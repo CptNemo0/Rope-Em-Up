@@ -5,6 +5,8 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+#include "Camera.h"
+
 namespace utility
 {
     void GLAPIENTRY
@@ -41,7 +43,7 @@ namespace utility
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
         window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), monitor, nullptr);
-
+            
         if (window == nullptr)
         {
             glfwTerminate();
@@ -49,7 +51,6 @@ namespace utility
         }
 
         glfwMakeContextCurrent(window);
-
         return return_value;
     }
 
@@ -67,6 +68,71 @@ namespace utility
         glDebugMessageCallback(MessageCallback, 0);
         return return_value;
     }
+
+    void DebugCameraMovement(GLFWwindow* window, std::shared_ptr <llr::Camera> camera)
+    {
+        if (glfwGetKey(window, GLFW_KEY_W))
+        {
+            camera->set_position(camera->get_position() + camera->get_front() * 0.01f);
+            camera->UpdateDirectionVectors();
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_S))
+        {
+            camera->set_position(camera->get_position() - camera->get_front() * 0.01f);
+            camera->UpdateDirectionVectors();
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_A))
+        {
+            camera->set_position(camera->get_position() - camera->get_right() * 0.01f);
+            camera->UpdateDirectionVectors();
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_D))
+        {
+            camera->set_position(camera->get_position() + camera->get_right() * 0.01f);
+            camera->UpdateDirectionVectors();
+        }
+
+
+        if (glfwGetKey(window, GLFW_KEY_UP))
+        {
+            camera->set_pitch(camera->get_pitch() + 0.5f);
+            camera->UpdateDirectionVectors();
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_DOWN))
+        {
+            camera->set_pitch(camera->get_pitch() - 0.5f);
+            camera->UpdateDirectionVectors();
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_RIGHT))
+        {
+            camera->set_yaw(camera->get_yaw() + 0.5f);
+            camera->UpdateDirectionVectors();
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_LEFT))
+        {
+            camera->set_yaw(camera->get_yaw() - 0.5f);
+            camera->UpdateDirectionVectors();
+        }
+
+        if (camera->get_pitch() > 89.0f)
+        {
+            camera->set_pitch(89.0f);
+            camera->UpdateDirectionVectors();
+        }
+
+        if (camera->get_pitch() < -89.0f)
+        {
+            camera->set_pitch(-89.0f);
+            camera->UpdateDirectionVectors();
+        }
+    }
+    
 
     // Zwraca unsigned int 32, ktory ma takie samo ustawienie bitow jak przekazany float 32.
     // Przydatne do szybkich aproksymacji.

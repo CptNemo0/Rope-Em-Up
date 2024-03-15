@@ -8,6 +8,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "headers/Camera.h"
 #include "headers/GameObject.h"
 #include "headers/Mesh.h"
 #include "headers/Shader.h"
@@ -18,26 +19,22 @@
 #include <ratio>
 #include <chrono>
 
-const std::string kWindowTitle = "Modul Sumatywny";
-
-const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
-const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
-
-const std::string kGreenTexturePath = "res/textures/green_texture.png";
-const std::string kRedTexturePath = "res/textures/red_texture.png";
-
-const std::string kCubeMeshPath = "res/models/cube.obj";
-
-const glm::vec3 kCameraPosition = glm::vec3(0.0f, 5.0f, -5.0f);
-
-const glm::vec3 kRight = glm::vec3(1.0f, 0.0f, 0.0f);
-const glm::vec3 kUp = glm::vec3(0.0f, 1.0f, 0.0f);
-const glm::vec3 kForward = glm::vec3(0.0f, 0.0f, 1.0f);
-
-const std::string kTest = "Test";
-
 int main()
 {
+    const std::string kWindowTitle = "Modul Sumatywny";
+
+    const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
+    const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
+
+    const std::string kGreenTexturePath = "res/textures/green_texture.png";
+    const std::string kRedTexturePath = "res/textures/red_texture.png";
+
+    const std::string kCubeMeshPath = "res/models/cube.obj";
+
+    const float kFov = 90.0f;
+    const float kNear = 0.1f;
+    const float kFar = 1000.0f;
+
     GLFWwindow* window = nullptr;
     GLFWmonitor* monitor = nullptr;
     GLFWvidmode* mode = nullptr;
@@ -53,6 +50,12 @@ int main()
         exit(return_value);
     }
     std::cout << "GLAD Initialized.\n";
+    
+    auto camera = std::make_shared<llr::Camera>();
+    camera->set_fov(kFov);
+    camera->set_near(kNear);
+    camera->set_far(kFar);
+    camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
 
@@ -60,12 +63,11 @@ int main()
     auto red_texture = std::make_shared<Texture>(kRedTexturePath);
 
     auto cube_mesh = std::make_shared<Mesh>(kCubeMeshPath);
-
+    
     auto object = std::make_shared<GameObject>(cube_mesh, green_texture, shader);
     auto object2 = std::make_shared<GameObject>(cube_mesh, red_texture, shader);
 
-    auto view_matrix = glm::lookAt(kCameraPosition, object->transform_.position_, kUp);
-    auto projection_matrix = glm::perspective(glm::radians(90.0f), (1920.0f / 1080.0f), 0.1f, 1000.0f);
+    auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     PointLight point_light;
     point_light.intensity = 100.0f;
@@ -76,7 +78,7 @@ int main()
 
     object->transform_.position_.x -= 2;
     object2->transform_.position_.x += 2;
-
+    
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -87,10 +89,12 @@ int main()
 
         shader->SetPointLight("light", point_light);
         shader->SetMatrix4("projection_matrix", projection_matrix);
-        shader->SetMatrix4("view_matrix", view_matrix);
+        shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
         object->Render();
         object2->Render();
+        
+        utility::DebugCameraMovement(window, camera);
 
         glfwSwapBuffers(window);
     }
