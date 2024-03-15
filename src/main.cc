@@ -49,7 +49,7 @@ int main()
     std::cout << "GLFW Initialized.\n";
 
     if (int return_value = utility::InitGlad())
-    {
+    {   
         exit(return_value);
     }
     std::cout << "GLAD Initialized.\n";

@@ -1,7 +1,8 @@
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 
 	 *.c
-	 *.cpp)
+	 *.cpp
+	 *.cc)
 	
 # Add header files
 file(GLOB_RECURSE HEADER_FILES 
