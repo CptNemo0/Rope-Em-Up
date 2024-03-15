@@ -34,6 +34,11 @@ set(STB_IMAGE_RESIZE_SOURCE_DIR ${STB_IMAGE_RESIZE_DIR} CACHE INTERNAL "")
 add_library(stb_image_resize STATIC ${STB_IMAGE_RESIZE_DIR}/stb_image_resize2.cpp)
 target_include_directories(stb_image_resize PRIVATE ${STB_IMAGE_RESIZE_DIR})
 
+#stb_truetype
+set(STB_TRUETYPE_DIR ${CMAKE_CURRENT_LIST_DIR}/stb_truetype)
+set(STB_TRUETYPE_SOURCE_DIR ${STB_TRUETYPE_DIR} CACHE INTERNAL "")
+add_library(stb_truetype STATIC ${STB_TRUETYPE_DIR}/stb_truetype.cpp)
+target_include_directories(stb_truetype PRIVATE ${STB_TRUETYPE_DIR})
 
 # other
 CPMAddPackage("gh:assimp/assimp@5.2.5")
@@ -42,10 +47,6 @@ CPMAddPackage("gh:g-truc/glm#1.0.1")
 CPMAddPackage("gh:ocornut/imgui@1.90.4")
 CPMAddPackage("gh:gabime/spdlog@1.13.0")
 CPMAddPackage("gh:kcat/openal-soft#1.23.1")
-CPMAddPackage(
-    NAME FreeType
-    VERSION 2.13.2
-    URL https://download.savannah.gnu.org/releases/freetype/ftdoc2132.zip)
 
 set(imgui_SOURCE_DIR ${imgui_SOURCE_DIR} CACHE INTERNAL "")
 add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
