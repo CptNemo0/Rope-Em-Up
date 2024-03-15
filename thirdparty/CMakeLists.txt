@@ -55,3 +55,21 @@ add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
 						 ${imgui_SOURCE_DIR}/imgui_tables.cpp
 					     ${imgui_SOURCE_DIR}/imgui_widgets.cpp)
 						 
+
+set_target_properties(assimp
+		      build_version
+		      common
+		      glad
+	              glm
+		      imgui
+     		      OpenAL
+		      spdlog
+		      stb_easy_font
+		      stb_image
+		      stb_image_resize
+		      stb_image_write
+		      stb_truetype PROPERTIES FOLDER "thirdparty")
+
+if (TARGET zlibstatic)
+    set_target_properties(zlibstatic PROPERTIES FOLDER "thirdparty")
+endif()
