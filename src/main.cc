@@ -34,6 +34,8 @@ const glm::vec3 kRight = glm::vec3(1.0f, 0.0f, 0.0f);
 const glm::vec3 kUp = glm::vec3(0.0f, 1.0f, 0.0f);
 const glm::vec3 kForward = glm::vec3(0.0f, 0.0f, 1.0f);
 
+const std::string kTest = "Test";
+
 int main()
 {
     GLFWwindow* window = nullptr;
