@@ -70,9 +70,9 @@ int main()
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     PointLight point_light;
-    point_light.intensity = 100.0f;
-    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    point_light.ambient_colour = glm::vec3(0.1f, 0.1f, 0.1f);
+    point_light.intensity = 50.0f;
+    point_light.position = glm::vec3(0.0f, 10.0f, 0.0f);
+    point_light.ambient_colour = glm::vec3(0.2f, 0.2f, 0.2f);
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
@@ -95,6 +95,7 @@ int main()
         object2->Render();
         
         utility::DebugCameraMovement(window, camera);
+        utility::DebugCameraMovementJoystick(window, camera);
 
         glfwSwapBuffers(window);
     }

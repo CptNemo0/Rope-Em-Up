@@ -31,10 +31,9 @@ vec3 PointLightColour(PointLight light, vec3 view_direction)
     distance = distance * distance;
     float distance_factor = GetDistanceFactor(distance, light.intensity);
 
-    
     float diffuse = max(dot(light_direction_normalized, if_normal), 0.0);
 
-    float specular = 1.0f;
+    float specular = 0.0f;
     if(diffuse != 0)
     {
         

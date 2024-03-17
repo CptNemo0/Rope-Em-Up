@@ -133,6 +133,46 @@ namespace utility
         }
     }
     
+    void DebugCameraMovementJoystick(GLFWwindow* window, std::shared_ptr <llr::Camera> camera)
+    {
+        if (glfwJoystickPresent(GLFW_JOYSTICK_1))
+        {
+            int count;
+            const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+            auto left_stick = glm::vec2(axes[0], axes[1]);
+            auto right_stick = glm::vec2(axes[2], axes[3]);
+
+            if (glm::length(left_stick) > 0.0001)
+            {
+                camera->set_position(camera->get_position() + camera->get_right() * left_stick.x * 0.01f);
+                camera->UpdateDirectionVectors();
+                camera->set_position(camera->get_position() - camera->get_front() * left_stick.y * 0.01f);
+                camera->UpdateDirectionVectors();
+            }
+            
+            if (glm::length(right_stick) > 0.0001)
+            {
+                camera->set_yaw(camera->get_yaw() + right_stick.x * 0.5f);
+                camera->UpdateDirectionVectors();
+                camera->set_pitch(camera->get_pitch() - right_stick.y * 0.5f);
+                camera->UpdateDirectionVectors();
+                
+            }
+            
+
+            if (camera->get_pitch() > 89.0f)
+            {
+                camera->set_pitch(89.0f);
+                camera->UpdateDirectionVectors();
+            }
+
+            if (camera->get_pitch() < -89.0f)
+            {
+                camera->set_pitch(-89.0f);
+                camera->UpdateDirectionVectors();
+            }
+        }
+    }
 
     // Zwraca unsigned int 32, ktory ma takie samo ustawienie bitow jak przekazany float 32.
     // Przydatne do szybkich aproksymacji.
