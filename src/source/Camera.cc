@@ -9,12 +9,13 @@ llr::Camera::Camera()
 	glm::vec3 front_ = kForward;
 
 	this->pitch_ = 0.0f;
-	this->yaw_ = -90.0f;
+	this->yaw_ = 0.0f;
 
 	this->fov_ = 0.0f;
 	this->near_ = 0.0f;
 	this->far_ = 0.0f;
 	this->aspect_ratio_ = 0.0f;
+	UpdateDirectionVectors();
 }
 
 void llr::Camera::UpdateDirectionVectors()

@@ -66,6 +66,8 @@ int main()
     
     auto object = std::make_shared<GameObject>(cube_mesh, green_texture, shader);
     auto object2 = std::make_shared<GameObject>(cube_mesh, red_texture, shader);
+    auto object3 = std::make_shared<GameObject>(cube_mesh, red_texture, shader);
+    auto object4 = std::make_shared<GameObject>(cube_mesh, red_texture, shader);
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
@@ -78,6 +80,8 @@ int main()
 
     object->transform_.position_.x -= 2;
     object2->transform_.position_.x += 2;
+    object3->transform_.position_.y -= 2;
+    object4->transform_.position_.y += 2;
     
     while (!glfwWindowShouldClose(window))
     {
@@ -93,6 +97,8 @@ int main()
 
         object->Render();
         object2->Render();
+        object3->Render();
+        object4->Render();
         
         utility::DebugCameraMovement(window, camera);
         utility::DebugCameraMovementJoystick(window, camera);
