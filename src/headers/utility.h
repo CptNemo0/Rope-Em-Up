@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <string>
+#include <stdlib.h>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
@@ -9,6 +10,12 @@
 
 namespace utility
 {
+    enum ControllerType
+    {
+        PS4,
+        Joystick
+    };
+
     void GLAPIENTRY
         MessageCallback(GLenum source,
             GLenum type,
@@ -42,7 +49,7 @@ namespace utility
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), monitor, nullptr);
+        window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), nullptr, nullptr);
             
         if (window == nullptr)
         {
@@ -139,10 +146,23 @@ namespace utility
         {
             int count;
             const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
-            auto left_stick = glm::vec2(axes[0], axes[1]);
-            auto right_stick = glm::vec2(axes[2], axes[3]);
+            auto controller_name = glfwGetJoystickName(GLFW_JOYSTICK_1);
 
-            if (glm::length(left_stick) > 0.0001)
+            glm::vec2 left_stick;
+            glm::vec2 right_stick;
+
+            if (std::strcmp(controller_name, "Wireless Controller") == 0)
+            {
+                left_stick = glm::vec2(axes[0] * 0.1f, axes[1] * 0.1f);
+                right_stick = glm::vec2(axes[2] * 0.1f, axes[5] * 0.1f);
+            }
+            else
+            {
+                left_stick = glm::vec2(axes[0], axes[1]);
+                right_stick = glm::vec2(axes[2], axes[3]);
+            }
+
+            if (glm::length(left_stick) > 0.01)
             {
                 camera->set_position(camera->get_position() + camera->get_right() * left_stick.x * 0.01f);
                 camera->UpdateDirectionVectors();
@@ -150,7 +170,7 @@ namespace utility
                 camera->UpdateDirectionVectors();
             }
             
-            if (glm::length(right_stick) > 0.0001)
+            if (glm::length(right_stick) > 0.01)
             {
                 camera->set_yaw(camera->get_yaw() + right_stick.x * 0.5f);
                 camera->UpdateDirectionVectors();
