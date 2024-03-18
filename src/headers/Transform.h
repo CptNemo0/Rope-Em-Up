@@ -11,8 +11,8 @@ class Transform
 {
 private:
     Transform *parent_ = nullptr;
-    std::vector<std::shared_ptr<Transform>> children_;
     bool is_dirty_ = false;
+    std::vector<std::shared_ptr<Transform>> children_;
 
     glm::mat4 model_matrix_;
 

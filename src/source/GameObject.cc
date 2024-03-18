@@ -2,6 +2,7 @@
 
 GameObject::GameObject(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::shared_ptr<Shader> shader)
 {
+	this->transform_ = std::make_shared<Transform>();
 	this->mesh_ = mesh;
 	this->texture_ = texture;
 	this->shader_ = shader;

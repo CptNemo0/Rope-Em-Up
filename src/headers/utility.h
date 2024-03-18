@@ -145,8 +145,8 @@ namespace utility
     
     void DebugCameraMovementJoystick(GLFWwindow* window, std::shared_ptr <llr::Camera> camera, float delta_time)
     {
-        static float move_speed = 10.0f;
-        static float look_speed = 1000.0f;
+        static float move_speed = 1.0f;
+        static float look_speed = 100.0f;
 
         if (glfwJoystickPresent(GLFW_JOYSTICK_1))
         {
@@ -159,8 +159,8 @@ namespace utility
 
             if (std::strcmp(controller_name, "Wireless Controller") == 0)
             {
-                left_stick = glm::vec2(axes[0] * 0.1f, axes[1] * 0.1f);
-                right_stick = glm::vec2(axes[2] * 0.1f, axes[5] * 0.1f);
+                left_stick = glm::vec2(axes[0], axes[1]);
+                right_stick = glm::vec2(axes[2], axes[5]);
             }
             else
             {
@@ -168,7 +168,7 @@ namespace utility
                 right_stick = glm::vec2(axes[2], axes[3]);
             }
 
-            if (glm::length(left_stick) > 0.01)
+            if (glm::length(left_stick) > 0.1)
             {
                 camera->set_position(camera->get_position() + camera->get_right() * left_stick.x * move_speed * delta_time);
                 camera->UpdateDirectionVectors();
@@ -176,7 +176,7 @@ namespace utility
                 camera->UpdateDirectionVectors();
             }
             
-            if (glm::length(right_stick) > 0.01)
+            if (glm::length(right_stick) > 0.1)
             {
                 camera->set_yaw(camera->get_yaw() + right_stick.x * look_speed * delta_time);
                 camera->UpdateDirectionVectors();
