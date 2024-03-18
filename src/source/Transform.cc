@@ -2,13 +2,54 @@
 
 Transform::Transform()
 {
+    is_dirty_ = false;
     model_matrix_ = glm::mat4(1.0f);
     position_ = { 0.0f, 0.0f, 0.0f };
     rotation_ = { 0.0f, 0.0f, 0.0f };
     scale_    = { 1.0f, 1.0f, 1.0f };
 }
 
-glm::mat4 Transform::get_model_matrix() const
+void Transform::AddChild(std::shared_ptr<Transform> child)
+{
+    children_.push_back(child);
+    child.get()->parent_ = this;
+    child.get()->CalculateModelMatrix(model_matrix_);
+}
+
+void Transform::UpdateChildren()
+{
+    for (auto& child : children_)
+    {
+        child.get()->CalculateModelMatrix(model_matrix_);
+        child.get()->UpdateChildren();
+    }
+}
+
+void Transform::set_position(const glm::vec3 & position)
+{
+    position_ = position;
+    is_dirty_ = true;
+}
+
+void Transform::set_rotation(const glm::vec3 & rotation)
+{
+    rotation_ = rotation;
+    is_dirty_ = true;
+}
+
+void Transform::set_scale(const glm::vec3 & scale)
+{
+    scale_ = scale;
+    is_dirty_ = true;
+}
+
+void Transform::translate(const glm::vec3 & translation)
+{
+    position_ += translation;
+    is_dirty_ = true;
+}
+
+void Transform::CalculateModelMatrix(const glm::mat4 parent_model)
 {
     const glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), scale_);
 
@@ -18,5 +59,17 @@ glm::mat4 Transform::get_model_matrix() const
 
     const glm::mat4 translation = glm::translate(glm::mat4(1.0f), position_);
 
-    return translation * rotation_Y * rotation_X * rotation_Z * scale_matrix;
+    model_matrix_ = translation * rotation_Y * rotation_X * rotation_Z * scale_matrix * parent_model;
+}
+
+const glm::mat4 Transform::get_model_matrix()
+{
+    if (is_dirty_)
+    {
+        is_dirty_ = false;
+        CalculateModelMatrix(parent_ ? parent_->get_model_matrix() : glm::mat4(1.0f));
+        UpdateChildren();
+    }
+
+    return model_matrix_;
 }
