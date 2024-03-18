@@ -76,10 +76,10 @@ int main()
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
-    object->AddChild(object2);
-    object2->translate(glm::vec3(-2.0f, 0.0f, 0.0f));
+    object->transform_->AddChild(object2->transform_);
+    object2->transform_->translate(glm::vec3(-2.0f, 0.0f, 0.0f));
 
-    object->translate(glm::vec3(0.0f, 1.0f, 0.0f));
+    object->transform_->translate(glm::vec3(0.0f, 1.0f, 0.0f));
     
     while (!glfwWindowShouldClose(window))
     {

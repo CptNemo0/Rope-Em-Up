@@ -11,9 +11,11 @@
 #include "Mesh.h"
 #include "Shader.h"
 
-class GameObject : public Transform
+class GameObject
 {
 public:
+	std::shared_ptr<Transform> transform_;
+
 	std::shared_ptr<Mesh> mesh_;
 	std::shared_ptr<Texture> texture_;
 	std::shared_ptr<Shader> shader_;
