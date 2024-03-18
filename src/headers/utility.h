@@ -76,54 +76,57 @@ namespace utility
         return return_value;
     }
 
-    void DebugCameraMovement(GLFWwindow* window, std::shared_ptr <llr::Camera> camera)
+    void DebugCameraMovement(GLFWwindow* window, std::shared_ptr <llr::Camera> camera, float delta_time)
     {
+        static float move_speed = 1.0f;
+        static float look_speed = 100.0f;
+
         if (glfwGetKey(window, GLFW_KEY_W))
         {
-            camera->set_position(camera->get_position() + camera->get_front() * 0.01f);
+            camera->set_position(camera->get_position() + camera->get_front() * move_speed * delta_time);
             camera->UpdateDirectionVectors();
         }
 
         if (glfwGetKey(window, GLFW_KEY_S))
         {
-            camera->set_position(camera->get_position() - camera->get_front() * 0.01f);
+            camera->set_position(camera->get_position() - camera->get_front() * move_speed * delta_time);
             camera->UpdateDirectionVectors();
         }
 
         if (glfwGetKey(window, GLFW_KEY_A))
         {
-            camera->set_position(camera->get_position() - camera->get_right() * 0.01f);
+            camera->set_position(camera->get_position() - camera->get_right() * move_speed * delta_time);
             camera->UpdateDirectionVectors();
         }
 
         if (glfwGetKey(window, GLFW_KEY_D))
         {
-            camera->set_position(camera->get_position() + camera->get_right() * 0.01f);
+            camera->set_position(camera->get_position() + camera->get_right() * move_speed * delta_time);
             camera->UpdateDirectionVectors();
         }
 
 
         if (glfwGetKey(window, GLFW_KEY_UP))
         {
-            camera->set_pitch(camera->get_pitch() + 0.5f);
+            camera->set_pitch(camera->get_pitch() + look_speed * delta_time);
             camera->UpdateDirectionVectors();
         }
 
         if (glfwGetKey(window, GLFW_KEY_DOWN))
         {
-            camera->set_pitch(camera->get_pitch() - 0.5f);
+            camera->set_pitch(camera->get_pitch() - look_speed * delta_time);
             camera->UpdateDirectionVectors();
         }
 
         if (glfwGetKey(window, GLFW_KEY_RIGHT))
         {
-            camera->set_yaw(camera->get_yaw() + 0.5f);
+            camera->set_yaw(camera->get_yaw() + look_speed * delta_time);
             camera->UpdateDirectionVectors();
         }
 
         if (glfwGetKey(window, GLFW_KEY_LEFT))
         {
-            camera->set_yaw(camera->get_yaw() - 0.5f);
+            camera->set_yaw(camera->get_yaw() - look_speed * delta_time);
             camera->UpdateDirectionVectors();
         }
 
@@ -140,8 +143,11 @@ namespace utility
         }
     }
     
-    void DebugCameraMovementJoystick(GLFWwindow* window, std::shared_ptr <llr::Camera> camera)
+    void DebugCameraMovementJoystick(GLFWwindow* window, std::shared_ptr <llr::Camera> camera, float delta_time)
     {
+        static float move_speed = 10.0f;
+        static float look_speed = 1000.0f;
+
         if (glfwJoystickPresent(GLFW_JOYSTICK_1))
         {
             int count;
@@ -164,17 +170,17 @@ namespace utility
 
             if (glm::length(left_stick) > 0.01)
             {
-                camera->set_position(camera->get_position() + camera->get_right() * left_stick.x * 0.01f);
+                camera->set_position(camera->get_position() + camera->get_right() * left_stick.x * move_speed * delta_time);
                 camera->UpdateDirectionVectors();
-                camera->set_position(camera->get_position() - camera->get_front() * left_stick.y * 0.01f);
+                camera->set_position(camera->get_position() - camera->get_front() * left_stick.y * move_speed * delta_time);
                 camera->UpdateDirectionVectors();
             }
             
             if (glm::length(right_stick) > 0.01)
             {
-                camera->set_yaw(camera->get_yaw() + right_stick.x * 0.5f);
+                camera->set_yaw(camera->get_yaw() + right_stick.x * look_speed * delta_time);
                 camera->UpdateDirectionVectors();
-                camera->set_pitch(camera->get_pitch() - right_stick.y * 0.5f);
+                camera->set_pitch(camera->get_pitch() - right_stick.y * look_speed * delta_time);
                 camera->UpdateDirectionVectors();
                 
             }

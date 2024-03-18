@@ -87,8 +87,13 @@ int main()
         glClearColor(0.03f, 0.04f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        utility::DebugCameraMovement(window, camera);
-        utility::DebugCameraMovementJoystick(window, camera);
+        static float previous_time = glfwGetTime();
+        float current_time = glfwGetTime();
+        float delta_time = current_time - previous_time;
+        previous_time = current_time;
+
+        utility::DebugCameraMovement(window, camera, delta_time);
+        utility::DebugCameraMovementJoystick(window, camera, delta_time);
 
         shader->Use();
 
