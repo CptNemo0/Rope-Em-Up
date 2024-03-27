@@ -8,7 +8,7 @@
 #include <memory>
 #include <math.h>
 
-namespace aabb
+namespace collisions
 {
 	struct AABB;
 

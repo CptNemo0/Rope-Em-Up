@@ -11,6 +11,7 @@
 #include "headers/AABB.h"
 #include "headers/Camera.h"
 #include "headers/ConvexHull.h"
+#include "headers/ConvexHullCreator.h"
 #include "headers/GameObject.h"
 #include "headers/Mesh.h"
 #include "headers/Shader.h"
@@ -94,12 +95,15 @@ int main()
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    object2->transform_->set_position(glm::vec3(1.41421f * 2.0f, 0.0f, 1.42421f * 2.0f));
+    object2->transform_->set_position(glm::vec3(1.41421f * 2.0f, 0.0f, 1.41421f * 2.0f));
 
-    auto collider1 = aabb::CreateAABB(cube_mesh, object);
-    auto collider2 = aabb::CreateAABB(cube_mesh, object2);
+    auto collider1 = collisions::CreateAABB(cube_mesh, object);
+    auto collider2 = collisions::CreateAABB(cube_mesh, object2);
 
-        
+    auto chc = collisions::ConvexHullCreator(8);
+
+    auto a = chc.CreateConvexHull(debug_mesh);
+    a->UpdateVertices(object->transform_->get_model_matrix());
 
     while (!glfwWindowShouldClose(window))
     {
@@ -128,13 +132,13 @@ int main()
         object2->Update();
         debug1->Update();
         debug2->Update();
-        for (int i = 0; i < aabb::colliders.size(); i++)
+        for (int i = 0; i < collisions::colliders.size(); i++)
         {
-            for (int j = i + 1; j < aabb::colliders.size(); j++)
+            for (int j = i + 1; j < collisions::colliders.size(); j++)
             {
-                auto a = aabb::colliders[i];
-                auto b = aabb::colliders[j];
-                auto c = aabb::TestAABBAABB(a, b);
+                auto a = collisions::colliders[i];
+                auto b = collisions::colliders[j];
+                auto c = collisions::TestAABBAABB(a, b);
                 if (c)
                 {
                     std::cout << "KOLIZJA!!!\n";
