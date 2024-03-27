@@ -278,9 +278,46 @@ namespace collisions
         return minkowski;
     }
 
+    bool Line(Simplex& simplex, glm::vec3& direction)
+    {
+        auto a = simplex.points[0];
+        auto b = simplex.points[1];
+
+        auto ab = b - a;
+        auto ao = - a;
+
+        if (glm::dot(ab, ao) > 0)
+        {
+            direction = glm::normalize(glm::cross(glm::cross(ab, ao), ab));
+        }
+        else
+        {
+            simplex.points[0] = a;
+            simplex.points[1] = glm::vec3(0.0f);
+            simplex.points[2] = glm::vec3(0.0f);
+            simplex.points[3] = glm::vec3(0.0f);
+            simplex.size = 1;
+
+            direction = ao;
+        }
+
+        return false;
+    }
+
+
     bool NearestSimplex(Simplex& simplex, glm::vec3& direction)
     {
-
+        switch (simplex.size)
+        {
+        case 2:
+            return Line(simplex, direction);
+            break;
+        case 3:
+            break;
+        case 4: 
+            break;
+        }
+        return false;
     }
 
     bool GJK(const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
@@ -292,7 +329,7 @@ namespace collisions
 
         glm::vec3 new_direction = -initial_support;
 
-        while (TRUE)
+        while (1)
         {
             initial_support = Support(A, B, new_direction);
 

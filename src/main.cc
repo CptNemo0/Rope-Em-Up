@@ -87,8 +87,8 @@ int main()
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    object2->transform_->set_position(glm::vec3(1.41421f * 2.0f, 0.0f, 1.41421f * 2.0f));
-
+    object2->transform_->set_position(glm::vec3(1.0, 0.0f, 1.0f));
+    object2->transform_->set_rotation(glm::vec3(0.0f, 45.0f, 0.0f));
     auto aabb1 = collisions::CreateAABB(cube_mesh, object);
     auto aabb2 = collisions::CreateAABB(cube_mesh, object2);
 
@@ -102,8 +102,6 @@ int main()
 
     auto minkowski = collisions::MinkowskisDifference(collider1, collider2);
     
-
-
 
     while (!glfwWindowShouldClose(window))
     {
@@ -140,6 +138,7 @@ int main()
                 auto c = collisions::TestAABBAABB(a, b);
                 if (c)
                 {
+                    collisions::GJK(collider1, collider2);
                     std::cout << "KOLIZJA!!!\n";
                 }
             }
