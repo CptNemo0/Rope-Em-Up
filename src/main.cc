@@ -14,6 +14,7 @@
 #include "headers/Shader.h"
 #include "headers/Texture.h"
 #include "headers/utility.h"
+#include "headers/MeshRenderer.h"
 
 #include <ctime>
 #include <ratio>
@@ -64,8 +65,11 @@ int main()
 
     auto cube_mesh = std::make_shared<Mesh>(kCubeMeshPath);
     
-    auto object = std::make_shared<GameObject>(cube_mesh, green_texture, shader);
-    auto object2 = std::make_shared<GameObject>(cube_mesh, red_texture, shader);
+    auto object = std::make_shared<GameObject>();
+    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, cube_mesh, green_texture, shader));
+
+    auto object2 = std::make_shared<GameObject>();
+    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, cube_mesh, red_texture, shader));
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
@@ -101,8 +105,8 @@ int main()
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        object->Render();
-        object2->Render();
+        object->Update();
+        object2->Update();
 
         glfwSwapBuffers(window);
     }
