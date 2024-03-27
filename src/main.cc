@@ -70,7 +70,7 @@ int main()
     auto debug_mesh = std::make_shared<Mesh>(kDebugMeshPath);
 
     auto object = std::make_shared<GameObject>(cube_mesh, green_texture, shader);
-    auto object2 = std::make_shared<GameObject>(player_mesh, red_texture, shader);
+    auto object2 = std::make_shared<GameObject>(cube_mesh, red_texture, shader);
     auto debug_obj_1 = std::make_shared<GameObject>(debug_mesh, green_texture, shader);
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
@@ -82,13 +82,23 @@ int main()
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
-    object->transform_->AddChild(object2->transform_);
-    object->transform_->translate(glm::vec3(1.0f, 2.0f, 3.0f));
-    object->transform_->set_rotation(glm::vec3(0.0f, 45.0f, 0.0f));
+    
+    object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    object2->transform_->set_position(glm::vec3(1.41421f * 2.0f, 0.0f, 1.42421f * 2.0f));
+    
     
     auto collider1 = testaabb::CreateCollider(cube_mesh, object);
-    auto collider2 = testaabb::CreateCollider(player_mesh, object2);
+    auto collider2 = testaabb::CreateCollider(cube_mesh, object2);
 
+    for (int i = 0; i < testaabb::colliders.size(); i++)
+    {
+        for (int j = i + 1; j < testaabb::colliders.size(); j++)
+        {
+            auto a = testaabb::colliders[i];
+            auto b = testaabb::colliders[j];
+            auto c = testaabb::TestAABBAABB(a, b);
+        }
+    }
 
     int a = 10;
 

@@ -10,7 +10,11 @@
 
 namespace testaabb
 {
-	struct TestAABB
+	struct AABB;
+
+	static std::vector<std::shared_ptr<AABB>> colliders;
+
+	struct AABB
 	{
 		std::shared_ptr<GameObject> game_object;
 		glm::vec3 extremes = glm::vec3(0.0f);
@@ -37,23 +41,27 @@ namespace testaabb
 		return return_value;
 	}
 
-	void Init(std::shared_ptr<TestAABB> collider, std::shared_ptr<Mesh> mesh, std::shared_ptr<GameObject> game_object)
+	std::shared_ptr<AABB> CreateCollider(std::shared_ptr<Mesh> mesh, std::shared_ptr<GameObject> game_object)
 	{
-		glm::vec3 extreme_point = GetExtremePoint(mesh);
-		float distance = glm::length(extreme_point);
-		collider->extremes = glm::vec3(distance, 0.0f, distance);
-	}
-	
-	std::shared_ptr<TestAABB> CreateCollider(std::shared_ptr<Mesh> mesh, std::shared_ptr<GameObject> game_object)
-	{
-		auto return_value = std::make_shared<TestAABB>();
+		auto return_value = std::make_shared<AABB>();
 		glm::vec3 extreme_point = GetExtremePoint(mesh);
 		float distance = glm::length(extreme_point);
 
 		return_value->game_object = game_object;
 		return_value->extremes = glm::vec3(distance, 0.0f, distance);
+
+		colliders.push_back(return_value);
+
 		return return_value;
 	}
+
+	int TestAABBAABB(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
+	{
+		if (fabsf(a->game_object->transform_->get_position().x - b->game_object->transform_->get_position().x) > (a->extremes.x + b->extremes.x)) return 0;
+		if (fabsf(a->game_object->transform_->get_position().z - b->game_object->transform_->get_position().z) > (a->extremes.z + b->extremes.z)) return 0;
+		return 1;
+	}
+
 }
 
 #endif // !TESTAABB_H
