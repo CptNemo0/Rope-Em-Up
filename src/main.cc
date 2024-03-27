@@ -15,6 +15,7 @@
 #include "headers/Texture.h"
 #include "headers/TestAABB.h"
 #include "headers/utility.h"
+#include "headers/MeshRenderer.h"
 
 #include <ctime>
 #include <ratio>
@@ -66,12 +67,12 @@ int main()
     auto red_texture = std::make_shared<Texture>(kRedTexturePath);
 
     auto cube_mesh = std::make_shared<Mesh>(kCubeMeshPath);
-    auto player_mesh = std::make_shared<Mesh>(kPlayerMeshPath);
-    auto debug_mesh = std::make_shared<Mesh>(kDebugMeshPath);
+    
+    auto object = std::make_shared<GameObject>();
+    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, cube_mesh, green_texture, shader));
 
-    auto object = std::make_shared<GameObject>(cube_mesh, green_texture, shader);
-    auto object2 = std::make_shared<GameObject>(cube_mesh, red_texture, shader);
-    auto debug_obj_1 = std::make_shared<GameObject>(debug_mesh, green_texture, shader);
+    auto object2 = std::make_shared<GameObject>();
+    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, cube_mesh, red_texture, shader));
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
@@ -125,9 +126,8 @@ int main()
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        object->Render();
-        object2->Render();
-        debug_obj_1->Render();
+        object->Update();
+        object2->Update();
 
         glfwSwapBuffers(window);
     }*/

@@ -1,11 +1,14 @@
 #ifndef TRANSFORM_H
-#define TRANSFROM_H
+#define TRANSFORM_H
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <vector>
 #include <memory>
+
+namespace Components
+{
 
 class Transform
 {
@@ -38,6 +41,8 @@ public:
 
     void translate(const glm::vec3& translation);
     const glm::mat4 get_model_matrix();
+};
+
 };
 
 #endif // !TRANSFORM_H
