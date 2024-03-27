@@ -20,7 +20,7 @@ namespace aabb
 		glm::vec3 extremes = glm::vec3(0.0f);
 	};
 	
-	glm::vec3 GetExtremePoint(std::shared_ptr<Mesh> mesh)
+	glm::vec3 FindRadius(std::shared_ptr<Mesh> mesh)
 	{
 		glm::vec3 return_value = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3 a = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -41,10 +41,10 @@ namespace aabb
 		return return_value;
 	}
 
-	std::shared_ptr<AABB> CreateCollider(std::shared_ptr<Mesh> mesh, std::shared_ptr<GameObject> game_object)
+	std::shared_ptr<AABB> CreateAABB(std::shared_ptr<Mesh> mesh, std::shared_ptr<GameObject> game_object)
 	{
 		auto return_value = std::make_shared<AABB>();
-		glm::vec3 extreme_point = GetExtremePoint(mesh);
+		glm::vec3 extreme_point = FindRadius(mesh);
 		float distance = glm::length(extreme_point);
 
 		return_value->game_object = game_object;

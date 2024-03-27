@@ -3,6 +3,8 @@
 
 #include <string>
 #include <stdlib.h>
+#include <unordered_map>
+
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
@@ -218,6 +220,8 @@ namespace utility
     {
         return AsFlaot(AsInt(f) ^ 0x80000000);
     }
+
+    
 
 } //utility
 

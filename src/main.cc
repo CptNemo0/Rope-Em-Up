@@ -8,12 +8,13 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "headers/AABB.h"
 #include "headers/Camera.h"
+#include "headers/ConvexHull.h"
 #include "headers/GameObject.h"
 #include "headers/Mesh.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
-#include "headers/AABB.h"
 #include "headers/utility.h"
 #include "headers/MeshRenderer.h"
 
@@ -67,12 +68,21 @@ int main()
     auto red_texture = std::make_shared<Texture>(kRedTexturePath);
 
     auto cube_mesh = std::make_shared<Mesh>(kCubeMeshPath);
+    auto debug_mesh = std::make_shared<Mesh>(kDebugMeshPath);
     
     auto object = std::make_shared<GameObject>();
     object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, cube_mesh, green_texture, shader));
 
     auto object2 = std::make_shared<GameObject>();
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, cube_mesh, red_texture, shader));
+
+    auto debug1 = std::make_shared<GameObject>();
+    debug1->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, debug_mesh, red_texture, shader));
+    debug1->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
+
+    auto debug2 = std::make_shared<GameObject>();
+    debug2->transform_->set_scale(glm::vec3(4.1f, 4.1f, 4.1f));
+    debug2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, debug_mesh, red_texture, shader));
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
@@ -85,9 +95,11 @@ int main()
 
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(1.41421f * 2.0f, 0.0f, 1.42421f * 2.0f));
-    
-    auto collider1 = aabb::CreateCollider(cube_mesh, object);
-    auto collider2 = aabb::CreateCollider(cube_mesh, object2);
+
+    auto collider1 = aabb::CreateAABB(cube_mesh, object);
+    auto collider2 = aabb::CreateAABB(cube_mesh, object2);
+
+        
 
     while (!glfwWindowShouldClose(window))
     {
@@ -114,7 +126,8 @@ int main()
 
         object->Update();
         object2->Update();
-
+        debug1->Update();
+        debug2->Update();
         for (int i = 0; i < aabb::colliders.size(); i++)
         {
             for (int j = i + 1; j < aabb::colliders.size(); j++)
