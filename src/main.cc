@@ -88,7 +88,7 @@ int main()
     object->transform_->set_rotation(glm::vec3(0.0f, 45.0f, 0.0f));
     
     auto collider1 = testaabb::CreateCollider(cube_mesh, object);
-    auto collider2 = testaabb::CreateCollider(player_mesh, object2);
+    auto collider2 = testaabb::CreateCollider(cube_mesh, object2);
 
 
     int a = 10;
