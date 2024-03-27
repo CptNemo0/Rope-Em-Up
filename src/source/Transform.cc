@@ -16,6 +16,21 @@ void Transform::AddChild(std::shared_ptr<Transform> child)
     child.get()->CalculateModelMatrix(model_matrix_);
 }
 
+const glm::vec3 Transform::get_position() const
+{
+    return position_;
+}
+
+const glm::vec3 Transform::get_rotation() const
+{
+    return rotation_;
+}
+
+const glm::vec3 Transform::get_scale() const
+{
+    return scale_;
+}
+
 void Transform::UpdateChildren()
 {
     for (auto& child : children_)

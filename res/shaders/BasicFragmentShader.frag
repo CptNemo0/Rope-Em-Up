@@ -9,10 +9,11 @@ struct PointLight
 	vec3 specular_colour;
 };
 
+in vec3 if_fragment_position;
 in vec3 if_normal;
 in vec2 if_texture;
-in vec3 if_fragment_position;
 
+uniform vec3 camera_position;
 uniform sampler2D this_texture;
 uniform PointLight light;
 uniform float shininess;
@@ -49,7 +50,7 @@ out vec4 FragColour;
 
 void main()
 {
-   vec3 view_direction = normalize(if_fragment_position - vec3(0.0f, 5.0f, -5.0f));
+   vec3 view_direction = normalize(if_fragment_position - camera_position);
    vec3 result = PointLightColour(light, view_direction);
    FragColour = texture(this_texture, if_texture) * vec4(result, 1.0f); 
 }
