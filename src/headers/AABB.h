@@ -8,7 +8,7 @@
 #include <memory>
 #include <math.h>
 
-namespace testaabb
+namespace aabb
 {
 	struct AABB;
 
