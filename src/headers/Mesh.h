@@ -33,7 +33,6 @@ public:
 
 	void Init();
 	void Draw() const;
-	
 };
 
 #endif //MESH_H

@@ -31,6 +31,10 @@ public:
 
     void AddChild(std::shared_ptr<Transform> child);
 
+    const glm::vec3 get_position() const;
+    const glm::vec3 get_rotation() const;
+    const glm::vec3 get_scale() const;
+
     void set_position(const glm::vec3& position);
     void set_rotation(const glm::vec3& rotation);
     void set_scale(const glm::vec3& scale);

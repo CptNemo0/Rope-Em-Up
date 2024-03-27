@@ -13,6 +13,7 @@
 #include "headers/Mesh.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
+#include "headers/TestAABB.h"
 #include "headers/utility.h"
 #include "headers/MeshRenderer.h"
 
@@ -31,6 +32,8 @@ int main()
     const std::string kRedTexturePath = "res/textures/red_texture.png";
 
     const std::string kCubeMeshPath = "res/models/cube.obj";
+    const std::string kPlayerMeshPath = "res/models/player.obj";
+    const std::string kDebugMeshPath = "res/models/debug_thingy.obj";
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -74,18 +77,23 @@ int main()
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     PointLight point_light;
-    point_light.intensity = 50.0f;
-    point_light.position = glm::vec3(0.0f, 10.0f, 0.0f);
+    point_light.intensity = 100.0f;
+    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     point_light.ambient_colour = glm::vec3(0.2f, 0.2f, 0.2f);
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
     object->transform_->AddChild(object2->transform_);
-    object2->transform_->translate(glm::vec3(-2.0f, 0.0f, 0.0f));
-
-    object->transform_->translate(glm::vec3(0.0f, 1.0f, 0.0f));
+    object->transform_->translate(glm::vec3(1.0f, 2.0f, 3.0f));
+    object->transform_->set_rotation(glm::vec3(0.0f, 45.0f, 0.0f));
     
-    while (!glfwWindowShouldClose(window))
+    auto collider1 = testaabb::CreateCollider(cube_mesh, object);
+    auto collider2 = testaabb::CreateCollider(player_mesh, object2);
+
+
+    int a = 10;
+
+    /*while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glClearColor(0.03f, 0.04f, 0.05f, 1.0f);
@@ -101,6 +109,9 @@ int main()
 
         shader->Use();
 
+        shader->SetVec3("camera_position", camera->get_position());
+        shader->SetFloat("shininess", 50.0f);
+
         shader->SetPointLight("light", point_light);
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
@@ -109,7 +120,7 @@ int main()
         object2->Update();
 
         glfwSwapBuffers(window);
-    }
+    }*/
 
     shader->End();
     glfwTerminate();
