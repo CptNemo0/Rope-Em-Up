@@ -61,7 +61,6 @@ namespace testaabb
 		if (fabsf(a->game_object->transform_->get_position().z - b->game_object->transform_->get_position().z) > (a->extremes.z + b->extremes.z)) return 0;
 		return 1;
 	}
-
 }
 
 #endif // !TESTAABB_H

@@ -13,7 +13,7 @@
 #include "headers/Mesh.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
-#include "headers/TestAABB.h"
+#include "headers/AABB.h"
 #include "headers/utility.h"
 #include "headers/MeshRenderer.h"
 
@@ -83,27 +83,13 @@ int main()
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
-    
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(1.41421f * 2.0f, 0.0f, 1.42421f * 2.0f));
     
-    
-    auto collider1 = testaabb::CreateCollider(cube_mesh, object);
-    auto collider2 = testaabb::CreateCollider(cube_mesh, object2);
+    auto collider1 = aabb::CreateCollider(cube_mesh, object);
+    auto collider2 = aabb::CreateCollider(cube_mesh, object2);
 
-    for (int i = 0; i < testaabb::colliders.size(); i++)
-    {
-        for (int j = i + 1; j < testaabb::colliders.size(); j++)
-        {
-            auto a = testaabb::colliders[i];
-            auto b = testaabb::colliders[j];
-            auto c = testaabb::TestAABBAABB(a, b);
-        }
-    }
-
-    int a = 10;
-
-    /*while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glClearColor(0.03f, 0.04f, 0.05f, 1.0f);
@@ -129,8 +115,22 @@ int main()
         object->Update();
         object2->Update();
 
+        for (int i = 0; i < aabb::colliders.size(); i++)
+        {
+            for (int j = i + 1; j < aabb::colliders.size(); j++)
+            {
+                auto a = aabb::colliders[i];
+                auto b = aabb::colliders[j];
+                auto c = aabb::TestAABBAABB(a, b);
+                if (c)
+                {
+                    std::cout << "KOLIZJA!!!\n";
+                }
+            }
+        }
+
         glfwSwapBuffers(window);
-    }*/
+    }
 
     shader->End();
     glfwTerminate();
