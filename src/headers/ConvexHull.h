@@ -15,6 +15,10 @@ namespace collisions
             std::vector<glm::vec3> vertices_;
             
             void UpdateVertices(glm::mat4 model_matrix);
+            int FindFurthestPoint(glm::vec3 direction);
+            
+
+            
     };
 }
 

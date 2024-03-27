@@ -221,9 +221,95 @@ namespace utility
         return AsFlaot(AsInt(f) ^ 0x80000000);
     }
 
-    
-
 } //utility
+
+namespace collisions
+{
+    struct Simplex
+    {
+        glm::vec3 points[4];
+        int size;
+
+        Simplex()
+        {
+            points[0] = glm::vec3(0.0f);
+            points[1] = glm::vec3(0.0f);
+            points[2] = glm::vec3(0.0f);
+            points[3] = glm::vec3(0.0f);
+            this->size = 0;
+        }
+
+        void PushFront(glm::vec3 point)
+        {
+            points[3] = points[2];
+            points[2] = points[1];
+            points[1] = points[0];
+            points[0] = point;
+
+            size = std::min(size + 1, 4);
+        }
+    };
+
+    glm::vec3 Support(const std::shared_ptr <collisions::ConvexHull> A, const std::shared_ptr <collisions::ConvexHull> B, glm::vec3 direction)
+    {
+        int idx1 = A->FindFurthestPoint(direction);
+        int idx2 = B->FindFurthestPoint(-direction);
+
+        return A->vertices_[idx1] - B->vertices_[idx2];
+    }
+
+    std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr < collisions::ConvexHull> A, const std::shared_ptr <collisions::ConvexHull> B)
+    {
+        auto minkowski = std::vector<glm::vec3>();
+        auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        float current_rotation = 0;
+        int precision = fmax(A->vertices_.size(), B->vertices_.size());
+        int angle = 360 / precision;
+
+        for (int i = 0; i < precision; i++)
+        {
+            current_rotation = angle * i;
+            auto rotation_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(current_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+            auto rotated_vec4 = rotation_matrix * start_dir_vec;
+            auto direction = glm::vec3(rotated_vec4.x, rotated_vec4.y, rotated_vec4.z);
+
+            minkowski.push_back(Support(A, B, direction));
+        }
+        return minkowski;
+    }
+
+    bool NearestSimplex(Simplex& simplex, glm::vec3& direction)
+    {
+
+    }
+
+    bool GJK(const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
+    {
+        Simplex simplex = Simplex();
+        glm::vec3 initial_support = Support(A, B, glm::vec3(1.0f, 0.0f, 0.0f));
+       
+        simplex.PushFront(initial_support);
+
+        glm::vec3 new_direction = -initial_support;
+
+        while (TRUE)
+        {
+            initial_support = Support(A, B, new_direction);
+
+            if (glm::dot(initial_support, new_direction) <= 0)
+            {
+                return false;
+            }
+
+            simplex.PushFront(initial_support);
+            
+            if (NearestSimplex(simplex, new_direction))
+            {
+                return true;
+            }
+        }
+    }
+}
 
 #endif // !UTILITY_H
 

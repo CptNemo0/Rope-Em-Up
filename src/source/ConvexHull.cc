@@ -18,4 +18,22 @@ namespace collisions
 		}
 
 	}
+	
+	int ConvexHull::FindFurthestPoint(glm::vec3 direction)
+	{
+		int return_value = 0;
+		float maxproj = -FLT_MAX;
+		
+		for (int i = 0; i < local_vertices_.size(); i++)
+		{
+			float proj = glm::dot(local_vertices_[i], direction);
+			if (proj > maxproj)
+			{
+				maxproj = proj;
+				return_value = i;
+			}
+		}
+
+		return return_value;
+	}
 }

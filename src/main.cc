@@ -77,14 +77,6 @@ int main()
     auto object2 = std::make_shared<GameObject>();
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, cube_mesh, red_texture, shader));
 
-    auto debug1 = std::make_shared<GameObject>();
-    debug1->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, debug_mesh, red_texture, shader));
-    debug1->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
-
-    auto debug2 = std::make_shared<GameObject>();
-    debug2->transform_->set_scale(glm::vec3(4.1f, 4.1f, 4.1f));
-    debug2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, debug_mesh, red_texture, shader));
-
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     PointLight point_light;
@@ -97,13 +89,21 @@ int main()
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(1.41421f * 2.0f, 0.0f, 1.41421f * 2.0f));
 
-    auto collider1 = collisions::CreateAABB(cube_mesh, object);
-    auto collider2 = collisions::CreateAABB(cube_mesh, object2);
+    auto aabb1 = collisions::CreateAABB(cube_mesh, object);
+    auto aabb2 = collisions::CreateAABB(cube_mesh, object2);
 
-    auto chc = collisions::ConvexHullCreator(8);
+    auto chc = collisions::ConvexHullCreator(6);
 
-    auto a = chc.CreateConvexHull(debug_mesh);
-    a->UpdateVertices(object->transform_->get_model_matrix());
+    auto collider1 = chc.CreateConvexHull(cube_mesh);
+    collider1->UpdateVertices(object->transform_->get_model_matrix());
+
+    auto collider2 = chc.CreateConvexHull(cube_mesh);
+    collider2->UpdateVertices(object2->transform_->get_model_matrix());
+
+    auto minkowski = collisions::MinkowskisDifference(collider1, collider2);
+    
+
+
 
     while (!glfwWindowShouldClose(window))
     {
@@ -130,8 +130,7 @@ int main()
 
         object->Update();
         object2->Update();
-        debug1->Update();
-        debug2->Update();
+        
         for (int i = 0; i < collisions::colliders.size(); i++)
         {
             for (int j = i + 1; j < collisions::colliders.size(); j++)

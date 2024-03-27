@@ -29,6 +29,7 @@ namespace collisions
 	{
 		assert((360 % precision) == 0);
 		precision_ = precision;
+		angle_ = 360 / precision_;
 	}
 
 	ConvexHullCreator::~ConvexHullCreator()
@@ -57,8 +58,9 @@ namespace collisions
 		for (int i = 0; i < precision_; i++)
 		{
 			current_rotation = angle_ * i;
-			auto rotation_matrix = (glm::mat3)glm::rotate(glm::mat4(1.0f), glm::radians(current_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-			auto rotated_vec3 = rotation_matrix * start_dir_vec;
+			auto rotation_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(current_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+			auto rotated_vec4 = rotation_matrix * start_dir_vec;
+			auto rotated_vec3 = glm::vec3(rotated_vec4.x, rotated_vec4.y, rotated_vec4.z);
 
 			float maxproj = -FLT_MAX;
 			int idx = 0;
