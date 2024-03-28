@@ -12,6 +12,11 @@
 
 namespace utility
 {
+    void LogVec3(glm::vec3 vec3)
+    {
+        std::cout << "x: " << vec3.x << " y: " << vec3.y << " z: " << vec3.z << "\n";
+    }
+
     enum ControllerType
     {
         PS4,
@@ -250,6 +255,16 @@ namespace collisions
         }
     };
 
+    bool SameDir(glm::vec3 a, glm::vec3 b)
+    {
+        return (glm::dot(a, b) > 0);
+    }
+
+    glm::vec3 Perpendicular(glm::vec3 a, glm::vec3 b)
+    {
+        return glm::cross(glm::cross(a, b), a);
+    }
+
     glm::vec3 Support(const std::shared_ptr <collisions::ConvexHull> A, const std::shared_ptr <collisions::ConvexHull> B, glm::vec3 direction)
     {
         int idx1 = A->FindFurthestPoint(direction);
@@ -286,9 +301,9 @@ namespace collisions
         auto ab = b - a;
         auto ao = - a;
 
-        if (glm::dot(ab, ao) > 0)
+        if (SameDir(ab, ao))
         {
-            direction = glm::normalize(glm::cross(glm::cross(ab, ao), ab));
+            direction = Perpendicular(ab, ao);
         }
         else
         {
@@ -304,6 +319,118 @@ namespace collisions
         return false;
     }
 
+    bool Triangle(Simplex& simplex, glm::vec3& direction)
+    {
+        glm::vec3 a = simplex.points[0];
+        glm::vec3 b = simplex.points[1];
+        glm::vec3 c = simplex.points[2];
+
+        glm::vec3 ab = b - a;
+        glm::vec3 ac = c - a;
+        glm::vec3 ao = -a;
+        
+        glm::vec3 abc = glm::cross(ab, ac);
+
+        if (SameDir(glm::cross(abc, ac), ao))
+        {
+            if (SameDir(ac, ao))
+            {
+                simplex.points[0] = a;
+                simplex.points[1] = c;
+                simplex.points[2] = glm::vec3(0.0f);
+                simplex.points[3] = glm::vec3(0.0f);
+                simplex.size = 2;
+                direction = Perpendicular(ac, ao);
+            }
+            else
+            {
+                simplex.points[0] = a;
+                simplex.points[1] = b;
+                simplex.points[2] = glm::vec3(0.0f);
+                simplex.points[3] = glm::vec3(0.0f);
+                simplex.size = 2;
+                return Line(simplex, direction);
+            }
+        }
+        else
+        {
+            if (SameDir(glm::cross(ab, abc), ao))
+            {
+                simplex.points[0] = a;
+                simplex.points[1] = b;
+                simplex.points[2] = glm::vec3(0.0f);
+                simplex.points[3] = glm::vec3(0.0f);
+                simplex.size = 2;
+                return Line(simplex, direction);
+            }
+            else
+            {
+                if (SameDir(abc, ao))
+                {
+                    direction = abc;
+                }
+                else
+                {
+                    simplex.points[0] = a;
+                    simplex.points[1] = c;
+                    simplex.points[2] = b;
+                    simplex.points[3] = glm::vec3(0.0f);
+                    simplex.size = 3;
+                    direction = -abc;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    bool Tetrahedron(Simplex& simplex, glm::vec3& direction)
+    {
+        glm::vec3 a = simplex.points[0];
+        glm::vec3 b = simplex.points[1];
+        glm::vec3 c = simplex.points[2];
+        glm::vec3 d = simplex.points[3];
+
+        glm::vec3 ab = b - a;
+        glm::vec3 ac = c - a;
+        glm::vec3 ad = d - a;
+        glm::vec3 ao = -a;
+
+        glm::vec3 abc = glm::cross(ab, ac);
+        glm::vec3 acd = glm::cross(ac, ad);
+        glm::vec3 adb = glm::cross(ad, ab);
+
+        if (SameDir(abc, ao))
+        {
+            simplex.points[0] = a;
+            simplex.points[1] = b;
+            simplex.points[2] = c;
+            simplex.points[3] = glm::vec3(0.0f);
+            simplex.size = 3;
+            return Triangle(simplex, direction);
+        }
+
+        if (SameDir(acd, ao))
+        {
+            simplex.points[0] = a;
+            simplex.points[1] = c;
+            simplex.points[2] = d;
+            simplex.points[3] = glm::vec3(0.0f);
+            simplex.size = 3;
+            return Triangle(simplex, direction);
+        }
+        
+        if (SameDir(adb, ao))
+        {
+            simplex.points[0] = a;
+            simplex.points[1] = d;
+            simplex.points[2] = b;
+            simplex.points[3] = glm::vec3(0.0f);
+            simplex.size = 3;
+            return Triangle(simplex, direction);
+        }
+        return true;
+    }
 
     bool NearestSimplex(Simplex& simplex, glm::vec3& direction)
     {
@@ -313,8 +440,10 @@ namespace collisions
             return Line(simplex, direction);
             break;
         case 3:
+            return Triangle(simplex, direction);
             break;
         case 4: 
+            return Tetrahedron(simplex, direction);
             break;
         }
         return false;
@@ -323,8 +452,8 @@ namespace collisions
     bool GJK(const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
     {
         Simplex simplex = Simplex();
-        glm::vec3 initial_support = Support(A, B, glm::vec3(1.0f, 0.0f, 0.0f));
-       
+            glm::vec3 initial_support = Support(A, B, glm::vec3(1.0f, 0.0f, 0.0f));
+        
         simplex.PushFront(initial_support);
 
         glm::vec3 new_direction = -initial_support;
@@ -345,6 +474,30 @@ namespace collisions
                 return true;
             }
         }
+    }
+
+
+
+    bool InsideDifference(const std::vector<glm::vec3>& polygon) 
+    {
+        if (polygon.empty()) return false;
+
+        glm::vec3 normal(0.0f, -1.0f, 0.0f);
+
+        for (size_t i = 0; i < polygon.size(); ++i) 
+        {
+            glm::vec3 p1 = polygon[i];
+            glm::vec3 p2 = polygon[(i + 1) % polygon.size()];
+            glm::vec3 edge = p2 - p1;
+            glm::vec3 edgeToPoint = glm::vec3(0.0f, 0.0f, 0.0f) - p1;
+
+            if (glm::dot(glm::cross(edge, edgeToPoint), normal) > 0) 
+            {
+                return false; 
+            }
+        }
+
+        return true;
     }
 }
 

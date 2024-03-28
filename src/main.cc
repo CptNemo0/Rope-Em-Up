@@ -69,13 +69,14 @@ int main()
     auto red_texture = std::make_shared<Texture>(kRedTexturePath);
 
     auto cube_mesh = std::make_shared<Mesh>(kCubeMeshPath);
+    auto player_mesh = std::make_shared<Mesh>(kPlayerMeshPath);
     auto debug_mesh = std::make_shared<Mesh>(kDebugMeshPath);
     
     auto object = std::make_shared<GameObject>();
-    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, cube_mesh, green_texture, shader));
+    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, debug_mesh, green_texture, shader));
 
     auto object2 = std::make_shared<GameObject>();
-    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, cube_mesh, red_texture, shader));
+    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, player_mesh, red_texture, shader));
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
@@ -87,26 +88,27 @@ int main()
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    object2->transform_->set_position(glm::vec3(1.0, 0.0f, 1.0f));
-    object2->transform_->set_rotation(glm::vec3(0.0f, 45.0f, 0.0f));
-    auto aabb1 = collisions::CreateAABB(cube_mesh, object);
-    auto aabb2 = collisions::CreateAABB(cube_mesh, object2);
+    object2->transform_->set_position(glm::vec3(1.5f, 0.0f, 1.0f));
+    object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
+    auto aabb1 = collisions::CreateAABB(debug_mesh, object);
+    auto aabb2 = collisions::CreateAABB(player_mesh, object2);
 
-    auto chc = collisions::ConvexHullCreator(6);
+    auto chc = collisions::ConvexHullCreator(12);
 
-    auto collider1 = chc.CreateConvexHull(cube_mesh);
+    auto collider1 = chc.CreateConvexHull(debug_mesh);
     collider1->UpdateVertices(object->transform_->get_model_matrix());
 
-    auto collider2 = chc.CreateConvexHull(cube_mesh);
+    auto collider2 = chc.CreateConvexHull(player_mesh);
     collider2->UpdateVertices(object2->transform_->get_model_matrix());
 
     auto minkowski = collisions::MinkowskisDifference(collider1, collider2);
+    
     
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        glClearColor(0.03f, 0.04f, 0.05f, 1.0f);
+        glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         static float previous_time = glfwGetTime();
@@ -138,10 +140,59 @@ int main()
                 auto c = collisions::TestAABBAABB(a, b);
                 if (c)
                 {
-                    collisions::GJK(collider1, collider2);
-                    std::cout << "KOLIZJA!!!\n";
+                    std::cout << "Kolizja AABB\n";
+                    /*if (collisions::GJK(collider1, collider2))
+                    {
+                        std::cout << "Kolizja gjk\n";
+                    }
+                    else
+                    {
+                        std::cout << "Brak kolizji gjk!\n";
+                    }*/
+
+                    auto polygon = collisions::MinkowskisDifference(collider1, collider2);
+                    if (collisions::InsideDifference(polygon))
+                    {
+                        std::cout << "Kolizja minkowski\n";
+                    }
+                    else
+                    {
+                        std::cout << "Brak minkowski!\n";
+                    }
+                }
+                else
+                {
+                    std::cout<< "Brak kolizji AABB\n";
                 }
             }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_L))
+        {
+            auto md = glm::vec3(1.0f, 0.0f, 0.0f);
+            object2->transform_->translate(md * delta_time);
+            collider2->UpdateVertices(object2->transform_->get_model_matrix());
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_J))
+        {
+            auto md = glm::vec3(-1.0f, 0.0f, 0.0f);
+            object2->transform_->translate(md * delta_time);
+            collider2->UpdateVertices(object2->transform_->get_model_matrix());
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_I))
+        {
+            auto md = glm::vec3(0.0f, 0.0f, -1.0f);
+            object2->transform_->translate(md * delta_time);
+            collider2->UpdateVertices(object2->transform_->get_model_matrix());
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_K))
+        {
+            auto md = glm::vec3(0.0f, 0.0f, +1.0f);
+            object2->transform_->translate(md * delta_time);
+            collider2->UpdateVertices(object2->transform_->get_model_matrix());
         }
 
         glfwSwapBuffers(window);
