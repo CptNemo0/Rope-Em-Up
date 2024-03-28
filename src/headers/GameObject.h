@@ -24,6 +24,7 @@ public:
 	GameObject();
 
 	void Update();
+	void PropagateUpdate();
 
 	template <typename T>
 	void AddComponent(std::shared_ptr<T> component)

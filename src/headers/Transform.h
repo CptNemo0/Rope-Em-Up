@@ -7,6 +7,8 @@
 #include <vector>
 #include <memory>
 
+class GameObject;
+
 namespace Components
 {
 
@@ -15,7 +17,6 @@ class Transform
 private:
     Transform *parent_ = nullptr;
     bool is_dirty_ = false;
-    std::vector<std::shared_ptr<Transform>> children_;
 
     glm::mat4 model_matrix_;
 
@@ -27,7 +28,10 @@ private:
     void CalculateModelMatrix(const glm::mat4 parent_model);
 
 public:
-    Transform();
+    GameObject *game_object_ = nullptr;
+    std::vector<std::shared_ptr<Transform>> children_;
+
+    Transform(GameObject *game_object);
 
     void AddChild(std::shared_ptr<Transform> child);
 
