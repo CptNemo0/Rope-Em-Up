@@ -88,12 +88,12 @@ int main()
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    object2->transform_->set_position(glm::vec3(1.5f, 0.0f, 1.0f));
+    object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
     auto aabb1 = collisions::CreateAABB(debug_mesh, object);
     auto aabb2 = collisions::CreateAABB(player_mesh, object2);
 
-    auto chc = collisions::ConvexHullCreator(12);
+    auto chc = collisions::ConvexHullCreator(6);
 
     auto collider1 = chc.CreateConvexHull(debug_mesh);
     collider1->UpdateVertices(object->transform_->get_model_matrix());

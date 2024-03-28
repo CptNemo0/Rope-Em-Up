@@ -476,22 +476,20 @@ namespace collisions
         }
     }
 
-
-
     bool InsideDifference(const std::vector<glm::vec3>& polygon) 
     {
-        if (polygon.empty()) return false;
-
-        glm::vec3 normal(0.0f, -1.0f, 0.0f);
+        static glm::vec3 normal(0.0f, 1.0f, 0.0f);
+        int size = polygon.size();
+        assert(size >= 3);
 
         for (size_t i = 0; i < polygon.size(); ++i) 
         {
-            glm::vec3 p1 = polygon[i];
-            glm::vec3 p2 = polygon[(i + 1) % polygon.size()];
-            glm::vec3 edge = p2 - p1;
-            glm::vec3 edgeToPoint = glm::vec3(0.0f, 0.0f, 0.0f) - p1;
+            glm::vec3 edge = polygon[(i + 1) % size] - polygon[i];
 
-            if (glm::dot(glm::cross(edge, edgeToPoint), normal) > 0) 
+            auto cross = glm::cross(edge, polygon[i]); // Jezeli jest kolizja to wszystkie corss producty beda szly w kierunku (0, 1, 0)
+            auto dot = glm::dot(cross, normal);
+
+            if (dot > 0)
             {
                 return false; 
             }
