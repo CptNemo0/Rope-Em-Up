@@ -16,7 +16,6 @@ class Transform
 {
 private:
     Transform *parent_ = nullptr;
-    bool is_dirty_ = false;
 
     glm::mat4 model_matrix_;
 
@@ -24,7 +23,7 @@ private:
     glm::vec3 rotation_;
     glm::vec3 scale_;
 
-    void UpdateChildren();
+    void UpdateSelfAndChildren();
     void CalculateModelMatrix(const glm::mat4 parent_model);
 
 public:
