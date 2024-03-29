@@ -73,7 +73,7 @@ int main()
     auto debug_mesh = std::make_shared<Mesh>(kDebugMeshPath);
     
     auto object = std::make_shared<GameObject>();
-    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, debug_mesh, green_texture, shader));
+    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, player_mesh, green_texture, shader));
 
     auto object2 = std::make_shared<GameObject>();
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, player_mesh, red_texture, shader));
@@ -90,12 +90,12 @@ int main()
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
-    auto aabb1 = collisions::CreateAABB(debug_mesh, object);
+    auto aabb1 = collisions::CreateAABB(player_mesh, object);
     auto aabb2 = collisions::CreateAABB(player_mesh, object2);
 
-    auto chc = collisions::ConvexHullCreator(6);
+    auto chc = collisions::ConvexHullCreator(10);
 
-    auto collider1 = chc.CreateConvexHull(debug_mesh);
+    auto collider1 = chc.CreateConvexHull(player_mesh);
     collider1->UpdateVertices(object->transform_->get_model_matrix());
 
     auto collider2 = chc.CreateConvexHull(player_mesh);
@@ -141,15 +141,6 @@ int main()
                 if (c)
                 {
                     std::cout << "Kolizja AABB\n";
-                    /*if (collisions::GJK(collider1, collider2))
-                    {
-                        std::cout << "Kolizja gjk\n";
-                    }
-                    else
-                    {
-                        std::cout << "Brak kolizji gjk!\n";
-                    }*/
-
                     auto polygon = collisions::MinkowskisDifference(collider1, collider2);
                     if (collisions::InsideDifference(polygon))
                     {
