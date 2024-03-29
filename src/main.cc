@@ -36,6 +36,7 @@ int main()
     const std::string kCubeMeshPath = "res/models/cube.obj";
     const std::string kPlayerMeshPath = "res/models/player.obj";
     const std::string kDebugMeshPath = "res/models/debug_thingy.obj";
+    const std::string kEnemyMeshPath = "res/models/enemy.obj";
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -71,12 +72,13 @@ int main()
     auto cube_mesh = std::make_shared<Mesh>(kCubeMeshPath);
     auto player_mesh = std::make_shared<Mesh>(kPlayerMeshPath);
     auto debug_mesh = std::make_shared<Mesh>(kDebugMeshPath);
+    auto enemy_mesh = std::make_shared<Mesh>(kEnemyMeshPath);
     
     auto object = std::make_shared<GameObject>();
     object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, debug_mesh, green_texture, shader));
 
     auto object2 = std::make_shared<GameObject>();
-    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, cube_mesh, red_texture, shader));
+    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, enemy_mesh, red_texture, shader));
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
@@ -91,14 +93,14 @@ int main()
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
     auto aabb1 = collisions::CreateAABB(debug_mesh, object);
-    auto aabb2 = collisions::CreateAABB(cube_mesh, object2);
+    auto aabb2 = collisions::CreateAABB(enemy_mesh, object2);
 
-    auto chc = collisions::ConvexHullCreator(36);
+    auto chc = collisions::ConvexHullCreator(18);
 
     auto collider1 = chc.CreateConvexHull(debug_mesh);
     collider1->UpdateVertices(object->transform_->get_model_matrix());
 
-    auto collider2 = chc.CreateConvexHull(cube_mesh);
+    auto collider2 = chc.CreateConvexHull(enemy_mesh);
     collider2->UpdateVertices(object2->transform_->get_model_matrix());
 
     auto minkowski = collisions::MinkowskisDifference(collider1, collider2);

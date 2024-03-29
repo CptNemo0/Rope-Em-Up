@@ -48,8 +48,7 @@ def main():
 
         plt.scatter(0.0, 0.0, color = "black")
 
-        plt.gca() .set_aspect('equal')
-
+        plt.gca().set_aspect('equal', adjustable='box')
         plt.show()
         plt.cla()
     
