@@ -1,6 +1,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <fstream>  
 #include <string>
 #include <stdlib.h>
 #include <unordered_map>
@@ -502,6 +503,30 @@ namespace collisions
         }
 
         return true;
+    }
+
+    void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
+    {
+        std::ofstream polygon_file("res/logs/polygon_debug.csv");
+        for (int i = 0; i < polygon.size(); i++)
+        {
+            polygon_file << polygon[i].x << ", " << polygon[i].z << "\n";
+        }
+        polygon_file.close();
+
+        std::ofstream coll_a_file("res/logs/coll_a_debug.csv");
+        for (int i = 0; i < A->vertices_.size(); i++)
+        {
+            coll_a_file << A->vertices_[i].x << ", " << A->vertices_[i].z << "\n";
+        }
+        coll_a_file.close();
+
+        std::ofstream coll_b_file("res/logs/coll_b_debug.csv");
+        for (int i = 0; i < B->vertices_.size(); i++)
+        {
+            coll_b_file << B->vertices_[i].x << ", " << B->vertices_[i].z << "\n";
+        }
+        coll_b_file.close();
     }
 }
 

@@ -73,10 +73,10 @@ int main()
     auto debug_mesh = std::make_shared<Mesh>(kDebugMeshPath);
     
     auto object = std::make_shared<GameObject>();
-    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, player_mesh, green_texture, shader));
+    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, debug_mesh, green_texture, shader));
 
     auto object2 = std::make_shared<GameObject>();
-    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, player_mesh, red_texture, shader));
+    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, cube_mesh, red_texture, shader));
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
@@ -90,15 +90,15 @@ int main()
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
-    auto aabb1 = collisions::CreateAABB(player_mesh, object);
-    auto aabb2 = collisions::CreateAABB(player_mesh, object2);
+    auto aabb1 = collisions::CreateAABB(debug_mesh, object);
+    auto aabb2 = collisions::CreateAABB(cube_mesh, object2);
 
-    auto chc = collisions::ConvexHullCreator(10);
+    auto chc = collisions::ConvexHullCreator(36);
 
-    auto collider1 = chc.CreateConvexHull(player_mesh);
+    auto collider1 = chc.CreateConvexHull(debug_mesh);
     collider1->UpdateVertices(object->transform_->get_model_matrix());
 
-    auto collider2 = chc.CreateConvexHull(player_mesh);
+    auto collider2 = chc.CreateConvexHull(cube_mesh);
     collider2->UpdateVertices(object2->transform_->get_model_matrix());
 
     auto minkowski = collisions::MinkowskisDifference(collider1, collider2);
@@ -150,6 +150,10 @@ int main()
                     {
                         std::cout << "Brak minkowski!\n";
                     }
+                    if (glfwGetKey(window, GLFW_KEY_P))
+                    {
+                        collisions::WriteDebugFIles(polygon, collider1, collider2);
+                    }
                 }
                 else
                 {
@@ -185,6 +189,15 @@ int main()
             object2->transform_->translate(md * delta_time);
             collider2->UpdateVertices(object2->transform_->get_model_matrix());
         }
+
+        if (glfwGetKey(window, GLFW_KEY_O))
+        {
+            auto md = glm::vec3(0.0f, 10.0f, 0.0f);
+            object2->transform_->set_rotation(object2->transform_->get_rotation() + md * delta_time);
+            collider2->UpdateVertices(object2->transform_->get_model_matrix());
+        }
+
+        
 
         glfwSwapBuffers(window);
     }

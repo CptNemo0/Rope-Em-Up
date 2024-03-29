@@ -20,9 +20,9 @@ namespace collisions
 		int return_value = 0;
 		float maxproj = -FLT_MAX;
 		
-		for (int i = 0; i < local_vertices_.size(); i++)
+		for (int i = 0; i < vertices_.size(); i++)
 		{
-			float proj = glm::dot(local_vertices_[i], direction);
+			float proj = glm::dot(vertices_[i], direction);
 			if (proj > maxproj)
 			{
 				maxproj = proj;
