@@ -85,7 +85,7 @@ int main()
     PointLight point_light;
     point_light.intensity = 100.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    point_light.ambient_colour = glm::vec3(0.2f, 0.2f, 0.2f);
+    point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
