@@ -8,10 +8,9 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "headers/AABB.h"
+
 #include "headers/Camera.h"
-#include "headers/ConvexHull.h"
-#include "headers/ConvexHullCreator.h"
+#include "headers/Collisions.h"
 #include "headers/GameObject.h"
 #include "headers/Mesh.h"
 #include "headers/Shader.h"
@@ -92,16 +91,14 @@ int main()
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
-    auto aabb1 = collisions::CreateAABB(debug_mesh, object);
-    auto aabb2 = collisions::CreateAABB(enemy_mesh, object2);
 
-    auto chc = collisions::ConvexHullCreator(18);
+    auto aabb1 = collisions::CreateAABB(debug_mesh);
+    auto aabb2 = collisions::CreateAABB(enemy_mesh);
+    auto collider1 = collisions::CreateConvexHull(18, debug_mesh);
+    auto collider2 = collisions::CreateConvexHull(18, enemy_mesh);
 
-    auto collider1 = chc.CreateConvexHull(debug_mesh);
-    collider1->UpdateVertices(object->transform_->get_model_matrix());
-
-    auto collider2 = chc.CreateConvexHull(enemy_mesh);
-    collider2->UpdateVertices(object2->transform_->get_model_matrix());
+    collisions::UpdateVertices(collider1, object->transform_->get_model_matrix());
+    collisions::UpdateVertices(collider2, object2->transform_->get_model_matrix());
 
     auto minkowski = collisions::MinkowskisDifference(collider1, collider2);
     
@@ -133,38 +130,9 @@ int main()
         object->Update();
         object2->Update();
         
-        for (int i = 0; i < collisions::colliders.size(); i++)
-        {
-            for (int j = i + 1; j < collisions::colliders.size(); j++)
-            {
-                auto a = collisions::colliders[i];
-                auto b = collisions::colliders[j];
-                auto c = collisions::TestAABBAABB(a, b);
-                if (c)
-                {
-                    std::cout << "Kolizja AABB\n";
-                    auto polygon = collisions::MinkowskisDifference(collider1, collider2);
-                    if (collisions::InsideDifference(polygon))
-                    {
-                        std::cout << "Kolizja minkowski\n";
-                    }
-                    else
-                    {
-                        std::cout << "Brak minkowski!\n";
-                    }
-                    if (glfwGetKey(window, GLFW_KEY_P))
-                    {
-                        collisions::WriteDebugFIles(polygon, collider1, collider2);
-                    }
-                }
-                else
-                {
-                    std::cout<< "Brak kolizji AABB\n";
-                }
-            }
-        }
+       
 
-        if (glfwGetKey(window, GLFW_KEY_L))
+        /*if (glfwGetKey(window, GLFW_KEY_L))
         {
             auto md = glm::vec3(1.0f, 0.0f, 0.0f);
             object2->transform_->translate(md * delta_time);
@@ -197,7 +165,7 @@ int main()
             auto md = glm::vec3(0.0f, 10.0f, 0.0f);
             object2->transform_->set_rotation(object2->transform_->get_rotation() + md * delta_time);
             collider2->UpdateVertices(object2->transform_->get_model_matrix());
-        }
+        }*/
 
         
 
