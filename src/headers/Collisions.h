@@ -11,7 +11,24 @@
 
 namespace collisions
 {
+	struct AABB;
+	struct ConvexHull;
+
+	/*const glm::vec3 FindFarthestPointAABB(std::shared_ptr<Mesh> mesh);
+	void UpdateCentre(std::shared_ptr<AABB> aabb, glm::vec3 position);
+	std::shared_ptr<AABB> CreateAABB(std::shared_ptr<Mesh> mesh);
+	const glm::vec3 FindFarthestPointConvexHull(const std::shared_ptr<ConvexHull> hull, const glm::vec3& direction);
+	void UpdateVertices(std::shared_ptr<ConvexHull> hull, const glm::mat4& model_matrix);
+	std::shared_ptr<ConvexHull> CreateConvexHull(int precision, std::shared_ptr<Mesh> mesh);
+	glm::vec3 Support(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction);
+	std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b);
+	bool InsideDifference(const std::vector<glm::vec3>& polygon);
+	void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B);
+	inline bool TestAABBAABB(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b);*/
+
 #pragma region AABB
+
+	
 
 	struct AABB
 	{
@@ -19,7 +36,7 @@ namespace collisions
 		glm::vec3 extremes = glm::vec3(0.0f);
 	};
 
-	const glm::vec3 FindFarthestPointAABB(std::shared_ptr<Mesh> mesh)
+	inline const glm::vec3 FindFarthestPointAABB(std::shared_ptr<Mesh> mesh)
 	{
 		glm::vec3 return_value = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3 a = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -40,12 +57,12 @@ namespace collisions
 		return return_value;
 	}
 
-	void UpdateCentre(std::shared_ptr<AABB> aabb, glm::vec3 position)
+	inline void UpdateCentre(std::shared_ptr<AABB> aabb, glm::vec3 position)
 	{
 		aabb->centre = position;
 	}
 
-	std::shared_ptr<AABB> CreateAABB(std::shared_ptr<Mesh> mesh)
+	inline std::shared_ptr<AABB> CreateAABB(std::shared_ptr<Mesh> mesh)
 	{
 		auto return_value = std::make_shared<AABB>();
 
@@ -67,7 +84,7 @@ namespace collisions
 		std::vector<glm::vec3> vertices;
 	};
 
-	const glm::vec3 FindFarthestPointConvexHull(const std::shared_ptr<ConvexHull> hull, const glm::vec3& direction)
+	inline const glm::vec3 FindFarthestPointConvexHull(const std::shared_ptr<ConvexHull> hull, const glm::vec3& direction)
 	{
 		int return_value = 0;
 		float maxproj = -FLT_MAX;
@@ -85,7 +102,7 @@ namespace collisions
 		return hull->vertices[return_value];
 	}
 
-	void UpdateVertices(std::shared_ptr<ConvexHull> hull, const glm::mat4& model_matrix)
+	inline void UpdateVertices(std::shared_ptr<ConvexHull> hull, const glm::mat4& model_matrix)
 	{
 		int size = hull->vertices.size();
 		assert(size == hull->local_vertices.size());
@@ -98,7 +115,7 @@ namespace collisions
 		}
 	}
 
-	std::shared_ptr<ConvexHull> CreateConvexHull(int precision, std::shared_ptr<Mesh> mesh)
+	inline std::shared_ptr<ConvexHull> CreateConvexHull(int precision, std::shared_ptr<Mesh> mesh)
 	{
 		assert((360 % precision) == 0);
 		int angle = 360 / precision;
@@ -139,7 +156,7 @@ namespace collisions
 
 #pragma region Helpers
 
-	glm::vec3 Support(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
+	inline glm::vec3 Support(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
 	{
 		auto vertex_a = FindFarthestPointConvexHull(hull_a, direction);
 		auto vertex_b = FindFarthestPointConvexHull(hull_b, -direction);
@@ -147,7 +164,7 @@ namespace collisions
 		return vertex_a - vertex_b;
 	}
 
-	std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
+	inline std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
 	{
 		auto minkowski = std::vector<glm::vec3>();
 		auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -167,7 +184,7 @@ namespace collisions
 		return minkowski;
 	}
 
-	bool InsideDifference(const std::vector<glm::vec3>& polygon)
+	inline bool InsideDifference(const std::vector<glm::vec3>& polygon)
 	{
 		static glm::vec3 normal(0.0f, 1.0f, 0.0f);
 		int size = polygon.size();
@@ -190,7 +207,7 @@ namespace collisions
 		return true;
 	}
 
-	void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
+	inline void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
 	{
 		std::ofstream polygon_file("res/logs/polygon_debug.csv");
 		for (int i = 0; i < polygon.size(); i++)

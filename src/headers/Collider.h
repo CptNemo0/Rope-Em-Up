@@ -7,7 +7,6 @@
 
 #include "Component.h"
 #include "Collisions.h"
-#include "GameObject.h"
 #include "Mesh.h"
 
 namespace Components

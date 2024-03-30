@@ -95,7 +95,7 @@ int main()
 
    /* auto aabb1 = collisions::CreateAABB(debug_mesh);
     auto aabb2 = collisions::CreateAABB(enemy_mesh);
-    auto collider1 = collisions::CreateConvexHull(18, debug_mesh);
+    auto collider1 = collisions::CreateConvexHull(18, debug_mesh);one d
     auto collider2 = collisions::CreateConvexHull(18, enemy_mesh);
 
     collisions::UpdateVertices(collider1, object->transform_->get_model_matrix());
