@@ -1,5 +1,7 @@
 #include "../headers/GameObject.h"
 
+#include "../headers/Component.h"
+
 GameObject::GameObject()
 {
 	this->transform_ = std::make_shared<Components::Transform>(this);
