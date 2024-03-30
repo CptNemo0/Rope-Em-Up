@@ -83,25 +83,15 @@ int main()
     
     auto object = std::make_shared<GameObject>();
     object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, debug_mesh, green_texture, shader));
-    object->AddComponent(std::make_shared<Components::Collider>(0, 18, debug_mesh));
+    object->AddComponent(std::make_shared<Components::Collider>(0, 18, debug_mesh, object->transform_));
 
     auto object2 = std::make_shared<GameObject>();
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, enemy_mesh, red_texture, shader));
-    object2->AddComponent(std::make_shared<Components::Collider>(0, 18, enemy_mesh));
+    object2->AddComponent(std::make_shared<Components::Collider>(0, 18, enemy_mesh, object2->transform_));
 
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
-
-   /* auto aabb1 = collisions::CreateAABB(debug_mesh);
-    auto aabb2 = collisions::CreateAABB(enemy_mesh);
-    auto collider1 = collisions::CreateConvexHull(18, debug_mesh);one d
-    auto collider2 = collisions::CreateConvexHull(18, enemy_mesh);
-
-    collisions::UpdateVertices(collider1, object->transform_->get_model_matrix());
-    collisions::UpdateVertices(collider2, object2->transform_->get_model_matrix());
-
-    auto minkowski = collisions::MinkowskisDifference(collider1, collider2);*/
 
     while (!glfwWindowShouldClose(window))
     {
@@ -129,6 +119,18 @@ int main()
         object->Update();
         object2->Update();
         
+        bool bpc = collisions::TestAABBAABB(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
+        if (bpc)
+        {
+            std::cout << "AABB\n";
+            auto polygon = collisions::MinkowskisDifference(object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
+            bpc = collisions::InsideDifference(polygon);
+            if (bpc)
+            {
+                std::cout << "Min\n";
+            }
+            
+        }
        
         if (glfwGetKey(window, GLFW_KEY_L))
         {
@@ -159,8 +161,6 @@ int main()
             auto md = glm::vec3(0.0f, 10.0f, 0.0f);
             object2->transform_->set_rotation(object2->transform_->get_rotation() + md * delta_time);
         }
-
-        
 
         glfwSwapBuffers(window);
     }

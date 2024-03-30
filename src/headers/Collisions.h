@@ -14,21 +14,7 @@ namespace collisions
 	struct AABB;
 	struct ConvexHull;
 
-	/*const glm::vec3 FindFarthestPointAABB(std::shared_ptr<Mesh> mesh);
-	void UpdateCentre(std::shared_ptr<AABB> aabb, glm::vec3 position);
-	std::shared_ptr<AABB> CreateAABB(std::shared_ptr<Mesh> mesh);
-	const glm::vec3 FindFarthestPointConvexHull(const std::shared_ptr<ConvexHull> hull, const glm::vec3& direction);
-	void UpdateVertices(std::shared_ptr<ConvexHull> hull, const glm::mat4& model_matrix);
-	std::shared_ptr<ConvexHull> CreateConvexHull(int precision, std::shared_ptr<Mesh> mesh);
-	glm::vec3 Support(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction);
-	std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b);
-	bool InsideDifference(const std::vector<glm::vec3>& polygon);
-	void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B);
-	inline bool TestAABBAABB(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b);*/
-
 #pragma region AABB
-
-	
 
 	struct AABB
 	{
