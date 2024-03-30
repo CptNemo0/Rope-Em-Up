@@ -1,7 +1,6 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-
 #include <string>
 #include <stdlib.h>
 #include <unordered_map>

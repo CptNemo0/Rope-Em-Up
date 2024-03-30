@@ -1,26 +1,26 @@
 #define STB_IMAGE_IMPLEMENTATION
 
+#include <chrono>
+#include <ctime>
 #include <iostream>
 #include <memory>
+#include <ratio>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-
 #include "headers/Camera.h"
-#include "headers/Collisions.h"
+#include "headers/Collider.h"
+//#include "headers/Collisions.h"
 #include "headers/GameObject.h"
 #include "headers/Mesh.h"
+#include "headers/MeshRenderer.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
 #include "headers/utility.h"
-#include "headers/MeshRenderer.h"
 
-#include <ctime>
-#include <ratio>
-#include <chrono>
 
 int main()
 {
@@ -62,8 +62,16 @@ int main()
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
+    auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
+
+    PointLight point_light;
+    point_light.intensity = 100.0f;
+    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
+    point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
+    point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
     auto green_texture = std::make_shared<Texture>(kGreenTexturePath);
     auto red_texture = std::make_shared<Texture>(kRedTexturePath);
@@ -75,24 +83,17 @@ int main()
     
     auto object = std::make_shared<GameObject>();
     object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, debug_mesh, green_texture, shader));
+    object->AddComponent(std::make_shared<Components::Collider>(0, 18, debug_mesh));
 
     auto object2 = std::make_shared<GameObject>();
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, enemy_mesh, red_texture, shader));
-
-    auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
-
-    PointLight point_light;
-    point_light.intensity = 100.0f;
-    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
-    point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
-    point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
+    object2->AddComponent(std::make_shared<Components::Collider>(0, 18, enemy_mesh));
 
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-    auto aabb1 = collisions::CreateAABB(debug_mesh);
+   /* auto aabb1 = collisions::CreateAABB(debug_mesh);
     auto aabb2 = collisions::CreateAABB(enemy_mesh);
     auto collider1 = collisions::CreateConvexHull(18, debug_mesh);
     auto collider2 = collisions::CreateConvexHull(18, enemy_mesh);
@@ -100,9 +101,7 @@ int main()
     collisions::UpdateVertices(collider1, object->transform_->get_model_matrix());
     collisions::UpdateVertices(collider2, object2->transform_->get_model_matrix());
 
-    auto minkowski = collisions::MinkowskisDifference(collider1, collider2);
-    
-    
+    auto minkowski = collisions::MinkowskisDifference(collider1, collider2);*/
 
     while (!glfwWindowShouldClose(window))
     {
@@ -131,41 +130,35 @@ int main()
         object2->Update();
         
        
-
-        /*if (glfwGetKey(window, GLFW_KEY_L))
+        if (glfwGetKey(window, GLFW_KEY_L))
         {
             auto md = glm::vec3(1.0f, 0.0f, 0.0f);
             object2->transform_->translate(md * delta_time);
-            collider2->UpdateVertices(object2->transform_->get_model_matrix());
         }
 
         if (glfwGetKey(window, GLFW_KEY_J))
         {
             auto md = glm::vec3(-1.0f, 0.0f, 0.0f);
             object2->transform_->translate(md * delta_time);
-            collider2->UpdateVertices(object2->transform_->get_model_matrix());
         }
 
         if (glfwGetKey(window, GLFW_KEY_I))
         {
             auto md = glm::vec3(0.0f, 0.0f, -1.0f);
             object2->transform_->translate(md * delta_time);
-            collider2->UpdateVertices(object2->transform_->get_model_matrix());
         }
 
         if (glfwGetKey(window, GLFW_KEY_K))
         {
             auto md = glm::vec3(0.0f, 0.0f, +1.0f);
             object2->transform_->translate(md * delta_time);
-            collider2->UpdateVertices(object2->transform_->get_model_matrix());
         }
 
         if (glfwGetKey(window, GLFW_KEY_O))
         {
             auto md = glm::vec3(0.0f, 10.0f, 0.0f);
             object2->transform_->set_rotation(object2->transform_->get_rotation() + md * delta_time);
-            collider2->UpdateVertices(object2->transform_->get_model_matrix());
-        }*/
+        }
 
         
 

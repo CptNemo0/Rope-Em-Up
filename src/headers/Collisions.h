@@ -1,9 +1,13 @@
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "Mesh.h"
+#ifndef COLLISIONS_H
+#define COLLISIONS_H
 
 #include <fstream>  
 #include <memory>
+
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
+#include "Mesh.h"
 
 namespace collisions
 {
@@ -11,6 +15,7 @@ namespace collisions
 
 	struct AABB
 	{
+		glm::vec3 centre = glm::vec3(0.0f);
 		glm::vec3 extremes = glm::vec3(0.0f);
 	};
 
@@ -33,6 +38,11 @@ namespace collisions
 			}
 		}
 		return return_value;
+	}
+
+	void UpdateCentre(std::shared_ptr<AABB> aabb, glm::vec3 position)
+	{
+		aabb->centre = position;
 	}
 
 	std::shared_ptr<AABB> CreateAABB(std::shared_ptr<Mesh> mesh)
@@ -129,90 +139,89 @@ namespace collisions
 
 #pragma region Helpers
 
-    glm::vec3 Support(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
-    {
-        auto vertex_a = FindFarthestPointConvexHull(hull_a, direction);
+	glm::vec3 Support(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
+	{
+		auto vertex_a = FindFarthestPointConvexHull(hull_a, direction);
 		auto vertex_b = FindFarthestPointConvexHull(hull_b, -direction);
 
 		return vertex_a - vertex_b;
-    }
+	}
 
-    std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
-    {
-        auto minkowski = std::vector<glm::vec3>();
-        auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-        float current_rotation = 0;
-        int precision = fmax(hull_a->vertices.size(), hull_b->vertices.size());
-        int angle = 360 / precision;
-
-        for (int i = 0; i < precision; i++)
-        {
-            current_rotation = angle * i;
-            auto rotation_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(current_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-            auto rotated_vec4 = rotation_matrix * start_dir_vec;
-            auto direction = glm::vec3(rotated_vec4.x, rotated_vec4.y, rotated_vec4.z);
-
-            minkowski.push_back(Support(hull_a, hull_b, direction));
-        }
-        return minkowski;
-    }
-
-    bool InsideDifference(const std::vector<glm::vec3>& polygon)
-    {
-        static glm::vec3 normal(0.0f, 1.0f, 0.0f);
-        int size = polygon.size();
-        assert(size >= 3);
-
-        for (int i = 0; i < size; i++)
-        {
-            glm::vec3 edge = polygon[(i + 1) % size] - polygon[i];
-            
-
-            auto cross = glm::cross(edge, polygon[i]); // Jezeli jest kolizja to wszystkie corss producty beda szly w kierunku (0, 1, 0)
-            auto dot = glm::dot(cross, normal);
-
-            if (dot > 0)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
-    {
-        std::ofstream polygon_file("res/logs/polygon_debug.csv");
-        for (int i = 0; i < polygon.size(); i++)
-        {
-            polygon_file << polygon[i].x << ", " << polygon[i].z << "\n";
-        }
-        polygon_file.close();
-
-        std::ofstream coll_a_file("res/logs/coll_a_debug.csv");
-        for (int i = 0; i < A->vertices.size(); i++)
-        {
-            coll_a_file << A->vertices[i].x << ", " << A->vertices[i].z << "\n";
-        }
-        coll_a_file.close();
-
-        std::ofstream coll_b_file("res/logs/coll_b_debug.csv");
-        for (int i = 0; i < B->vertices.size(); i++)
-        {
-            coll_b_file << B->vertices[i].x << ", " << B->vertices[i].z << "\n";
-        }
-        coll_b_file.close();
-    }
-
-	/*int TestAABBAABB(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
+	std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
 	{
-		if (fabsf(a->game_object->transform_->get_position().x - b->game_object->transform_->get_position().x) > (a->extremes.x + b->extremes.x)) return 0;
-		if (fabsf(a->game_object->transform_->get_position().z - b->game_object->transform_->get_position().z) > (a->extremes.z + b->extremes.z)) return 0;
+		auto minkowski = std::vector<glm::vec3>();
+		auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		float current_rotation = 0;
+		int precision = fmax(hull_a->vertices.size(), hull_b->vertices.size());
+		int angle = 360 / precision;
+
+		for (int i = 0; i < precision; i++)
+		{
+			current_rotation = angle * i;
+			auto rotation_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(current_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+			auto rotated_vec4 = rotation_matrix * start_dir_vec;
+			auto direction = glm::vec3(rotated_vec4.x, rotated_vec4.y, rotated_vec4.z);
+
+			minkowski.push_back(Support(hull_a, hull_b, direction));
+		}
+		return minkowski;
+	}
+
+	bool InsideDifference(const std::vector<glm::vec3>& polygon)
+	{
+		static glm::vec3 normal(0.0f, 1.0f, 0.0f);
+		int size = polygon.size();
+		assert(size >= 3);
+
+		for (int i = 0; i < size; i++)
+		{
+			glm::vec3 edge = polygon[(i + 1) % size] - polygon[i];
+
+
+			auto cross = glm::cross(edge, polygon[i]); // Jezeli jest kolizja to wszystkie corss producty beda szly w kierunku (0, 1, 0)
+			auto dot = glm::dot(cross, normal);
+
+			if (dot > 0)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
+	{
+		std::ofstream polygon_file("res/logs/polygon_debug.csv");
+		for (int i = 0; i < polygon.size(); i++)
+		{
+			polygon_file << polygon[i].x << ", " << polygon[i].z << "\n";
+		}
+		polygon_file.close();
+
+		std::ofstream coll_a_file("res/logs/coll_a_debug.csv");
+		for (int i = 0; i < A->vertices.size(); i++)
+		{
+			coll_a_file << A->vertices[i].x << ", " << A->vertices[i].z << "\n";
+		}
+		coll_a_file.close();
+
+		std::ofstream coll_b_file("res/logs/coll_b_debug.csv");
+		for (int i = 0; i < B->vertices.size(); i++)
+		{
+			coll_b_file << B->vertices[i].x << ", " << B->vertices[i].z << "\n";
+		}
+		coll_b_file.close();
+	}
+
+	inline bool TestAABBAABB(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
+	{
+		if (fabsf(a->centre.x - b->centre.x) > (a->extremes.x + b->extremes.x)) return false;
+		if (fabsf(a->centre.z - b->centre.z) > (a->extremes.z + b->extremes.z)) return false;
 		return 1;
-	}*/
+	}
 
 #pragma endregion
-
-
-
 }
+
+#endif // !COLLISIONS_H
