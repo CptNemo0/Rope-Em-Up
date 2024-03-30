@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "Component.h"
+#include "Transform.h"
 #include "Collisions.h"
 #include "Mesh.h"
 

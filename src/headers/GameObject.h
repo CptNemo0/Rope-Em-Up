@@ -12,8 +12,7 @@
 #include "Transform.h"
 #include "Mesh.h"
 #include "Shader.h"
-
-class Component;
+#include "Component.h"
 
 class GameObject
 {
