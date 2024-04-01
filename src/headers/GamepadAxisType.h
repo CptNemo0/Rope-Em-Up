@@ -8,7 +8,8 @@ enum class GamepadAxisType
 {
     LEFT = 0,
     RIGHT = 2,
-    TRIGGERS = 4
+    TRIGGERS = 4,
+    KEYBOARD = 6
 };
 
 } // namespace Input

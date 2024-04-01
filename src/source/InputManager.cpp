@@ -49,6 +49,19 @@ void Input::InputManager::UpdateGamepadState(int gamepadID)
     }
 }
 
+void Input::InputManager::UpdateKeyboardState(int gamepadID)
+{
+    glm::vec2 axis_state(0.0f);
+    auto keys = axis_keyboard_mappings[gamepadID];
+    for (int i = 0; i < 4; i++)
+    {
+        if (glfwGetKey(nullptr, keys[i]) == GLFW_PRESS)
+        {
+            axis_state += axis_directions[i];
+        }
+    }
+}
+
 void Input::InputManager::AddObserver(InputObserver *observer, int gamepadID)
 {
     observers_.push_back(std::make_pair(observer, gamepadID));
@@ -95,6 +108,10 @@ void Input::InputManager::Update()
         if (glfwJoystickPresent(gamepad.first))
         {
             UpdateGamepadState(gamepad.first);
+        }
+        else
+        {
+            UpdateKeyboardState(gamepad.first);
         }
     }
 }

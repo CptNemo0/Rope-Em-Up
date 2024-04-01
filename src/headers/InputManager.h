@@ -8,11 +8,26 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <array>
 #include "glm/glm.hpp"
 #include "glfw/glfw3.h"
 
 namespace Input
 {
+
+static std::unordered_map<int, std::array<int, 4>> axis_keyboard_mappings =
+{
+    {GLFW_JOYSTICK_1, {GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D}},
+    {GLFW_JOYSTICK_2, {GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT}}
+};
+
+static const glm::vec2 axis_directions[] = {glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, -1.0f), glm::vec2(-1.0f, 0.0f), glm::vec2(1.0f, 0.0f)};
+
+static std::unordered_map<int, std::vector<int>> button_keyboard_mappings =
+{
+    {GLFW_JOYSTICK_1, {GLFW_KEY_E}},
+    {GLFW_JOYSTICK_2, {GLFW_KEY_SLASH}}
+};
 
 class InputManager
 {
@@ -50,6 +65,7 @@ private:
     static void JoystickStateCallback(int jid, int event);
 
     void UpdateGamepadState(int gamepadID);
+    void UpdateKeyboardState(int gamepadID);
 
 public:
     void AddObserver(InputObserver *observer, int gamepadID);
