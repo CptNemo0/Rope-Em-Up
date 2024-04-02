@@ -13,6 +13,7 @@ namespace collisions
 {
 	struct AABB;
 	struct ConvexHull;
+	struct SeparationVectors;
 
 #pragma region AABB
 
@@ -216,6 +217,10 @@ namespace collisions
 		}
 		coll_b_file.close();
 	}
+	
+#pragma endregion
+	
+#pragma region Collisions and Separation
 
 	inline bool AABBCollisionCheck(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
 	{
@@ -228,7 +233,7 @@ namespace collisions
 	{
 		return InsideDifference(MinkowskisDifference(hull_a, hull_b));
 	}
-
+	
 	struct SeparationVectors
 	{
 		glm::vec3 sep_a;
@@ -257,9 +262,14 @@ namespace collisions
 		return return_value;
 	}
 
-	
+#pragma endregion
+
+#pragma region Doubly Linked List
+
+
 
 #pragma endregion
+
 }
 
 #endif // !COLLISIONS_H

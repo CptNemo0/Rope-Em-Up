@@ -14,6 +14,7 @@
 #include "headers/Camera.h"
 #include "headers/Collider.h"
 #include "headers/Collisions.h"
+#include "headers/CollisionManager.h"
 #include "headers/GameObject.h"
 #include "headers/Mesh.h"
 #include "headers/MeshRenderer.h"
@@ -59,7 +60,8 @@ int main()
     std::cout << "GLAD Initialized.\n";
 
     Input::InputManager::Initialize(window);
-    
+    collisions::CollisionManager::Initialize();
+
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
     camera->set_near(kNear);
@@ -86,21 +88,18 @@ int main()
     
     auto object = std::make_shared<GameObject>();
     object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, debug_mesh, green_texture, shader));
-    object->AddComponent(std::make_shared<Components::Collider>(0, 18, debug_mesh, object->transform_));
+    object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, 18, debug_mesh, object->transform_));
 
     auto object2 = std::make_shared<GameObject>();
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, enemy_mesh, red_texture, shader));
-    object2->AddComponent(std::make_shared<Components::Collider>(0, 18, enemy_mesh, object2->transform_));
+    object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, 18, enemy_mesh, object2->transform_));
 
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-    int idx = 0;
-
     while (!glfwWindowShouldClose(window))
     {
-        idx++;
         glfwPollEvents();
         glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -110,7 +109,7 @@ int main()
         float delta_time = current_time - previous_time;
         previous_time = current_time;
 
-        bool bpc = collisions::AABBCollisionCheck(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
+        /*bool bpc = collisions::AABBCollisionCheck(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
         if (bpc)
         {
             auto polygon = collisions::MinkowskisDifference(object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
@@ -124,7 +123,9 @@ int main()
                 object->transform_->set_position(object->transform_->get_position() + separation_vector.sep_a);
                 object2->transform_->set_position(object2->transform_->get_position() + separation_vector.sep_b);
             }
-        }
+        }*/
+
+        collisions::CollisionManager::i_->CollisionCheck();
 
         utility::DebugCameraMovement(window, camera, delta_time);
         utility::DebugCameraMovementJoystick(window, camera, delta_time);
@@ -174,8 +175,9 @@ int main()
         glfwSwapBuffers(window);
     }
 
+    collisions::CollisionManager::Destroy();
     Input::InputManager::Destroy();
-
+    
     shader->End();
     glfwTerminate();
     return 0;
