@@ -2,7 +2,8 @@
 
 Input::InputManager *Input::InputManager::i_ = nullptr;
 
-Input::InputManager::InputManager()
+Input::InputManager::InputManager(GLFWwindow *window)
+    : window_(window)
 {
     glfwSetJoystickCallback(JoystickStateCallback);
     old_gamepad_states_.emplace(GLFW_JOYSTICK_1, GLFWgamepadstate());
@@ -55,7 +56,7 @@ void Input::InputManager::UpdateKeyboardState(int gamepadID)
     auto keys = axis_keyboard_mappings[gamepadID];
     for (int i = 0; i < 4; i++)
     {
-        if (glfwGetKey(nullptr, keys[i]) == GLFW_PRESS)
+        if (glfwGetKey(window_, keys[i]) == GLFW_PRESS)
         {
             axis_state += axis_directions[i];
         }

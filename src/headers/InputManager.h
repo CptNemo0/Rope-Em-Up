@@ -34,17 +34,19 @@ class InputManager
 
 // Singleton stuff
 private:
-    InputManager();
+    InputManager(GLFWwindow *window);
     ~InputManager() = default;
+
+    GLFWwindow *window_;
 
 public:
     static InputManager *i_;
 
-    static void Initialize()
+    static void Initialize(GLFWwindow *window)
     {
         if (i_ == nullptr)
         {
-            i_ = new InputManager();
+            i_ = new InputManager(window);
         }
     }
 
