@@ -20,6 +20,7 @@
 #include "headers/Shader.h"
 #include "headers/Texture.h"
 #include "headers/utility.h"
+#include "headers/InputManager.h"
 
 
 int main()
@@ -56,6 +57,8 @@ int main()
         exit(return_value);
     }
     std::cout << "GLAD Initialized.\n";
+
+    Input::InputManager::Initialize();
     
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -104,6 +107,8 @@ int main()
         float delta_time = current_time - previous_time;
         previous_time = current_time;
 
+        Input::InputManager::i_->Update();
+
         utility::DebugCameraMovement(window, camera, delta_time);
         utility::DebugCameraMovementJoystick(window, camera, delta_time);
 
@@ -122,12 +127,12 @@ int main()
         bool bpc = collisions::AABBCollisionCheck(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
         if (bpc)
         {
-            std::cout << "AABB\n";
+            // std::cout << "AABB\n";
             auto polygon = collisions::MinkowskisDifference(object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
             bpc = collisions::InsideDifference(polygon);
             if (bpc)
             {
-                std::cout << "Min\n";
+                // std::cout << "Min\n";
             }
             collisions::WriteDebugFIles(polygon, object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
             
@@ -165,6 +170,8 @@ int main()
 
         glfwSwapBuffers(window);
     }
+
+    Input::InputManager::Destroy();
 
     shader->End();
     glfwTerminate();
