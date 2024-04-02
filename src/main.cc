@@ -58,7 +58,7 @@ int main()
     }
     std::cout << "GLAD Initialized.\n";
 
-    Input::InputManager::Initialize();
+    Input::InputManager::Initialize(window);
     
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
