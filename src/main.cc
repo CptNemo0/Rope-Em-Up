@@ -96,8 +96,11 @@ int main()
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
+    int idx = 0;
+
     while (!glfwWindowShouldClose(window))
     {
+        idx++;
         glfwPollEvents();
         glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -107,7 +110,32 @@ int main()
         float delta_time = current_time - previous_time;
         previous_time = current_time;
 
-        Input::InputManager::i_->Update();
+        //Input::InputManager::i_->Update();
+
+        bool bpc = collisions::AABBCollisionCheck(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
+        if (bpc)
+        {
+            // std::cout << "AABB\n";
+            auto polygon = collisions::MinkowskisDifference(object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
+            bpc = collisions::InsideDifference(polygon);
+            if (bpc)
+            {
+                if (idx > 1)
+                {
+                    auto separation_vector = collisions::GetSeparatingVector(object->GetComponent<Components::Collider>()->np_collider_,
+                                                    object->transform_->get_position(),
+                                                    object2->GetComponent<Components::Collider>()->np_collider_,
+                                                    object2->transform_->get_position());
+                    object->transform_->set_position(object->transform_->get_position() + separation_vector.sep_a);
+                    object2->transform_->set_position(object2->transform_->get_position() + separation_vector.sep_b);
+                }
+                
+                collisions::WriteDebugFIles(polygon, object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
+                // std::cout << "Min\n";
+            }
+            
+
+        }
 
         utility::DebugCameraMovement(window, camera, delta_time);
         utility::DebugCameraMovementJoystick(window, camera, delta_time);
@@ -123,21 +151,7 @@ int main()
 
         object->Update();
         object2->Update();
-        
-        bool bpc = collisions::AABBCollisionCheck(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
-        if (bpc)
-        {
-            // std::cout << "AABB\n";
-            auto polygon = collisions::MinkowskisDifference(object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
-            bpc = collisions::InsideDifference(polygon);
-            if (bpc)
-            {
-                // std::cout << "Min\n";
-            }
-            collisions::WriteDebugFIles(polygon, object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
-            
-        }
-       
+
         if (glfwGetKey(window, GLFW_KEY_L))
         {
             auto md = glm::vec3(1.0f, 0.0f, 0.0f);

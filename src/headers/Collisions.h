@@ -229,27 +229,35 @@ namespace collisions
 		return InsideDifference(MinkowskisDifference(hull_a, hull_b));
 	}
 
-	inline glm::vec3 GetSeparatingVector(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
+	struct SeparationVectors
 	{
-		glm::vec3 return_value = glm::vec3(1.0f, 0.0f, 0.0f);
-		int i = 0;
-		int upper_bound = 128;
-		while (TRUE && (i < upper_bound))
-		{
-			auto p = FindFarthestPointConvexHull(hull_a, return_value);
-			auto q = FindFarthestPointConvexHull(hull_b, -return_value);
-			if (glm::dot(p, return_value) < glm::dot(q, -return_value))
-			{
-				return return_value;
-			}
-			auto r = glm::normalize(q - p);
-			return_value = return_value - (2.0f * r * glm::dot(r, return_value));
-			i++;
-		}
+		glm::vec3 sep_a;
+		glm::vec3 sep_b;
+	};
 
-		return glm::vec3(0.0f);
+	inline SeparationVectors GetSeparatingVector(const std::shared_ptr<ConvexHull> hull_a, glm::vec3 a, const std::shared_ptr<ConvexHull> hull_b, glm::vec3 b)
+	{
+		auto dir_a = glm::normalize(a - b);
+		auto dir_b = dir_a * -1.0f;
 
+		auto vertex_a = FindFarthestPointConvexHull(hull_a, -dir_a);
+		auto vertex_b = FindFarthestPointConvexHull(hull_b, -dir_b);
+
+		auto radius_a = glm::distance(a, vertex_a);
+		auto radius_b = glm::distance(b, vertex_b);
+	
+		auto distance = glm::distance(a, b);
+
+		float mag = radius_a + radius_b - distance;
+
+		SeparationVectors return_value;
+		return_value.sep_a = dir_a * mag * 0.5f;
+		return_value.sep_b = dir_b * mag * 0.5f;
+
+		return return_value;
 	}
+
+	
 
 #pragma endregion
 }
