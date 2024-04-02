@@ -110,31 +110,20 @@ int main()
         float delta_time = current_time - previous_time;
         previous_time = current_time;
 
-        //Input::InputManager::i_->Update();
-
         bool bpc = collisions::AABBCollisionCheck(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
         if (bpc)
         {
-            // std::cout << "AABB\n";
             auto polygon = collisions::MinkowskisDifference(object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
             bpc = collisions::InsideDifference(polygon);
             if (bpc)
             {
-                if (idx > 1)
-                {
-                    auto separation_vector = collisions::GetSeparatingVector(object->GetComponent<Components::Collider>()->np_collider_,
-                                                    object->transform_->get_position(),
-                                                    object2->GetComponent<Components::Collider>()->np_collider_,
-                                                    object2->transform_->get_position());
-                    object->transform_->set_position(object->transform_->get_position() + separation_vector.sep_a);
-                    object2->transform_->set_position(object2->transform_->get_position() + separation_vector.sep_b);
-                }
-                
-                collisions::WriteDebugFIles(polygon, object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
-                // std::cout << "Min\n";
+                auto separation_vector = collisions::GetSeparatingVector(object->GetComponent<Components::Collider>()->np_collider_,
+                                                                         object->transform_->get_position(),
+                                                                         object2->GetComponent<Components::Collider>()->np_collider_,
+                                                                         object2->transform_->get_position());
+                object->transform_->set_position(object->transform_->get_position() + separation_vector.sep_a);
+                object2->transform_->set_position(object2->transform_->get_position() + separation_vector.sep_b);
             }
-            
-
         }
 
         utility::DebugCameraMovement(window, camera, delta_time);
