@@ -217,11 +217,38 @@ namespace collisions
 		coll_b_file.close();
 	}
 
-	inline bool TestAABBAABB(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
+	inline bool AABBCollisionCheck(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
 	{
 		if (fabsf(a->centre.x - b->centre.x) > (a->extremes.x + b->extremes.x)) return false;
 		if (fabsf(a->centre.z - b->centre.z) > (a->extremes.z + b->extremes.z)) return false;
 		return 1;
+	}
+
+	inline bool ConvexHullCollisionCheck(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
+	{
+		return InsideDifference(MinkowskisDifference(hull_a, hull_b));
+	}
+
+	inline glm::vec3 GetSeparatingVector(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
+	{
+		glm::vec3 return_value = glm::vec3(1.0f, 0.0f, 0.0f);
+		int i = 0;
+		int upper_bound = 128;
+		while (TRUE && (i < upper_bound))
+		{
+			auto p = FindFarthestPointConvexHull(hull_a, return_value);
+			auto q = FindFarthestPointConvexHull(hull_b, -return_value);
+			if (glm::dot(p, return_value) < glm::dot(q, -return_value))
+			{
+				return return_value;
+			}
+			auto r = glm::normalize(q - p);
+			return_value = return_value - (2.0f * r * glm::dot(r, return_value));
+			i++;
+		}
+
+		return glm::vec3(0.0f);
+
 	}
 
 #pragma endregion

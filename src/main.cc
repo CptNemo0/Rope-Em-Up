@@ -13,7 +13,7 @@
 
 #include "headers/Camera.h"
 #include "headers/Collider.h"
-//#include "headers/Collisions.h"
+#include "headers/Collisions.h"
 #include "headers/GameObject.h"
 #include "headers/Mesh.h"
 #include "headers/MeshRenderer.h"
@@ -124,7 +124,7 @@ int main()
         object->Update();
         object2->Update();
         
-        bool bpc = collisions::TestAABBAABB(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
+        bool bpc = collisions::AABBCollisionCheck(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
         if (bpc)
         {
             // std::cout << "AABB\n";
@@ -134,6 +134,7 @@ int main()
             {
                 // std::cout << "Min\n";
             }
+            collisions::WriteDebugFIles(polygon, object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
             
         }
        
