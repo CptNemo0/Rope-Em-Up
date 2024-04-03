@@ -222,6 +222,8 @@ namespace collisions
 	
 #pragma region Collisions and Separation
 
+
+
 	inline bool AABBCollisionCheck(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
 	{
 		if (fabsf(a->centre.x - b->centre.x) > (a->extremes.x + b->extremes.x)) return false;
@@ -242,11 +244,13 @@ namespace collisions
 
 	inline SeparationVectors GetSeparatingVector(const std::shared_ptr<ConvexHull> hull_a, glm::vec3 a, const std::shared_ptr<ConvexHull> hull_b, glm::vec3 b)
 	{
+		SeparationVectors return_value;
+
 		auto dir_a = glm::normalize(a - b);
 		auto dir_b = dir_a * -1.0f;
 
-		auto vertex_a = FindFarthestPointConvexHull(hull_a, -dir_a);
-		auto vertex_b = FindFarthestPointConvexHull(hull_b, -dir_b);
+		auto vertex_a = FindFarthestPointConvexHull(hull_a, dir_b);
+		auto vertex_b = FindFarthestPointConvexHull(hull_b, dir_a);
 
 		auto radius_a = glm::distance(a, vertex_a);
 		auto radius_b = glm::distance(b, vertex_b);
@@ -254,13 +258,21 @@ namespace collisions
 		auto distance = glm::distance(a, b);
 
 		float mag = radius_a + radius_b - distance;
-
-		SeparationVectors return_value;
-		return_value.sep_a = dir_a * mag * 0.5f;
-		return_value.sep_b = dir_b * mag * 0.5f;
+		
+		if (fabs(mag) < 0.001f)
+		{
+			return_value.sep_a = dir_a * mag;
+			return_value.sep_b = dir_b * mag;
+			return return_value;
+		}
+		
+		return_value.sep_a = dir_a * mag * 0.25f;
+		return_value.sep_b = dir_b * mag * 0.25f;
 
 		return return_value;
 	}
+
+
 
 #pragma endregion
 

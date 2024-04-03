@@ -19,8 +19,20 @@ std::shared_ptr<Components::Collider> collisions::CollisionManager::CreateCollid
     return return_value;
 }
 
+void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b)
+{
+    auto separation_vector = GetSeparatingVector(a->np_collider_,
+        a->transform_->get_position(),
+        b->np_collider_,
+        b->transform_->get_position());
+    a->transform_->set_position(a->transform_->get_position() + separation_vector.sep_a);
+    b->transform_->set_position(b->transform_->get_position() + separation_vector.sep_b);
+}
+
 void collisions::CollisionManager::CollisionCheck()
 {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     for (int i = 0; i < colliders_.size() - 1; i++)
     {
         for (int j = i + 1; j < colliders_.size(); j++)
@@ -33,24 +45,16 @@ void collisions::CollisionManager::CollisionCheck()
                 bool are_colliding = AABBCollisionCheck(a->bp_collider_, b->bp_collider_);
                 if (are_colliding)
                 {
-                    auto polygon = MinkowskisDifference(a->np_collider_, a->np_collider_);
+                    auto polygon = MinkowskisDifference(a->np_collider_, b->np_collider_);
                     are_colliding = InsideDifference(polygon);
                     if (are_colliding)
                     {
-                        auto separation_vector = GetSeparatingVector(a->np_collider_,
-                            a->transform_->get_position(),
-                            b->np_collider_,
-                            b->transform_->get_position());
-                        a->transform_->set_position(a->transform_->get_position() + separation_vector.sep_a);
-                        b->transform_->set_position(b->transform_->get_position() + separation_vector.sep_b);
-
-                        collisions::UpdateCentre(a->bp_collider_, a->transform_->get_position());
-                        collisions::UpdateCentre(b->bp_collider_, b->transform_->get_position());
-                        collisions::UpdateVertices(a->np_collider_, a->transform_->get_model_matrix());
-                        collisions::UpdateVertices(b->np_collider_, b->transform_->get_model_matrix());
+                        Separation(a, b);
                     }
                 }
             }
         }
     }
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "CollisionCheck() time = " << std::chrono::duration_cast<std::chrono::microseconds> (end - begin).count() << "[micro s]" << std::endl;
 }

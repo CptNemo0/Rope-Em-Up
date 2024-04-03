@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <vector>
+#include <chrono>
+#include <ctime>
 
 #include "Collider.h"
 #include "Collisions.h"
@@ -46,8 +48,9 @@ namespace collisions
         }
 
         std::shared_ptr<Components::Collider> CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<Components::Transform> transform);
-
+       
         void CollisionCheck();
+        void Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b);
 	};
 
 
