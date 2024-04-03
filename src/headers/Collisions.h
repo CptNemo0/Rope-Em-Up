@@ -1,6 +1,8 @@
 #ifndef COLLISIONS_H
 #define COLLISIONS_H
 
+#define gPRECISION 18
+
 #include <fstream>  
 #include <memory>
 
@@ -89,6 +91,50 @@ namespace collisions
 		return hull->vertices[return_value];
 	}
 
+	struct F2FStruct
+	{
+		glm::vec3 fp_hull_a;
+		glm::vec3 fp_hull_b;
+	};
+
+	inline const F2FStruct Find2FarthestPoints(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b, const glm::vec3& direction)
+	{
+		assert(gPRECISION == hull_a->vertices.size());
+		assert(gPRECISION == hull_b->vertices.size());
+
+		F2FStruct return_value;
+
+		int idx_a = 0;
+		int idx_b = 0;
+
+		float maxproj_a = -FLT_MAX;
+		float maxproj_b = -FLT_MAX;
+		float proj = 0.0f;
+
+
+		for (int i = 0; i < gPRECISION; i++)
+		{
+			proj = glm::dot(hull_a->vertices[i], direction);
+			if (proj > maxproj_a)
+			{
+				maxproj_a = proj;
+				idx_a = i;
+			}
+
+			proj = glm::dot(hull_b->vertices[i], -direction);
+			if (proj > maxproj_b)
+			{
+				maxproj_b = proj;
+				idx_b = i;
+			}
+		}
+
+		return_value.fp_hull_a = hull_a->vertices[idx_a];
+		return_value.fp_hull_b = hull_b->vertices[idx_b];
+
+		return return_value;
+	}
+
 	inline void UpdateVertices(std::shared_ptr<ConvexHull> hull, const glm::mat4& model_matrix)
 	{
 		int size = hull->vertices.size();
@@ -145,10 +191,12 @@ namespace collisions
 
 	inline glm::vec3 Support(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
 	{
-		auto vertex_a = FindFarthestPointConvexHull(hull_a, direction);
-		auto vertex_b = FindFarthestPointConvexHull(hull_b, -direction);
+		//auto vertex_a = FindFarthestPointConvexHull(hull_a, direction);
+		//auto vertex_b = FindFarthestPointConvexHull(hull_b, -direction);
 
-		return vertex_a - vertex_b;
+		auto result = Find2FarthestPoints(hull_a, hull_b, direction);
+
+		return result.fp_hull_a - result.fp_hull_b;
 	}
 
 	inline std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
@@ -194,6 +242,81 @@ namespace collisions
 		return true;
 	}
 
+	inline bool ConvexHullCheckFaster(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
+	{
+		auto minkowski = std::vector<glm::vec3>();
+		auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		static glm::vec3 normal(0.0f, 1.0f, 0.0f);
+
+		int precision = fmax(hull_a->vertices.size(), hull_b->vertices.size());
+		int angle = 360 / precision;
+		
+		int i = 0;
+		float current_rotation = angle * i;
+
+		auto rotation_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(current_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+		auto rotated_vec4 = rotation_matrix * start_dir_vec;
+		auto direction = glm::vec3(rotated_vec4.x, rotated_vec4.y, rotated_vec4.z);
+
+		minkowski.push_back(Support(hull_a, hull_b, direction));
+
+		i++;
+
+		for (i; i < precision; i++)
+		{
+			current_rotation = angle * i;
+			rotation_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(current_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+			rotated_vec4 = rotation_matrix * start_dir_vec;
+			direction = glm::vec3(rotated_vec4.x, rotated_vec4.y, rotated_vec4.z);
+
+			minkowski.push_back(Support(hull_a, hull_b, direction));
+
+			glm::vec3 edge = minkowski[i] - minkowski[i - 1];
+			auto cross = glm::cross(edge, minkowski[i]); // Jezeli jest kolizja to wszystkie corss producty beda szly w kierunku (0, 1, 0)
+			auto dot = glm::dot(cross, normal);
+
+			if (dot > 0)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	inline bool ConvexHullCheckFaster2(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b) 
+	{
+		static const int PRECISION = fmax(hull_a->vertices.size(), hull_b->vertices.size());
+		static const float ANGLE = 360.0f / PRECISION;
+		static const glm::vec3 NORMAL(0.0f, 1.0f, 0.0f);
+		static std::vector<glm::vec3> DIR_VECTORS; 
+		std::vector<glm::vec3> minkowski(PRECISION);
+
+		if (DIR_VECTORS.empty()) 
+		{
+			for (int i = 0; i < PRECISION; ++i) 
+			{
+				DIR_VECTORS.push_back(glm::rotate(glm::mat4(1.0f), glm::radians(ANGLE * i), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+			}
+		}
+
+		minkowski[0] = Support(hull_a, hull_b, DIR_VECTORS[0]);
+
+		for (int i = 1; i < PRECISION; ++i) 
+		{
+			minkowski[i] = Support(hull_a, hull_b, DIR_VECTORS[i]);
+
+			glm::vec3 edge = minkowski[i] - minkowski[i - 1];
+			glm::vec3 cross = glm::cross(edge, minkowski[i]);
+			if (glm::dot(cross, NORMAL) > 0) 
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	inline void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
 	{
 		std::ofstream polygon_file("res/logs/polygon_debug.csv");
@@ -222,8 +345,6 @@ namespace collisions
 	
 #pragma region Collisions and Separation
 
-
-
 	inline bool AABBCollisionCheck(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
 	{
 		if (fabsf(a->centre.x - b->centre.x) > (a->extremes.x + b->extremes.x)) return false;
@@ -246,33 +367,32 @@ namespace collisions
 	{
 		SeparationVectors return_value;
 
-		auto dir_a = glm::normalize(a - b);
-		auto dir_b = dir_a * -1.0f;
+		glm::vec3 center_diff = a - b;
 
-		auto vertex_a = FindFarthestPointConvexHull(hull_a, dir_b);
-		auto vertex_b = FindFarthestPointConvexHull(hull_b, dir_a);
+		auto fp = Find2FarthestPoints(hull_a, hull_b, center_diff);
+
+		auto vertex_a = fp.fp_hull_a;
+		auto vertex_b = fp.fp_hull_b;
 
 		auto radius_a = glm::distance(a, vertex_a);
 		auto radius_b = glm::distance(b, vertex_b);
-	
-		auto distance = glm::distance(a, b);
+		auto distance = glm::length(center_diff);
 
 		float mag = radius_a + radius_b - distance;
-		
-		if (fabs(mag) < 0.001f)
-		{
-			return_value.sep_a = dir_a * mag;
-			return_value.sep_b = dir_b * mag;
+
+		if (mag <= 0.0f) {
+			return_value.sep_a = glm::vec3(0.0f);
+			return_value.sep_b = glm::vec3(0.0f);
 			return return_value;
 		}
+
+		glm::vec3 dir = glm::normalize(center_diff);
 		
-		return_value.sep_a = dir_a * mag * 0.25f;
-		return_value.sep_b = dir_b * mag * 0.25f;
+		return_value.sep_a = dir * mag * 0.1f; 
+		return_value.sep_b = -return_value.sep_a;
 
-		return return_value;
+		return return_value;	
 	}
-
-
 
 #pragma endregion
 

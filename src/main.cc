@@ -34,7 +34,7 @@ int main()
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
 
-    const std::string kCubeMeshPath = "res/models/cube.obj";
+    const std::string kCubeMeshPath = "res/models/cube_2.obj";
     const std::string kPlayerMeshPath = "res/models/player.obj";
     const std::string kDebugMeshPath = "res/models/debug_thingy.obj";
     const std::string kEnemyMeshPath = "res/models/enemy.obj";
@@ -87,16 +87,29 @@ int main()
     auto enemy_mesh = std::make_shared<Mesh>(kEnemyMeshPath);
     
     auto object = std::make_shared<GameObject>();
-    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, debug_mesh, green_texture, shader));
-    object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, 18, debug_mesh, object->transform_));
+    object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, enemy_mesh, green_texture, shader));
+    object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_mesh, object->transform_));
 
     auto object2 = std::make_shared<GameObject>();
-    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, enemy_mesh, red_texture, shader));
-    object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, 18, enemy_mesh, object2->transform_));
-
-    object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
-    object2->transform_->set_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
+    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, debug_mesh, red_texture, shader));
+    object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_mesh, object2->transform_));
+
+    std::vector<std::shared_ptr<GameObject>> gos;
+
+    for (int i = 1; i < 10; i++)
+    {
+        for (int j = 1; j < 10; j++)
+        {
+            auto new_object = std::make_shared<GameObject>();
+            new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
+            new_object->AddComponent(std::make_shared<Components::MeshRenderer>(new_object->transform_, player_mesh, green_texture, shader));
+            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, player_mesh, new_object->transform_));
+            
+            gos.push_back(new_object);
+        }
+    }
 
     while (!glfwWindowShouldClose(window))
     {
@@ -108,22 +121,6 @@ int main()
         float current_time = glfwGetTime();
         float delta_time = current_time - previous_time;
         previous_time = current_time;
-
-        /*bool bpc = collisions::AABBCollisionCheck(object->GetComponent<Components::Collider>()->bp_collider_, object2->GetComponent<Components::Collider>()->bp_collider_);
-        if (bpc)
-        {
-            auto polygon = collisions::MinkowskisDifference(object->GetComponent<Components::Collider>()->np_collider_, object2->GetComponent<Components::Collider>()->np_collider_);
-            bpc = collisions::InsideDifference(polygon);
-            if (bpc)
-            {
-                auto separation_vector = collisions::GetSeparatingVector(object->GetComponent<Components::Collider>()->np_collider_,
-                                                                         object->transform_->get_position(),
-                                                                         object2->GetComponent<Components::Collider>()->np_collider_,
-                                                                         object2->transform_->get_position());
-                object->transform_->set_position(object->transform_->get_position() + separation_vector.sep_a);
-                object2->transform_->set_position(object2->transform_->get_position() + separation_vector.sep_b);
-            }
-        }*/
 
         collisions::CollisionManager::i_->CollisionCheck();
 
@@ -141,28 +138,33 @@ int main()
 
         object->Update();
         object2->Update();
+        
+        for (auto& go : gos)
+        {
+            go->Update();
+        }
 
         if (glfwGetKey(window, GLFW_KEY_L))
         {
-            auto md = glm::vec3(1.0f, 0.0f, 0.0f);
+            auto md = glm::vec3(2.0f, 0.0f, 0.0f);
             object2->transform_->translate(md * delta_time);
         }
 
         if (glfwGetKey(window, GLFW_KEY_J))
         {
-            auto md = glm::vec3(-1.0f, 0.0f, 0.0f);
+            auto md = glm::vec3(-2.0f, 0.0f, 0.0f);
             object2->transform_->translate(md * delta_time);
         }
 
         if (glfwGetKey(window, GLFW_KEY_I))
         {
-            auto md = glm::vec3(0.0f, 0.0f, -1.0f);
+            auto md = glm::vec3(0.0f, 0.0f, -2.0f);
             object2->transform_->translate(md * delta_time);
         }
 
         if (glfwGetKey(window, GLFW_KEY_K))
         {
-            auto md = glm::vec3(0.0f, 0.0f, +1.0f);
+            auto md = glm::vec3(0.0f, 0.0f, +2.0f);
             object2->transform_->translate(md * delta_time);
         }
 
