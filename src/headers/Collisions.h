@@ -396,6 +396,17 @@ namespace collisions
 
 #pragma endregion
 
+#pragma region CollisionLayer
+
+	struct CollisionLayer
+	{
+		int id;
+	};
+
+
+
+#pragma endregion
+
 #pragma region Doubly Linked List
 
 

@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <ctime>
+#include <format>
 
 #include "Collider.h"
 #include "Collisions.h"
@@ -24,7 +25,9 @@ namespace collisions
         CollisionManager();
         ~CollisionManager() = default;
 
-        std::vector< std::shared_ptr<Components::Collider> > colliders_;
+        int collision_layers[32];
+        std::vector<std::shared_ptr<Components::Collider>> colliders_;
+        
 
         void AddCollider(std::shared_ptr<Components::Collider> collider);
 
@@ -51,6 +54,12 @@ namespace collisions
        
         void CollisionCheck();
         void Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b);
+        void AddCollisionBetweenLayers(int layer_1, int layer_2);
+        void RemoveCollisionBetweenLayers(int layer_1, int layer_2);
+        inline bool LayerCheck(int layer_1, int layer_2)
+        {
+            return collision_layers[layer_1] & (1 << layer_2);
+        }
 	};
 
 

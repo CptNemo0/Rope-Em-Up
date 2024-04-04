@@ -5,6 +5,11 @@ collisions::CollisionManager* collisions::CollisionManager::i_ = nullptr;
 collisions::CollisionManager::CollisionManager()
 {
     colliders_ = std::vector<std::shared_ptr<Components::Collider>>();
+    for (int i = 0; i < 32; i++)
+    {
+        collision_layers[i] = (1 << i);
+    }
+
 }
 
 void collisions::CollisionManager::AddCollider(std::shared_ptr<Components::Collider> collider)
@@ -14,6 +19,7 @@ void collisions::CollisionManager::AddCollider(std::shared_ptr<Components::Colli
 
 std::shared_ptr<Components::Collider> collisions::CollisionManager::CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<Components::Transform> transform)
 {
+    assert(layer > -1 && layer < 32);
     auto return_value = std::make_shared<Components::Collider>(layer, precision, mesh, transform);
     AddCollider(return_value);
     return return_value;
@@ -27,6 +33,18 @@ void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collid
         b->transform_->get_position());
     a->transform_->set_position(a->transform_->get_position() + separation_vector.sep_a);
     b->transform_->set_position(b->transform_->get_position() + separation_vector.sep_b);
+}
+
+void collisions::CollisionManager::AddCollisionBetweenLayers(int layer_1, int layer_2)
+{
+    collision_layers[layer_1] = collision_layers[layer_1] | (1 << layer_2);
+    collision_layers[layer_2] = collision_layers[layer_2] | (1 << layer_1);
+}
+
+void collisions::CollisionManager::RemoveCollisionBetweenLayers(int layer_1, int layer_2)
+{
+    collision_layers[layer_1] = collision_layers[layer_1] & ~(1 << layer_2);
+    collision_layers[layer_2] = collision_layers[layer_2] & ~(1 << layer_1);
 }
 
 void collisions::CollisionManager::CollisionCheck()
@@ -44,7 +62,7 @@ void collisions::CollisionManager::CollisionCheck()
             std::shared_ptr<Components::Collider> a = colliders_[i];
             std::shared_ptr<Components::Collider> b = colliders_[j];
 
-            if (a->layer_ == b->layer_)
+            if (LayerCheck(a->layer_, b->layer_))
             {
                 bool are_colliding = AABBCollisionCheck(a->bp_collider_, b->bp_collider_);
                 if (are_colliding)
