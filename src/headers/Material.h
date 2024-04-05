@@ -21,13 +21,13 @@ public:
     unsigned int metallicMap;
     unsigned int roughnessMap;
     unsigned int aoMap;
-    std::vector<std::shared_ptr<Texture>> textures;
+    std::vector<std::shared_ptr<Texture>> textures_loaded;
 
-    Material(std::vector<std::shared_ptr<Texture>> albedoMap,
-        std::vector<std::shared_ptr<Texture>> normalMap,
-        std::vector<std::shared_ptr<Texture>> metallicMap,
-        std::vector<std::shared_ptr<Texture>> roughnessMap,
-        std::vector<std::shared_ptr<Texture>> aoMap) {
+    Material(std::shared_ptr<Texture > albedoMap,
+        std::shared_ptr<Texture> normalMap,
+        std::shared_ptr<Texture> metallicMap,
+        std::shared_ptr<Texture> roughnessMap,
+        std::shared_ptr<Texture> aoMap) {
         
     }
 
