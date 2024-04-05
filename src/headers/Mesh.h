@@ -12,6 +12,12 @@
 
 #include "Vertex.h"
 
+struct Texture {
+	unsigned int id;
+	std::string type;
+	std::string path;
+};
+
 class Mesh
 {
 public:
@@ -22,6 +28,8 @@ public:
 
 	std::vector<Vertex> vertices_;
 	std::vector<unsigned int> indices_;
+	std::vector<Texture> textures;
+
 
 	Assimp::Importer importer_;
 	const aiScene* scene_;
