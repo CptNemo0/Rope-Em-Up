@@ -10,9 +10,10 @@ class Texture
 {
 public:
     unsigned int id_;
-    const std::string& type_;
+    std::string type_;
+    std::string path_;
     Texture(const std::string& path);
-    unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma);
+    Texture() = default;
 
 };
 

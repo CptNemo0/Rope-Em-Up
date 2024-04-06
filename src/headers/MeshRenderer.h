@@ -6,8 +6,7 @@
 #include <memory>
 
 #include "Component.h"
-#include "Mesh.h"
-#include "Material.h"
+#include "Model.h"
 #include "Shader.h"
 #include "Transform.h"
 
@@ -17,12 +16,11 @@ namespace Components
 class MeshRenderer : public Component
 {
 public:
-    MeshRenderer(std::shared_ptr<Transform> transform, std::shared_ptr<Mesh> mesh,
-                 std::shared_ptr<Material> material, std::shared_ptr<Shader> shader);
+    MeshRenderer(std::shared_ptr<Transform> transform, std::shared_ptr<Model> model,
+                 std::shared_ptr<Shader> shader);
 
     std::shared_ptr<Transform> transform_;
-    std::shared_ptr<Mesh> mesh_;
-	std::shared_ptr<Material> material_;
+    std::shared_ptr<Model> model_;
 	std::shared_ptr<Shader> shader_;
 
     void Start() override {};
