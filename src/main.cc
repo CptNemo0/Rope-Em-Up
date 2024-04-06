@@ -92,12 +92,12 @@ int main()
 
     auto object = std::make_shared<GameObject>();
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    object->AddComponent(std::make_shared<Components::MeshRenderer>(object->transform_, enemy_mesh, green_texture, shader));
+    object->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_mesh, green_texture, shader));
     object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, enemy_mesh, object->transform_));
 
     auto object2 = std::make_shared<GameObject>();
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
-    object2->AddComponent(std::make_shared<Components::MeshRenderer>(object2->transform_, debug_mesh, red_texture, shader));
+    object2->AddComponent(std::make_shared<Components::MeshRenderer>(debug_mesh, red_texture, shader));
     object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_mesh, object2->transform_));
 
     std::vector<std::shared_ptr<GameObject>> gos;
@@ -108,7 +108,7 @@ int main()
         {
             auto new_object = std::make_shared<GameObject>();
             new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
-            new_object->AddComponent(std::make_shared<Components::MeshRenderer>(new_object->transform_, player_mesh, green_texture, shader));
+            new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_mesh, green_texture, shader));
             new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, player_mesh, new_object->transform_));
             
             gos.push_back(new_object);
