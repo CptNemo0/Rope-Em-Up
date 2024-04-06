@@ -30,7 +30,8 @@ public:
 	void AddComponent(std::shared_ptr<T> component)
 	{
 		components_[typeid(T).name()] = component;
-		component->gameObject_ = this;
+		component->gameObject_ = shared_from_this();
+		component->Start();
 	}
 
 	template <typename T>

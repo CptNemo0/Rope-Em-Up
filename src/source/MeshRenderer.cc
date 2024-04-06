@@ -2,10 +2,14 @@
 
 Components::MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::shared_ptr<Shader> shader)
 {
-	this->transform_ = this->gameObject_->transform_;
 	this->mesh_ = mesh;
 	this->texture_ = texture;
 	this->shader_ = shader;
+}
+
+void Components::MeshRenderer::Start()
+{
+	this->transform_ = this->gameObject_.lock()->transform_;
 }
 
 void Components::MeshRenderer::Update()

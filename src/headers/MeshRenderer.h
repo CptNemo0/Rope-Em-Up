@@ -25,7 +25,7 @@ public:
 	std::shared_ptr<Texture> texture_;
 	std::shared_ptr<Shader> shader_;
 
-    void Start() override {};
+    void Start() override;
     void Update() override;
 };
 
