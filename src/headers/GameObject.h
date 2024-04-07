@@ -14,7 +14,7 @@
 #include "Shader.h"
 #include "Component.h"
 
-class GameObject
+class GameObject : public std::enable_shared_from_this<GameObject>
 {
 private:
 	std::unordered_map<std::string, std::shared_ptr<Component>> components_;
@@ -30,6 +30,8 @@ public:
 	void AddComponent(std::shared_ptr<T> component)
 	{
 		components_[typeid(T).name()] = component;
+		component->gameObject_ = shared_from_this();
+		component->Start();
 	}
 
 	template <typename T>
