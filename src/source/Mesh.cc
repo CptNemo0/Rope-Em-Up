@@ -7,18 +7,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     this->indices_ = indices;
     this->textures_ = textures;
 
-    // now that we have all the required data, set the vertex buffers and its attribute pointers.
     Init();
 }
 
 Mesh::~Mesh()
 {
-   /* const GLuint* arrays = new GLuint[1]{ vao_ };
-    const GLuint* buffers = new GLuint[2]{vbo_, ebo_};
-    glDeleteBuffers(2, buffers);
-    glDeleteVertexArrays(1, arrays);
-    delete[] arrays; 
-    delete[] buffers;*/
+    glDeleteVertexArrays(1, &vao_);
 }
 
 void Mesh::Init()

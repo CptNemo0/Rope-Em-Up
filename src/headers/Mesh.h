@@ -23,13 +23,6 @@ public:
 	std::vector<unsigned int> indices_;
 	std::vector<Texture> textures_;
 
-
-
-
-	/*Assimp::Importer importer_;
-	const aiScene* scene_;
-	const aiMesh* mesh_;*/
-
 	Mesh() = default;
 	//Mesh(std::string mesh_path);
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);

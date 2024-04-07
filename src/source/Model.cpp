@@ -2,19 +2,15 @@
 
 Model::Model(std::string path, bool gamma) : gammaCorrection(gamma)
 {
-    // read file via ASSIMP
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-    // check for errors
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
         std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
         return;
     }
-    // retrieve the directory path of the filepath
     directory_ = path.substr(0, path.find_last_of('/'));
 
-    // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
 }
 
@@ -120,19 +116,19 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
     {
         aiString str;
         mat->GetTexture(type, i, &str);
-        // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
+        
         bool skip = false;
         for (unsigned int j = 0; j < textures_loaded_.size(); j++)
         {
             if (std::strcmp(textures_loaded_[j].path_.data(), str.C_Str()) == 0)
             {
                 textures.push_back(textures_loaded_[j]);
-                skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                skip = true;
                 break;
             }
         }
         if (!skip)
-        {   // if texture hasn't been loaded already, load it
+        {
             Texture texture;
             texture.id_ = TextureFromFile(str.C_Str(), this->directory_);
             texture.type_ = typeName;
@@ -173,10 +169,10 @@ unsigned int TextureFromFile(const char* path, const std::string& directory)
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         stbi_image_free(data);
     }
@@ -185,6 +181,7 @@ unsigned int TextureFromFile(const char* path, const std::string& directory)
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     return textureID;
 }
