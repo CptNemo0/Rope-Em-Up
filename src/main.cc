@@ -24,6 +24,7 @@
 #include "headers/utility.h"
 #include "headers/InputManager.h"
 #include "headers/HUDRenderer.h"
+#include "headers/TextRenderer.h"
 
 int main()
 {
@@ -31,8 +32,13 @@ int main()
 
     const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
     const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
+
     const std::string kHUDVertexShaderPath = "res/shaders/HUDVertexShader.vert";
     const std::string kHUDFragmentShaderPath = "res/shaders/HUDFragmentShader.frag";
+
+    const std::string kHUDTextVertexShaderPath = "res/shaders/HUDTextVertexShader.vert";
+    const std::string kHUDTextFragmentShaderPath = "res/shaders/HUDTextFragmentShader.frag";
+
 
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
@@ -75,6 +81,7 @@ int main()
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
     auto HUDshader = std::make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
+    auto HUDTextShader = std::make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
 
     PointLight point_light;
     point_light.intensity = 100.0f;
@@ -122,9 +129,16 @@ int main()
     auto HUD_root = GameObject::Create();
 
     auto HUD_object = GameObject::Create(HUD_root);
-    HUD_object->AddComponent(std::make_shared<HUDRenderer>(HUD_texture, HUDshader));
+    HUD_object->AddComponent(std::make_shared<Components::HUDRenderer>(HUD_texture, HUDshader));
     HUD_object->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
     HUD_object->transform_->set_position(glm::vec3(-0.75f, -0.75f, 0.0f));
+
+    auto HUDText_root = GameObject::Create();
+
+    auto HUDText_object = GameObject::Create(HUDText_root);
+    HUDText_object->AddComponent(std::make_shared<Components::TextRenderer>(HUDTextShader, "..."));
+    HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
+    HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
 
     while (!glfwWindowShouldClose(window))
     {
@@ -161,6 +175,11 @@ int main()
 
         HUD_root->PropagateUpdate();
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
+
+        HUDTextShader->Use();
+
+        HUDText_root->PropagateUpdate();
+        HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);

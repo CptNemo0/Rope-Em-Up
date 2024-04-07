@@ -1,6 +1,6 @@
 #include "../headers/HUDRenderer.h"
 
-HUDRenderer::HUDRenderer(std::shared_ptr<Texture> texture, std::shared_ptr<Shader> shader)
+Components::HUDRenderer::HUDRenderer(std::shared_ptr<Texture> texture, std::shared_ptr<Shader> shader)
 {
     this->texture_ = texture;
     this->shader_ = shader;
@@ -16,12 +16,12 @@ HUDRenderer::HUDRenderer(std::shared_ptr<Texture> texture, std::shared_ptr<Shade
     glEnableVertexAttribArray(0);
 }
 
-void HUDRenderer::Start()
+void Components::HUDRenderer::Start()
 {
     this->transform_ = gameObject_.lock()->transform_;
 }
 
-void HUDRenderer::Update()
+void Components::HUDRenderer::Update()
 {
     shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
     glActiveTexture(GL_TEXTURE0);

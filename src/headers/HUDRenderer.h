@@ -6,6 +6,9 @@
 #include "GameObject.h"
 #include "Texture.h"
 
+namespace Components
+{
+
 class HUDRenderer : public Component
 {
 private:
@@ -18,12 +21,13 @@ private:
     unsigned int VAO_, VBO_;
     std::shared_ptr<Texture> texture_;
     std::shared_ptr<Shader> shader_;
-    std::shared_ptr<Components::Transform> transform_;
-    glm::vec3 internal_scale_;
+    std::shared_ptr<Transform> transform_;
 public:
     HUDRenderer(std::shared_ptr<Texture> texture, std::shared_ptr<Shader> shader);
     void Start() override;
     void Update() override;
 };
+
+}; // namespace Components
 
 #endif // !HUDRENDERER_H
