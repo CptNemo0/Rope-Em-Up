@@ -20,8 +20,8 @@ Model::Model(std::string path, bool gamma) : gammaCorrection(gamma)
 
 void Model::Draw(std::shared_ptr<Shader> shader) const
 {
-    	//for (unsigned int i = 0; i < meshes_.size(); i++)
-		meshes_->Draw(shader);
+    	for (unsigned int i = 0; i < meshes_.size(); i++)
+		meshes_.at(i)->Draw(shader);
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -29,8 +29,8 @@ void Model::processNode(aiNode* node, const aiScene* scene)
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        //meshes_.push_back(processMesh(mesh, scene));
-       meshes_ = processMesh(mesh, scene);
+       meshes_.push_back(processMesh(mesh, scene));
+       //meshes_ = processMesh(mesh, scene);
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++)

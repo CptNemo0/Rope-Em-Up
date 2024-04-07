@@ -18,9 +18,6 @@ class Mesh
 {
 public:
 	unsigned int vao_;
-	unsigned int vbo_;
-	unsigned int ebo_;
-	unsigned int indices_num_;
 
 	std::vector<Vertex> vertices_;
 	std::vector<unsigned int> indices_;

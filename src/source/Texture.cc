@@ -1,9 +1,9 @@
 #include "../headers/Texture.h"
 
-Texture::Texture(const std::string& path)
+ /*Texture::Texture(const std::string& path)
 {
     path_ = path;
-   /* id_ = 0;
+   id_ = 0;
     glGenTextures(1, &id_);
     glBindTexture(GL_TEXTURE_2D, id_);
 
@@ -34,8 +34,8 @@ Texture::Texture(const std::string& path)
     }
 
     stbi_image_free(img);
-    glBindTexture(GL_TEXTURE_2D, 0);*/
-}
+    glBindTexture(GL_TEXTURE_2D, 0);
+}*/
 
 
 

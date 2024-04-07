@@ -7,7 +7,7 @@
 
 
 #include "GameObject.h"
-#include "Mesh.h"
+#include "Model.h"
 #include "Texture.h"
 
 #include "Shader.h"
@@ -20,12 +20,13 @@ class MeshRenderer : public Component
 {
 public:
 
-    MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture,
+    MeshRenderer(std::shared_ptr<Model> model,
                 std::shared_ptr<Shader> shader);
 
     std::shared_ptr<Transform> transform_;
     std::shared_ptr<Model> model_;
 	std::shared_ptr<Shader> shader_;
+    std::shared_ptr<Mesh> mesh_;
 
     void Start() override;
     void Update() override;

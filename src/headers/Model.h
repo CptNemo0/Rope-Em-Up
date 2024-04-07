@@ -18,7 +18,7 @@ unsigned int TextureFromFile(const char* path, const std::string& directory);
 class Model
 {
 public:
-		std::shared_ptr<Mesh> meshes_;
+		std::vector<std::shared_ptr<Mesh>> meshes_;
 		std::vector <Texture> textures_loaded_; //na razie nie robi³am oddzielnych materia³ów bo tak by³o w sumie szybciej i nie wiem czy klasa Model jest nam rzeczywiœcie potrzebna D:
 		std::string directory_;
 		bool gammaCorrection;
