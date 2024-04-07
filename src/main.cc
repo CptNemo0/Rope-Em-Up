@@ -43,6 +43,7 @@ int main()
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
     const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
+    const std::string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
 
     const std::string kCubeMeshPath = "res/models/cube_2.obj";
     const std::string kPlayerMeshPath = "res/models/player.obj";
@@ -93,6 +94,7 @@ int main()
     auto green_texture = std::make_shared<Texture>(kGreenTexturePath);
     auto red_texture = std::make_shared<Texture>(kRedTexturePath);
     auto HUD_texture = std::make_shared<Texture>(kHUDTexturePath, true);
+    auto HUD_texture2 = std::make_shared<Texture>(kHUDTexturePath2, true);
 
     auto cube_mesh = std::make_shared<Mesh>(kCubeMeshPath);
     auto player_mesh = std::make_shared<Mesh>(kPlayerMeshPath);
@@ -132,6 +134,11 @@ int main()
     HUD_object->AddComponent(std::make_shared<Components::HUDRenderer>(HUD_texture, HUDshader));
     HUD_object->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
     HUD_object->transform_->set_position(glm::vec3(-0.75f, -0.75f, 0.0f));
+
+    auto HUD_object2 = GameObject::Create(HUD_root);
+    HUD_object2->AddComponent(std::make_shared<Components::HUDRenderer>(HUD_texture2, HUDshader));
+    HUD_object2->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
+    HUD_object2->transform_->set_position(glm::vec3(0.75f, -0.75f, 0.0f));
 
     auto HUDText_root = GameObject::Create();
 
