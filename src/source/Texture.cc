@@ -1,6 +1,6 @@
 #include "../headers/Texture.h"
 
-Texture::Texture(const std::string& path)
+Texture::Texture(const std::string& path, bool alpha)
 {
     id_ = 0;
     glGenTextures(1, &id_);
@@ -13,9 +13,14 @@ Texture::Texture(const std::string& path)
 
     int t_width, t_height, t_c;
     unsigned char* img = stbi_load(path.c_str(), &t_width, &t_height, &t_c, 0);
+    width_ = t_width;
+    height_ = t_height;
     if (img)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
+        if (alpha)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t_width, t_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+        else
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
         glGenerateMipmap(GL_TEXTURE_2D);
         std::cout << "Texture loaded.\n";
     }

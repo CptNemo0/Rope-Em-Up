@@ -22,7 +22,7 @@
 #include "headers/Texture.h"
 #include "headers/utility.h"
 #include "headers/InputManager.h"
-
+#include "headers/HUDRenderer.h"
 
 int main()
 {
@@ -30,9 +30,12 @@ int main()
 
     const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
     const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
+    const std::string kHUDVertexShaderPath = "res/shaders/HUDVertexShader.vert";
+    const std::string kHUDFragmentShaderPath = "res/shaders/HUDFragmentShader.frag";
 
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
+    const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
 
     const std::string kCubeMeshPath = "res/models/cube_2.obj";
     const std::string kPlayerMeshPath = "res/models/player.obj";
@@ -70,6 +73,7 @@ int main()
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
+    auto HUDshader = std::make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
 
     PointLight point_light;
     point_light.intensity = 100.0f;
@@ -80,6 +84,7 @@ int main()
 
     auto green_texture = std::make_shared<Texture>(kGreenTexturePath);
     auto red_texture = std::make_shared<Texture>(kRedTexturePath);
+    auto HUD_texture = std::make_shared<Texture>(kHUDTexturePath, true);
 
     auto cube_mesh = std::make_shared<Mesh>(kCubeMeshPath);
     auto player_mesh = std::make_shared<Mesh>(kPlayerMeshPath);
@@ -113,6 +118,11 @@ int main()
         }
     }
 
+    auto HUD_root = GameObject::Create();
+
+    auto HUD_object = GameObject::Create(HUD_root);
+    HUD_object->AddComponent(std::make_shared<HUDRenderer>(HUD_texture, HUDshader));
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -139,6 +149,18 @@ int main()
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
         scene_root->PropagateUpdate();
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        HUDshader->Use();
+
+        HUD_root->PropagateUpdate();
+        HUD_object->transform_->translate(glm::vec3(0.1f * delta_time, 0.0f, 0.0f));
+
+        glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
 
         if (glfwGetKey(window, GLFW_KEY_L))
         {

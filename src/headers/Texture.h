@@ -9,9 +9,8 @@
 class Texture
 {
 public:
-    unsigned int id_;
-    Texture(const std::string& path);
-    
+    unsigned int id_, width_, height_;
+    Texture(const std::string& path, bool alpha = false);
 };
 
 #endif //TEXTURE_H

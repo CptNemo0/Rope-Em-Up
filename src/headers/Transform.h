@@ -43,6 +43,8 @@ public:
     void set_scale(const glm::vec3& scale);
 
     void translate(const glm::vec3& translation);
+    void rotate(const glm::vec3& rotation);
+    void scale(const glm::vec3& scale);
     const glm::mat4 get_model_matrix();
 };
 

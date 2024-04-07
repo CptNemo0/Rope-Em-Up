@@ -67,9 +67,9 @@ void Components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
 {
     const glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), scale_);
 
-    const glm::mat4 rotation_X = rotate(glm::mat4(1.0f), glm::radians(rotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    const glm::mat4 rotation_Y = rotate(glm::mat4(1.0f), glm::radians(rotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    const glm::mat4 rotation_Z = rotate(glm::mat4(1.0f), glm::radians(rotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    const glm::mat4 rotation_X = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    const glm::mat4 rotation_Y = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::mat4 rotation_Z = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
     const glm::mat4 translation = glm::translate(glm::mat4(1.0f), position_);
 
@@ -79,4 +79,16 @@ void Components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
 const glm::mat4 Components::Transform::get_model_matrix()
 {
     return model_matrix_;
+}
+
+void Components::Transform::rotate(const glm::vec3 &rotation)
+{
+    rotation_ += rotation;
+    UpdateSelfAndChildren();
+}
+
+void Components::Transform::scale(const glm::vec3 &scale)
+{
+    scale_ += scale;
+    UpdateSelfAndChildren();
 }
