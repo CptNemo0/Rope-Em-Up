@@ -90,28 +90,26 @@ int main()
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(1, 2);
 
-    auto object = std::make_shared<GameObject>();
+    auto scene_root = GameObject::Create();
+
+    auto object = GameObject::Create(scene_root);
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_mesh, green_texture, shader));
     object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, enemy_mesh, object->transform_));
 
-    auto object2 = std::make_shared<GameObject>();
+    auto object2 = GameObject::Create(scene_root);
     object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(debug_mesh, red_texture, shader));
     object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_mesh, object2->transform_));
-
-    std::vector<std::shared_ptr<GameObject>> gos;
 
     for (int i = 1; i < 10; i++)
     {
         for (int j = 1; j < 10; j++)
         {
-            auto new_object = std::make_shared<GameObject>();
+            auto new_object = GameObject::Create(scene_root);
             new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
             new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_mesh, green_texture, shader));
             new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, player_mesh, new_object->transform_));
-            
-            gos.push_back(new_object);
         }
     }
 
@@ -140,13 +138,7 @@ int main()
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        object->Update();
-        object2->Update();
-        
-        for (auto& go : gos)
-        {
-            go->Update();
-        }
+        scene_root->PropagateUpdate();
 
         if (glfwGetKey(window, GLFW_KEY_L))
         {

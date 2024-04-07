@@ -27,10 +27,10 @@ private:
     void CalculateModelMatrix(const glm::mat4 parent_model);
 
 public:
-    GameObject *game_object_ = nullptr;
+    std::shared_ptr<GameObject> game_object_;
     std::vector<std::shared_ptr<Transform>> children_;
 
-    Transform(GameObject *game_object);
+    Transform();
 
     void AddChild(std::shared_ptr<Transform> child);
 

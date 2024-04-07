@@ -18,10 +18,13 @@ class GameObject : public std::enable_shared_from_this<GameObject>
 {
 private:
 	std::unordered_map<std::string, std::shared_ptr<Component>> components_;
+
 public:
+	GameObject();
 	std::shared_ptr<Components::Transform> transform_;
 
-	GameObject();
+	static std::shared_ptr<GameObject> Create();
+	static std::shared_ptr<GameObject> Create(std::shared_ptr<GameObject> parent);
 
 	void Update();
 	void PropagateUpdate();

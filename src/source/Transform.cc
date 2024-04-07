@@ -1,8 +1,7 @@
 #include "../headers/Transform.h"
 
-Components::Transform::Transform(GameObject *game_object)
+Components::Transform::Transform()
 {
-    this->game_object_ = game_object;
     model_matrix_ = glm::mat4(1.0f);
     position_ = { 0.0f, 0.0f, 0.0f };
     rotation_ = { 0.0f, 0.0f, 0.0f };
