@@ -57,12 +57,6 @@ void Components::Transform::set_scale(const glm::vec3 & scale)
     UpdateSelfAndChildren();
 }
 
-void Components::Transform::translate(const glm::vec3 & translation)
-{
-    position_ += translation;
-    UpdateSelfAndChildren();
-}
-
 void Components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
 {
     const glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), scale_);
@@ -81,13 +75,19 @@ const glm::mat4 Components::Transform::get_model_matrix()
     return model_matrix_;
 }
 
-void Components::Transform::rotate(const glm::vec3 &rotation)
+void Components::Transform::add_position(const glm::vec3 & translation)
+{
+    position_ += translation;
+    UpdateSelfAndChildren();
+}
+
+void Components::Transform::add_rotation(const glm::vec3 &rotation)
 {
     rotation_ += rotation;
     UpdateSelfAndChildren();
 }
 
-void Components::Transform::scale(const glm::vec3 &scale)
+void Components::Transform::add_scale(const glm::vec3 &scale)
 {
     scale_ += scale;
     UpdateSelfAndChildren();

@@ -10,6 +10,7 @@
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "stb_easy_font.h"
 
 #include "headers/Camera.h"
 #include "headers/Collider.h"
@@ -122,6 +123,8 @@ int main()
 
     auto HUD_object = GameObject::Create(HUD_root);
     HUD_object->AddComponent(std::make_shared<HUDRenderer>(HUD_texture, HUDshader));
+    HUD_object->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
+    HUD_object->transform_->set_position(glm::vec3(-0.75f, -0.75f, 0.0f));
 
     while (!glfwWindowShouldClose(window))
     {
@@ -157,7 +160,7 @@ int main()
         HUDshader->Use();
 
         HUD_root->PropagateUpdate();
-        HUD_object->transform_->translate(glm::vec3(0.1f * delta_time, 0.0f, 0.0f));
+        HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
@@ -165,25 +168,25 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_L))
         {
             auto md = glm::vec3(2.0f, 0.0f, 0.0f);
-            object2->transform_->translate(md * delta_time);
+            object2->transform_->add_position(md * delta_time);
         }
 
         if (glfwGetKey(window, GLFW_KEY_J))
         {
             auto md = glm::vec3(-2.0f, 0.0f, 0.0f);
-            object2->transform_->translate(md * delta_time);
+            object2->transform_->add_position(md * delta_time);
         }
 
         if (glfwGetKey(window, GLFW_KEY_I))
         {
             auto md = glm::vec3(0.0f, 0.0f, -2.0f);
-            object2->transform_->translate(md * delta_time);
+            object2->transform_->add_position(md * delta_time);
         }
 
         if (glfwGetKey(window, GLFW_KEY_K))
         {
             auto md = glm::vec3(0.0f, 0.0f, +2.0f);
-            object2->transform_->translate(md * delta_time);
+            object2->transform_->add_position(md * delta_time);
         }
 
         if (glfwGetKey(window, GLFW_KEY_O))

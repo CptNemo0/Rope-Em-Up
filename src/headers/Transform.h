@@ -42,9 +42,9 @@ public:
     void set_rotation(const glm::vec3& rotation);
     void set_scale(const glm::vec3& scale);
 
-    void translate(const glm::vec3& translation);
-    void rotate(const glm::vec3& rotation);
-    void scale(const glm::vec3& scale);
+    void add_position(const glm::vec3& translation);
+    void add_rotation(const glm::vec3& rotation);
+    void add_scale(const glm::vec3& scale);
     const glm::mat4 get_model_matrix();
 };
 
