@@ -5,6 +5,7 @@
 #include <memory>
 #include "Transform.h"
 #include <iostream>
+#include "Component.h"
 
 struct FGRRecord;
 
@@ -16,7 +17,7 @@ class PhysicsManager;
 
 namespace Components
 {
-	class Particle
+	class Particle : public Component
 	{
 	public:
 		float inverse_mass_;
@@ -35,6 +36,10 @@ namespace Components
 		void AddForce(glm::vec3 force);
 		void ZeroForces();
 		void UpdatePhysics(float t);
+
+		// Inherited via Component
+		void Start() override;
+		void Update() override;
 	};
 }
 

@@ -113,11 +113,13 @@ int main()
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, -3.0f));
     object->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_mesh, green_texture, shader));
     object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, enemy_mesh, object->transform_));
+    object->AddComponent(physics::PhysicsManager::i_->CreateParticle(object->transform_, 2.0f));
 
     auto object2 = GameObject::Create(scene_root);
     object2->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(debug_mesh, red_texture, shader));
     object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_mesh, object2->transform_));
+    object2->AddComponent(physics::PhysicsManager::i_->CreateParticle(object2->transform_, 1.0f));
 
     for (int i = 1; i < 10; i++)
     {
@@ -152,10 +154,7 @@ int main()
     //----------------
     auto generator = std::make_shared<physics::BasicGenerator>();
 
-    auto particle = physics::PhysicsManager::i_->CreateParticle(object->transform_, 2.0f);
-    auto particle2 = physics::PhysicsManager::i_->CreateParticle(object2->transform_, 1.0f);
-
-    physics::PhysicsManager::i_->AddFGRRecord(generator, particle2);
+    physics::PhysicsManager::i_->AddFGRRecord(generator, object2->GetComponent<Components::Particle>());
     //----------------
 
     while (!glfwWindowShouldClose(window))

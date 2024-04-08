@@ -46,6 +46,14 @@ void Components::Particle::UpdatePhysics(float t)
 	LogVec3(transform_->get_position());*/
 }
 
+void Components::Particle::Start()
+{
+}
+
+void Components::Particle::Update()
+{
+}
+
 physics::DragGenerator::DragGenerator(float k1, float k2)
 {
 	this->k1_ = k1;
