@@ -1,9 +1,9 @@
 #include "../headers/MeshRenderer.h"
 
-Components::MeshRenderer::MeshRenderer(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::shared_ptr<Shader> shader)
+Components::MeshRenderer::MeshRenderer(std::shared_ptr<Model> model, std::shared_ptr<Shader> shader)
 {
-	this->mesh_ = mesh;
-	this->texture_ = texture;
+	this->model_ = model;
+	this->mesh_ = model_->meshes_.at(0);
 	this->shader_ = shader;
 }
 
@@ -15,6 +15,5 @@ void Components::MeshRenderer::Start()
 void Components::MeshRenderer::Update()
 {
     shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
-	glBindTexture(GL_TEXTURE_2D, texture_->id_);
-	mesh_->Draw();
+	model_->Draw(shader_);
 }
