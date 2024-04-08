@@ -23,6 +23,8 @@ private:
     glm::vec3 rotation_;
     glm::vec3 scale_;
 
+    glm::vec3 previous_position_;
+
     void UpdateSelfAndChildren();
     void CalculateModelMatrix(const glm::mat4 parent_model);
 
@@ -35,6 +37,7 @@ public:
     void AddChild(std::shared_ptr<Transform> child);
 
     const glm::vec3 get_position() const;
+    const glm::vec3 get_previous_position() const;
     const glm::vec3 get_rotation() const;
     const glm::vec3 get_scale() const;
 

@@ -30,8 +30,25 @@ void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collid
         a->transform_->get_position(),
         b->np_collider_,
         b->transform_->get_position());
-    a->transform_->set_position(a->transform_->get_position() + separation_vector.sep_a);
-    b->transform_->set_position(b->transform_->get_position() + separation_vector.sep_b);
+
+    bool a_moved = (a->transform_->get_position() != a->transform_->get_previous_position());
+    bool b_moved = (b->transform_->get_position() != b->transform_->get_previous_position());
+
+    if (a_moved && b_moved)
+    {
+        a->transform_->set_position(a->transform_->get_position() + separation_vector.sep_a);
+        b->transform_->set_position(b->transform_->get_position() + separation_vector.sep_b);
+    }
+    else if (a_moved && !b_moved)
+    {
+        a->transform_->set_position(a->transform_->get_position() + 2.0f * separation_vector.sep_a);
+        b->transform_->set_position(b->transform_->get_position() + 0.0f * separation_vector.sep_b);
+    }
+    else if (!a_moved && b_moved)
+    {
+        a->transform_->set_position(a->transform_->get_position() + 0.0f * separation_vector.sep_a);
+        b->transform_->set_position(b->transform_->get_position() + 2.0f * separation_vector.sep_b);
+    }
 }
 
 void collisions::CollisionManager::AddCollisionBetweenLayers(int layer_1, int layer_2)
@@ -78,6 +95,8 @@ void collisions::CollisionManager::CollisionCheck()
                     if (are_colliding)
                     {
                         Separation(a, b);
+                        a->UpdateColliders();
+                        b->UpdateColliders();
                         auto particle_a = a->gameObject_.lock()->GetComponent<Components::Particle>();
                         auto particle_b = b->gameObject_.lock()->GetComponent<Components::Particle>();
                         physics::PhysicsManager::i_->ResolveContact(particle_a, particle_b);

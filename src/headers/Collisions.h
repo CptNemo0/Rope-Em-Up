@@ -388,7 +388,8 @@ namespace collisions
 
 		glm::vec3 dir = glm::normalize(center_diff);
 		
-		return_value.sep_a = dir * mag * 0.25f; 
+		
+		return_value.sep_a = dir * mag * 0.5f; //zmienic na 0.1f w razie co
 		return_value.sep_b = -return_value.sep_a;
 
 		return return_value;	

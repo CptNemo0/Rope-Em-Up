@@ -120,7 +120,7 @@ int main()
     object2->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
     object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_model->meshes_[0], object2->transform_));
-    object2->AddComponent(physics::PhysicsManager::i_->CreateParticle(object2->transform_, 1.0f));
+    object2->AddComponent(physics::PhysicsManager::i_->CreateParticle(object2->transform_, 2.0f));
 
     std::vector<std::shared_ptr<GameObject>> gos;
     auto scene_root = GameObject::Create();
@@ -133,7 +133,7 @@ int main()
             new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
             new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
             new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, player_model->meshes_[0], new_object->transform_));
-            new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 1.0f));
+            new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 2.0f));
         }
     }
 
@@ -215,25 +215,25 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_L))
         {
             generator->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator->magnitude_ = 50;
+            generator->magnitude_ = 100;
         }
 
         if (glfwGetKey(window, GLFW_KEY_J))
         {   
             generator->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator->magnitude_ = 50;
+            generator->magnitude_ = 100;
         }
 
         if (glfwGetKey(window, GLFW_KEY_I))
         {   
             generator->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator->magnitude_ = 50;
+            generator->magnitude_ = 100;
         }
 
         if (glfwGetKey(window, GLFW_KEY_K))
         {   
             generator->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator->magnitude_ = 50;
+            generator->magnitude_ = 100;
         }
 
         if (!(glfwGetKey(window, GLFW_KEY_L) || glfwGetKey(window, GLFW_KEY_I) || glfwGetKey(window, GLFW_KEY_K) || glfwGetKey(window, GLFW_KEY_J)))

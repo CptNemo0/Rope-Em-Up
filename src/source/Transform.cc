@@ -20,6 +20,11 @@ const glm::vec3 Components::Transform::get_position() const
     return position_;
 }
 
+const glm::vec3 Components::Transform::get_previous_position() const
+{
+    return previous_position_;
+}
+
 const glm::vec3 Components::Transform::get_rotation() const
 {
     return rotation_;
@@ -41,6 +46,7 @@ void Components::Transform::UpdateSelfAndChildren()
 
 void Components::Transform::set_position(const glm::vec3 & position)
 {
+    previous_position_ = position_;
     position_ = position;
     UpdateSelfAndChildren();
 }
@@ -77,6 +83,7 @@ const glm::mat4 Components::Transform::get_model_matrix()
 
 void Components::Transform::add_position(const glm::vec3 & translation)
 {
+    previous_position_ = position_;
     position_ += translation;
     UpdateSelfAndChildren();
 }

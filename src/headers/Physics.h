@@ -1,7 +1,7 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#define gCOEFFIECENT_OF_RESTITUTION 0.5f;
+#define gCOEFFIECENT_OF_RESTITUTION 0.1f;
 
 #include "glm/glm.hpp"
 #include <memory>
