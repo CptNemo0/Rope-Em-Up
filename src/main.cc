@@ -19,6 +19,7 @@
 #include "headers/GameObject.h"
 #include "headers/Mesh.h"
 #include "headers/MeshRenderer.h"
+#include "headers/Physics.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
 #include "headers/utility.h"
@@ -72,6 +73,7 @@ int main()
 
     Input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
+    physics::PhysicsManager::Initialize();
 
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -108,12 +110,12 @@ int main()
     auto scene_root = GameObject::Create();
 
     auto object = GameObject::Create(scene_root);
-    object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    object->transform_->set_position(glm::vec3(0.0f, 0.0f, -3.0f));
     object->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_mesh, green_texture, shader));
     object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, enemy_mesh, object->transform_));
 
     auto object2 = GameObject::Create(scene_root);
-    object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
+    object2->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(debug_mesh, red_texture, shader));
     object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_mesh, object2->transform_));
 
@@ -147,6 +149,15 @@ int main()
     HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
 
+    //----------------
+    auto generator = std::make_shared<physics::BasicGenerator>();
+
+    auto particle = physics::PhysicsManager::i_->CreateParticle(object->transform_, 2.0f);
+    auto particle2 = physics::PhysicsManager::i_->CreateParticle(object2->transform_, 1.0f);
+
+    physics::PhysicsManager::i_->AddFGRRecord(generator, particle2);
+    //----------------
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -157,6 +168,9 @@ int main()
         float current_time = glfwGetTime();
         float delta_time = current_time - previous_time;
         previous_time = current_time;
+
+        physics::PhysicsManager::i_->GeneratorUpdate();
+        physics::PhysicsManager::i_->ParticleUpdate(delta_time);
 
         collisions::CollisionManager::i_->CollisionCheck();
 
@@ -190,31 +204,38 @@ int main()
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-
+        generator->direction_ = glm::vec3(0.0f);
+        generator->magnitude_ = 0.0f;
         if (glfwGetKey(window, GLFW_KEY_L))
         {
-            auto md = glm::vec3(2.0f, 0.0f, 0.0f);
-            object2->transform_->add_position(md * delta_time);
+            generator->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
+            generator->magnitude_ = 50;
         }
 
         if (glfwGetKey(window, GLFW_KEY_J))
-        {
-            auto md = glm::vec3(-2.0f, 0.0f, 0.0f);
-            object2->transform_->add_position(md * delta_time);
+        {   
+            generator->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
+            generator->magnitude_ = 50;
         }
 
         if (glfwGetKey(window, GLFW_KEY_I))
-        {
-            auto md = glm::vec3(0.0f, 0.0f, -2.0f);
-            object2->transform_->add_position(md * delta_time);
+        {   
+            generator->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
+            generator->magnitude_ = 50;
         }
 
         if (glfwGetKey(window, GLFW_KEY_K))
-        {
-            auto md = glm::vec3(0.0f, 0.0f, +2.0f);
-            object2->transform_->add_position(md * delta_time);
+        {   
+            generator->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
+            generator->magnitude_ = 50;
         }
 
+        if (!(glfwGetKey(window, GLFW_KEY_L) || glfwGetKey(window, GLFW_KEY_I) || glfwGetKey(window, GLFW_KEY_K) || glfwGetKey(window, GLFW_KEY_J)))
+        {
+            generator->direction_ = glm::vec3(0.0f);
+            generator->magnitude_ = 0.0f;
+        }
+       
         if (glfwGetKey(window, GLFW_KEY_O))
         {
             auto md = glm::vec3(0.0f, 10.0f, 0.0f);
@@ -224,6 +245,7 @@ int main()
         glfwSwapBuffers(window);
     }
 
+    physics::PhysicsManager::Destroy();
     collisions::CollisionManager::Destroy();
     Input::InputManager::Destroy();
     

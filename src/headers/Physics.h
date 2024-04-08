@@ -4,23 +4,30 @@
 #include "glm/glm.hpp"
 #include <memory>
 #include "Transform.h"
+#include <iostream>
 
 namespace physics
 {
+	struct FGRRecord;
+
 	class Particle;
 	class ForceGenerator;
+	class BasicGenerator;
+	class DragGenerator;
+	class PhysicsManager;
 
 	class Particle
 	{
 	public:
 		float inverse_mass_;
+		float mass_;
 		glm::vec3 forces_ = glm::vec3(0.0f);
 
 		std::shared_ptr<Components::Transform> transform_;
 		glm::vec3 velocity_ = glm::vec3(0.0f);
 		glm::vec3 acceleration_ = glm::vec3(0.0f);
 		
-		Particle(std::shared_ptr<Components::Transform> transform, float mass) : transform_(transform), inverse_mass_(1.0f / mass) {}
+		Particle(std::shared_ptr<Components::Transform> transform, float mass) : transform_(transform), inverse_mass_(1.0f / mass), mass_(mass) {}
 	
 		void UpdateAcceleration();
 		void UpdateVelocity(float t);
@@ -35,7 +42,21 @@ namespace physics
 	public:
 		ForceGenerator() = default;
 		~ForceGenerator() = default;
-		virtual void GenerateForce(std::shared_ptr<Particle>) = 0;
+		virtual void GenerateForce(std::shared_ptr<Particle> particle) = 0;
+	};
+
+	class BasicGenerator : public ForceGenerator
+	{
+	public:
+		float magnitude_;
+		glm::vec3 direction_;
+
+		BasicGenerator();
+		~BasicGenerator() = default;
+
+		// Inherited via ForceGenerator
+		void GenerateForce(std::shared_ptr<Particle> particle) override;
+
 	};
 
 	class DragGenerator : public ForceGenerator
@@ -47,11 +68,51 @@ namespace physics
 		DragGenerator(float k1, float k2);
 		~DragGenerator() = default;
 
-		void GenerateForce(std::shared_ptr<Particle>) override;
+		void GenerateForce(std::shared_ptr<Particle> particle) override;
 	};
 
+	//Force Generators Registry Record
+	struct FGRRecord
+	{
+		std::shared_ptr<Particle> particle;
+		std::shared_ptr<ForceGenerator> generator;
+		
+		void Generate();
+	};
 
+	class PhysicsManager
+	{
+	public:
+		static PhysicsManager* i_;
+	private:
+		std::vector<FGRRecord> generator_registry_;
+		std::shared_ptr<DragGenerator> common_drag_generator_;
+		std::vector<std::shared_ptr<Particle>> particles_;
+		PhysicsManager();
+		~PhysicsManager() = default;
+	public:
+		static void Initialize()
+		{
+			if (i_ == nullptr)
+			{
+				i_ = new PhysicsManager();
+			}
+		}
 
+		static void Destroy()
+		{
+			if (i_ != nullptr)
+			{
+				delete i_;
+				i_ = nullptr;
+			}
+		}
+
+		std::shared_ptr<physics::Particle> CreateParticle(std::shared_ptr<Components::Transform> transform, float mass);
+		void GeneratorUpdate();
+		void ParticleUpdate(float t);
+		void AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<physics::Particle> particle);
+	};
 } //physics
 
 #endif // !PHYSICS_H

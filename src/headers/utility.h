@@ -12,11 +12,6 @@
 
 namespace utility
 {
-    void LogVec3(glm::vec3 vec3)
-    {
-        std::cout << "x: " << vec3.x << " y: " << vec3.y << " z: " << vec3.z << "\n";
-    }
-
     enum ControllerType
     {
         PS4,
@@ -56,7 +51,7 @@ namespace utility
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), monitor, nullptr);
+        window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), nullptr, nullptr);
             
         if (window == nullptr)
         {
@@ -79,7 +74,7 @@ namespace utility
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_DEBUG_OUTPUT);
-        glDebugMessageCallback(MessageCallback, 0);
+        //glDebugMessageCallback(MessageCallback, 0);
         return return_value;
     }
 
@@ -206,26 +201,6 @@ namespace utility
             }
         }
     }
-
-    // Zwraca unsigned int 32, ktory ma takie samo ustawienie bitow jak przekazany float 32.
-    // Przydatne do szybkich aproksymacji.
-    inline unsigned int AsInt(float float_value)
-    {
-        return *(unsigned int*)&float_value;
-    }
-
-    // Zwraca float 32, ktory ma takie samo ustawienie bitow jak przekazany unsigned int.
-    // Przydatne do szybkich aproksymacji.
-    inline float AsFlaot(unsigned int uint_value)
-    {
-        return *(float*)&uint_value;
-    }
-
-    float NegateFloat(float f)
-    {
-        return AsFlaot(AsInt(f) ^ 0x80000000);
-    }
-
 } //utility
 
 #endif // !UTILITY_H

@@ -83,7 +83,7 @@ void collisions::CollisionManager::CollisionCheck()
 
     if (idx == 60)
     {
-        std::cout << "CollisionCheck() time = " << time / idx << "[micro s]" << std::endl;
+        //std::cout << "CollisionCheck() time = " << time / idx << "[micro s]" << std::endl;
         idx = 0;
         time = 0.0f;
     }
