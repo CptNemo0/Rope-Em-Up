@@ -60,7 +60,9 @@ namespace collisions
         {
             return collision_layers[layer_1] & (1 << layer_2);
         }
-	};
+	
+        void UpdateColliders();
+    };
 
 
 

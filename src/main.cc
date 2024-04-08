@@ -170,7 +170,7 @@ int main()
 
         physics::PhysicsManager::i_->GeneratorUpdate();
         physics::PhysicsManager::i_->ParticleUpdate(delta_time);
-
+        collisions::CollisionManager::i_->UpdateColliders();
         collisions::CollisionManager::i_->CollisionCheck();
 
         utility::DebugCameraMovement(window, camera, delta_time);

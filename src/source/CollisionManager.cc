@@ -9,7 +9,6 @@ collisions::CollisionManager::CollisionManager()
     {
         collision_layers[i] = (1 << i);
     }
-
 }
 
 void collisions::CollisionManager::AddCollider(std::shared_ptr<Components::Collider> collider)
@@ -45,6 +44,14 @@ void collisions::CollisionManager::RemoveCollisionBetweenLayers(int layer_1, int
 {
     collision_layers[layer_1] = collision_layers[layer_1] & ~(1 << layer_2);
     collision_layers[layer_2] = collision_layers[layer_2] & ~(1 << layer_1);
+}
+
+void collisions::CollisionManager::UpdateColliders()
+{
+    for (auto& c : colliders_)
+    {
+        c->UpdateColliders();
+    }
 }
 
 void collisions::CollisionManager::CollisionCheck()

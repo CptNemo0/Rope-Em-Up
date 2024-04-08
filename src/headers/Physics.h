@@ -88,8 +88,6 @@ namespace physics
 		void Generate();
 	};
 
-
-
 	class PhysicsManager
 	{
 	public:
