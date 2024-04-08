@@ -56,7 +56,7 @@ namespace utility
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), nullptr, nullptr);
+        window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), monitor, nullptr);
             
         if (window == nullptr)
         {
