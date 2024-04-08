@@ -9,9 +9,10 @@
 
 #include "Collider.h"
 #include "Collisions.h"
+#include "GameObject.h"
 #include "Mesh.h"
+#include "Physics.h"
 #include "Transform.h"
-
 
 class Components::Collider;
 

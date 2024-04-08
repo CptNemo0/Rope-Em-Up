@@ -133,6 +133,7 @@ int main()
             new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
             new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
             new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, player_model->meshes_[0], new_object->transform_));
+            new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 1.0f));
         }
     }
 
@@ -157,7 +158,6 @@ int main()
 
     //----------------
     auto generator = std::make_shared<physics::BasicGenerator>();
-
     physics::PhysicsManager::i_->AddFGRRecord(generator, object2->GetComponent<Components::Particle>());
     //----------------
 

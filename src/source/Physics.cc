@@ -133,3 +133,24 @@ void physics::PhysicsManager::AddFGRRecord(std::shared_ptr<physics::ForceGenerat
 	new_record.particle = particle;
 	generator_registry_.push_back(new_record);
 }
+
+void physics::PhysicsManager::ResolveContact(std::shared_ptr<Components::Particle> a, std::shared_ptr<Components::Particle> b)
+{
+	glm::vec3 va = glm::vec3(0.0f);
+	glm::vec3 vb = glm::vec3(0.0f);
+
+	glm::vec3 ua = a->velocity_;
+	glm::vec3 ub = b->velocity_;
+
+	float ma = a->mass_;
+	float mb = b->mass_;
+
+	float mass_sum = ma + mb;
+	glm::vec3 mumu = ma * ua + mb * ub;
+
+	va = ( (mumu + (0.5f * mb * (ub - ua))) / (mass_sum));
+	vb = ( (mumu + (0.5f * ma * (ua - ub))) / (mass_sum));
+
+	a->velocity_ = va;
+	b->velocity_ = vb;
+}

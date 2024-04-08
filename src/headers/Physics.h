@@ -1,6 +1,8 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
+#define gCOEFFIECENT_OF_RESTITUTION 0.5f;
+
 #include "glm/glm.hpp"
 #include <memory>
 #include "Transform.h"
@@ -120,6 +122,7 @@ namespace physics
 		void GeneratorUpdate();
 		void ParticleUpdate(float t);
 		void AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<Components::Particle> particle);
+		void ResolveContact(std::shared_ptr<Components::Particle> a, std::shared_ptr<Components::Particle> b);
 	};
 } //physics
 
