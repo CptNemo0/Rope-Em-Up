@@ -19,11 +19,11 @@ private:
         1.0f, -1.0f
     };
     unsigned int VAO_, VBO_;
-    std::shared_ptr<Texture> texture_;
+    std::shared_ptr<tmp::Texture> texture_;
     std::shared_ptr<Shader> shader_;
     std::shared_ptr<Transform> transform_;
 public:
-    HUDRenderer(std::shared_ptr<Texture> texture, std::shared_ptr<Shader> shader);
+    HUDRenderer(std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader);
     void Start() override;
     void Update() override;
 };

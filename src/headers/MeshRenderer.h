@@ -16,21 +16,21 @@
 namespace Components
 {
 
-class MeshRenderer : public Component
-{
-public:
+    class MeshRenderer : public Component
+    {
+    public:
 
-    MeshRenderer(std::shared_ptr<Model> model,
-                std::shared_ptr<Shader> shader);
+        MeshRenderer(std::shared_ptr<Model> model,
+                    std::shared_ptr<Shader> shader);
 
-    std::shared_ptr<Transform> transform_;
-    std::shared_ptr<Model> model_;
-	std::shared_ptr<Shader> shader_;
-    std::shared_ptr<Mesh> mesh_;
+        std::shared_ptr<Transform> transform_;
+        std::shared_ptr<Model> model_;
+	    std::shared_ptr<Shader> shader_;
+        std::shared_ptr<Mesh> mesh_;
 
-    void Start() override;
-    void Update() override;
-};
+        void Start() override;
+        void Update() override;
+    };
 
 };
 

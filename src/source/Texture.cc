@@ -1,6 +1,7 @@
 #include "../headers/Texture.h"
 
-Texture::Texture(const std::string& path, bool alpha)
+
+tmp::Texture::Texture(const std::string& path)
 {
     id_ = 0;
     glGenTextures(1, &id_);
@@ -17,7 +18,7 @@ Texture::Texture(const std::string& path, bool alpha)
     height_ = t_height;
     if (img)
     {
-        if (alpha)
+        if (t_c == 4)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t_width, t_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
         else
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);

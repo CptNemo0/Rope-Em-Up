@@ -40,7 +40,6 @@ int main()
     const std::string kHUDTextVertexShaderPath = "res/shaders/HUDTextVertexShader.vert";
     const std::string kHUDTextFragmentShaderPath = "res/shaders/HUDTextFragmentShader.frag";
 
-
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
     const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
@@ -104,35 +103,27 @@ int main()
     auto debug_model = std::make_shared<Model>(kDebugMeshPath);
     auto enemy_model = std::make_shared<Model>(kEnemyMeshPath);
     
+    auto HUD_texture = std::make_shared<tmp::Texture>(kHUDTexturePath);
+    auto HUD_texture2 = std::make_shared<tmp::Texture>(kHUDTexturePath2);
+
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(1, 2);
 
     auto object = std::make_shared<GameObject>();
-    object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-
+    object->transform_->set_position(glm::vec3(0.0f, 0.0f, -3.0f));
     object->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
     object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, enemy_model->meshes_[0], object->transform_));
+    object->AddComponent(physics::PhysicsManager::i_->CreateParticle(object->transform_, 2.0f));
 
     auto object2 = std::make_shared<GameObject>();
-    object2->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.5f));
+    object2->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
     object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_model->meshes_[0], object2->transform_));
+    object2->AddComponent(physics::PhysicsManager::i_->CreateParticle(object2->transform_, 1.0f));
 
     std::vector<std::shared_ptr<GameObject>> gos;
     auto scene_root = GameObject::Create();
-
-    auto object = GameObject::Create(scene_root);
-    object->transform_->set_position(glm::vec3(0.0f, 0.0f, -3.0f));
-    object->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_mesh, green_texture, shader));
-    object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, enemy_mesh, object->transform_));
-    object->AddComponent(physics::PhysicsManager::i_->CreateParticle(object->transform_, 2.0f));
-
-    auto object2 = GameObject::Create(scene_root);
-    object2->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    object2->AddComponent(std::make_shared<Components::MeshRenderer>(debug_mesh, red_texture, shader));
-    object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_mesh, object2->transform_));
-    object2->AddComponent(physics::PhysicsManager::i_->CreateParticle(object2->transform_, 1.0f));
 
     for (int i = 1; i < 10; i++)
     {
@@ -140,8 +131,8 @@ int main()
         {
             auto new_object = GameObject::Create(scene_root);
             new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
-            new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_mesh, green_texture, shader));
-            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, player_mesh, new_object->transform_));
+            new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
+            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, player_model->meshes_[0], new_object->transform_));
         }
     }
 
@@ -197,6 +188,9 @@ int main()
         shader->SetPointLight("light", point_light);
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+
+        object->Update();
+        object2->Update();
 
         scene_root->PropagateUpdate();
 
