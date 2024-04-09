@@ -114,17 +114,17 @@ int main()
 
     auto scene_root = GameObject::Create();
 
-    auto object = GameObject::Create(scene_root);
-    object->transform_->set_position(glm::vec3(0.0f, 0.0f, -3.0f));
-    object->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
-    object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], object->transform_));
-    object->AddComponent(physics::PhysicsManager::i_->CreateParticle(object->transform_, 2.0f));
+    auto player_1 = GameObject::Create(scene_root);
+    player_1->transform_->set_position(glm::vec3(2.0f, 0.0f, 0.0f));
+    player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
+    player_1->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_1->transform_, 2.0f));
 
-    auto player_object = GameObject::Create(scene_root);
-    player_object->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    player_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
-    player_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_object->transform_));
-    player_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_object->transform_, 2.0f));
+    auto player_2 = GameObject::Create(scene_root);
+    player_2->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    player_2->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
+    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
+    player_2->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_2->transform_, 2.0f));
 
     auto rope_segment = GameObject::Create(scene_root);
     rope_segment->transform_->set_position(glm::vec3(0.5f, 0.0f, 0.0f));
@@ -147,10 +147,11 @@ int main()
     rope_segment_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment_2->transform_));
     rope_segment_2->AddComponent(physics::PhysicsManager::i_->CreateParticle(rope_segment_2->transform_, 1.0f));
 
-    auto segment_1 = std::make_shared<rope::RopeSegment>(nullptr, nullptr, player_object->transform_);
+    auto segment_1 = std::make_shared<rope::RopeSegment>(nullptr, nullptr, player_2->transform_);
     auto segment_2 = std::make_shared<rope::RopeSegment>(nullptr, nullptr, rope_segment->transform_);
     auto segment_3 = std::make_shared<rope::RopeSegment>(nullptr, nullptr, rope_segment_1->transform_);
     auto segment_4 = std::make_shared<rope::RopeSegment>(nullptr, nullptr, rope_segment_2->transform_);
+    auto segment_5 = std::make_shared<rope::RopeSegment>(nullptr, nullptr, player_1->transform_);
 
     segment_1->left_ = nullptr;
     segment_1->right_ = segment_2;
@@ -162,7 +163,10 @@ int main()
     segment_3->right_ = segment_4;
 
     segment_4->left_ = segment_3;
-    segment_4->right_ = nullptr;
+    segment_4->right_ = segment_5;
+
+    segment_5->left_ = segment_4;
+    segment_5->right_ = nullptr;
 
     /*for (int i = 1; i < 10; i++)
     {
@@ -197,7 +201,7 @@ int main()
 
     //----------------
     auto generator = std::make_shared<physics::BasicGenerator>();
-    physics::PhysicsManager::i_->AddFGRRecord(generator, player_object->GetComponent<Components::Particle>());
+    physics::PhysicsManager::i_->AddFGRRecord(generator, player_2->GetComponent<Components::Particle>());
     
     std::vector<physics::Contact> contacts = std::vector<physics::Contact>();
 
@@ -227,9 +231,10 @@ int main()
         collisions::CollisionManager::i_->UpdateColliders();
         collisions::CollisionManager::i_->CollisionCheck(contacts);
         physics::PhysicsManager::i_->ResolveContacts(contacts);
-        rope::CheckRestraints(segment_1, segment_2);
-        rope::CheckRestraints(segment_2, segment_3);
-        rope::CheckRestraints(segment_3, segment_4);
+        rope::CheckRestraints(segment_1, segment_2, delta_time);
+        rope::CheckRestraints(segment_2, segment_3, delta_time);
+        rope::CheckRestraints(segment_3, segment_4, delta_time);
+        rope::CheckRestraints(segment_4, segment_5, delta_time);
         std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
 
         cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
@@ -314,7 +319,7 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_O))
         {
             auto md = glm::vec3(0.0f, 10.0f, 0.0f);
-            player_object->transform_->set_rotation(player_object->transform_->get_rotation() + md * delta_time);
+            player_2->transform_->set_rotation(player_2->transform_->get_rotation() + md * delta_time);
         }
 
         glfwSwapBuffers(window);
