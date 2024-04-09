@@ -134,7 +134,9 @@ namespace physics
 		void ResolveContacts(std::vector<physics::Contact> contacts);
 	};
 
-
+	void LogVec3(glm::vec3 v);
+	float Clampf(float v, float max, float min);
+	void ClampElementwise(glm::vec3& v, float max, float min);
 } //physics
 
 #endif // !PHYSICS_H

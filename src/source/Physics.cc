@@ -1,11 +1,11 @@
 #include "../headers/Physics.h"
 
-void LogVec3(glm::vec3 a)
+void physics::LogVec3(glm::vec3 a)
 {
 	std::cout << a.x << " " << a.y << " " << a.z << "\n";
 }
 
-float Clampf(float v, float max, float min)
+float physics::Clampf(float v, float max, float min)
 {
 	if (v < min)
 	{
@@ -21,7 +21,7 @@ float Clampf(float v, float max, float min)
 	
 }
 
-void ClampElementwise(glm::vec3& v, float max, float min)
+void physics::ClampElementwise(glm::vec3& v, float max, float min)
 {
 	v.x = Clampf(v.x, max, min);
 	v.y = Clampf(v.y, max, min);
@@ -31,14 +31,14 @@ void ClampElementwise(glm::vec3& v, float max, float min)
 void Components::Particle::UpdateAcceleration()
 {
 	acceleration_ = inverse_mass_ * forces_;
-	ClampElementwise(acceleration_, 1000.f, -1000.f);
+	physics::ClampElementwise(acceleration_, 1000.f, -1000.f);
 
 }
 
 void Components::Particle::UpdateVelocity(float t)
 {
 	velocity_ = velocity_ + acceleration_ * t;
-	ClampElementwise(velocity_, 1000.f, -1000.f);
+	physics::ClampElementwise(velocity_, 1000.f, -1000.f);
 }
 
 void Components::Particle::UpdatePosition(float t)
