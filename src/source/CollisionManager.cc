@@ -71,11 +71,12 @@ void collisions::CollisionManager::UpdateColliders()
     }
 }
 
-void collisions::CollisionManager::CollisionCheck()
+void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>& contacts)
 {
     static float time = 0;
     static int idx = 0;
 
+    contacts.clear();
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
@@ -102,7 +103,11 @@ void collisions::CollisionManager::CollisionCheck()
 
                         if (particle_a != nullptr && particle_b != nullptr)
                         {
-                            physics::PhysicsManager::i_->ResolveContact(particle_a, particle_b);
+                            physics::Contact contact;
+                            contact.a = particle_a;
+                            contact.b = particle_b;
+                            contacts.push_back(contact);
+                            //physics::PhysicsManager::i_->ResolveContact(particle_a, particle_b);
                         }
                     }
                 }

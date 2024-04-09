@@ -2,6 +2,8 @@
 #define PHYSICS_H
 
 #define gCOEFFIECENT_OF_RESTITUTION 0.9f;
+#define gCLAMP_MAX 1000.0f;
+#define gCLAMP_MIN -1000.0f;
 
 #include "glm/glm.hpp"
 #include <memory>
@@ -90,6 +92,12 @@ namespace physics
 		void Generate();
 	};
 
+	struct Contact
+	{
+		std::shared_ptr<Components::Particle> a;
+		std::shared_ptr<Components::Particle> b;
+	};
+
 	class PhysicsManager
 	{
 	public:
@@ -122,8 +130,11 @@ namespace physics
 		void GeneratorUpdate();
 		void ParticleUpdate(float t);
 		void AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<Components::Particle> particle);
-		void ResolveContact(std::shared_ptr<Components::Particle> a, std::shared_ptr<Components::Particle> b);
+		void ResolveContact(physics::Contact& contact);
+		void ResolveContacts(std::vector<physics::Contact> contacts);
 	};
+
+
 } //physics
 
 #endif // !PHYSICS_H

@@ -159,6 +159,9 @@ int main()
     //----------------
     auto generator = std::make_shared<physics::BasicGenerator>();
     physics::PhysicsManager::i_->AddFGRRecord(generator, object2->GetComponent<Components::Particle>());
+    
+    std::vector<physics::Contact> contacts = std::vector<physics::Contact>();
+
     //----------------
 
     while (!glfwWindowShouldClose(window))
@@ -172,10 +175,36 @@ int main()
         float delta_time = current_time - previous_time;
         previous_time = current_time;
 
+        
+#pragma region Collisions and Physics
+
+        static float cp_time = 0;
+        static int cp_idx = 0;
+
+        std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
+
         physics::PhysicsManager::i_->GeneratorUpdate();
         physics::PhysicsManager::i_->ParticleUpdate(delta_time);
         collisions::CollisionManager::i_->UpdateColliders();
-        collisions::CollisionManager::i_->CollisionCheck();
+        collisions::CollisionManager::i_->CollisionCheck(contacts);
+        physics::PhysicsManager::i_->ResolveContacts(contacts);
+
+        std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
+
+        cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
+        cp_idx++;
+
+        if (cp_idx == 120)
+        {
+            std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
+            cp_idx = 0;
+            cp_time = 0.0f;
+        }
+
+#pragma endregion
+
+
+        
 
         utility::DebugCameraMovement(window, camera, delta_time);
         utility::DebugCameraMovementJoystick(window, camera, delta_time);
@@ -198,14 +227,15 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        //HUDshader->Use();
+        HUDshader->Use();
 
-        //HUD_root->PropagateUpdate();
-        //HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
+        HUD_root->PropagateUpdate();
+        HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
 
         HUDTextShader->Use();
 
         HUDText_root->PropagateUpdate();
+
         HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
 
         glDisable(GL_BLEND);

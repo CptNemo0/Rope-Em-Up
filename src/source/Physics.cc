@@ -5,14 +5,40 @@ void LogVec3(glm::vec3 a)
 	std::cout << a.x << " " << a.y << " " << a.z << "\n";
 }
 
+float Clampf(float v, float max, float min)
+{
+	if (v < min)
+	{
+		return min;
+	}
+	else if (v > max)
+	{
+		return max;
+	}
+
+	return v;
+
+	
+}
+
+void ClampElementwise(glm::vec3& v, float max, float min)
+{
+	v.x = Clampf(v.x, max, min);
+	v.y = Clampf(v.y, max, min);
+	v.z = Clampf(v.z, max, min);
+}
+
 void Components::Particle::UpdateAcceleration()
 {
 	acceleration_ = inverse_mass_ * forces_;
+	ClampElementwise(acceleration_, 1000.f, -1000.f);
+
 }
 
 void Components::Particle::UpdateVelocity(float t)
 {
 	velocity_ = velocity_ + acceleration_ * t;
+	ClampElementwise(velocity_, 1000.f, -1000.f);
 }
 
 void Components::Particle::UpdatePosition(float t)
@@ -36,16 +62,7 @@ void Components::Particle::UpdatePhysics(float t)
 	assert(t > 0.0f);
 	UpdatePosition(t);
 	UpdateAcceleration();
-	//assert(100.0f > glm::length(acceleration_));
-
-	if (glm::length(acceleration_) > 100.0f)
-	{
-		LogVec3(acceleration_);
-	}
-
 	UpdateVelocity(t);
-	assert(100.0f > glm::length(velocity_));
-
 	ZeroForces();
 	/*std::cout << "acc: ";
 	LogVec3(acceleration_);
@@ -143,16 +160,16 @@ void physics::PhysicsManager::AddFGRRecord(std::shared_ptr<physics::ForceGenerat
 	generator_registry_.push_back(new_record);
 }
 
-void physics::PhysicsManager::ResolveContact(std::shared_ptr<Components::Particle> a, std::shared_ptr<Components::Particle> b)
+void physics::PhysicsManager::ResolveContact(physics::Contact& contact)
 {
 	glm::vec3 va = glm::vec3(0.0f);
 	glm::vec3 vb = glm::vec3(0.0f);
 
-	glm::vec3 ua = a->velocity_;
-	glm::vec3 ub = b->velocity_;
+	glm::vec3 ua = contact.a->velocity_;
+	glm::vec3 ub = contact.b->velocity_;
 
-	float ma = a->mass_;
-	float mb = b->mass_;
+	float ma = contact.a->mass_;
+	float mb = contact.b->mass_;
 
 	float mass_sum = ma + mb;
 	assert(mass_sum > 0.00001f);
@@ -161,6 +178,14 @@ void physics::PhysicsManager::ResolveContact(std::shared_ptr<Components::Particl
 	va = ( (mumu + (0.1f * mb * (ub - ua))) / (mass_sum));
 	vb = ( (mumu + (0.1f * ma * (ua - ub))) / (mass_sum));
 
-	a->velocity_ = va;
-	b->velocity_ = vb;
+	contact.a->velocity_ = va;
+	contact.b->velocity_ = vb;
+}
+
+void physics::PhysicsManager::ResolveContacts(std::vector<physics::Contact> contacts)
+{
+	for (auto& contact : contacts)
+	{
+		ResolveContact(contact);
+	}
 }

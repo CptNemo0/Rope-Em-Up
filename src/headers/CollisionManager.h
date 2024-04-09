@@ -53,7 +53,7 @@ namespace collisions
 
         std::shared_ptr<Components::Collider> CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<Components::Transform> transform);
        
-        void CollisionCheck();
+        void CollisionCheck(std::vector<physics::Contact>& contacts);
         void Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b);
         void AddCollisionBetweenLayers(int layer_1, int layer_2);
         void RemoveCollisionBetweenLayers(int layer_1, int layer_2);
