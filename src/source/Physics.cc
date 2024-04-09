@@ -36,7 +36,13 @@ void Components::Particle::UpdatePhysics(float t)
 	assert(t > 0.0f);
 	UpdatePosition(t);
 	UpdateAcceleration();
-	assert(100.0f > glm::length(acceleration_));
+	//assert(100.0f > glm::length(acceleration_));
+
+	if (glm::length(acceleration_) > 100.0f)
+	{
+		LogVec3(acceleration_);
+	}
+
 	UpdateVelocity(t);
 	assert(100.0f > glm::length(velocity_));
 
@@ -96,7 +102,7 @@ physics::PhysicsManager* physics::PhysicsManager::i_ = nullptr;
 
 physics::PhysicsManager::PhysicsManager()
 {
-	common_drag_generator_ = std::make_shared<DragGenerator>(5.0f, 10.0f);
+	common_drag_generator_ = std::make_shared<DragGenerator>(7.0f, 15.0f);
 	generator_registry_ = std::vector<FGRRecord>();
 	particles_ = std::vector<std::shared_ptr<Components::Particle>>();
 }

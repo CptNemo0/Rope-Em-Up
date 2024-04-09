@@ -198,10 +198,10 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        HUDshader->Use();
+        //HUDshader->Use();
 
-        HUD_root->PropagateUpdate();
-        HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
+        //HUD_root->PropagateUpdate();
+        //HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
 
         HUDTextShader->Use();
 

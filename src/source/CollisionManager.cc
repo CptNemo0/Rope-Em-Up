@@ -99,7 +99,11 @@ void collisions::CollisionManager::CollisionCheck()
                         b->UpdateColliders();
                         auto particle_a = a->gameObject_.lock()->GetComponent<Components::Particle>();
                         auto particle_b = b->gameObject_.lock()->GetComponent<Components::Particle>();
-                        physics::PhysicsManager::i_->ResolveContact(particle_a, particle_b);
+
+                        if (particle_a != nullptr && particle_b != nullptr)
+                        {
+                            physics::PhysicsManager::i_->ResolveContact(particle_a, particle_b);
+                        }
                     }
                 }
             }
