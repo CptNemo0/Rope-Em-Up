@@ -109,21 +109,20 @@ int main()
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(1, 2);
+    
+    auto scene_root = GameObject::Create();
 
-    auto object = std::make_shared<GameObject>();
+    auto object = GameObject::Create(scene_root);
     object->transform_->set_position(glm::vec3(0.0f, 0.0f, -3.0f));
     object->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
     object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, enemy_model->meshes_[0], object->transform_));
     object->AddComponent(physics::PhysicsManager::i_->CreateParticle(object->transform_, 2.0f));
 
-    auto object2 = std::make_shared<GameObject>();
+    auto object2 = GameObject::Create(scene_root);
     object2->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     object2->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
     object2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, debug_model->meshes_[0], object2->transform_));
     object2->AddComponent(physics::PhysicsManager::i_->CreateParticle(object2->transform_, 2.0f));
-
-    std::vector<std::shared_ptr<GameObject>> gos;
-    auto scene_root = GameObject::Create();
 
     for (int i = 1; i < 10; i++)
     {
@@ -218,9 +217,6 @@ int main()
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        object->Update();
-        object2->Update();
-
         scene_root->PropagateUpdate();
 
         glDisable(GL_DEPTH_TEST);
@@ -237,6 +233,7 @@ int main()
         HUDText_root->PropagateUpdate();
 
         HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+        HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
