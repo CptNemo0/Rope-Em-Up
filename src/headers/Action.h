@@ -3,7 +3,9 @@
 
 enum Action
 {
+    // Axis Actions
     MOVE,
+    // Button Actions
     PULL_ROPE
 };
 

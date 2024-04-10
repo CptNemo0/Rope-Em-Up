@@ -11,7 +11,7 @@ namespace Input
 union State
 {
     glm::vec2 axis;
-    bool button;
+    int button;
 };
 
 class InputObserver
