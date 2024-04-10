@@ -8,6 +8,8 @@ Input::InputManager::InputManager(GLFWwindow *window)
     glfwSetJoystickCallback(JoystickStateCallback);
     old_gamepad_states_.emplace(GLFW_JOYSTICK_1, GLFWgamepadstate());
     old_gamepad_states_.emplace(GLFW_JOYSTICK_2, GLFWgamepadstate());
+    observers_.emplace(GLFW_JOYSTICK_1, std::vector<std::shared_ptr<InputObserver>>());
+    observers_.emplace(GLFW_JOYSTICK_2, std::vector<std::shared_ptr<InputObserver>>());
 }
 
 void Input::InputManager::JoystickStateCallback(int jid, int event)
@@ -63,42 +65,22 @@ void Input::InputManager::UpdateKeyboardState(int gamepadID)
     }
 }
 
-void Input::InputManager::AddObserver(InputObserver *observer, int gamepadID)
+void Input::InputManager::AddObserver(int gamepadID, std::shared_ptr<InputObserver> observer)
 {
-    observers_.push_back(std::make_pair(observer, gamepadID));
+    observers_[gamepadID].push_back(observer);
 }
 
-void Input::InputManager::RemoveObserver(InputObserver *observer)
+void Input::InputManager::RemoveObserver(int gamepadID, std::shared_ptr<InputObserver> observer)
 {
-    for (auto it = observers_.begin(); it != observers_.end(); it++)
-    {
-        if (it->first == observer)
-        {
-            observers_.erase(it);
-            break;
-        }
-    }
+    auto &observers = observers_[gamepadID];
+    observers.erase(std::remove(observers.begin(), observers.end(), observer), observers.end());
 }
 
-void Input::InputManager::NotifyAxisChange(int gamepadID, GamepadAxisType axis_type, glm::vec2 state)
+void Input::InputManager::NotifyAction(int gamepadID, Action action, State state)
 {
-    for (auto &observer : observers_)
+    for (auto &observer : observers_[gamepadID])
     {
-        if (observer.second == gamepadID)
-        {
-            observer.first->OnAxisChange(axis_type, state);
-        }
-    }
-}
-
-void Input::InputManager::NotifyButtonChange(int gamepadID, int buttonID, bool state)
-{
-    for (auto &observer : observers_)
-    {
-        if (observer.second == gamepadID)
-        {
-            observer.first->OnButtonChange(buttonID, state);
-        }
+        observer->OnAction(action, state);
     }
 }
 

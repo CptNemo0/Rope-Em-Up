@@ -61,7 +61,7 @@ public:
 
 // Input stuff
 private:
-    std::vector<std::pair<InputObserver *, int>> observers_;
+    std::unordered_map<int, std::vector<std::shared_ptr<InputObserver>>> observers_;
     std::unordered_map<int, GLFWgamepadstate> old_gamepad_states_;
 
     static void JoystickStateCallback(int jid, int event);
@@ -70,10 +70,9 @@ private:
     void UpdateKeyboardState(int gamepadID);
 
 public:
-    void AddObserver(InputObserver *observer, int gamepadID);
-    void RemoveObserver(InputObserver *observer);
-    void NotifyAxisChange(int gamepadID, GamepadAxisType axis_type, glm::vec2 state);
-    void NotifyButtonChange(int gamepadID, int buttonID, bool state);
+    void AddObserver(int gamepadID, std::shared_ptr<InputObserver> observer);
+    void RemoveObserver(int gamepadID, std::shared_ptr<InputObserver> observer);
+    void NotifyAction(int gamepadID, Action action, State state);
 
     void Update();
 };
