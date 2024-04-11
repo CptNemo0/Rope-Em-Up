@@ -3,13 +3,13 @@
 void rope::Rope::CheckRestraints(std::shared_ptr<Components::RopeSegment> a, std::shared_ptr<Components::RopeSegment> b, float t)
 {
 	float distance = glm::distance(a->transform_->get_position(), b->transform_->get_position());
+	auto particle_a = a->transform_->game_object_->GetComponent<Components::Particle>();
+	auto particle_b = b->transform_->game_object_->GetComponent<Components::Particle>();
+	assert(particle_a != nullptr);
+	assert(particle_b != nullptr);
+	
 	if (distance >= kMaxDistance)
 	{
-		auto particle_a = a->transform_->game_object_->GetComponent<Components::Particle>();
-		auto particle_b = b->transform_->game_object_->GetComponent<Components::Particle>();
-		assert(particle_a != nullptr);
-		assert(particle_b != nullptr);
-
 		glm::vec3 force = particle_b->transform_->get_position();
 		force -= particle_a->transform_->get_position();
 		float magnitude = glm::length(force);
@@ -18,18 +18,21 @@ void rope::Rope::CheckRestraints(std::shared_ptr<Components::RopeSegment> a, std
 		glm::normalize(force);
 		force *= -magnitude;
 		particle_b->AddForce(force);
+		particle_a->AddForce(-force);
+		
 
 
-		force = particle_a->transform_->get_position();
+		/*force = particle_a->transform_->get_position();
 		force -= particle_b->transform_->get_position();
 		magnitude = glm::length(force);
 		magnitude = std::abs(magnitude - kMaxDistance);
 		magnitude *= kSpringConstant;
 		glm::normalize(force);
 		force *= -magnitude;
-		particle_a->AddForce(force);
+		particle_a->AddForce(force);*/
+
+		
 	}
-	
 }
 
 void rope::Rope::EnforceRestraints(float t)

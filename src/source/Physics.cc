@@ -17,8 +17,6 @@ float physics::Clampf(float v, float max, float min)
 	}
 
 	return v;
-
-	
 }
 
 void physics::ClampElementwise(glm::vec3& v, float max, float min)
@@ -28,26 +26,32 @@ void physics::ClampElementwise(glm::vec3& v, float max, float min)
 	v.z = Clampf(v.z, max, min);
 }
 
+void physics::Sigmoid(glm::vec3& v)
+{
+	v.x = std::exp2f(-v.x);
+	v.y = 0.0f;
+	v.z = std::exp2f(-v.z);
+}
+
 void Components::Particle::UpdateAcceleration()
 {
+	physics::ClampElementwise(forces_, physics::kMaxForce, -physics::kMaxForce);
 	acceleration_ = inverse_mass_ * forces_;
-	physics::ClampElementwise(acceleration_, 1000.f, -1000.f);
-
 }
 
 void Components::Particle::UpdateVelocity(float t)
 {
-	velocity_ = velocity_ + acceleration_ * t;
-	physics::ClampElementwise(velocity_, 1000.f, -1000.f);
+	velocity_ = velocity_ + acceleration_ * t;	
 }
 
 void Components::Particle::UpdatePosition(float t)
 {
+	velocity_ *= drag_;
 	auto new_position = transform_->get_position() + velocity_ * t + 0.5f * acceleration_ * t * t;
 	transform_->set_position(new_position);
 }
 
-void Components::Particle::AddForce(glm::vec3 force)
+void Components::Particle::AddForce(const glm::vec3& force)
 {
 	forces_ += force;
 }
@@ -64,12 +68,6 @@ void Components::Particle::UpdatePhysics(float t)
 	UpdateAcceleration();
 	UpdateVelocity(t);
 	ZeroForces();
-	/*std::cout << "acc: ";
-	LogVec3(acceleration_);
-	std::cout << "vel: ";
-	LogVec3(velocity_);
-	std::cout << "pos: ";
-	LogVec3(transform_->get_position());*/
 }
 
 void Components::Particle::Start()
@@ -119,18 +117,13 @@ physics::PhysicsManager* physics::PhysicsManager::i_ = nullptr;
 
 physics::PhysicsManager::PhysicsManager()
 {
-	common_drag_generator_ = std::make_shared<DragGenerator>(7.0f, 15.0f);
 	generator_registry_ = std::vector<FGRRecord>();
 	particles_ = std::vector<std::shared_ptr<Components::Particle>>();
 }
 
-std::shared_ptr<Components::Particle> physics::PhysicsManager::CreateParticle(std::shared_ptr<Components::Transform> transform, float mass)
+std::shared_ptr<Components::Particle> physics::PhysicsManager::CreateParticle(std::shared_ptr<Components::Transform> transform, float mass, float drag)
 {
-	auto return_value = std::make_shared<Components::Particle>(transform, mass);
-	FGRRecord new_record;
-	new_record.generator = common_drag_generator_;
-	new_record.particle = return_value;
-	generator_registry_.push_back(new_record);
+	auto return_value = std::make_shared<Components::Particle>(transform, mass, drag);
 	particles_.push_back(return_value);
 	return return_value;
 }

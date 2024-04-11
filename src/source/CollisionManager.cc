@@ -92,7 +92,7 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
                 bool are_colliding = AABBCollisionCheck(a->bp_collider_, b->bp_collider_);
                 if (are_colliding)
                 {
-                    are_colliding = ConvexHullCheckFaster2(a->np_collider_, b->np_collider_);
+                    are_colliding = ConvexHullCheckFaster(a->np_collider_, b->np_collider_);
                     if (are_colliding)
                     {
                         Separation(a, b);
@@ -107,7 +107,6 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
                             contact.a = particle_a;
                             contact.b = particle_b;
                             contacts.push_back(contact);
-                            //physics::PhysicsManager::i_->ResolveContact(particle_a, particle_b);
                         }
                     }
                 }
