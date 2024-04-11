@@ -27,6 +27,7 @@
 #include "headers/InputManager.h"
 #include "headers/HUDRenderer.h"
 #include "headers/TextRenderer.h"
+#include "headers/PlayerController.h"
 
 int main()
 {
@@ -122,6 +123,7 @@ int main()
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_1->transform_, 2.0f));
     player_1->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_1->transform_));
+    player_1->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_1));
 
     rope.AddSegment(player_1->GetComponent<Components::RopeSegment>());
 
@@ -186,8 +188,11 @@ int main()
     physics::PhysicsManager::i_->AddFGRRecord(generator, player_1->GetComponent<Components::Particle>());
     
     std::vector<physics::Contact> contacts = std::vector<physics::Contact>();
-
     //----------------
+
+    scene_root->PropagateStart();
+    HUD_root->PropagateStart();
+    HUDText_root->PropagateStart();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -208,6 +213,7 @@ int main()
 
         std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
 
+        Input::InputManager::i_->Update();
         physics::PhysicsManager::i_->GeneratorUpdate();
         physics::PhysicsManager::i_->ParticleUpdate(delta_time);
         collisions::CollisionManager::i_->UpdateColliders();
@@ -221,12 +227,10 @@ int main()
 
         if (cp_idx == 120)
         {
-            std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
+            // std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
             cp_idx = 0;
             cp_time = 0.0f;
-        }
-
-        
+        }    
 
 #pragma endregion
 #pragma region Other
@@ -256,8 +260,6 @@ int main()
 
         HUDTextShader->Use();
 
-        HUDText_root->PropagateUpdate();
-
         HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
         HUDText_root->PropagateUpdate();
 
@@ -265,6 +267,7 @@ int main()
         glEnable(GL_DEPTH_TEST);
         generator->direction_ = glm::vec3(0.0f);
         generator->magnitude_ = 0.0f;
+
         if (glfwGetKey(window, GLFW_KEY_L))
         {
             generator->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);

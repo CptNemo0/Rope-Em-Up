@@ -35,3 +35,15 @@ void GameObject::PropagateUpdate()
 		child->game_object_->PropagateUpdate();
 	}
 }
+
+void GameObject::PropagateStart()
+{
+	for (auto& component : components_)
+	{
+		component.second->Start();
+	}
+	for (auto& child : transform_->children_)
+	{
+		child->game_object_->PropagateStart();
+	}
+}
