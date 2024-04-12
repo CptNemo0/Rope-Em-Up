@@ -20,13 +20,13 @@ Input::InputManager::InputManager(GLFWwindow *window)
     {
         {GLFW_JOYSTICK_1,
         {
-            {Action::MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D}}},
-            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_E}}
+            {Action::MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_I, GLFW_KEY_K, GLFW_KEY_J, GLFW_KEY_L}}},
+            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_U}}
         }},
         {GLFW_JOYSTICK_2,
         {
-            {Action::MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT}}},
-            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_SLASH}}
+            {Action::MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_T, GLFW_KEY_G, GLFW_KEY_F, GLFW_KEY_H}}},
+            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_Y}}
         }}
     };
 
@@ -66,6 +66,15 @@ void Input::InputManager::UpdateGamepadState(int gamepadID)
         glm::vec2 new_axis_state(new_gamepad_state.axes[axis_type], new_gamepad_state.axes[axis_type + 1]);
         glm::vec2 old_axis_state(old_gamepad_states_[gamepadID].axes[axis_type], old_gamepad_states_[gamepadID].axes[axis_type + 1]);
 
+        if (glm::length(new_axis_state) < deadzone_)
+        {
+            new_axis_state = glm::vec2(0.0f);
+        }
+        if (glm::length(old_axis_state) < deadzone_)
+        {
+            old_axis_state = glm::vec2(0.0f);
+        }
+
         if (new_axis_state != old_axis_state)
         {
             NotifyAction(gamepadID, Action::MOVE, State(new_axis_state));
@@ -93,14 +102,15 @@ void Input::InputManager::UpdateKeyboardState(int gamepadID)
         {
             keyboard_state[move_action_buttons[i]] = key_state;
             key_state_changed = true;
-            if (key_state)
-            {
-                axis_state += axis_directions[i];
-            }
+        }
+        if (key_state)
+        {
+            axis_state += axis_directions[i];
         }
     }
     if (key_state_changed)
     {
+        axis_state = SafeNormalize(axis_state);
         NotifyAction(gamepadID, Action::MOVE, State(axis_state));
     }
 
@@ -108,6 +118,7 @@ void Input::InputManager::UpdateKeyboardState(int gamepadID)
     int pull_rope_button_state = glfwGetKey(window_, pull_rope_button);
     if (pull_rope_button_state != keyboard_state[pull_rope_button])
     {
+        keyboard_state[pull_rope_button] = pull_rope_button_state;
         NotifyAction(gamepadID, Action::PULL_ROPE, State{.button = pull_rope_button_state});
     }
 }

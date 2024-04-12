@@ -40,6 +40,7 @@ public:
 	template <typename T>
 	std::shared_ptr<T> GetComponent()
 	{
+		assert(components_.find(typeid(T).name()) != components_.end());
 		return std::dynamic_pointer_cast<T>(components_[typeid(T).name()]);
 	}
 };

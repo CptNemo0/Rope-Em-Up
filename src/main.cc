@@ -133,6 +133,7 @@ int main()
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_2->transform_, 2.0f));
     player_2->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_2->transform_));
+    player_2->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_2));
 
 
     for (int i = 1; i < 20; i++)
@@ -236,7 +237,6 @@ int main()
 #pragma region Other
 
         utility::DebugCameraMovement(window, camera, delta_time);
-        utility::DebugCameraMovementJoystick(window, camera, delta_time);
 
         shader->Use();
 
@@ -267,36 +267,6 @@ int main()
         glEnable(GL_DEPTH_TEST);
         generator->direction_ = glm::vec3(0.0f);
         generator->magnitude_ = 0.0f;
-
-        if (glfwGetKey(window, GLFW_KEY_L))
-        {
-            generator->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator->magnitude_ = 200;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_J))
-        {
-            generator->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator->magnitude_ = 200;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_I))
-        {
-            generator->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator->magnitude_ = 200;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_K))
-        {
-            generator->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator->magnitude_ = 200;
-        }
-
-        if (!(glfwGetKey(window, GLFW_KEY_L) || glfwGetKey(window, GLFW_KEY_I) || glfwGetKey(window, GLFW_KEY_K) || glfwGetKey(window, GLFW_KEY_J)))
-        {
-            generator->direction_ = glm::vec3(0.0f);
-            generator->magnitude_ = 0.0f;
-        }
 
         if (glfwGetKey(window, GLFW_KEY_O))
         {

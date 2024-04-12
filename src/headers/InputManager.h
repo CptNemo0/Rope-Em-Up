@@ -16,7 +16,7 @@
 namespace Input
 {
 
-static const glm::vec2 axis_directions[] = {glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, -1.0f), glm::vec2(-1.0f, 0.0f), glm::vec2(1.0f, 0.0f)};
+static const glm::vec2 axis_directions[] = {glm::vec2(0.0f, -1.0f), glm::vec2(0.0f, 1.0f), glm::vec2(-1.0f, 0.0f), glm::vec2(1.0f, 0.0f)};
 
 class InputManager
 {
@@ -63,11 +63,25 @@ private:
     void UpdateKeyboardState(int gamepadID);
 
 public:
+    float deadzone_ = 0.1f;
+
     void AddObserver(int gamepadID, std::shared_ptr<InputObserver> observer);
     void RemoveObserver(int gamepadID, std::shared_ptr<InputObserver> observer);
     void NotifyAction(int gamepadID, Action action, State state);
 
     void Update();
+
+    glm::vec2 SafeNormalize(glm::vec2 vector)
+    {
+        if (glm::length(vector) > 0.0f)
+        {
+            return glm::normalize(vector);
+        }
+        else
+        {
+            return glm::vec2(0.0f);
+        }
+    }
 };
 
 }; // namespace Input
