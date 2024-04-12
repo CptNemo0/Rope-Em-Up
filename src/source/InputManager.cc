@@ -84,22 +84,24 @@ void Input::InputManager::UpdateGamepadState(int gamepadID)
 void Input::InputManager::UpdateKeyboardState(int gamepadID)
 {
     auto &move_action_buttons = keyboard_mappings[gamepadID][Action::MOVE].buttonIDs;
-    glm::vec2 old_axis_state(0.0f);
-    glm::vec2 new_axis_state(0.0f);
+    glm::vec2 axis_state(0.0f);
+    bool key_state_changed = false;
     for (int i = 0; i < 4; i++)
     {
-        if (glfwGetKey(window_, move_action_buttons[i]) == GLFW_PRESS)
+        bool key_state = glfwGetKey(window_, move_action_buttons[i]);
+        if (keyboard_state[move_action_buttons[i]] != key_state)
         {
-            new_axis_state += axis_directions[i];
-        }
-        if (keyboard_state[move_action_buttons[i]])
-        {
-            old_axis_state += axis_directions[i];
+            keyboard_state[move_action_buttons[i]] = key_state;
+            key_state_changed = true;
+            if (key_state)
+            {
+                axis_state += axis_directions[i];
+            }
         }
     }
-    if (new_axis_state != old_axis_state)
+    if (key_state_changed)
     {
-        NotifyAction(gamepadID, Action::MOVE, State(new_axis_state));
+        NotifyAction(gamepadID, Action::MOVE, State(axis_state));
     }
 
     auto &pull_rope_button = keyboard_mappings[gamepadID][Action::PULL_ROPE].buttonID;
