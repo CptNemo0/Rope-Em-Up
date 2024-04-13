@@ -12,6 +12,7 @@
 #include "GameObject.h"
 #include "Mesh.h"
 #include "Physics.h"
+#include "PBD.h"
 #include "Transform.h"
 
 class Components::Collider;
@@ -54,6 +55,7 @@ namespace collisions
         std::shared_ptr<Components::Collider> CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<Components::Transform> transform);
        
         void CollisionCheck(std::vector<physics::Contact>& contacts);
+        void CollisionCheckPBD(std::vector<pbd::Contact>& contacts);
         void Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b);
         void AddCollisionBetweenLayers(int layer_1, int layer_2);
         void RemoveCollisionBetweenLayers(int layer_1, int layer_2);
@@ -63,6 +65,7 @@ namespace collisions
         }
 	
         void UpdateColliders();
+        void PredictColliders();
     };
 
 

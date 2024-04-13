@@ -29,6 +29,7 @@ namespace Components
 		void Start() override;
 		void Update() override;
 		void UpdateColliders();
+		void PredictColliders();
 	};
 }
 

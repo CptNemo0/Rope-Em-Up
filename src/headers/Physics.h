@@ -95,8 +95,10 @@ namespace physics
 
 	struct Contact
 	{
+		Contact(std::shared_ptr<Components::Particle> p1, std::shared_ptr<Components::Particle> p2);
 		std::shared_ptr<Components::Particle> a;
 		std::shared_ptr<Components::Particle> b;
+		glm::vec3 contact_normal;
 	};
 
 	class PhysicsManager
@@ -132,6 +134,7 @@ namespace physics
 		void AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<Components::Particle> particle);
 		void ResolveContact(physics::Contact& contact);
 		void ResolveContacts(std::vector<physics::Contact> contacts);
+		void RealizePositions();
 	};
 
 	void LogVec3(glm::vec3 v);

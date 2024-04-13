@@ -20,6 +20,7 @@
 #include "headers/Model.h"
 #include "headers/MeshRenderer.h"
 #include "headers/Physics.h"
+#include "headers/PBD.h"
 #include "headers/Rope.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
@@ -76,6 +77,7 @@ int main()
     Input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
     physics::PhysicsManager::Initialize();
+    pbd::PBDManager::Initialize(2, 0.5f);
 
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -107,7 +109,6 @@ int main()
 
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
-    //collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(1, 2);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
 
     auto scene_root = GameObject::Create();
@@ -214,7 +215,8 @@ int main()
         float delta_time = current_time - previous_time;
         previous_time = current_time;
 
-        
+        Input::InputManager::i_->Update();
+
 #pragma region Collisions and Physics
 
         static float cp_time = 0;
@@ -222,21 +224,31 @@ int main()
 
         std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
 
-        Input::InputManager::i_->Update();
         physics::PhysicsManager::i_->GeneratorUpdate();
         physics::PhysicsManager::i_->ParticleUpdate(delta_time);
-        collisions::CollisionManager::i_->UpdateColliders();
+        collisions::CollisionManager::i_->PredictColliders();
         collisions::CollisionManager::i_->CollisionCheck(contacts);
         physics::PhysicsManager::i_->ResolveContacts(contacts);
         rope.EnforceRestraints(delta_time);
-        std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
+        physics::PhysicsManager::i_->RealizePositions();
+        
 
+       /* pbd::PBDManager::i_->GeneratorUpdate();
+        pbd::PBDManager::i_->Integration(delta_time);
+        collisions::CollisionManager::i_->PredictColliders();
+        collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
+        pbd::PBDManager::i_->ResolveContacts();
+        pbd::PBDManager::i_->ClearContacts();
+        pbd::PBDManager::i_->ProjectConstraints(delta_time);
+        pbd::PBDManager::i_->UpdatePositions(delta_time);*/
+        
+        std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
         cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
         cp_idx++;
 
         if (cp_idx == 120)
         {
-            // std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
+            std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
             cp_idx = 0;
             cp_time = 0.0f;
         }
@@ -342,6 +354,7 @@ int main()
 #pragma endregion
     }
 
+    pbd::PBDManager::Destroy();
     physics::PhysicsManager::Destroy();
     collisions::CollisionManager::Destroy();
     Input::InputManager::Destroy();
