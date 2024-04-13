@@ -15,6 +15,7 @@ uniform sampler2D normal_map;
 uniform sampler2D metallic_map;
 uniform sampler2D roughness_map;
 uniform sampler2D ao_map;
+uniform samplerCube _cubemapEnvironment;
  
 const float PI = 3.14159265359;
 
@@ -61,9 +62,11 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 void main()
     {
 		vec3 albedo = texture(albedo_map, Texture_coords).rgb;
+        vec3 radiance = texture(_cubemapEnvironment, w_i).rgb; 
 		float metallic = texture(metallic_map, Texture_coords).r;
 		float roughness = texture(roughness_map, Texture_coords).r;
 		float ao = texture(ao_map, Texture_coords).r;
+
 
         vec3 N = normalize(Normal); 
         vec3 V = normalize(camPos - WorldPos);
