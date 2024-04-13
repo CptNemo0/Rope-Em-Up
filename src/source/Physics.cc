@@ -168,11 +168,29 @@ void physics::PhysicsManager::ResolveContact(physics::Contact& contact)
 	assert(mass_sum > 0.00001f);
 	glm::vec3 mumu = ma * ua + mb * ub;
 
-	va = ( (mumu + (0.1f * mb * (ub - ua))) / (mass_sum));
-	vb = ( (mumu + (0.1f * ma * (ua - ub))) / (mass_sum));
+	va = ( (mumu + (kCoeffiecentOfResitution * mb * (ub - ua))) / (mass_sum));
+	vb = ( (mumu + (kCoeffiecentOfResitution * ma * (ua - ub))) / (mass_sum));
 
 	contact.a->velocity_ = va;
 	contact.b->velocity_ = vb;
+
+	/*glm::vec3 va = glm::vec3(0.0f);
+	glm::vec3 vb = glm::vec3(0.0f);
+
+	glm::vec3 ua = contact.a->velocity_;
+	glm::vec3 ub = contact.b->velocity_;
+
+	float ma = contact.a->mass_;
+	float mb = contact.b->mass_;
+
+	glm::vec3 ga = ua * ma;
+	glm::vec3 gb = ub * mb;
+
+	va = ua + gb * contact.a->inverse_mass_;
+	vb = ub + ga * contact.b->inverse_mass_;
+
+	contact.a->velocity_ = va * kCoeffiecentOfResitution;
+	contact.b->velocity_ = vb * kCoeffiecentOfResitution;*/
 }
 
 void physics::PhysicsManager::ResolveContacts(std::vector<physics::Contact> contacts)

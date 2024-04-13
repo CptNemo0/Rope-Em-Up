@@ -1,10 +1,6 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#define gCOEFFIECENT_OF_RESTITUTION 0.9;
-#define gCLAMP_MAX 1000.0;
-#define gCLAMP_MIN -1000.0;
-
 #include "glm/glm.hpp"
 #include <memory>
 #include "Transform.h"
@@ -53,7 +49,7 @@ namespace Components
 namespace physics
 {
 	const float kMaxForce = 100.0f;
-
+	const float kCoeffiecentOfResitution = 0.5f;
 	class ForceGenerator
 	{
 	public:

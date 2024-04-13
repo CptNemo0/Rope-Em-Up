@@ -18,20 +18,22 @@ void rope::Rope::CheckRestraints(std::shared_ptr<Components::RopeSegment> a, std
 		glm::normalize(force);
 		force *= -magnitude;
 		particle_b->AddForce(force);
-		particle_a->AddForce(-force);
-		
+		particle_a->AddForce(-force);	
 
+		if (!a->is_puller_ && !b->is_puller_)
+		{
+			auto vl = left_puller_->gameObject_.lock()->GetComponent<Components::Particle>()->velocity_;
+			auto rl = right_puller_->gameObject_.lock()->GetComponent<Components::Particle>()->velocity_;
 
-		/*force = particle_a->transform_->get_position();
-		force -= particle_b->transform_->get_position();
-		magnitude = glm::length(force);
-		magnitude = std::abs(magnitude - kMaxDistance);
-		magnitude *= kSpringConstant;
-		glm::normalize(force);
-		force *= -magnitude;
-		particle_a->AddForce(force);*/
-
-		
+			if(glm::dot(vl, rl) > 0.0f)
+			{
+				auto v = vl + rl;
+				v *= kAdditionalPull;
+				particle_a->velocity_ += v; 
+				particle_b->velocity_ += v;
+				physics::LogVec3(v);
+			}
+		}
 	}
 }
 

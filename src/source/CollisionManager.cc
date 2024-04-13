@@ -78,8 +78,6 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
 
     contacts.clear();
 
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
     for (int i = 0; i < colliders_.size() - 1; i++)
     {
         for (int j = i + 1; j < colliders_.size(); j++)
@@ -112,16 +110,5 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
                 }
             }
         }
-    }
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    
-    time += std::chrono::duration_cast<std::chrono::microseconds> (end - begin).count();
-    idx++;
-
-    if (idx == 60)
-    {
-        //std::cout << "CollisionCheck() time = " << time / idx << "[micro s]" << std::endl;
-        idx = 0;
-        time = 0.0f;
     }
 }

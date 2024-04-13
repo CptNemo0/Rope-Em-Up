@@ -113,13 +113,19 @@ int main()
 
     rope::Rope rope = rope::Rope();
 
+    auto enemy_1 = GameObject::Create(scene_root);
+    enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
+    enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
+    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
+    enemy_1->AddComponent(physics::PhysicsManager::i_->CreateParticle(enemy_1->transform_, 4.0f, 0.9f));
+
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_1->transform_, 1.0f, 0.75f));
     player_1->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_1->transform_));
-
+    player_1->GetComponent<Components::RopeSegment>()->is_puller_ = true;
     rope.AddSegment(player_1->GetComponent<Components::RopeSegment>());
 
     auto player_2 = GameObject::Create(scene_root);
@@ -128,7 +134,7 @@ int main()
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_2->transform_, 1.0f, 0.75f));
     player_2->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_2->transform_));
-
+    player_2->GetComponent<Components::RopeSegment>()->is_puller_ = true;
 
     for (int i = 1; i < 15; i++)
     {
@@ -137,13 +143,17 @@ int main()
         new_object->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
         new_object->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
         new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], new_object->transform_));
-        new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 0.25f, 0.01f));
+        new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 0.25f, 0.05f));
         new_object->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, new_object->transform_));
         rope.AddSegment(new_object->GetComponent<Components::RopeSegment>());
+        new_object->GetComponent<Components::RopeSegment>()->is_puller_ = false;
     }
 
     rope.AddSegment(player_2->GetComponent<Components::RopeSegment>());
     
+    rope.left_puller_ = player_1->GetComponent<Components::RopeSegment>();
+    rope.right_puller_ = player_2->GetComponent<Components::RopeSegment>();
+
     std::cout << rope.Size() << std::endl;
 
 
