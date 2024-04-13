@@ -1,19 +1,24 @@
 #ifndef INPUTOBSERVER_H
 #define INPUTOBSERVER_H
 
-#include "GamepadAxisType.h"
+#include "Action.h"
 
 #include "glm/glm.hpp"
 
 namespace Input
 {
 
+union State
+{
+    glm::vec2 axis;
+    int button;
+};
+
 class InputObserver
 {
 public:
     virtual ~InputObserver() = default;
-    virtual void OnAxisChange(GamepadAxisType axis_type, glm::vec2 state) = 0;
-    virtual void OnButtonChange(int buttonID, bool state) = 0;
+    virtual void OnAction(Action action, State state) = 0;
 };
 
 } // namespace Input
