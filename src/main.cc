@@ -77,7 +77,7 @@ int main()
     Input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
     physics::PhysicsManager::Initialize();
-    pbd::PBDManager::Initialize(2, 0.5f);
+    pbd::PBDManager::Initialize(2, 0.9f);
 
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -113,53 +113,25 @@ int main()
 
     auto scene_root = GameObject::Create();
 
-    rope::Rope rope = rope::Rope();
-
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
     enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(physics::PhysicsManager::i_->CreateParticle(enemy_1->transform_, 4.0f, 0.9f));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(100.0f, 0.9f, enemy_1->transform_));
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
-    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
-    player_1->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_1->transform_, 1.0f, 0.75f));
-    player_1->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_1->transform_));
+    player_1->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, debug_model->meshes_[0], player_1->transform_));
+    player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_1));
-
-    rope.AddSegment(player_1->GetComponent<Components::RopeSegment>());
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->set_position(glm::vec3(11.0f, 0.0f, 0.0f));
     player_2->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
-    player_2->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_2->transform_, 1.0f, 0.75f));
-    player_2->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_2->transform_));
+    player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_2));
-    player_2->GetComponent<Components::RopeSegment>()->is_puller_ = true;
-
-    for (int i = 1; i < 15; i++)
-    {
-        auto new_object = GameObject::Create(scene_root);
-        new_object->transform_->set_position(glm::vec3(i * rope::kMaxDistance, 0.0f, 0.0f));
-        new_object->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
-        new_object->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
-        new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], new_object->transform_));
-        new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 0.25f, 0.05f));
-        new_object->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, new_object->transform_));
-        rope.AddSegment(new_object->GetComponent<Components::RopeSegment>());
-        new_object->GetComponent<Components::RopeSegment>()->is_puller_ = false;
-    }
-
-    rope.AddSegment(player_2->GetComponent<Components::RopeSegment>());
-    
-    rope.left_puller_ = player_1->GetComponent<Components::RopeSegment>();
-    rope.right_puller_ = player_2->GetComponent<Components::RopeSegment>();
-
-    std::cout << rope.Size() << std::endl;
-
 
     for (int i = 1; i < 10; i++)
     {
@@ -169,7 +141,7 @@ int main()
             new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
             new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
             new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], new_object->transform_));
-            new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 2.0f, 0.75f));
+            new_object->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.88f, new_object->transform_));
         }
     }
 
@@ -192,13 +164,11 @@ int main()
     HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
 
-    auto generator_1 = std::make_shared<physics::BasicGenerator>();
-    auto generator_2 = std::make_shared<physics::BasicGenerator>();
+    auto generator_1 = std::make_shared<pbd::BasicGenerator>();
+    auto generator_2 = std::make_shared<pbd::BasicGenerator>();
 
-    physics::PhysicsManager::i_->AddFGRRecord(generator_1, player_1->GetComponent<Components::Particle>());
-    physics::PhysicsManager::i_->AddFGRRecord(generator_2, player_2->GetComponent<Components::Particle>());
-
-    std::vector<physics::Contact> contacts = std::vector<physics::Contact>();
+    pbd::PBDManager::i_->CreateFGRRecord(player_1->GetComponent<Components::PBDParticle>(), generator_1);
+    pbd::PBDManager::i_->CreateFGRRecord(player_2->GetComponent<Components::PBDParticle>(), generator_2);
 
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
@@ -224,24 +194,15 @@ int main()
 
         std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
 
-        physics::PhysicsManager::i_->GeneratorUpdate();
-        physics::PhysicsManager::i_->ParticleUpdate(delta_time);
-        collisions::CollisionManager::i_->PredictColliders();
-        collisions::CollisionManager::i_->CollisionCheck(contacts);
-        physics::PhysicsManager::i_->ResolveContacts(contacts);
-        rope.EnforceRestraints(delta_time);
-        physics::PhysicsManager::i_->RealizePositions();
-        
-
-       /* pbd::PBDManager::i_->GeneratorUpdate();
+        pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(delta_time);
         collisions::CollisionManager::i_->PredictColliders();
         collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
         pbd::PBDManager::i_->ResolveContacts();
-        pbd::PBDManager::i_->ClearContacts();
         pbd::PBDManager::i_->ProjectConstraints(delta_time);
-        pbd::PBDManager::i_->UpdatePositions(delta_time);*/
-        
+        pbd::PBDManager::i_->UpdatePositions(delta_time);
+        pbd::PBDManager::i_->ClearContacts();
+
         std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
         cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
         cp_idx++;
@@ -291,25 +252,25 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_L))
         {
             generator_1->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator_1->magnitude_ = 300;
+            generator_1->magnitude_ = 200;
         }
 
         if (glfwGetKey(window, GLFW_KEY_J))
         {
             generator_1->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator_1->magnitude_ = 300;
+            generator_1->magnitude_ = 200;
         }
 
         if (glfwGetKey(window, GLFW_KEY_I))
         {
             generator_1->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator_1->magnitude_ = 300;
+            generator_1->magnitude_ = 200;
         }
 
         if (glfwGetKey(window, GLFW_KEY_K))
         {
             generator_1->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator_1->magnitude_ = 300;
+            generator_1->magnitude_ = 200;
         }
 
         if (!(glfwGetKey(window, GLFW_KEY_L) || glfwGetKey(window, GLFW_KEY_I) || glfwGetKey(window, GLFW_KEY_K) || glfwGetKey(window, GLFW_KEY_J)))
@@ -322,25 +283,25 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_H))
         {
             generator_2->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator_2->magnitude_ = 300;
+            generator_2->magnitude_ = 200;
         }
 
         if (glfwGetKey(window, GLFW_KEY_F))
         {
             generator_2->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator_2->magnitude_ = 300;
+            generator_2->magnitude_ = 200;
         }
 
         if (glfwGetKey(window, GLFW_KEY_T))
         {
             generator_2->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator_2->magnitude_ = 300;
+            generator_2->magnitude_ = 200;
         }
 
         if (glfwGetKey(window, GLFW_KEY_G))
         {
             generator_2->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator_2->magnitude_ = 300;
+            generator_2->magnitude_ = 200;
         }
 
         if (!(glfwGetKey(window, GLFW_KEY_H) || glfwGetKey(window, GLFW_KEY_F) || glfwGetKey(window, GLFW_KEY_T) || glfwGetKey(window, GLFW_KEY_G)))

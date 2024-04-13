@@ -2,6 +2,32 @@
 
 pbd::PBDManager* pbd::PBDManager::i_ = nullptr;
 
+void LogVec3(glm::vec3 a)
+{
+	std::cout << "x: " << a.x << " y: " << a.y << " z: " << a.z << "\n";
+}
+
+float pbd::Clampf(float v, float max, float min)
+{
+	if (v < min)
+	{
+		return min;
+	}
+	else if (v > max)
+	{
+		return max;
+	}
+
+	return v;
+}
+
+void ClampElementwise(glm::vec3& v, float max, float min)
+{
+	v.x = pbd::Clampf(v.x, max, min);
+	v.y = pbd::Clampf(v.y, max, min);
+	v.z = pbd::Clampf(v.z, max, min);
+}
+
 void Components::PBDParticle::AddForce(glm::vec3 force)
 {
 	forces_ += force;
@@ -15,8 +41,8 @@ void Components::PBDParticle::ZeroForces()
 void Components::PBDParticle::SympleticEulerIntegration(float t)
 {
 	UpdateVelocity(t);
-	ZeroForces();
 	DampVelocity();
+	ZeroForces();
 	PredictPosition(t);
 }
 
@@ -27,6 +53,7 @@ void Components::PBDParticle::DampVelocity()
 
 void Components::PBDParticle::UpdateVelocity(float t)
 {
+	ClampElementwise(forces_, 1000.0f, -1000.0f);
 	velocity_ = velocity_ + t * inverse_mass_ * forces_;
 }
 
@@ -37,8 +64,31 @@ void Components::PBDParticle::PredictPosition(float t)
 
 void Components::PBDParticle::UpdatePosition(float t)
 {
-	velocity_ = (transform_->get_predicted_position() - transform_->get_position()) / t;
-	transform_->set_position(transform_->get_predicted_position());
+	if (glm::length(velocity_) != 0.0f && transform_->get_position() == transform_->get_predicted_position())
+	{
+		transform_->set_position(transform_->get_predicted_position());
+	}
+	else
+	{
+		auto pp = transform_->get_predicted_position();
+		auto p = transform_->get_position();
+		velocity_ = (pp - p) / t;
+		transform_->set_position(transform_->get_predicted_position());
+	}
+	
+}
+
+void Components::PBDParticle::Start()
+{
+}
+
+void Components::PBDParticle::Update()
+{
+}
+
+Components::PBDParticle::~PBDParticle()
+{
+	std::cout << "DELETING PARTICLE!\n";
 }
 
 
@@ -68,6 +118,14 @@ pbd::Contact::Contact(std::shared_ptr<Components::PBDParticle> p1, std::shared_p
 	contact_normal.z = tmp.z;
 	glm::normalize(contact_normal);
 }
+
+pbd::Contact::~Contact()
+{
+	a = nullptr;
+	b = nullptr;
+	contact_normal = glm::vec3(0.0f);
+}
+
 
 
 pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution)
@@ -106,7 +164,7 @@ std::shared_ptr<Components::PBDParticle> pbd::PBDManager::CreateParticle(float m
 	return p;
 }
 
-void pbd::PBDManager::CreateFGRRecord(std::shared_ptr<Components::PBDParticle> p, std::shared_ptr<pbd::ForceGenerator> g)
+void pbd::PBDManager::CreateFGRRecord(std::shared_ptr<Components::PBDParticle> p, std::shared_ptr<pbd::BasicGenerator> g)
 {
 	pbd::FGRRecord fgrr = pbd::FGRRecord(p, g);
 	generator_registry_.push_back(fgrr);
@@ -127,6 +185,7 @@ void pbd::PBDManager::ResolveContact(const Contact& contact)
 	assert(contact.b != nullptr);
 
 	float separating_velocity = glm::dot((contact.a->velocity_ - contact.b->velocity_), contact.contact_normal);
+	
 	if (separating_velocity > 0)
 	{
 		return;
@@ -134,7 +193,6 @@ void pbd::PBDManager::ResolveContact(const Contact& contact)
 
 	float new_sep_vel = -separating_velocity * coeffiecent_of_restitution_;
 	float delta_velocity = new_sep_vel - separating_velocity;
-
 	float total_inverse_mass = contact.a->inverse_mass_ + contact.b->inverse_mass_;
 
 	if (total_inverse_mass <= 0)

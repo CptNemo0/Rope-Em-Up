@@ -5,7 +5,7 @@
 #include "InputObserver.h"
 #include "InputManager.h"
 #include "Physics.h"
-
+#include "PBD.h"
 namespace Components
 {
 
@@ -14,8 +14,8 @@ class PlayerController : public Component, public Input::InputObserver, public s
 private:
     int gamepadID_;
     std::shared_ptr<Transform> transform_;
-    std::shared_ptr<physics::BasicGenerator> move_generator_;
-    std::shared_ptr<physics::BasicGenerator> pull_generator_;
+    std::shared_ptr<pbd::BasicGenerator> move_generator_;
+    std::shared_ptr<pbd::BasicGenerator> pull_generator_;
     int speed_ = 200;
     int pull_power_ = 1000;
     glm::vec3 direction_ = glm::vec3(0.0f);

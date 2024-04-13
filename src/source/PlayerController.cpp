@@ -10,13 +10,13 @@ void Components::PlayerController::Start()
     transform_ = gameObject_.lock()->transform_;
     Input::InputManager::i_->AddObserver(gamepadID_, shared_from_this());
 
-    move_generator_ = std::make_shared<physics::BasicGenerator>();
-    pull_generator_ = std::make_shared<physics::BasicGenerator>();
+    move_generator_ = std::make_shared<pbd::BasicGenerator>();
+    pull_generator_ = std::make_shared<pbd::BasicGenerator>();
 
-    auto particle_component = gameObject_.lock()->GetComponent<Components::Particle>();
+    auto particle_component = gameObject_.lock()->GetComponent<Components::PBDParticle>();
 
-    physics::PhysicsManager::i_->AddFGRRecord(move_generator_, particle_component);
-    physics::PhysicsManager::i_->AddFGRRecord(pull_generator_, particle_component);
+    pbd::PBDManager::i_->CreateFGRRecord(particle_component, move_generator_);
+    pbd::PBDManager::i_->CreateFGRRecord(particle_component, pull_generator_);
 }
 
 void Components::PlayerController::Update()

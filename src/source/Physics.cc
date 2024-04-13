@@ -172,8 +172,6 @@ void physics::PhysicsManager::ResolveContact(physics::Contact& contact)
 	float new_sep_vel = -separating_velocity * kCoeffiecentOfResitution;
 	float delta_velocity = new_sep_vel - separating_velocity;
 	
-	std::cout << delta_velocity << "\n";
-		;
 	float total_inverse_mass = contact.a->inverse_mass_ + contact.b->inverse_mass_;
 
 	if (total_inverse_mass <= 0)

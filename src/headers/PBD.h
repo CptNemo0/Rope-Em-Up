@@ -1,16 +1,18 @@
 #ifndef PBD_H
 #define PBD_H
 
+#include <iostream>
 #include <memory>
 #include <vector>
 
 #include "glm/glm.hpp"
 
+#include "Component.h"
 #include "Transform.h"
 
 namespace Components
 {
-	class PBDParticle
+	class PBDParticle : public Component
 	{
 	public:
 		std::shared_ptr<Components::Transform> transform_;
@@ -35,6 +37,12 @@ namespace Components
 		void UpdateVelocity(float t);
 		void PredictPosition(float t);
 		void UpdatePosition(float t);
+
+		// Inherited via Component
+		void Start() override;
+		void Update() override;
+
+		~PBDParticle();
 	};
 }
 
@@ -88,7 +96,7 @@ namespace pbd
 	struct Contact
 	{
 		Contact(std::shared_ptr<Components::PBDParticle> p1, std::shared_ptr<Components::PBDParticle> p2);
-		~Contact() = default;
+		~Contact();
 		std::shared_ptr<Components::PBDParticle> a;
 		std::shared_ptr<Components::PBDParticle> b;
 		glm::vec3 contact_normal;
@@ -133,12 +141,14 @@ namespace pbd
 		void ProjectConstraints(float t);
 
 		std::shared_ptr<Components::PBDParticle> CreateParticle(float mass, float damping_factor, std::shared_ptr<Components::Transform> transform);
-		void CreateFGRRecord(std::shared_ptr<Components::PBDParticle> p, std::shared_ptr<pbd::ForceGenerator> g);
+		void CreateFGRRecord(std::shared_ptr<Components::PBDParticle> p, std::shared_ptr<pbd::BasicGenerator> g);
 		void ClearContacts();
 		void ResolveContact(const Contact& contact);
 		void ResolveContacts();
 		void UpdatePositions(float t);
 		void GeneratorUpdate();
 	};
+	float Clampf(float v, float max, float min);
+	void ClampElementwise(glm::vec3& v, float max, float min);
 }
 #endif // !PBD_H
