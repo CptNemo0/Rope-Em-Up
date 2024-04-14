@@ -35,15 +35,17 @@ void Components::PlayerController::OnAction(Action action, Input::State state)
         }
         case Action::PULL_ROPE:
         {
-            if (state.button)
+            if (state.button && !is_pulling_)
             {
+                is_pulling_ = true;
                 pull_generator_->direction_ = move_generator_->direction_;
                 pull_generator_->magnitude_ = pull_power_;
-            }
-            else
-            {
-                pull_generator_->direction_ = glm::vec3(0.0f);
-                pull_generator_->magnitude_ = 0.0f;
+                Timer::AddTimer(0.25f, [this]()
+                {
+                    pull_generator_->magnitude_ = 0;
+                    std::cout << "Pulling stopped" << std::endl;
+                });
+                Timer::AddTimer(1.0f, [this](){ is_pulling_ = false; });
             }
             break;
         }

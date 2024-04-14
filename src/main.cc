@@ -29,7 +29,6 @@
 #include "headers/HUDRenderer.h"
 #include "headers/TextRenderer.h"
 #include "headers/PlayerController.h"
-#include "headers/Timer.h"
 
 int main()
 {
@@ -243,7 +242,7 @@ int main()
             cp_time = 0.0f;
         }
 #pragma endregion
-#pragma region Other
+#pragma region GO Update and Draw
 
         utility::DebugCameraMovement(window, camera, delta_time);
 
@@ -258,11 +257,14 @@ int main()
 
         scene_root->PropagateUpdate();
 
+#pragma endregion
+#pragma region Interface
+
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        /*HUDshader->Use();
+        HUDshader->Use();
 
         HUD_root->PropagateUpdate();
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
@@ -270,77 +272,12 @@ int main()
         HUDTextShader->Use();
 
         HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
-        HUDText_root->PropagateUpdate();*/
+        HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-        generator_1->direction_ = glm::vec3(0.0f);
-        generator_1->magnitude_ = 0.0f;
-        generator_2->direction_ = glm::vec3(0.0f);
-        generator_2->magnitude_ = 0.0f;
 
-        float debug_m =200.0f;
-
-        if (glfwGetKey(window, GLFW_KEY_L))
-        {
-            generator_1->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator_1->magnitude_ = debug_m;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_J))
-        {
-            generator_1->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator_1->magnitude_ = debug_m;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_I))
-        {
-            generator_1->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator_1->magnitude_ = debug_m;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_K))
-        {
-            generator_1->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator_1->magnitude_ = debug_m;
-        }
-
-        if (!(glfwGetKey(window, GLFW_KEY_L) || glfwGetKey(window, GLFW_KEY_I) || glfwGetKey(window, GLFW_KEY_K) || glfwGetKey(window, GLFW_KEY_J)))
-        {
-            generator_1->direction_ = glm::vec3(0.0f);
-            generator_1->magnitude_ = 0.0f;
-        }
-
-
-        if (glfwGetKey(window, GLFW_KEY_H))
-        {
-            generator_2->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator_2->magnitude_ = debug_m;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_F))
-        {
-            generator_2->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator_2->magnitude_ = debug_m;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_T))
-        {
-            generator_2->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator_2->magnitude_ = debug_m;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_G))
-        {
-            generator_2->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator_2->magnitude_ = debug_m;
-        }
-
-        if (!(glfwGetKey(window, GLFW_KEY_H) || glfwGetKey(window, GLFW_KEY_F) || glfwGetKey(window, GLFW_KEY_T) || glfwGetKey(window, GLFW_KEY_G)))
-        {
-            generator_2->direction_ = glm::vec3(0.0f);
-            generator_2->magnitude_ = 0.0f;
-        }
+#pragma endregion
 
         glfwSwapBuffers(window);
 
