@@ -29,6 +29,7 @@
 #include "headers/HUDRenderer.h"
 #include "headers/TextRenderer.h"
 #include "headers/PlayerController.h"
+#include "headers/Timer.h"
 
 int main()
 {
@@ -185,6 +186,7 @@ int main()
         float delta_time = current_time - previous_time;
         previous_time = current_time;
 
+        Timer::Update(delta_time);
         Input::InputManager::i_->Update();
 
 #pragma region Collisions and Physics
