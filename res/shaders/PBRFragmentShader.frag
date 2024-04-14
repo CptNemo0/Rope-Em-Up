@@ -10,12 +10,17 @@ uniform vec3 light_colors[4];
 
 uniform vec3 camera_position;
 
-uniform sampler2D albedo_map;
-uniform sampler2D normal_map;
-uniform sampler2D metallic_map;
-uniform sampler2D roughness_map;
-uniform sampler2D ao_map;
-uniform samplerCube _cubemapEnvironment;
+//uniform sampler2D albedo_map;
+//uniform sampler2D normal_map;
+//uniform sampler2D metallic_map;
+//uniform sampler2D roughness_map;
+//uniform sampler2D ao_map;
+//uniform samplerCube _cubemapEnvironment;
+
+uniform vec3 albedo;
+uniform float metallic;
+uniform float roughness;
+uniform float ao;
  
 const float PI = 3.14159265359;
 
@@ -61,15 +66,17 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
 void main()
     {
-		vec3 albedo = texture(albedo_map, Texture_coords).rgb;
-        vec3 radiance = texture(_cubemapEnvironment, w_i).rgb; 
-		float metallic = texture(metallic_map, Texture_coords).r;
-		float roughness = texture(roughness_map, Texture_coords).r;
-		float ao = texture(ao_map, Texture_coords).r;
+		//vec3 albedo = texture(albedo_map, Texture_coords).rgb;
+        //vec3 radiance = texture(_cubemapEnvironment, w_i).rgb; 
+		//float metallic = texture(metallic_map, Texture_coords).r;
+		//float roughness = texture(roughness_map, Texture_coords).r;
+		//float ao = texture(ao_map, Texture_coords).r;
 
 
         vec3 N = normalize(Normal); 
-        vec3 V = normalize(camPos - WorldPos);
+        vec3 V = normalize(camera_position - World_position);
+        vec3 R = reflect(-V, N); 
+
 
         vec3 F0 = vec3(0.04);
         F0 = mix(F0, albedo, metallic);
@@ -79,10 +86,10 @@ void main()
         for(int i = 0; i < 4; ++i) 
         {
             //radiation
-            vec3 L = normalize(light_positions[i] - WorldPos);
+            vec3 L = normalize(light_positions[i] - World_position);
             vec3 H = normalize(V + L);
 
-            float distance    = length(light_positions[i] - WorldPos);
+            float distance    = length(light_positions[i] - World_position);
             float attenuation = 1.0 / (distance * distance);
             vec3 radiance     = light_colors[i] * attenuation; 
 
@@ -96,7 +103,7 @@ void main()
 
 			vec3 numerator    = NDF * G * F;
 			float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-			vec3 specular     = numerator / max(denominator, 0.001;
+			vec3 specular     = numerator / max(denominator, 0.001);
 
 			vec3 kS = F;
 			vec3 kD = 1.0 - kS;
@@ -110,7 +117,9 @@ void main()
         vec3 ambient = vec3(0.03) * albedo * ao;
         vec3 color   = ambient + Lo;
 
+    // HDR tonemapping
         color = color / (color + vec3(1.0));
+    // gamma correction
         color = pow(color, vec3(1.0/2.2)); 
         FragColor = vec4(color, 1.0);
 }

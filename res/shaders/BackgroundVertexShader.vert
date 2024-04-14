@@ -1,17 +1,17 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
 
-uniform mat4 projection;
-uniform mat4 view;
+uniform mat4 projection_matrix;
+uniform mat4 view_matrix;
 
-out vec3 WorldPos;
+out vec3 World_position;
 
 void main()
 {
-    WorldPos = aPos;
+    World_position = aPos;
 
-	mat4 rotView = mat4(mat3(view));
-	vec4 clipPos = projection * rotView * vec4(WorldPos, 1.0);
+	mat4 rotView = mat4(mat3(view_matrix));
+	vec4 clipPos = projection_matrix * rotView * vec4(World_position, 1.0);
 
 	gl_Position = clipPos.xyww;
 }
