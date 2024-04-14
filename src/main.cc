@@ -209,9 +209,15 @@ int main()
         static float previous_time = glfwGetTime();
         float current_time = glfwGetTime();
         float delta_time = current_time - previous_time;
+
+        #ifdef _DEBUG
+            delta_time = glm::clamp(delta_time, 0.0f, (1.0f / 30.0f));
+        #endif
+
         previous_time = current_time;
 
         Timer::Update(delta_time);
+        utility::DebugCameraMovement(window, camera, delta_time);
         Input::InputManager::i_->Update();
 
 #pragma region Collisions and Physics
@@ -243,8 +249,6 @@ int main()
         }
 #pragma endregion
 #pragma region GO Update and Draw
-
-        utility::DebugCameraMovement(window, camera, delta_time);
 
         shader->Use();
 
