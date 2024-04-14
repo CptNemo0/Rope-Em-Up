@@ -20,7 +20,7 @@ private:
     std::shared_ptr<pbd::BasicGenerator> pull_generator_;
     int speed_ = 200;
     int pull_power_ = 1000;
-    bool is_pulling_ = false;
+    bool is_pulling_ = false, pulling_cooldown_ = false;
     glm::vec3 direction_ = glm::vec3(0.0f);
 public:
     PlayerController(int gamepadID);

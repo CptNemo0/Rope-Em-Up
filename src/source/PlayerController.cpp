@@ -11,6 +11,8 @@ void Components::PlayerController::Start()
     Input::InputManager::i_->AddObserver(gamepadID_, shared_from_this());
 
     move_generator_ = std::make_shared<pbd::BasicGenerator>();
+    move_generator_->magnitude_ = speed_;
+
     pull_generator_ = std::make_shared<pbd::BasicGenerator>();
 
     auto particle_component = gameObject_.lock()->GetComponent<Components::PBDParticle>();
@@ -21,6 +23,10 @@ void Components::PlayerController::Start()
 
 void Components::PlayerController::Update()
 {
+    if (!is_pulling_)
+    {
+        move_generator_->direction_ = direction_;
+    }
 }
 
 void Components::PlayerController::OnAction(Action action, Input::State state)
@@ -29,23 +35,27 @@ void Components::PlayerController::OnAction(Action action, Input::State state)
     {
         case Action::MOVE:
         {
-            move_generator_->direction_ = glm::vec3(state.axis.x, 0.0f, state.axis.y);
-            move_generator_->magnitude_ = speed_;
+            direction_ = glm::vec3(state.axis.x, 0.0f, state.axis.y);
             break;
         }
         case Action::PULL_ROPE:
         {
-            if (state.button && !is_pulling_)
+            if (state.button && !pulling_cooldown_)
             {
-                is_pulling_ = true;
+                pulling_cooldown_ = true;
+                Timer::AddTimer(1.0f, [this]()
+                {
+                    pulling_cooldown_ = false;
+                });
+
                 pull_generator_->direction_ = move_generator_->direction_;
                 pull_generator_->magnitude_ = pull_power_;
+                is_pulling_ = true;
                 Timer::AddTimer(0.25f, [this]()
                 {
                     pull_generator_->magnitude_ = 0;
-                    std::cout << "Pulling stopped" << std::endl;
+                    is_pulling_ = false;
                 });
-                Timer::AddTimer(1.0f, [this](){ is_pulling_ = false; });
             }
             break;
         }
