@@ -144,18 +144,32 @@ void pbd::RopeConstraint::Enforce()
 	float w2 = p2_->inverse_mass_;
 
 	float distance = glm::distance(x2, x1);
+	
+	/*if (distance > max_distance_)
+	{
+		float inv_distance = 1.0f / distance;
+
+		auto separation_vector = (distance - max_distance_) * inv_distance * (x2 - x1);
+
+		auto dx1 = 0.5f * separation_vector;
+		auto dx2 = -0.5f * separation_vector;
+
+		p1_->transform_->set_predicted_position(x1 + dx1);
+		p2_->transform_->set_predicted_position(x2 + dx2);
+	}*/
 
 	if (distance > max_distance_)
 	{
 		float inv_distance = 1.0f / distance;
 
-		auto dx1 = (w1 / (w1 + w2)) * (distance - max_distance_) * inv_distance * (x2 - x1);
-		auto dx2 = -dx1;
+		auto separation_vector = (distance - max_distance_) * inv_distance * (x2 - x1);
+
+		auto dx1 = (w1 / (w1 + w2)) * separation_vector;
+		auto dx2 = -(w2 / (w1 + w2)) * separation_vector;
 
 		p1_->transform_->set_predicted_position(x1 + dx1);
 		p2_->transform_->set_predicted_position(x2 + dx2);
 	}
-	
 }
 
 

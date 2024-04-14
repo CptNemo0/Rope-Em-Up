@@ -118,7 +118,7 @@ int main()
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
     enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(100.0f, 0.9f, enemy_1->transform_));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(100.0f, 0.3f, enemy_1->transform_));
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -128,7 +128,7 @@ int main()
     player_1->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->set_position(glm::vec3(10.5f, 0.0f, 0.0f));
+    player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/3.0f), 0.0f, 0.0f));
     player_2->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
@@ -148,29 +148,29 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 30; i++)
     {
         auto rope_segment = GameObject::Create(scene_root);
         rope_segment->transform_->set_scale(glm::vec3(0.15f, 0.15f, 0.15f));
-        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)*0.5f, 0.0f, 0.0f));
+        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/3.0f, 0.0f, 0.0f));
         physics::LogVec3(rope_segment->transform_->get_position());
         rope_segment->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
         rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment->transform_));
-        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.1f, 0.88f, rope_segment->transform_));
+        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.5f, 0.9f, rope_segment->transform_));
 
         if (i == 0)
         {
-            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.5f);
+            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.34f);
         }
         else
         {
-            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.5f);
+            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.34f);
         }
 
         rope_segments.push_back(rope_segment);
     }
 
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.5f);
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.34f);
 
     auto HUD_root = GameObject::Create();
 
@@ -262,7 +262,7 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        HUDshader->Use();
+        /*HUDshader->Use();
 
         HUD_root->PropagateUpdate();
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
@@ -270,7 +270,7 @@ int main()
         HUDTextShader->Use();
 
         HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
-        HUDText_root->PropagateUpdate();
+        HUDText_root->PropagateUpdate();*/
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
@@ -278,28 +278,31 @@ int main()
         generator_1->magnitude_ = 0.0f;
         generator_2->direction_ = glm::vec3(0.0f);
         generator_2->magnitude_ = 0.0f;
+
+        float debug_m =200.0f;
+
         if (glfwGetKey(window, GLFW_KEY_L))
         {
             generator_1->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator_1->magnitude_ = 300;
+            generator_1->magnitude_ = debug_m;
         }
 
         if (glfwGetKey(window, GLFW_KEY_J))
         {
             generator_1->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator_1->magnitude_ = 300;
+            generator_1->magnitude_ = debug_m;
         }
 
         if (glfwGetKey(window, GLFW_KEY_I))
         {
             generator_1->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator_1->magnitude_ = 300;
+            generator_1->magnitude_ = debug_m;
         }
 
         if (glfwGetKey(window, GLFW_KEY_K))
         {
             generator_1->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator_1->magnitude_ = 300;
+            generator_1->magnitude_ = debug_m;
         }
 
         if (!(glfwGetKey(window, GLFW_KEY_L) || glfwGetKey(window, GLFW_KEY_I) || glfwGetKey(window, GLFW_KEY_K) || glfwGetKey(window, GLFW_KEY_J)))
@@ -312,25 +315,25 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_H))
         {
             generator_2->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator_2->magnitude_ = 300;
+            generator_2->magnitude_ = debug_m;
         }
 
         if (glfwGetKey(window, GLFW_KEY_F))
         {
             generator_2->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator_2->magnitude_ = 300;
+            generator_2->magnitude_ = debug_m;
         }
 
         if (glfwGetKey(window, GLFW_KEY_T))
         {
             generator_2->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator_2->magnitude_ = 300;
+            generator_2->magnitude_ = debug_m;
         }
 
         if (glfwGetKey(window, GLFW_KEY_G))
         {
             generator_2->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator_2->magnitude_ = 300;
+            generator_2->magnitude_ = debug_m;
         }
 
         if (!(glfwGetKey(window, GLFW_KEY_H) || glfwGetKey(window, GLFW_KEY_F) || glfwGetKey(window, GLFW_KEY_T) || glfwGetKey(window, GLFW_KEY_G)))
