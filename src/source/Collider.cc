@@ -24,9 +24,3 @@ void Components::Collider::UpdateColliders()
 	collisions::UpdateCentre(bp_collider_, transform_->get_position());
 	collisions::UpdateVertices(np_collider_, transform_->get_model_matrix());
 }
-
-void Components::Collider::PredictColliders()
-{
-	collisions::UpdateCentre(bp_collider_, transform_->get_predicted_position());
-	collisions::UpdateVertices(np_collider_, transform_->get_prediction_matrix());
-}

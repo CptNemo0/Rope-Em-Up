@@ -2,39 +2,34 @@
 
 void rope::Rope::CheckRestraints(std::shared_ptr<Components::RopeSegment> a, std::shared_ptr<Components::RopeSegment> b, float t)
 {
-	float distance = glm::distance(a->transform_->get_predicted_position(), b->transform_->get_predicted_position());
-	auto particle_a = a->transform_->game_object_->GetComponent<Components::Particle>();
-	auto particle_b = b->transform_->game_object_->GetComponent<Components::Particle>();
-	assert(particle_a != nullptr);
-	assert(particle_b != nullptr);
-	
+	float distance = glm::distance(a->transform_->get_position(), b->transform_->get_position());
 	if (distance >= kMaxDistance)
 	{
-		glm::vec3 force = particle_b->transform_->get_predicted_position();
-		force -= particle_a->transform_->get_predicted_position();
+		auto particle_a = a->transform_->game_object_->GetComponent<Components::Particle>();
+		auto particle_b = b->transform_->game_object_->GetComponent<Components::Particle>();
+		assert(particle_a != nullptr);
+		assert(particle_b != nullptr);
+
+		glm::vec3 force = particle_b->transform_->get_position();
+		force -= particle_a->transform_->get_position();
 		float magnitude = glm::length(force);
 		magnitude = std::abs(magnitude - kMaxDistance);
 		magnitude *= kSpringConstant;
 		glm::normalize(force);
 		force *= -magnitude;
 		particle_b->AddForce(force);
-		particle_a->AddForce(-force);	
 
-		if (!a->is_puller_ && !b->is_puller_)
-		{
-			auto vl = left_puller_->gameObject_.lock()->GetComponent<Components::Particle>()->velocity_;
-			auto rl = right_puller_->gameObject_.lock()->GetComponent<Components::Particle>()->velocity_;
 
-			if(glm::dot(vl, rl) > 0.0f)
-			{
-				auto v = vl + rl;
-				v *= kAdditionalPull;
-				particle_a->velocity_ += v; 
-				particle_b->velocity_ += v;
-				//physics::LogVec3(v);
-			}
-		}
+		force = particle_a->transform_->get_position();
+		force -= particle_b->transform_->get_position();
+		magnitude = glm::length(force);
+		magnitude = std::abs(magnitude - kMaxDistance);
+		magnitude *= kSpringConstant;
+		glm::normalize(force);
+		force *= -magnitude;
+		particle_a->AddForce(force);
 	}
+	
 }
 
 void rope::Rope::EnforceRestraints(float t)

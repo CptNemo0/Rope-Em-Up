@@ -27,32 +27,28 @@ std::shared_ptr<Components::Collider> collisions::CollisionManager::CreateCollid
 void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b)
 {
     auto separation_vector = GetSeparatingVector(a->np_collider_,
-        a->transform_->get_predicted_position(),
+        a->transform_->get_position(),
         b->np_collider_,
-        b->transform_->get_predicted_position());
+        b->transform_->get_position());
 
     bool a_moved = (a->transform_->get_position() != a->transform_->get_previous_position());
     bool b_moved = (b->transform_->get_position() != b->transform_->get_previous_position());
 
     if (a_moved && b_moved)
     {
-        a->transform_->set_predicted_position(a->transform_->get_predicted_position() + separation_vector.sep_a);
-        b->transform_->set_predicted_position(b->transform_->get_predicted_position() + separation_vector.sep_b);
-        a->PredictColliders();
-        b->PredictColliders();
+        a->transform_->set_position(a->transform_->get_position() + separation_vector.sep_a);
+        b->transform_->set_position(b->transform_->get_position() + separation_vector.sep_b);
     }
     else if (a_moved && !b_moved)
     {
-        a->transform_->set_predicted_position(a->transform_->get_predicted_position() + 2.0f * separation_vector.sep_a);
-        a->PredictColliders();
+        a->transform_->set_position(a->transform_->get_position() + 2.0f * separation_vector.sep_a);
+        b->transform_->set_position(b->transform_->get_position() + 0.0f * separation_vector.sep_b);
     }
     else if (!a_moved && b_moved)
     {
-        b->transform_->set_predicted_position(b->transform_->get_predicted_position() + 2.0f * separation_vector.sep_b);
-        b->PredictColliders();
+        a->transform_->set_position(a->transform_->get_position() + 0.0f * separation_vector.sep_a);
+        b->transform_->set_position(b->transform_->get_position() + 2.0f * separation_vector.sep_b);
     }
-
-    
 }
 
 void collisions::CollisionManager::AddCollisionBetweenLayers(int layer_1, int layer_2)
@@ -75,14 +71,6 @@ void collisions::CollisionManager::UpdateColliders()
     }
 }
 
-void collisions::CollisionManager::PredictColliders()
-{
-    for (auto& c : colliders_)
-    {
-        c->PredictColliders();
-    }
-}
-
 void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>& contacts)
 {
     static float time = 0;
@@ -90,6 +78,8 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
 
     contacts.clear();
 
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     for (int i = 0; i < colliders_.size() - 1; i++)
     {
         for (int j = i + 1; j < colliders_.size(); j++)
@@ -97,70 +87,42 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
             std::shared_ptr<Components::Collider> a = colliders_[i];
             std::shared_ptr<Components::Collider> b = colliders_[j];
 
-            bool layer_check = LayerCheck(a->layer_, b->layer_);
-            
-            if (layer_check)
+            if (LayerCheck(a->layer_, b->layer_))
             {
                 bool are_colliding = AABBCollisionCheck(a->bp_collider_, b->bp_collider_);
                 if (are_colliding)
                 {
-                    are_colliding = ConvexHullCheckFaster(a->np_collider_, b->np_collider_);
+                    are_colliding = ConvexHullCheckFaster2(a->np_collider_, b->np_collider_);
                     if (are_colliding)
                     {
                         Separation(a, b);
-                        
+                        a->UpdateColliders();
+                        b->UpdateColliders();
                         auto particle_a = a->gameObject_.lock()->GetComponent<Components::Particle>();
                         auto particle_b = b->gameObject_.lock()->GetComponent<Components::Particle>();
 
                         if (particle_a != nullptr && particle_b != nullptr)
                         {
-                            physics::Contact contact(particle_a, particle_b);
+                            physics::Contact contact;
+                            contact.a = particle_a;
+                            contact.b = particle_b;
                             contacts.push_back(contact);
+                            //physics::PhysicsManager::i_->ResolveContact(particle_a, particle_b);
                         }
                     }
                 }
             }
         }
     }
-}
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    
+    time += std::chrono::duration_cast<std::chrono::microseconds> (end - begin).count();
+    idx++;
 
-void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& contacts)
-{
-    static float time = 0;
-    static int idx = 0;
-
-    contacts.clear();
-
-    for (int i = 0; i < colliders_.size() - 1; i++)
+    if (idx == 60)
     {
-        for (int j = i + 1; j < colliders_.size(); j++)
-        {
-            std::shared_ptr<Components::Collider> a = colliders_[i];
-            std::shared_ptr<Components::Collider> b = colliders_[j];
-
-            bool layer_check = LayerCheck(a->layer_, b->layer_);
-
-            if (layer_check)
-            {
-                bool are_colliding = AABBCollisionCheck(a->bp_collider_, b->bp_collider_);
-                if (are_colliding)
-                {
-                    are_colliding = ConvexHullCheckFaster(a->np_collider_, b->np_collider_);
-                    if (are_colliding)
-                    {
-                        Separation(a, b);
-
-                        auto particle_a = a->gameObject_.lock()->GetComponent<Components::PBDParticle>();
-                        auto particle_b = b->gameObject_.lock()->GetComponent<Components::PBDParticle>();
-
-                        if (particle_a != nullptr && particle_b != nullptr)
-                        {
-                            pbd::Contact contact(particle_a, particle_b);
-                            contacts.push_back(contact);
-                        }
-                    }
-                }
-            }
-        }
+        //std::cout << "CollisionCheck() time = " << time / idx << "[micro s]" << std::endl;
+        idx = 0;
+        time = 0.0f;
     }
 }
