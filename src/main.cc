@@ -35,6 +35,15 @@ int main()
     const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
     const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
 
+    const std::string kPBRVertexShaderPath = "res/shaders/PBRVertexShader.vert";
+    const std::string kPBRFragmentShaderPath = "res/shaders/PBRFragmentShader.frag";
+    
+    const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemapVertexShader.vert";
+    const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemapFragmentShader.frag";
+    
+    const std::string kBackgroundVertexShaderPath = "res/shaders/BackgroundVertexShader.vert";
+    const std::string kBackgroundFragmentShaderPath = "res/shaders/BackgroundFragmentShader.frag";
+
     const std::string kHUDVertexShaderPath = "res/shaders/HUDVertexShader.vert";
     const std::string kHUDFragmentShaderPath = "res/shaders/HUDFragmentShader.frag";
 

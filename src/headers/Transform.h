@@ -23,7 +23,8 @@ private:
     glm::vec3 rotation_;
     glm::vec3 scale_;
 
-    glm::vec3 previous_position_;
+    glm::vec3 previous_position_ = glm::vec3(0.0f);
+    glm::vec3 predicted_position_ = glm::vec3(0.0f);
 
     void UpdateSelfAndChildren();
     void CalculateModelMatrix(const glm::mat4 parent_model);
@@ -38,10 +39,12 @@ public:
 
     const glm::vec3 get_position() const;
     const glm::vec3 get_previous_position() const;
+    const glm::vec3 get_predicted_position() const;
     const glm::vec3 get_rotation() const;
     const glm::vec3 get_scale() const;
 
     void set_position(const glm::vec3& position);
+    void set_predicted_position(const glm::vec3& position);
     void set_rotation(const glm::vec3& rotation);
     void set_scale(const glm::vec3& scale);
 
@@ -49,6 +52,7 @@ public:
     void add_rotation(const glm::vec3& rotation);
     void add_scale(const glm::vec3& scale);
     const glm::mat4 get_model_matrix();
+    const glm::mat4 get_prediction_matrix() const;
 };
 
 };
