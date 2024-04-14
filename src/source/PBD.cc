@@ -127,12 +127,43 @@ pbd::Contact::~Contact()
 }
 
 
+pbd::RopeConstraint::RopeConstraint(std::shared_ptr<Components::PBDParticle> p1, std::shared_ptr<Components::PBDParticle> p2, float ml)
+{
+	p1_ = p1;
+	p2_ = p2;
+	max_distance_ = ml;
+	k_ = 1.0f;
+}
+
+void pbd::RopeConstraint::Enforce()
+{
+	auto x1 = p1_->transform_->get_predicted_position();
+	auto x2 = p2_->transform_->get_predicted_position();
+
+	float w1 = p1_->inverse_mass_;
+	float w2 = p2_->inverse_mass_;
+
+	float distance = glm::distance(x2, x1);
+
+	if (distance > max_distance_)
+	{
+		float inv_distance = 1.0f / distance;
+
+		auto dx1 = (w1 / (w1 + w2)) * (distance - max_distance_) * inv_distance * (x2 - x1);
+		auto dx2 = -dx1;
+
+		p1_->transform_->set_predicted_position(x1 + dx1);
+		p2_->transform_->set_predicted_position(x2 + dx2);
+	}
+	
+}
+
 
 pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution)
 {
 	particles_ = std::vector<std::shared_ptr<Components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
-	constraints_ = std::vector<pbd::Constraint>();
+	constraints_ = std::vector<pbd::RopeConstraint>();
 	contacts_ = std::vector<pbd::Contact>();
 	solver_iterations_ = it;
 	coeffiecent_of_restitution_ = coeffiecent_of_restitution;
@@ -168,6 +199,12 @@ void pbd::PBDManager::CreateFGRRecord(std::shared_ptr<Components::PBDParticle> p
 {
 	pbd::FGRRecord fgrr = pbd::FGRRecord(p, g);
 	generator_registry_.push_back(fgrr);
+}
+
+void pbd::PBDManager::CreateRopeConstraint(std::shared_ptr<Components::PBDParticle> p1, std::shared_ptr<Components::PBDParticle> p2, float ml)
+{
+	RopeConstraint constraint = RopeConstraint(p1, p2, ml);
+	constraints_.push_back(constraint);
 }
 
 void pbd::PBDManager::ClearContacts()

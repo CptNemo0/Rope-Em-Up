@@ -87,10 +87,28 @@ namespace pbd
 	class Constraint
 	{
 	public:
-		float k;
+		float k_;
 		Constraint() = default;
 		~Constraint() = default;
-		virtual void Enforce() = 0;
+		virtual void Enforce()
+		{
+			return;
+		}
+	};
+
+	class RopeConstraint : public Constraint
+	{
+	public:
+
+		RopeConstraint(std::shared_ptr<Components::PBDParticle> p1, std::shared_ptr<Components::PBDParticle> p2, float ml);
+		RopeConstraint() = default;
+		~RopeConstraint() = default;
+		std::shared_ptr<Components::PBDParticle> p1_;
+		std::shared_ptr<Components::PBDParticle> p2_;
+		
+		float max_distance_;
+
+		void Enforce() override;
 	};
 
 	struct Contact
@@ -113,7 +131,7 @@ namespace pbd
 
 		std::vector<std::shared_ptr<Components::PBDParticle>> particles_;
 		std::vector<pbd::FGRRecord> generator_registry_;
-		std::vector<pbd::Constraint> constraints_;
+		std::vector<pbd::RopeConstraint> constraints_;
 		std::vector<pbd::Contact> contacts_;
 
 		int solver_iterations_;
@@ -142,6 +160,7 @@ namespace pbd
 
 		std::shared_ptr<Components::PBDParticle> CreateParticle(float mass, float damping_factor, std::shared_ptr<Components::Transform> transform);
 		void CreateFGRRecord(std::shared_ptr<Components::PBDParticle> p, std::shared_ptr<pbd::BasicGenerator> g);
+		void CreateRopeConstraint(std::shared_ptr<Components::PBDParticle> p1, std::shared_ptr<Components::PBDParticle> p2, float ml);
 		void ClearContacts();
 		void ResolveContact(const Contact& contact);
 		void ResolveContacts();
