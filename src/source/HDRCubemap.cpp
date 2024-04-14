@@ -2,7 +2,7 @@
 
 
 
-HDRCubemap::HDRCubemap(const std::string& path, std::shared_ptr<Shader> BackgroundShade, std::shared_ptr<Shader> EquirectangularToCubemapShader)
+HDRCubemap::HDRCubemap(const std::string& path, std::shared_ptr<Shader> BackgroundShade, std::shared_ptr<Shader> EquirectangularToCubemapShader, std::shared_ptr<Shader> IrrandanceShader)
 {
 	path_ = path;
 	BackgroundShader_ = BackgroundShade;
@@ -99,21 +99,49 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, std::shared_ptr<llr::Camera> cam
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // initialize static shader uniforms before rendering
-    // --------------------------------------------------
-    glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+    // pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
+   // --------------------------------------------------------------------------------
+    
+    glGenTextures(1, &irradianceMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    BackgroundShader_->Use();
-    BackgroundShader_->SetMatrix4("projection_matrix", projection);
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
-    // then before rendering, configure the viewport to the original framebuffer's screen dimensions
-    int scrWidth, scrHeight;
-    glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
-    glViewport(0, 0, scrWidth, scrHeight);
+    // pbr: solve diffuse integral by convolution to create an irradiance (cube)map.
+    // -----------------------------------------------------------------------------
+    IrrandanceShader_->Use();
+    IrrandanceShader_->SetInt("environmentMap", 0);
+    IrrandanceShader_->SetMatrix4("projection_matrix", captureProjection);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+
+    glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        IrrandanceShader_->SetMatrix4("view_matrix", captureViews[i]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        RenderCube();
+    }
 }
 
 void HDRCubemap::RenderCube()
 {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
         if (cubeVAO == 0)
         {
             float vertices[] = {
