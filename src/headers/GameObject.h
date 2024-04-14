@@ -28,18 +28,19 @@ public:
 
 	void Update();
 	void PropagateUpdate();
+	void PropagateStart();
 
 	template <typename T>
 	void AddComponent(std::shared_ptr<T> component)
 	{
 		components_[typeid(T).name()] = component;
 		component->gameObject_ = shared_from_this();
-		component->Start();
 	}
 
 	template <typename T>
 	std::shared_ptr<T> GetComponent()
 	{
+		assert(components_.find(typeid(T).name()) != components_.end());
 		return std::dynamic_pointer_cast<T>(components_[typeid(T).name()]);
 	}
 };
