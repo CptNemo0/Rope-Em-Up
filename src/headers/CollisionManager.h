@@ -56,7 +56,7 @@ namespace collisions
        
         void CollisionCheck(std::vector<physics::Contact>& contacts);
         void CollisionCheckPBD(std::vector<pbd::Contact>& contacts);
-        void Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b);
+        void Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b, float wa, float wb);
         void AddCollisionBetweenLayers(int layer_1, int layer_2);
         void RemoveCollisionBetweenLayers(int layer_1, int layer_2);
         inline bool LayerCheck(int layer_1, int layer_2)

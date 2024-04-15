@@ -24,7 +24,7 @@ std::shared_ptr<Components::Collider> collisions::CollisionManager::CreateCollid
     return return_value;
 }
 
-void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b)
+void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b, float wa, float wb)
 {
     auto separation_vector = GetSeparatingVector(a->np_collider_,
         a->transform_->get_predicted_position(),
@@ -36,8 +36,9 @@ void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collid
 
     if (a_moved && b_moved)
     {
-        a->transform_->set_predicted_position(a->transform_->get_predicted_position() + separation_vector.sep_a);
-        b->transform_->set_predicted_position(b->transform_->get_predicted_position() + separation_vector.sep_b);
+        a->transform_->set_predicted_position(a->transform_->get_predicted_position() + 2.0f * wa * separation_vector.sep_a);
+        b->transform_->set_predicted_position(b->transform_->get_predicted_position() + 2.0f * wb * separation_vector.sep_b);
+        
         a->PredictColliders();
         b->PredictColliders();
     }
@@ -107,7 +108,7 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
                     are_colliding = ConvexHullCheckFaster(a->np_collider_, b->np_collider_);
                     if (are_colliding)
                     {
-                        Separation(a, b);
+                        Separation(a, b, 0.5f, 0.5f);
                         
                         auto particle_a = a->gameObject_.lock()->GetComponent<Components::Particle>();
                         auto particle_b = b->gameObject_.lock()->GetComponent<Components::Particle>();
@@ -148,15 +149,21 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
                     are_colliding = ConvexHullCheckFaster(a->np_collider_, b->np_collider_);
                     if (are_colliding)
                     {
-                        Separation(a, b);
-
                         auto particle_a = a->gameObject_.lock()->GetComponent<Components::PBDParticle>();
                         auto particle_b = b->gameObject_.lock()->GetComponent<Components::PBDParticle>();
 
                         if (particle_a != nullptr && particle_b != nullptr)
                         {
+                            auto wa = particle_b->mass_ / (particle_a->mass_ + particle_b->mass_);
+                            auto wb = particle_a->mass_ / (particle_a->mass_ + particle_b->mass_);
+                           
+                            Separation(a, b, wa, wb);
                             pbd::Contact contact(particle_a, particle_b);
                             contacts.push_back(contact);
+                        }
+                        else
+                        {
+                            Separation(a, b, 0.5f, 0.5f);
                         }
                     }
                 }

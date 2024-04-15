@@ -119,7 +119,7 @@ int main()
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
     enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(100.0f, 0.1f, enemy_1->transform_));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.3f, enemy_1->transform_));
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -156,7 +156,7 @@ int main()
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/3.0f, 0.0f, 0.0f));
         physics::LogVec3(rope_segment->transform_->get_position());
         rope_segment->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
-        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, cube_model->meshes_[0], rope_segment->transform_));
+        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment->transform_));
         rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.5f, 0.9f, rope_segment->transform_));
 
         if (i == 0)
