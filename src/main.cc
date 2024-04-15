@@ -54,7 +54,13 @@ int main()
     const std::string kEnemyMeshPath = "res/models/enemy.obj";
     const std::string kTestPath = "res/models/test2.obj";
 
-    const float kMsPerUpdate = 6.0f / 1000.0f;
+    float kMsPerUpdate = 5.0f / 1000.0f;
+
+//#if DEBUG
+//    kMsPerUpdate = 6.0f / 1000.0f;
+//#else
+//    kMsPerUpdate = 1.0 / 1000.0f;
+//#endif
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -79,13 +85,14 @@ int main()
     Input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
     physics::PhysicsManager::Initialize();
-    pbd::PBDManager::Initialize(4, 0.9f);
+    pbd::PBDManager::Initialize(3, 0.5f);
 
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
+    camera->set_position(glm::vec3(5.0f, 13.85f, 2.25f));
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
@@ -116,12 +123,14 @@ int main()
     auto scene_root = GameObject::Create();
 
     auto enemy_1 = GameObject::Create(scene_root);
+    enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
     enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.3f, enemy_1->transform_));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
     auto player_1 = GameObject::Create(scene_root);
+    player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
@@ -129,7 +138,8 @@ int main()
     player_1->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/3.0f), 0.0f, 0.0f));
+    player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/5.0f), 0.0f, 0.0f));
+    player_2->transform_->set_position(glm::vec3(10.0f + (1.0f / 5.0f), 0.0f, 0.0f));
     player_2->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
@@ -141,37 +151,39 @@ int main()
         {
             auto new_object = GameObject::Create(scene_root);
             new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
+            new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
             new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
-            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], new_object->transform_));
+            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, player_model->meshes_[0], new_object->transform_));
             new_object->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.88f, new_object->transform_));
         }
     }
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
-    for (int i = 0; i < 30; i++)
+    for (int i = 0; i < 50; i++)
     {
         auto rope_segment = GameObject::Create(scene_root);
-        rope_segment->transform_->set_scale(glm::vec3(0.15f, 0.15f, 0.15f));
-        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/3.0f, 0.0f, 0.0f));
+        rope_segment->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
+        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/5.0f, 0.0f, 0.0f));
+        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
         physics::LogVec3(rope_segment->transform_->get_position());
         rope_segment->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
         rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment->transform_));
-        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.5f, 0.9f, rope_segment->transform_));
+        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
         if (i == 0)
         {
-            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.34f);
+            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.21f);
         }
         else
         {
-            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.34f);
+            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.21f);
         }
 
         rope_segments.push_back(rope_segment);
     }
 
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.34f);
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.21f);
 
     auto HUD_root = GameObject::Create();
 

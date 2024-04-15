@@ -54,7 +54,8 @@ void Components::PBDParticle::DampVelocity()
 void Components::PBDParticle::UpdateVelocity(float t)
 {
 	ClampElementwise(forces_, 1000.0f, -1000.0f);
-	velocity_ = velocity_ + t * inverse_mass_ * forces_;
+	//velocity_ = velocity_ + t * inverse_mass_ * forces_;
+	velocity_ = (transform_->get_position() - transform_->get_previous_position()) / t + t * inverse_mass_ * forces_;
 }
 
 void Components::PBDParticle::PredictPosition(float t)
@@ -72,7 +73,7 @@ void Components::PBDParticle::UpdatePosition(float t)
 	{
 		auto pp = transform_->get_predicted_position();
 		auto p = transform_->get_position();
-		velocity_ = (pp - p) / t;
+		//velocity_ = (pp - p) / t;
 		transform_->set_position(transform_->get_predicted_position());
 	}
 	

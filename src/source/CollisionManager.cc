@@ -31,8 +31,14 @@ void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collid
         b->np_collider_,
         b->transform_->get_predicted_position());
 
-    bool a_moved = (a->transform_->get_position() != a->transform_->get_previous_position());
-    bool b_moved = (b->transform_->get_position() != b->transform_->get_previous_position());
+    a->transform_->set_predicted_position(a->transform_->get_predicted_position() + 2.0f * wa * separation_vector.sep_a);
+    b->transform_->set_predicted_position(b->transform_->get_predicted_position() + 2.0f * wb * separation_vector.sep_b);
+
+    a->PredictColliders();
+    b->PredictColliders();
+
+    /*bool a_moved = (a->transform_->get_predicted_position() != a->transform_->get_previous_position());
+    bool b_moved = (b->transform_->get_predicted_position() != b->transform_->get_previous_position());
 
     if (a_moved && b_moved)
     {
@@ -51,7 +57,7 @@ void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collid
     {
         b->transform_->set_predicted_position(b->transform_->get_predicted_position() + 2.0f * separation_vector.sep_b);
         b->PredictColliders();
-    }
+    }*/
 
     
 }
