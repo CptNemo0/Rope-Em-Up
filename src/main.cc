@@ -54,6 +54,8 @@ int main()
     const std::string kEnemyMeshPath = "res/models/enemy.obj";
     const std::string kTestPath = "res/models/test2.obj";
 
+    const float kMsPerUpdate = 6.0f / 1000.0f;
+
     const float kFov = 90.0f;
     const float kNear = 0.1f;
     const float kFar = 1000.0f;
@@ -117,7 +119,7 @@ int main()
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
     enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(100.0f, 0.3f, enemy_1->transform_));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(100.0f, 0.1f, enemy_1->transform_));
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -154,7 +156,7 @@ int main()
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/3.0f, 0.0f, 0.0f));
         physics::LogVec3(rope_segment->transform_->get_position());
         rope_segment->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
-        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment->transform_));
+        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, cube_model->meshes_[0], rope_segment->transform_));
         rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.5f, 0.9f, rope_segment->transform_));
 
         if (i == 0)
@@ -206,10 +208,11 @@ int main()
         glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        static float lag = 0.0f;
         static float previous_time = glfwGetTime();
         float current_time = glfwGetTime();
         float delta_time = current_time - previous_time;
-
+        lag += delta_time;
         #ifdef _DEBUG
             delta_time = glm::clamp(delta_time, 0.0f, (1.0f / 30.0f));
         #endif
@@ -222,31 +225,38 @@ int main()
 
 #pragma region Collisions and Physics
 
-        static float cp_time = 0;
-        static int cp_idx = 0;
-
-        std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
-
-        pbd::PBDManager::i_->GeneratorUpdate();
-        pbd::PBDManager::i_->Integration(delta_time);
-        collisions::CollisionManager::i_->PredictColliders();
-        collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
-        pbd::PBDManager::i_->ResolveContacts();
-        pbd::PBDManager::i_->ProjectConstraints(delta_time);
-        pbd::PBDManager::i_->UpdatePositions(delta_time);
-        pbd::PBDManager::i_->ClearContacts();
-
-        std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
-        cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
-        cp_idx++;
-
-
-        if (cp_idx == 60)
+        if (lag >= kMsPerUpdate)
         {
-            std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
-            cp_idx = 0;
-            cp_time = 0.0f;
+            static float cp_time = 0;
+            static int cp_idx = 0;
+
+            std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
+
+            pbd::PBDManager::i_->GeneratorUpdate();
+            pbd::PBDManager::i_->Integration(kMsPerUpdate);
+            collisions::CollisionManager::i_->PredictColliders();
+            collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
+            pbd::PBDManager::i_->ResolveContacts();
+            pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
+            pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
+            pbd::PBDManager::i_->ClearContacts();
+
+            std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
+            cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
+            cp_idx++;
+
+
+            if (cp_idx == 60)
+            {
+                std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
+                cp_idx = 0;
+                cp_time = 0.0f;
+            }
+
+            lag -= kMsPerUpdate;
         }
+
+        
 #pragma endregion
 #pragma region GO Update and Draw
 
