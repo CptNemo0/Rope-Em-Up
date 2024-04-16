@@ -10,11 +10,16 @@ uniform vec3 light_colors[4];
 
 uniform vec3 camera_position;
 
-uniform sampler2D albedo_map;
-uniform sampler2D normal_map;
-uniform sampler2D metallic_map;
-uniform sampler2D roughness_map;
-uniform sampler2D ao_map;
+//uniform sampler2D albedo_map;
+//uniform sampler2D normal_map;
+//uniform sampler2D metallic_map;
+//uniform sampler2D roughness_map;
+//uniform sampler2D ao_map;
+
+uniform vec3 albedo;
+uniform float metallic;
+uniform float roughness;
+uniform float ao;
 
 
 // IBL
@@ -74,10 +79,10 @@ void main()
         vec3 R = reflect(-V, N); 
 
 
-		vec3 albedo = texture(albedo_map, Texture_coords).rgb;
-		float metallic = texture(metallic_map, Texture_coords).r;
-		float roughness = texture(roughness_map, Texture_coords).r;
-		float ao = texture(ao_map, Texture_coords).r;
+		//vec3 albedo = texture(albedo_map, Texture_coords).rgb;
+		//float metallic = texture(metallic_map, Texture_coords).r;
+		//float roughness = texture(roughness_map, Texture_coords).r;
+		//float ao = texture(ao_map, Texture_coords).r;
 
         vec3 F0 = vec3(0.04);
         F0 = mix(F0, albedo, metallic);

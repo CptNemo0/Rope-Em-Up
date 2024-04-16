@@ -10,12 +10,14 @@ out vec2 Texture_coords;
 uniform mat4 model_matrix;
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
+uniform mat3 normalMatrix;
+
 
 void main()
 {
 	vec4 mm = model_matrix * vec4(iv_position, 1.0);
 	World_position = vec3(mm);
-	Normal = normalize(vec3(transpose(inverse(model_matrix)) * vec4(iv_normal, 1.0)));;
+	Normal = normalMatrix * iv_normal;
 	Texture_coords = iv_texture;
 
 	gl_Position = projection_matrix * view_matrix * mm;

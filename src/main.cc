@@ -29,7 +29,8 @@
 #include "headers/TextRenderer.h"
 #include "headers/HDRCubemap.h"
 
-unsigned int loadTexture(char const* path);
+//unsigned int loadTexture(char const* path);
+void renderSphere();
 
 int main()
 {
@@ -80,6 +81,7 @@ int main()
     GLFWwindow* window = nullptr;
     GLFWmonitor* monitor = nullptr;
     GLFWvidmode* mode = nullptr;
+
 
     if (int return_value = utility::InitGLFW(window, monitor, mode, kWindowTitle))
     {
@@ -135,6 +137,9 @@ int main()
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f)
     };
+    int nrRows = 7;
+    int nrColumns = 7;
+    float spacing = 2.5;
 
     auto test_model = std::make_shared<Model>(kTestPath);
 
@@ -239,14 +244,19 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    /*PBRShader->Use();
-    PBRShader->SetInt("irradiance_map", 0);
+    PBRShader->Use();
+    /*PBRShader->SetInt("irradiance_map", 0);
     PBRShader->SetInt("albedo_map", 1);
     PBRShader->SetInt("normal_map", 2);
     PBRShader->SetInt("metallic_map", 3);
-    PBRShader->SetInt("roughness_map", 4)*/;
-    //PBRShader->SetInt("ao_map", 4);
+    PBRShader->SetInt("roughness_map", 4);
+    PBRShader->SetFloat("ao", 1.0f);
+    PBRShader->SetInt("ao_map", 4);*/
 
+    PBRShader->SetInt("irradiance_map", 0);
+    glm::vec3 albedo = glm::vec3(0.5f, 0.0f, 0.0f);
+    PBRShader->SetVec3("albedo", albedo);
+    PBRShader->SetFloat("ao", 1.0f);
 
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
@@ -256,8 +266,8 @@ int main()
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
     glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
-    /*PBRShader->Use();
-    PBRShader->SetMatrix4("projection_matrix", projection);*/
+    PBRShader->Use();
+    PBRShader->SetMatrix4("projection_matrix", projection);
 
     BackgroundShader->Use();
     BackgroundShader->SetMatrix4("projection_matrix", projection);
@@ -324,11 +334,12 @@ int main()
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
 
-        /*PBRShader->Use();
+        PBRShader->Use();
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        PBRShader->SetVec3("camera_position", camera->get_position());*/
+        PBRShader->SetVec3("camera_position", camera->get_position());
 
-
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
 
         /*glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
@@ -343,20 +354,47 @@ int main()
 
         scene_root->PropagateUpdate();
 
-        /*for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
+        // render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
+        glm::mat4 model = glm::mat4(1.0f);
+        for (int row = 0; row < nrRows; ++row)
+        {
+            PBRShader->SetFloat("metallic", (float)row / (float)nrRows);
+            for (int col = 0; col < nrColumns; ++col)
+            {
+                // we clamp the roughness to 0.025 - 1.0 as perfectly smooth surfaces (roughness of 0.0) tend to look a bit off
+                // on direct lighting.
+                PBRShader->SetFloat("roughness", glm::clamp((float)col / (float)nrColumns, 0.05f, 1.0f));
+
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(
+                    (float)(col - (nrColumns / 2)) * spacing,
+                    (float)(row - (nrRows / 2)) * spacing,
+                    -2.0f
+                ));
+                PBRShader->SetMatrix4("model", model);
+                PBRShader->SetMatrix3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+                renderSphere();
+            }
+        }
+
+
+        // render light source (simply re-render sphere at light positions)
+        // this looks a bit off as we use the same shader, but it'll make their positions obvious and 
+        // keeps the codeprint small.
+        for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
         {
             glm::vec3 newPos = lightPositions[i] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
             newPos = lightPositions[i];
-            PBRShader->SetVec3("light_positions[" + std::to_string(i) + "]", newPos);
-            PBRShader->SetVec3("light_colors[" + std::to_string(i) + "]", lightColors[i]);
+            PBRShader->SetVec3("lightPositions[" + std::to_string(i) + "]", newPos);
+            PBRShader->SetVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
 
-            auto model = glm::mat4(1.0f);
+            model = glm::mat4(1.0f);
             model = glm::translate(model, newPos);
             model = glm::scale(model, glm::vec3(0.5f));
-            PBRShader->SetMatrix4("model_matrix", model);
-            PBRShader->SetMatrix4("model_matrix", model);
-            scene_root->PropagateUpdate();
-        }*/
+            PBRShader->SetMatrix4("model", model);
+            PBRShader->SetMatrix3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+            renderSphere();
+        }
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -435,39 +473,134 @@ int main()
     return 0;
 }
 
-unsigned int loadTexture(char const* path)
+unsigned int sphereVAO = 0;
+unsigned int indexCount;
+void renderSphere()
 {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
+    if (sphereVAO == 0)
     {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
+        glGenVertexArrays(1, &sphereVAO);
 
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        unsigned int vbo, ebo;
+        glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ebo);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        std::vector<glm::vec3> positions;
+        std::vector<glm::vec2> uv;
+        std::vector<glm::vec3> normals;
+        std::vector<unsigned int> indices;
 
-        stbi_image_free(data);
+        const unsigned int X_SEGMENTS = 64;
+        const unsigned int Y_SEGMENTS = 64;
+        const float PI = 3.14159265359f;
+        for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+        {
+            for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
+            {
+                float xSegment = (float)x / (float)X_SEGMENTS;
+                float ySegment = (float)y / (float)Y_SEGMENTS;
+                float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+                float yPos = std::cos(ySegment * PI);
+                float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+
+                positions.push_back(glm::vec3(xPos, yPos, zPos));
+                uv.push_back(glm::vec2(xSegment, ySegment));
+                normals.push_back(glm::vec3(xPos, yPos, zPos));
+            }
+        }
+
+        bool oddRow = false;
+        for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
+        {
+            if (!oddRow) // even rows: y == 0, y == 2; and so on
+            {
+                for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+                {
+                    indices.push_back(y * (X_SEGMENTS + 1) + x);
+                    indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+                }
+            }
+            else
+            {
+                for (int x = X_SEGMENTS; x >= 0; --x)
+                {
+                    indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+                    indices.push_back(y * (X_SEGMENTS + 1) + x);
+                }
+            }
+            oddRow = !oddRow;
+        }
+        indexCount = static_cast<unsigned int>(indices.size());
+
+        std::vector<float> data;
+        for (unsigned int i = 0; i < positions.size(); ++i)
+        {
+            data.push_back(positions[i].x);
+            data.push_back(positions[i].y);
+            data.push_back(positions[i].z);
+            if (normals.size() > 0)
+            {
+                data.push_back(normals[i].x);
+                data.push_back(normals[i].y);
+                data.push_back(normals[i].z);
+            }
+            if (uv.size() > 0)
+            {
+                data.push_back(uv[i].x);
+                data.push_back(uv[i].y);
+            }
+        }
+        glBindVertexArray(sphereVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+        unsigned int stride = (3 + 2 + 3) * sizeof(float);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
     }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
 
-    return textureID;
+    glBindVertexArray(sphereVAO);
+    glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
 }
+
+//unsigned int loadTexture(char const* path)
+//{
+//    unsigned int textureID;
+//    glGenTextures(1, &textureID);
+//
+//    int width, height, nrComponents;
+//    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+//    if (data)
+//    {
+//        GLenum format;
+//        if (nrComponents == 1)
+//            format = GL_RED;
+//        else if (nrComponents == 3)
+//            format = GL_RGB;
+//        else if (nrComponents == 4)
+//            format = GL_RGBA;
+//
+//        glBindTexture(GL_TEXTURE_2D, textureID);
+//        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+//        glGenerateMipmap(GL_TEXTURE_2D);
+//
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//        stbi_image_free(data);
+//    }
+//    else
+//    {
+//        std::cout << "Texture failed to load at path: " << path << std::endl;
+//        stbi_image_free(data);
+//    }
+//
+//    return textureID;
+//}
