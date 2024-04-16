@@ -22,7 +22,8 @@ public:
 	unsigned int envCubemap = 0;
 	unsigned int irradianceMap = 0;
 
-	HDRCubemap(const std::string& path, std::shared_ptr<Shader> BackgroundShade, std::shared_ptr<Shader> EquirectangularToCubemapShader, std::shared_ptr<Shader> IrrandanceShader);
+	HDRCubemap(const std::string& path, std::shared_ptr<Shader> BackgroundShade, 
+		std::shared_ptr<Shader> EquirectangularToCubemapShader, std::shared_ptr<Shader> IrrandanceShader);
 	~HDRCubemap() = default;
 
 	void LoadHDRimg(GLFWwindow* window, std::shared_ptr<llr::Camera> camera);

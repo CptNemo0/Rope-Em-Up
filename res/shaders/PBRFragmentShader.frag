@@ -27,6 +27,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+    {
+        return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+    }
+
 float DistributionGGX(vec3 N, vec3 H, float roughness) //funkcja rozk³adu wektorów normalnych Trowbridge-Reitz GGX
 {
 		float a      = roughness * roughness;
@@ -109,7 +114,7 @@ void main()
 			float NdotL = max(dot(N, L), 0.0);
 			Lo += (kD * albedo / PI + specular) * radiance * NdotL;
         } 
-        vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+        vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
         vec3 kD = 1.0 - kS;
         kD *= 1.0 - metallic;
         vec3 irradiance = texture(irradiance_map, N).rgb;

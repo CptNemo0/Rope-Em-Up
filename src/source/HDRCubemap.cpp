@@ -7,6 +7,7 @@ HDRCubemap::HDRCubemap(const std::string& path, std::shared_ptr<Shader> Backgrou
 	path_ = path;
 	BackgroundShader_ = BackgroundShade;
 	EquirectangularToCubemapShader_ = EquirectangularToCubemapShader;
+    IrrandanceShader_ = IrrandanceShader;
 }
 
 
@@ -136,6 +137,7 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, std::shared_ptr<llr::Camera> cam
 
         RenderCube();
     }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void HDRCubemap::RenderCube()

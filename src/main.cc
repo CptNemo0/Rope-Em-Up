@@ -29,6 +29,8 @@
 #include "headers/TextRenderer.h"
 #include "headers/HDRCubemap.h"
 
+unsigned int loadTexture(char const* path);
+
 int main()
 {
     const std::string kWindowTitle = "Modul Sumatywny";
@@ -41,7 +43,7 @@ int main()
     
     const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemapVertexShader.vert";
     const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemapFragmentShader.frag";
-    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceFragmentShader.frag";
+    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolutionFragmentShader.frag";
     
     const std::string kBackgroundVertexShaderPath = "res/shaders/BackgroundVertexShader.vert";
     const std::string kBackgroundFragmentShaderPath = "res/shaders/BackgroundFragmentShader.frag";
@@ -65,10 +67,10 @@ int main()
     const std::string kEnemyMeshPath = "res/models/enemy.obj";
     const std::string kTestPath = "res/models/test2.obj";
 
-    unsigned int albedo = TextureFromFile("res/textures/test/test_basecolor.png", "");
-    unsigned int normal = TextureFromFile("res/textures/test/test_normal.png", "");
-    unsigned int metallic = TextureFromFile("res/textures/test/test_metallic.png", "");
-    unsigned int roughness = TextureFromFile("res/textures/test/test_roughness.png", "");
+    /*unsigned int albedo = loadTexture("res/textures/test/test_basecolor.png");
+    unsigned int normal = loadTexture("res/textures/test/test_normal.png");
+    unsigned int metallic = loadTexture("res/textures/test/test_metallic.png");
+    unsigned int roughness = loadTexture("res/textures/test/test_roughness.png");*/
     //unsigned int ao = TextureFromFile("res/textures/test/ao.png", "");
 
     const float kFov = 90.0f;
@@ -157,7 +159,7 @@ int main()
 
     ////test
     auto test = GameObject::Create(scene_root);
-    test->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    test->transform_->set_position(glm::vec3(-3.0f, 0.0f,-3.0f));
     test->AddComponent(std::make_shared<Components::MeshRenderer>(test_model, PBRShader));
 
 
@@ -237,24 +239,25 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    PBRShader->Use();
+    /*PBRShader->Use();
     PBRShader->SetInt("irradiance_map", 0);
     PBRShader->SetInt("albedo_map", 1);
     PBRShader->SetInt("normal_map", 2);
     PBRShader->SetInt("metallic_map", 3);
-    PBRShader->SetInt("roughness_map", 4);
+    PBRShader->SetInt("roughness_map", 4)*/;
     //PBRShader->SetInt("ao_map", 4);
 
 
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
 
+    cubemap->LoadHDRimg(window, camera);
 
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
     glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
-    PBRShader->Use();
-    PBRShader->SetMatrix4("projection_matrix", projection);
+    /*PBRShader->Use();
+    PBRShader->SetMatrix4("projection_matrix", projection);*/
 
     BackgroundShader->Use();
     BackgroundShader->SetMatrix4("projection_matrix", projection);
@@ -264,7 +267,6 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);
 
-    cubemap->LoadHDRimg(window, camera);
     
 
     while (!glfwWindowShouldClose(window))
@@ -322,13 +324,13 @@ int main()
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
 
-        PBRShader->Use();
+        /*PBRShader->Use();
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        PBRShader->SetVec3("camera_position", camera->get_position());
+        PBRShader->SetVec3("camera_position", camera->get_position());*/
 
 
 
-        glActiveTexture(GL_TEXTURE0);
+        /*glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, albedo);
@@ -337,11 +339,11 @@ int main()
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, metallic);
         glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, roughness);
+        glBindTexture(GL_TEXTURE_2D, roughness);*/
 
         scene_root->PropagateUpdate();
 
-        for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
+        /*for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
         {
             glm::vec3 newPos = lightPositions[i] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
             newPos = lightPositions[i];
@@ -352,8 +354,9 @@ int main()
             model = glm::translate(model, newPos);
             model = glm::scale(model, glm::vec3(0.5f));
             PBRShader->SetMatrix4("model_matrix", model);
+            PBRShader->SetMatrix4("model_matrix", model);
             scene_root->PropagateUpdate();
-        }
+        }*/
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -426,6 +429,45 @@ int main()
     Input::InputManager::Destroy();
     
     shader->End();
+    BackgroundShader->End();
+    IrradianceShader->End();
     glfwTerminate();
     return 0;
+}
+
+unsigned int loadTexture(char const* path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
 }
