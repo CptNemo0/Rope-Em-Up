@@ -20,6 +20,7 @@
 #include "headers/Model.h"
 #include "headers/MeshRenderer.h"
 #include "headers/Physics.h"
+#include "headers/PBD.h"
 #include "headers/Rope.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
@@ -27,9 +28,7 @@
 #include "headers/InputManager.h"
 #include "headers/HUDRenderer.h"
 #include "headers/TextRenderer.h"
-#include "headers/HDRCubemap.h"
-
-unsigned int loadTexture(char const* path);
+#include "headers/PlayerController.h"
 
 int main()
 {
@@ -37,16 +36,6 @@ int main()
 
     const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
     const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
-
-    const std::string kPBRVertexShaderPath = "res/shaders/PBRVertexShader.vert";
-    const std::string kPBRFragmentShaderPath = "res/shaders/PBRFragmentShader.frag";
-    
-    const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemapVertexShader.vert";
-    const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemapFragmentShader.frag";
-    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolutionFragmentShader.frag";
-    
-    const std::string kBackgroundVertexShaderPath = "res/shaders/BackgroundVertexShader.vert";
-    const std::string kBackgroundFragmentShaderPath = "res/shaders/BackgroundFragmentShader.frag";
 
     const std::string kHUDVertexShaderPath = "res/shaders/HUDVertexShader.vert";
     const std::string kHUDFragmentShaderPath = "res/shaders/HUDFragmentShader.frag";
@@ -59,19 +48,14 @@ int main()
     const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
     const std::string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
 
-    const std::string kHDREquirectangularPath = "res/cubemaps/HDR_placeholder.hdr";
-
     const std::string kCubeMeshPath = "res/models/cube_2.obj";
     const std::string kPlayerMeshPath = "res/models/player.obj";
     const std::string kDebugMeshPath = "res/models/debug_thingy.obj";
     const std::string kEnemyMeshPath = "res/models/enemy.obj";
     const std::string kTestPath = "res/models/test2.obj";
+    const std::string kWallPath = "res/models/simple_wall.obj";
 
-    /*unsigned int albedo = loadTexture("res/textures/test/test_basecolor.png");
-    unsigned int normal = loadTexture("res/textures/test/test_normal.png");
-    unsigned int metallic = loadTexture("res/textures/test/test_metallic.png");
-    unsigned int roughness = loadTexture("res/textures/test/test_roughness.png");*/
-    //unsigned int ao = TextureFromFile("res/textures/test/ao.png", "");
+    float kMsPerUpdate = 5.0f / 1000.0f;
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -96,23 +80,19 @@ int main()
     Input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
     physics::PhysicsManager::Initialize();
+    pbd::PBDManager::Initialize(3, 0.5f);
 
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
+    camera->set_position(glm::vec3(5.0f, 13.85f, 2.25f));
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
-    auto PBRShader = std::make_shared<Shader>(kPBRVertexShaderPath, kPBRFragmentShaderPath);
-    auto EquirectangularToCubemapShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kHDREquirectangularToCubemapFragmentShaderPath);
-    auto BackgroundShader = std::make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
-    auto IrradianceShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
     auto HUDshader = std::make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
     auto HUDTextShader = std::make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
-
-    auto cubemap = std::make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
     point_light.intensity = 100.0f;
@@ -121,93 +101,110 @@ int main()
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
-    // lights
-    // ------
-    glm::vec3 lightPositions[] = {
-        glm::vec3(-10.0f,  10.0f, 10.0f),
-        glm::vec3(10.0f,  10.0f, 10.0f),
-        glm::vec3(-10.0f, -10.0f, 10.0f),
-        glm::vec3(10.0f, -10.0f, 10.0f),
-    };
-    glm::vec3 lightColors[] = {
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f)
-    };
-
     auto test_model = std::make_shared<Model>(kTestPath);
 
     auto cube_model = std::make_shared<Model>(kCubeMeshPath);
     auto player_model = std::make_shared<Model>(kPlayerMeshPath);
     auto debug_model = std::make_shared<Model>(kDebugMeshPath);
     auto enemy_model = std::make_shared<Model>(kEnemyMeshPath);
+    auto wall_model = std::make_shared<Model>(kWallPath);
     
     auto HUD_texture = std::make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = std::make_shared<tmp::Texture>(kHUDTexturePath2);
 
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
-    //collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(1, 2);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
 
     auto scene_root = GameObject::Create();
 
-    rope::Rope rope = rope::Rope();
-    std::cout<< rope.Size() << std::endl;
+    auto wall_up = GameObject::Create(scene_root);
+    wall_up->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    wall_up->transform_->set_position(glm::vec3(0.0f, 0.0f, 17.0f));
+    wall_up->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
 
+    auto wall_down = GameObject::Create(scene_root);
+    wall_down->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    wall_down->transform_->set_position(glm::vec3(0.0f, 0.0f, -17.0f));
+    wall_down->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
 
-    ////test
-    auto test = GameObject::Create(scene_root);
-    test->transform_->set_position(glm::vec3(-3.0f, 0.0f,-3.0f));
-    test->AddComponent(std::make_shared<Components::MeshRenderer>(test_model, PBRShader));
+    auto wall_right = GameObject::Create(scene_root);
+    wall_right->transform_->set_position(glm::vec3(17.0f, 0.0f, 0.0f));
+    wall_right->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
 
+    auto wall_left = GameObject::Create(scene_root);
+    wall_left->transform_->set_position(glm::vec3(-17.0f, 0.0f, 0.0f));
+    wall_left->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
 
+    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 2.0f);
+    pbd::PBDManager::i_->set_walls(walls);
+
+    auto enemy_1 = GameObject::Create(scene_root);
+    enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
+    enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
+    enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
+    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
+
+    GameObject *test_obj;
+
+{
     auto player_1 = GameObject::Create(scene_root);
+    test_obj = player_1.get();
+    player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
-    player_1->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_1->transform_, 2.0f));
-    player_1->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_1->transform_));
-
-    rope.AddSegment(player_1->GetComponent<Components::RopeSegment>());
+    player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
+    player_1->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->set_position(glm::vec3(11.0f, 0.0f, 0.0f));
+    player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/5.0f), 0.0f, 0.0f));
+    player_2->transform_->set_position(glm::vec3(10.0f + (1.0f / 5.0f), 0.0f, 0.0f));
     player_2->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
-    player_2->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_2->transform_, 2.0f));
-    player_2->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_2->transform_));
+    player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
+    player_2->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_2));
 
-
-    for (int i = 1; i < 20; i++)
-    {
-        auto new_object = GameObject::Create(scene_root);
-        new_object->transform_->set_position(glm::vec3(i * rope::kMaxDistance, 0.0f, 0.0f));
-        new_object->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
-        new_object->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
-        new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], new_object->transform_));
-        new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 1.0f));
-        new_object->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, new_object->transform_));
-        rope.AddSegment(new_object->GetComponent<Components::RopeSegment>());
-    }
-
-    rope.AddSegment(player_2->GetComponent<Components::RopeSegment>());
-    
-    std::cout << rope.Size() << std::endl;
-
-
-    for (int i = 1; i < 10; i++)
+    /*for (int i = 1; i < 10; i++)
     {
         for (int j = 1; j < 10; j++)
         {
             auto new_object = GameObject::Create(scene_root);
             new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
+            new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
             new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
-            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], new_object->transform_));
-            new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 2.0f));
+            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, player_model->meshes_[0], new_object->transform_));
+            new_object->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.88f, new_object->transform_));
         }
+    }*/
+
+    std::vector<std::shared_ptr<GameObject>> rope_segments;
+
+    for (int i = 0; i < 50; i++)
+    {
+        auto rope_segment = GameObject::Create(scene_root);
+        rope_segment->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
+        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/5.0f, 0.0f, 0.0f));
+        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
+        rope_segment->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
+        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment->transform_));
+        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
+
+        if (i == 0)
+        {
+            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.31f);
+        }
+        else
+        {
+            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.31f);
+        }
+
+        rope_segments.push_back(rope_segment);
     }
+
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.21f);
+}
 
     auto HUD_root = GameObject::Create();
 
@@ -228,46 +225,11 @@ int main()
     HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
 
-    //----------------
-    auto generator = std::make_shared<physics::BasicGenerator>();
-    physics::PhysicsManager::i_->AddFGRRecord(generator, player_1->GetComponent<Components::Particle>());
-    
-    std::vector<physics::Contact> contacts = std::vector<physics::Contact>();
+    scene_root->PropagateStart();
+    HUD_root->PropagateStart();
+    HUDText_root->PropagateStart();
 
-    //----------------sobie pogram w 
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
-    /*PBRShader->Use();
-    PBRShader->SetInt("irradiance_map", 0);
-    PBRShader->SetInt("albedo_map", 1);
-    PBRShader->SetInt("normal_map", 2);
-    PBRShader->SetInt("metallic_map", 3);
-    PBRShader->SetInt("roughness_map", 4)*/;
-    //PBRShader->SetInt("ao_map", 4);
-
-
-    BackgroundShader->Use();
-    BackgroundShader->SetInt("environmentMap", 0);
-
-    cubemap->LoadHDRimg(window, camera);
-
-    // initialize static shader uniforms before rendering
-    // --------------------------------------------------
-    glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
-    /*PBRShader->Use();
-    PBRShader->SetMatrix4("projection_matrix", projection);*/
-
-    BackgroundShader->Use();
-    BackgroundShader->SetMatrix4("projection_matrix", projection);
-
-    // then before rendering, configure the viewport to the original framebuffer's screen dimensions
-    int scrWidth, scrHeight;
-    glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
-    glViewport(0, 0, scrWidth, scrHeight);
-
-    
+    test_obj->Destroy();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -275,44 +237,57 @@ int main()
         glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        static float lag = 0.0f;
         static float previous_time = glfwGetTime();
         float current_time = glfwGetTime();
         float delta_time = current_time - previous_time;
+        lag += delta_time;
+        #ifdef _DEBUG
+            delta_time = glm::clamp(delta_time, 0.0f, (1.0f / 30.0f));
+        #endif
+
         previous_time = current_time;
 
-        
-#pragma region Collisions and Physics
+        Timer::Update(delta_time);
+        utility::DebugCameraMovement(window, camera, delta_time);
+        Input::InputManager::i_->Update();
 
+#pragma region Collisions and Physics
         static float cp_time = 0;
         static int cp_idx = 0;
+        if (lag >= kMsPerUpdate)
+        {
+            std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
 
-        std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
+            pbd::PBDManager::i_->GeneratorUpdate();
+            pbd::PBDManager::i_->Integration(kMsPerUpdate);
+            collisions::CollisionManager::i_->PredictColliders();
+            collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
+            pbd::PBDManager::i_->ResolveContacts();
+            pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
+            /*walls.Enforce(player_1->GetComponent<Components::PBDParticle>());
+            walls.Enforce(player_2->GetComponent<Components::PBDParticle>());*/
+            pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
+            pbd::PBDManager::i_->ClearContacts();
 
-        physics::PhysicsManager::i_->GeneratorUpdate();
-        physics::PhysicsManager::i_->ParticleUpdate(delta_time);
-        collisions::CollisionManager::i_->UpdateColliders();
-        collisions::CollisionManager::i_->CollisionCheck(contacts);
-        physics::PhysicsManager::i_->ResolveContacts(contacts);
-        rope.EnforceRestraints(delta_time);
-        std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
+            
 
-        cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
-        cp_idx++;
+            std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
+            cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
+            cp_idx++;
 
-        if (cp_idx == 120)
+            lag -= kMsPerUpdate;
+        }
+
+        if (cp_idx == 60)
         {
             std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
             cp_idx = 0;
             cp_time = 0.0f;
         }
 
-        
-
 #pragma endregion
-#pragma region Other
-
-        utility::DebugCameraMovement(window, camera, delta_time);
-        utility::DebugCameraMovementJoystick(window, camera, delta_time);
+#pragma region GO Update and Draw
 
         shader->Use();
 
@@ -323,45 +298,10 @@ int main()
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-
-        /*PBRShader->Use();
-        PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        PBRShader->SetVec3("camera_position", camera->get_position());*/
-
-
-
-        /*glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, albedo);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, normal);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, metallic);
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, roughness);*/
-
         scene_root->PropagateUpdate();
 
-        /*for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
-        {
-            glm::vec3 newPos = lightPositions[i] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
-            newPos = lightPositions[i];
-            PBRShader->SetVec3("light_positions[" + std::to_string(i) + "]", newPos);
-            PBRShader->SetVec3("light_colors[" + std::to_string(i) + "]", lightColors[i]);
-
-            auto model = glm::mat4(1.0f);
-            model = glm::translate(model, newPos);
-            model = glm::scale(model, glm::vec3(0.5f));
-            PBRShader->SetMatrix4("model_matrix", model);
-            PBRShader->SetMatrix4("model_matrix", model);
-            scene_root->PropagateUpdate();
-        }*/
-
-        BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-
-        cubemap->RenderCube();
+#pragma endregion
+#pragma region Interface
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -374,102 +314,28 @@ int main()
 
         HUDTextShader->Use();
 
-        HUDText_root->PropagateUpdate();
-
-        HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+        if (cp_idx == 30)
+        {
+            HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+        }
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-        generator->direction_ = glm::vec3(0.0f);
-        generator->magnitude_ = 0.0f;
-        if (glfwGetKey(window, GLFW_KEY_L))
-        {
-            generator->direction_ += glm::vec3(1.0f, 0.0f, 0.0f);
-            generator->magnitude_ = 200;
-        }
 
-        if (glfwGetKey(window, GLFW_KEY_J))
-        {
-            generator->direction_ += glm::vec3(-1.0f, 0.0f, 0.0f);
-            generator->magnitude_ = 200;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_I))
-        {
-            generator->direction_ += glm::vec3(0.0f, 0.0f, -1.0f);
-            generator->magnitude_ = 200;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_K))
-        {
-            generator->direction_ += glm::vec3(0.0f, 0.0f, 1.0f);
-            generator->magnitude_ = 200;
-        }
-
-        if (!(glfwGetKey(window, GLFW_KEY_L) || glfwGetKey(window, GLFW_KEY_I) || glfwGetKey(window, GLFW_KEY_K) || glfwGetKey(window, GLFW_KEY_J)))
-        {
-            generator->direction_ = glm::vec3(0.0f);
-            generator->magnitude_ = 0.0f;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_O))
-        {
-            auto md = glm::vec3(0.0f, 10.0f, 0.0f);
-            player_2->transform_->set_rotation(player_2->transform_->get_rotation() + md * delta_time);
-        }
-
-        
+#pragma endregion
 
         glfwSwapBuffers(window);
 
 #pragma endregion
     }
 
+    pbd::PBDManager::Destroy();
     physics::PhysicsManager::Destroy();
     collisions::CollisionManager::Destroy();
     Input::InputManager::Destroy();
     
     shader->End();
-    BackgroundShader->End();
-    IrradianceShader->End();
     glfwTerminate();
     return 0;
-}
-
-unsigned int loadTexture(char const* path)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
 }

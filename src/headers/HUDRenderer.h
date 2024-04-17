@@ -21,11 +21,12 @@ private:
     unsigned int VAO_, VBO_;
     std::shared_ptr<tmp::Texture> texture_;
     std::shared_ptr<Shader> shader_;
-    std::shared_ptr<Transform> transform_;
+    std::weak_ptr<Transform> transform_;
 public:
     HUDRenderer(std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader);
     void Start() override;
     void Update() override;
+    void Destroy() override {}
 };
 
 }; // namespace Components

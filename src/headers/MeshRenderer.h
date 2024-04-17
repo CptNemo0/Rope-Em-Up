@@ -30,6 +30,7 @@ namespace Components
 
         void Start() override;
         void Update() override;
+        void Destroy() override {}
     };
 
 };

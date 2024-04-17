@@ -4,6 +4,10 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "Component.h"
+#include "Transform.h"
+#include <memory>
+
 namespace llr
 {
 	const glm::vec3 kRight   = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -158,6 +162,22 @@ namespace llr
 	};
 }
 
+namespace Components
+{
+	class CameraComponent : public Component
+	{
+	public:
+		std::shared_ptr<Components::Transform> transfrom_;
+		std::shared_ptr<llr::Camera> camera_;
 
+		// Inherited via Component
+		void Start() override;
+
+		void Update() override;
+
+	};
+
+
+}
 
 #endif

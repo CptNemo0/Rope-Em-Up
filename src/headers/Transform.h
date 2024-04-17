@@ -15,13 +15,15 @@ namespace Components
 class Transform
 {
 private:
-    Transform *parent_ = nullptr;
-
     glm::mat4 model_matrix_;
 
     glm::vec3 position_;
     glm::vec3 rotation_;
     glm::vec3 scale_;
+
+    glm::vec3 up_;
+    glm::vec3 forward_;
+    glm::vec3 right_;
 
     glm::vec3 previous_position_ = glm::vec3(0.0f);
     glm::vec3 predicted_position_ = glm::vec3(0.0f);
@@ -32,10 +34,12 @@ private:
 public:
     std::shared_ptr<GameObject> game_object_;
     std::vector<std::shared_ptr<Transform>> children_;
+    Transform *parent_ = nullptr;
 
     Transform();
 
     void AddChild(std::shared_ptr<Transform> child);
+    void RemoveChild(std::shared_ptr<Transform> child);
 
     const glm::vec3 get_position() const;
     const glm::vec3 get_previous_position() const;
@@ -53,6 +57,10 @@ public:
     void add_scale(const glm::vec3& scale);
     const glm::mat4 get_model_matrix();
     const glm::mat4 get_prediction_matrix() const;
+
+    const glm::vec3 get_up() const;
+    const glm::vec3 get_forward() const;
+    const glm::vec3 get_right() const;
 };
 
 };
