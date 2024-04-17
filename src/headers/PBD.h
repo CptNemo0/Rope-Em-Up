@@ -149,6 +149,8 @@ namespace pbd
 		std::vector<pbd::RopeConstraint> constraints_;
 		std::vector<pbd::Contact> contacts_;
 
+		pbd::WallConstraint walls_;
+
 		int solver_iterations_;
 		float coeffiecent_of_restitution_;
 
@@ -172,6 +174,12 @@ namespace pbd
 		void Integration(float t);
 		
 		void ProjectConstraints(float t);
+
+		void set_walls(const WallConstraint& walls)
+		{
+			walls_ = walls;
+		}
+		float GetDistanceToClosestWall(std::shared_ptr<Components::PBDParticle> p);
 
 		std::shared_ptr<Components::PBDParticle> CreateParticle(float mass, float damping_factor, std::shared_ptr<Components::Transform> transform);
 		void CreateFGRRecord(std::shared_ptr<Components::PBDParticle> p, std::shared_ptr<pbd::BasicGenerator> g);
