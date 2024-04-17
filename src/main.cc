@@ -401,10 +401,6 @@ int main()
 
         cubemap->RenderCube();
 
-        /*glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
-
 #pragma endregion
 #pragma region Interface
 
@@ -428,10 +424,6 @@ int main()
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
 
-        /*BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-
-        cubemap->RenderCube();*/
 
 #pragma endregion
 
