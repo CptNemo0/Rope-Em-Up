@@ -95,7 +95,7 @@ int main()
     Input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
     physics::PhysicsManager::Initialize();
-    pbd::PBDManager::Initialize(3, 0.5f);
+    pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
 
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -172,7 +172,7 @@ int main()
     wall_left->transform_->set_position(glm::vec3(-17.0f, 0.0f, 0.0f));
     wall_left->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
 
-    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 2.0f);
+    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
     auto enemy_1 = GameObject::Create(scene_root);
@@ -182,16 +182,13 @@ int main()
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
-    GameObject *test_obj;
-
     ////test
     auto test = GameObject::Create(scene_root);
-    test->transform_->set_position(glm::vec3(-3.0f, 0.0f, -3.0f));
+    test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
     test->AddComponent(std::make_shared<Components::MeshRenderer>(test_model, PBRShader));
 
 {
     auto player_1 = GameObject::Create(scene_root);
-    test_obj = player_1.get();
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
@@ -274,34 +271,32 @@ int main()
     glDepthFunc(GL_LEQUAL);
 
     /*PBRShader->Use();
-   PBRShader->SetInt("irradiance_map", 0);
-   PBRShader->SetInt("albedo_map", 1);
-   PBRShader->SetInt("normal_map", 2);
-   PBRShader->SetInt("metallic_map", 3);
-   PBRShader->SetInt("roughness_map", 4)*/;
-   //PBRShader->SetInt("ao_map", 4);
+    PBRShader->SetInt("irradiance_map", 0);
+    PBRShader->SetInt("albedo_map", 1);
+    PBRShader->SetInt("normal_map", 2);
+    PBRShader->SetInt("metallic_map", 3);
+    PBRShader->SetInt("roughness_map", 4)*/;
+    //PBRShader->SetInt("ao_map", 4);
 
 
-   BackgroundShader->Use();
-   BackgroundShader->SetInt("environmentMap", 0);
+    BackgroundShader->Use();
+    BackgroundShader->SetInt("environmentMap", 0);
 
-   cubemap->LoadHDRimg(window, camera);
+    cubemap->LoadHDRimg(window, camera);
 
-   // initialize static shader uniforms before rendering
-   // --------------------------------------------------
-   glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
-   /*PBRShader->Use();
-   PBRShader->SetMatrix4("projection_matrix", projection);*/
+    // initialize static shader uniforms before rendering
+    // --------------------------------------------------
+    glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+    /*PBRShader->Use();
+    PBRShader->SetMatrix4("projection_matrix", projection);*/
 
-   BackgroundShader->Use();
-   BackgroundShader->SetMatrix4("projection_matrix", projection);
+    BackgroundShader->Use();
+    BackgroundShader->SetMatrix4("projection_matrix", projection);
 
-   // then before rendering, configure the viewport to the original framebuffer's screen dimensions
-   int scrWidth, scrHeight;
-   glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
-   glViewport(0, 0, scrWidth, scrHeight);
-
-    test_obj->Destroy();
+    // then before rendering, configure the viewport to the original framebuffer's screen dimensions
+    int scrWidth, scrHeight;
+    glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
+    glViewport(0, 0, scrWidth, scrHeight);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -337,12 +332,8 @@ int main()
             collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
             pbd::PBDManager::i_->ResolveContacts();
             pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
-            /*walls.Enforce(player_1->GetComponent<Components::PBDParticle>());
-            walls.Enforce(player_2->GetComponent<Components::PBDParticle>());*/
             pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
             pbd::PBDManager::i_->ClearContacts();
-
-            
 
             std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
             cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();

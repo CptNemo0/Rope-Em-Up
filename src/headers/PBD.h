@@ -141,7 +141,7 @@ namespace pbd
     public:
         static PBDManager* i_;
     private:
-		PBDManager(int it, float coeffiecent_of_restitution);
+		PBDManager(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall);
         ~PBDManager() = default;
     public:
 
@@ -151,15 +151,15 @@ namespace pbd
 		std::vector<pbd::Contact> contacts_;
 
 		pbd::WallConstraint walls_;
-
 		int solver_iterations_;
 		float coeffiecent_of_restitution_;
+		float coeffiecent_of_restitution_wall_;
 
-        static void Initialize(int it, float coeffiecent_of_restitution)
+        static void Initialize(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall)
         {
             if (i_ == nullptr)
             {
-                i_ = new PBDManager(it, coeffiecent_of_restitution);
+                i_ = new PBDManager(it, coeffiecent_of_restitution, coeffiecent_of_restitution_wall);
             }
         }
 
@@ -183,6 +183,7 @@ namespace pbd
 		{
 			walls_ = walls;
 		}
+
 		float GetDistanceToClosestWall(std::shared_ptr<Components::PBDParticle> p);
 
 		std::shared_ptr<Components::PBDParticle> CreateParticle(float mass, float damping_factor, std::shared_ptr<Components::Transform> transform);

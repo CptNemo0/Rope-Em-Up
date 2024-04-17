@@ -160,18 +160,6 @@ void pbd::RopeConstraint::Enforce()
 
 	float distance = glm::distance(x2, x1);
 	
-	/*if (distance > max_distance_)
-	{
-		float inv_distance = 1.0f / distance;
-
-		auto separation_vector = (distance - max_distance_) * inv_distance * (x2 - x1);
-
-		auto dx1 = 0.5f * separation_vector;
-		auto dx2 = -0.5f * separation_vector;
-
-		p1_->transform_->set_predicted_position(x1 + dx1);
-		p2_->transform_->set_predicted_position(x2 + dx2);
-	}*/
 
 	if (distance > max_distance_)
 	{
@@ -186,6 +174,7 @@ void pbd::RopeConstraint::Enforce()
 		p2_->transform_->set_predicted_position(x2 + dx2);
 	}
 }
+
 
 void pbd::WallConstraint::Enforce(std::shared_ptr<Components::PBDParticle> particle)
 {
@@ -219,12 +208,12 @@ void pbd::WallConstraint::Enforce(std::shared_ptr<Components::PBDParticle> parti
 		diff_x = glm::vec3(0.0f, 0.0f, min_z - pp.z);
 	}
 
-	pp += diff_x + diff_z;
+	pp += 2.0f * pbd::PBDManager::i_->coeffiecent_of_restitution_wall_ * (diff_x + diff_z);
 	particle->transform_->set_predicted_position(pp);
 }
 
 
-pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution)
+pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall)
 {
 	particles_ = std::vector<std::shared_ptr<Components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
@@ -232,6 +221,7 @@ pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution)
 	contacts_ = std::vector<pbd::Contact>();
 	solver_iterations_ = it;
 	coeffiecent_of_restitution_ = coeffiecent_of_restitution;
+	coeffiecent_of_restitution_wall_ = coeffiecent_of_restitution_wall;
 }
 
 void pbd::PBDManager::RemoveRecord(std::shared_ptr<ForceGenerator> g)
@@ -323,6 +313,7 @@ std::shared_ptr<Components::PBDParticle> pbd::PBDManager::CreateParticle(float m
 {
 	auto p = std::make_shared<Components::PBDParticle>(mass, damping_factor, transform);
 	particles_.push_back(p);
+	
 	return p;
 }
 
@@ -398,4 +389,3 @@ void pbd::PBDManager::GeneratorUpdate()
 		record.Generate();
 	}
 }
-
