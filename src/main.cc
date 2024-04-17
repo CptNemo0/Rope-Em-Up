@@ -69,6 +69,10 @@ int main()
     const std::string kEnemyMeshPath = "res/models/enemy.obj";
     const std::string kTestPath = "res/models/test2.obj";
     const std::string kWallPath = "res/models/simple_wall.obj";
+    const std::string kModule1Path = "res/models/module1.obj";
+    const std::string kModule2Path = "res/models/module2.obj";
+    const std::string kSimpleFloodPath = "res/models/simple_floor.obj";
+    const std::string kTestBallPath = "res/models/test_ball.obj";
 
     float kMsPerUpdate = 5.0f / 1000.0f;
 
@@ -102,7 +106,9 @@ int main()
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(5.0f, 13.85f, 2.25f));
+    camera->set_position(glm::vec3(0.0f, 25.0f, 0.0f));
+    camera->set_pitch(-90.0f);
+    camera->set_yaw(-90.0f);
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
@@ -144,7 +150,11 @@ int main()
     auto debug_model = std::make_shared<Model>(kDebugMeshPath);
     auto enemy_model = std::make_shared<Model>(kEnemyMeshPath);
     auto wall_model = std::make_shared<Model>(kWallPath);
-    
+    auto module_1_model = std::make_shared<Model>(kModule1Path);
+    auto module_2_model = std::make_shared<Model>(kModule2Path);
+    auto simple_floor_model = std::make_shared<Model>(kSimpleFloodPath);
+    auto test_ball_model = std::make_shared<Model>(kTestBallPath);
+
     auto HUD_texture = std::make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = std::make_shared<tmp::Texture>(kHUDTexturePath2);
 
@@ -155,13 +165,13 @@ int main()
     auto scene_root = GameObject::Create();
 
     auto wall_up = GameObject::Create(scene_root);
-    wall_up->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_up->transform_->set_position(glm::vec3(0.0f, 0.0f, 17.0f));
+    wall_up->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_up->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
 
     auto wall_down = GameObject::Create(scene_root);
-    wall_down->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_down->transform_->set_position(glm::vec3(0.0f, 0.0f, -17.0f));
+    wall_down->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_down->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
 
     auto wall_right = GameObject::Create(scene_root);
@@ -171,6 +181,11 @@ int main()
     auto wall_left = GameObject::Create(scene_root);
     wall_left->transform_->set_position(glm::vec3(-17.0f, 0.0f, 0.0f));
     wall_left->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
+
+    auto floor = GameObject::Create(scene_root);
+    floor->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    floor->transform_->set_scale(glm::vec3(3.0f, 0.0f, 3.0f));
+    floor->AddComponent(std::make_shared<components::MeshRenderer>(simple_floor_model, shader));
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
@@ -183,9 +198,9 @@ int main()
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
     ////test
-    auto test = GameObject::Create(scene_root);
+    /*auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
-    test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));
+    test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));*/
 
 {
     auto player_1 = GameObject::Create(scene_root);
@@ -222,11 +237,11 @@ int main()
     for (int i = 0; i < 50; i++)
     {
         auto rope_segment = GameObject::Create(scene_root);
-        rope_segment->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
-        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/5.0f, 0.0f, 0.0f));
+        rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-        rope_segment->AddComponent(std::make_shared<components::MeshRenderer>(debug_model, shader));
-        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment->transform_));
+        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
+        rope_segment->AddComponent(std::make_shared<components::MeshRenderer>(test_ball_model, shader));
+        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
         rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
         if (i == 0)
