@@ -187,6 +187,42 @@ void pbd::RopeConstraint::Enforce()
 	}
 }
 
+void pbd::WallConstraint::Enforce(std::shared_ptr<Components::PBDParticle> particle)
+{
+	auto pp = particle->transform_->get_predicted_position();
+
+	float max_x = down_right_.x - offset_;
+	float min_x = up_left_.x + offset_;
+	float max_z = up_left_.z - offset_;
+	float min_z = down_right_.z + offset_;
+
+	glm::vec3 diff_x = glm::vec3(0.0f);
+	glm::vec3 diff_z = glm::vec3(0.0f);
+
+	if (pp.x > max_x)
+	{
+		diff_x = glm::vec3(max_x - pp.x, 0.0f, 0.0f);
+	}
+	
+	if (pp.x < min_x)
+	{
+		diff_x = glm::vec3(min_x - pp.x, 0.0f, 0.0f);
+	}
+
+	if (pp.z > max_z)
+	{
+		diff_x = glm::vec3(0.0f, 0.0f, max_z - pp.z);
+	}
+
+	if (pp.z < min_z)
+	{
+		diff_x = glm::vec3(0.0f, 0.0f, min_z - pp.z);
+	}
+
+	pp += diff_x + diff_z;
+	particle->transform_->set_predicted_position(pp);
+}
+
 
 pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution)
 {
@@ -239,6 +275,48 @@ void pbd::PBDManager::ProjectConstraints(float t)
 			c.Enforce();
 		}
 	}
+
+	for (auto& particle : particles_)
+	{
+		walls_.Enforce(particle);
+	}
+}
+
+float pbd::PBDManager::GetDistanceToClosestWall(std::shared_ptr<Components::PBDParticle> particle)
+{
+	float return_value;
+
+	auto pp = particle->transform_->get_predicted_position();
+
+	float max_x = walls_.down_right_.x - walls_.offset_;
+	float min_x = walls_.up_left_.x + walls_.offset_;
+	float max_z = walls_.up_left_.z - walls_.offset_;
+	float min_z = walls_.down_right_.z + walls_.offset_;
+
+	float diff_x = 0.0f;
+	float diff_z = 0.0f;
+
+	if (pp.x > max_x)
+	{
+		diff_x = std::fabs(max_x - pp.x);
+	}
+
+	if (pp.x < min_x)
+	{
+		diff_x = std::fabs(min_x - pp.x);
+	}
+
+	if (pp.z > max_z)
+	{
+		diff_x = std::fabs(max_z - pp.z);
+	}
+
+	if (pp.z < min_z)
+	{
+		diff_x = std::fabs(min_z - pp.z);
+	}
+
+	return std::max(diff_x, diff_z);
 }
 
 std::shared_ptr<Components::PBDParticle> pbd::PBDManager::CreateParticle(float mass, float damping_factor, std::shared_ptr<Components::Transform> transform)
@@ -320,3 +398,4 @@ void pbd::PBDManager::GeneratorUpdate()
 		record.Generate();
 	}
 }
+
