@@ -12,7 +12,7 @@ union ActionMappingType
 {
     int buttonID;
     std::array<int, 4> buttonIDs;
-    Input::GamepadAxisType axisType;
+    input::GamepadAxisType axisType;
 };
 
 #endif // !ACTIONMAPPINGTYPE_H

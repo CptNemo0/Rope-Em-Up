@@ -1,4 +1,4 @@
-#include "../headers/Physics.h"
+#include "../../headers/physics/Physics.h"
 
 void physics::LogVec3(glm::vec3 a)
 {
@@ -34,35 +34,35 @@ void physics::Sigmoid(glm::vec3& v)
 }
 
 
-void Components::Particle::UpdateAcceleration()
+void components::Particle::UpdateAcceleration()
 {
 	physics::ClampElementwise(forces_, physics::kMaxForce, -physics::kMaxForce);
 	acceleration_ = inverse_mass_ * forces_;
 }
 
-void Components::Particle::UpdateVelocity(float t)
+void components::Particle::UpdateVelocity(float t)
 {
 	velocity_ = velocity_ + acceleration_ * t;	
 }
 
-void Components::Particle::UpdatePosition(float t)
+void components::Particle::UpdatePosition(float t)
 {
 	velocity_ *= drag_;
 	auto new_position = transform_->get_position() + velocity_ * t + 0.5f * acceleration_ * t * t;
 	transform_->set_predicted_position(new_position);
 }
 
-void Components::Particle::AddForce(const glm::vec3& force)
+void components::Particle::AddForce(const glm::vec3& force)
 {
 	forces_ += force;
 }
 
-void Components::Particle::ZeroForces()
+void components::Particle::ZeroForces()
 {
 	forces_ = glm::vec3(0.0f);
 }
 
-void Components::Particle::UpdatePhysics(float t)
+void components::Particle::UpdatePhysics(float t)
 {
 	assert(t > 0.0f);
 	UpdatePosition(t);
@@ -71,11 +71,11 @@ void Components::Particle::UpdatePhysics(float t)
 	ZeroForces();
 }
 
-void Components::Particle::Start()
+void components::Particle::Start()
 {
 }
 
-void Components::Particle::Update()
+void components::Particle::Update()
 {
 	
 }
@@ -87,7 +87,7 @@ physics::DragGenerator::DragGenerator(float k1, float k2)
 	this->k2_ = k2;
 }
 
-void physics::DragGenerator::GenerateForce(std::shared_ptr<Components::Particle> partilce)
+void physics::DragGenerator::GenerateForce(std::shared_ptr<components::Particle> partilce)
 {
 	auto force = partilce->velocity_;
 
@@ -106,7 +106,7 @@ physics::BasicGenerator::BasicGenerator()
 	magnitude_ = 0.0f;
 }
 
-void physics::BasicGenerator::GenerateForce(std::shared_ptr<Components::Particle> particle)
+void physics::BasicGenerator::GenerateForce(std::shared_ptr<components::Particle> particle)
 {
 	particle->AddForce(direction_ * magnitude_);
 }
@@ -123,12 +123,12 @@ physics::PhysicsManager* physics::PhysicsManager::i_ = nullptr;
 physics::PhysicsManager::PhysicsManager()
 {
 	generator_registry_ = std::vector<FGRRecord>();
-	particles_ = std::vector<std::shared_ptr<Components::Particle>>();
+	particles_ = std::vector<std::shared_ptr<components::Particle>>();
 }
 
-std::shared_ptr<Components::Particle> physics::PhysicsManager::CreateParticle(std::shared_ptr<Components::Transform> transform, float mass, float drag)
+std::shared_ptr<components::Particle> physics::PhysicsManager::CreateParticle(std::shared_ptr<components::Transform> transform, float mass, float drag)
 {
-	auto return_value = std::make_shared<Components::Particle>(transform, mass, drag);
+	auto return_value = std::make_shared<components::Particle>(transform, mass, drag);
 	particles_.push_back(return_value);
 	return return_value;
 }
@@ -149,7 +149,7 @@ void physics::PhysicsManager::ParticleUpdate(float t)
 	}
 }
 
-void physics::PhysicsManager::AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<Components::Particle> particle)
+void physics::PhysicsManager::AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<components::Particle> particle)
 {
 	assert(generator != nullptr);
 	FGRRecord new_record;
@@ -203,7 +203,7 @@ void physics::PhysicsManager::RealizePositions()
 }
 	
 
-physics::Contact::Contact(std::shared_ptr<Components::Particle> p1, std::shared_ptr<Components::Particle> p2)
+physics::Contact::Contact(std::shared_ptr<components::Particle> p1, std::shared_ptr<components::Particle> p2)
 {
 	a = p1;
 	b = p2;

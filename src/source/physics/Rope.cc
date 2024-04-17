@@ -1,10 +1,10 @@
-#include "../headers/Rope.h"
+#include "../../headers/physics/Rope.h"
 
-void rope::Rope::CheckRestraints(std::shared_ptr<Components::RopeSegment> a, std::shared_ptr<Components::RopeSegment> b, float t)
+void rope::Rope::CheckRestraints(std::shared_ptr<components::RopeSegment> a, std::shared_ptr<components::RopeSegment> b, float t)
 {
 	float distance = glm::distance(a->transform_->get_predicted_position(), b->transform_->get_predicted_position());
-	auto particle_a = a->transform_->game_object_->GetComponent<Components::Particle>();
-	auto particle_b = b->transform_->game_object_->GetComponent<Components::Particle>();
+	auto particle_a = a->transform_->game_object_->GetComponent<components::Particle>();
+	auto particle_b = b->transform_->game_object_->GetComponent<components::Particle>();
 	assert(particle_a != nullptr);
 	assert(particle_b != nullptr);
 	
@@ -22,8 +22,8 @@ void rope::Rope::CheckRestraints(std::shared_ptr<Components::RopeSegment> a, std
 
 		if (!a->is_puller_ && !b->is_puller_)
 		{
-			auto vl = left_puller_->gameObject_.lock()->GetComponent<Components::Particle>()->velocity_;
-			auto rl = right_puller_->gameObject_.lock()->GetComponent<Components::Particle>()->velocity_;
+			auto vl = left_puller_->gameObject_.lock()->GetComponent<components::Particle>()->velocity_;
+			auto rl = right_puller_->gameObject_.lock()->GetComponent<components::Particle>()->velocity_;
 
 			if(glm::dot(vl, rl) > 0.0f)
 			{
@@ -40,7 +40,7 @@ void rope::Rope::CheckRestraints(std::shared_ptr<Components::RopeSegment> a, std
 void rope::Rope::EnforceRestraints(float t)
 {
 	int idx = 0;
-	std::shared_ptr<Components::RopeSegment> current = left_end_->right_;
+	std::shared_ptr<components::RopeSegment> current = left_end_->right_;
 
 	while (TRUE)
 	{
@@ -74,8 +74,8 @@ void rope::Rope::EnforceRestraints(float t)
 
 rope::Rope::Rope()
 {
-	this->left_end_ = std::make_shared<Components::RopeSegment>(nullptr, nullptr, nullptr);
-	this->right_end_ = std::make_shared<Components::RopeSegment>(nullptr, nullptr, nullptr);
+	this->left_end_ = std::make_shared<components::RopeSegment>(nullptr, nullptr, nullptr);
+	this->right_end_ = std::make_shared<components::RopeSegment>(nullptr, nullptr, nullptr);
 	left_end_->right_ = right_end_;
 	right_end_->left_ = left_end_;
 	left_end_->name_ = "LEFT END";
@@ -83,7 +83,7 @@ rope::Rope::Rope()
 
 }
 
-void rope::Rope::AddSegment(std::shared_ptr<Components::RopeSegment> segment)
+void rope::Rope::AddSegment(std::shared_ptr<components::RopeSegment> segment)
 {
 	right_end_->left_->right_ = segment;
 	right_end_->left_ = segment;
@@ -92,12 +92,12 @@ void rope::Rope::AddSegment(std::shared_ptr<Components::RopeSegment> segment)
 	segment->right_ = right_end_;
 }
 
-bool rope::Rope::InsertSegment(std::shared_ptr<Components::RopeSegment> segment, int index)
+bool rope::Rope::InsertSegment(std::shared_ptr<components::RopeSegment> segment, int index)
 {
 	assert(index <= Size());
 
 	int idx = 0;
-	std::shared_ptr<Components::RopeSegment> current = left_end_;
+	std::shared_ptr<components::RopeSegment> current = left_end_;
 
 	while (idx != index)
 	{
@@ -117,7 +117,7 @@ bool rope::Rope::InsertSegment(std::shared_ptr<Components::RopeSegment> segment,
 int rope::Rope::Size()
 {
 	int return_value = 0;
-	std::shared_ptr<Components::RopeSegment> current = left_end_;
+	std::shared_ptr<components::RopeSegment> current = left_end_;
 
 	while (current->right_->right_ != nullptr)
 	{
@@ -127,10 +127,10 @@ int rope::Rope::Size()
 	return return_value;
 }
 
-void Components::RopeSegment::Start()
+void components::RopeSegment::Start()
 {
 }
 
-void Components::RopeSegment::Update()
+void components::RopeSegment::Update()
 {
 }

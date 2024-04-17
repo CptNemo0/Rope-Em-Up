@@ -1,30 +1,30 @@
-#include "../headers/CollisionManager.h"
+#include "../../headers/collisions/CollisionManager.h"
 
 collisions::CollisionManager* collisions::CollisionManager::i_ = nullptr;
 
 collisions::CollisionManager::CollisionManager()
 {
-    colliders_ = std::vector<std::shared_ptr<Components::Collider>>();
+    colliders_ = std::vector<std::shared_ptr<components::Collider>>();
     for (int i = 0; i < 32; i++)
     {
         collision_layers[i] = (1 << i);
     }
 }
 
-void collisions::CollisionManager::AddCollider(std::shared_ptr<Components::Collider> collider)
+void collisions::CollisionManager::AddCollider(std::shared_ptr<components::Collider> collider)
 {
     colliders_.push_back(collider);
 }
 
-std::shared_ptr<Components::Collider> collisions::CollisionManager::CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<Components::Transform> transform)
+std::shared_ptr<components::Collider> collisions::CollisionManager::CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<components::Transform> transform)
 {
     assert(layer > -1 && layer < 32);
-    auto return_value = std::make_shared<Components::Collider>(layer, precision, mesh, transform);
+    auto return_value = std::make_shared<components::Collider>(layer, precision, mesh, transform);
     AddCollider(return_value);
     return return_value;
 }
 
-void collisions::CollisionManager::RemoveCollider(std::shared_ptr<Components::Collider> c)
+void collisions::CollisionManager::RemoveCollider(std::shared_ptr<components::Collider> c)
 {
     auto it = std::find(colliders_.begin(), colliders_.end(), c);
 	if (it != colliders_.end())
@@ -33,7 +33,7 @@ void collisions::CollisionManager::RemoveCollider(std::shared_ptr<Components::Co
 	}
 }
 
-void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b, float wa, float wb)
+void collisions::CollisionManager::Separation(std::shared_ptr<components::Collider> a, std::shared_ptr<components::Collider> b, float wa, float wb)
 {
     auto separation_vector = GetSeparatingVector(a->np_collider_,
         a->transform_->get_predicted_position(),
@@ -110,8 +110,8 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
     {
         for (int j = i + 1; j < colliders_.size(); j++)
         {
-            std::shared_ptr<Components::Collider> a = colliders_[i];
-            std::shared_ptr<Components::Collider> b = colliders_[j];
+            std::shared_ptr<components::Collider> a = colliders_[i];
+            std::shared_ptr<components::Collider> b = colliders_[j];
 
             bool layer_check = LayerCheck(a->layer_, b->layer_);
             
@@ -125,8 +125,8 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
                     {
                         Separation(a, b, 0.5f, 0.5f);
                         
-                        auto particle_a = a->gameObject_.lock()->GetComponent<Components::Particle>();
-                        auto particle_b = b->gameObject_.lock()->GetComponent<Components::Particle>();
+                        auto particle_a = a->gameObject_.lock()->GetComponent<components::Particle>();
+                        auto particle_b = b->gameObject_.lock()->GetComponent<components::Particle>();
 
                         if (particle_a != nullptr && particle_b != nullptr)
                         {
@@ -151,8 +151,8 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
     {
         for (int j = i + 1; j < colliders_.size(); j++)
         {
-            std::shared_ptr<Components::Collider> a = colliders_[i];
-            std::shared_ptr<Components::Collider> b = colliders_[j];
+            std::shared_ptr<components::Collider> a = colliders_[i];
+            std::shared_ptr<components::Collider> b = colliders_[j];
 
             bool layer_check = LayerCheck(a->layer_, b->layer_);
 
@@ -164,8 +164,8 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
                     are_colliding = ConvexHullCheckFaster(a->np_collider_, b->np_collider_);
                     if (are_colliding)
                     {
-                        auto particle_a = a->gameObject_.lock()->GetComponent<Components::PBDParticle>();
-                        auto particle_b = b->gameObject_.lock()->GetComponent<Components::PBDParticle>();
+                        auto particle_a = a->gameObject_.lock()->GetComponent<components::PBDParticle>();
+                        auto particle_b = b->gameObject_.lock()->GetComponent<components::PBDParticle>();
 
                         if (particle_a != nullptr && particle_b != nullptr)
                         {

@@ -13,7 +13,7 @@
 #include "glm/glm.hpp"
 #include "glfw/glfw3.h"
 
-namespace Input
+namespace input
 {
 
 static const glm::vec2 axis_directions[] = {glm::vec2(0.0f, -1.0f), glm::vec2(0.0f, 1.0f), glm::vec2(-1.0f, 0.0f), glm::vec2(1.0f, 0.0f)};

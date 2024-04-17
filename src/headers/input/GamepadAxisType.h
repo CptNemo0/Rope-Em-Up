@@ -1,7 +1,7 @@
 #ifndef GAMEPADAXISTYPE_H
 #define GAMEPADAXISTYPE_H
 
-namespace Input
+namespace input
 {
 
 enum class GamepadAxisType

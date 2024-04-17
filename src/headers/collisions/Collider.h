@@ -5,12 +5,12 @@
 
 #include <memory>
 
-#include "Component.h"
-#include "Transform.h"
+#include "../components/Component.h"
+#include "../components/Transform.h"
 #include "Collisions.h"
-#include "Mesh.h"
+#include "../Mesh.h"
 
-namespace Components
+namespace components
 {
 	class GameObject;
 	
@@ -18,7 +18,7 @@ namespace Components
 	class Collider : public Component, public std::enable_shared_from_this<Collider>
 	{
 	public:
-		std::shared_ptr<Components::Transform> transform_;
+		std::shared_ptr<components::Transform> transform_;
 		std::shared_ptr<collisions::AABB> bp_collider_;
 		std::shared_ptr<collisions::ConvexHull> np_collider_;
 		int layer_;

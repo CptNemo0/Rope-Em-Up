@@ -1,26 +1,26 @@
-#include "../headers/PlayerController.h"
+#include "../../headers/components/PlayerController.h"
 
-Components::PlayerController::PlayerController(int gamepadID)
+components::PlayerController::PlayerController(int gamepadID)
 {
     this->gamepadID_ = gamepadID;
 }
 
-void Components::PlayerController::Start()
+void components::PlayerController::Start()
 {
-    Input::InputManager::i_->AddObserver(gamepadID_, shared_from_this());
+    input::InputManager::i_->AddObserver(gamepadID_, shared_from_this());
 
     move_generator_ = std::make_shared<pbd::BasicGenerator>();
     move_generator_->magnitude_ = speed_;
 
     pull_generator_ = std::make_shared<pbd::BasicGenerator>();
 
-    auto particle_component = gameObject_.lock()->GetComponent<Components::PBDParticle>();
+    auto particle_component = gameObject_.lock()->GetComponent<components::PBDParticle>();
 
     pbd::PBDManager::i_->CreateFGRRecord(particle_component, move_generator_);
     pbd::PBDManager::i_->CreateFGRRecord(particle_component, pull_generator_);
 }
 
-void Components::PlayerController::Update()
+void components::PlayerController::Update()
 {
     if (!is_pulling_)
     {
@@ -28,14 +28,14 @@ void Components::PlayerController::Update()
     }
 }
 
-void Components::PlayerController::Destroy()
+void components::PlayerController::Destroy()
 {
-    Input::InputManager::i_->RemoveObserver(gamepadID_, shared_from_this());
+    input::InputManager::i_->RemoveObserver(gamepadID_, shared_from_this());
     pbd::PBDManager::i_->RemoveRecord(move_generator_);
     pbd::PBDManager::i_->RemoveRecord(pull_generator_);
 }
 
-void Components::PlayerController::OnAction(Action action, Input::State state)
+void components::PlayerController::OnAction(Action action, input::State state)
 {
     switch (action)
     {

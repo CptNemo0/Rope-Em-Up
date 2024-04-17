@@ -3,10 +3,10 @@
 
 #include <memory>
 
-#include "GameObject.h"
-#include "Texture.h"
+#include "../GameObject.h"
+#include "../Texture.h"
 
-namespace Components
+namespace components
 {
 
 class HUDRenderer : public Component

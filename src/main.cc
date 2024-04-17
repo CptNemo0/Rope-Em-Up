@@ -13,22 +13,22 @@
 #include "stb_easy_font.h"
 
 #include "headers/Camera.h"
-#include "headers/Collider.h"
-#include "headers/Collisions.h"
-#include "headers/CollisionManager.h"
+#include "headers/collisions/Collider.h"
+#include "headers/collisions/Collisions.h"
+#include "headers/collisions/CollisionManager.h"
 #include "headers/GameObject.h"
 #include "headers/Model.h"
-#include "headers/MeshRenderer.h"
-#include "headers/Physics.h"
-#include "headers/PBD.h"
-#include "headers/Rope.h"
+#include "headers/components/MeshRenderer.h"
+#include "headers/physics/Physics.h"
+#include "headers/physics/PBD.h"
+#include "headers/physics/Rope.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
 #include "headers/utility.h"
-#include "headers/InputManager.h"
-#include "headers/HUDRenderer.h"
-#include "headers/TextRenderer.h"
-#include "headers/PlayerController.h"
+#include "headers/input/InputManager.h"
+#include "headers/components/HUDRenderer.h"
+#include "headers/components/TextRenderer.h"
+#include "headers/components/PlayerController.h"
 #include "headers/HDRCubemap.h"
 
 
@@ -92,7 +92,7 @@ int main()
     }
     std::cout << "GLAD Initialized.\n";
 
-    Input::InputManager::Initialize(window);
+    input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
     physics::PhysicsManager::Initialize();
     pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
@@ -157,20 +157,20 @@ int main()
     auto wall_up = GameObject::Create(scene_root);
     wall_up->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_up->transform_->set_position(glm::vec3(0.0f, 0.0f, 17.0f));
-    wall_up->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
+    wall_up->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
 
     auto wall_down = GameObject::Create(scene_root);
     wall_down->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_down->transform_->set_position(glm::vec3(0.0f, 0.0f, -17.0f));
-    wall_down->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
+    wall_down->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
 
     auto wall_right = GameObject::Create(scene_root);
     wall_right->transform_->set_position(glm::vec3(17.0f, 0.0f, 0.0f));
-    wall_right->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
+    wall_right->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
 
     auto wall_left = GameObject::Create(scene_root);
     wall_left->transform_->set_position(glm::vec3(-17.0f, 0.0f, 0.0f));
-    wall_left->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
+    wall_left->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
@@ -178,31 +178,31 @@ int main()
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
-    enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
+    enemy_1->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
     ////test
     auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
-    test->AddComponent(std::make_shared<Components::MeshRenderer>(test_model, PBRShader));
+    test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));
 
 {
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
+    player_1->AddComponent(std::make_shared<components::MeshRenderer>(player_model, shader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
-    player_1->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_1));
+    player_1->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/5.0f), 0.0f, 0.0f));
     player_2->transform_->set_position(glm::vec3(10.0f + (1.0f / 5.0f), 0.0f, 0.0f));
-    player_2->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
+    player_2->AddComponent(std::make_shared<components::MeshRenderer>(player_model, shader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
-    player_2->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_2));
+    player_2->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
     /*for (int i = 1; i < 10; i++)
     {
@@ -225,41 +225,41 @@ int main()
         rope_segment->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/5.0f, 0.0f, 0.0f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-        rope_segment->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
+        rope_segment->AddComponent(std::make_shared<components::MeshRenderer>(debug_model, shader));
         rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment->transform_));
         rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
         if (i == 0)
         {
-            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.31f);
+            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
         }
         else
         {
-            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.31f);
+            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
         }
 
         rope_segments.push_back(rope_segment);
     }
 
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.21f);
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
 }
 
     auto HUD_root = GameObject::Create();
 
     auto HUD_object = GameObject::Create(HUD_root);
-    HUD_object->AddComponent(std::make_shared<Components::HUDRenderer>(HUD_texture, HUDshader));
+    HUD_object->AddComponent(std::make_shared<components::HUDRenderer>(HUD_texture, HUDshader));
     HUD_object->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
     HUD_object->transform_->set_position(glm::vec3(-0.75f, -0.75f, 0.0f));
 
     auto HUD_object2 = GameObject::Create(HUD_root);
-    HUD_object2->AddComponent(std::make_shared<Components::HUDRenderer>(HUD_texture2, HUDshader));
+    HUD_object2->AddComponent(std::make_shared<components::HUDRenderer>(HUD_texture2, HUDshader));
     HUD_object2->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
     HUD_object2->transform_->set_position(glm::vec3(0.75f, -0.75f, 0.0f));
 
     auto HUDText_root = GameObject::Create();
 
     auto HUDText_object = GameObject::Create(HUDText_root);
-    HUDText_object->AddComponent(std::make_shared<Components::TextRenderer>(HUDTextShader, "..."));
+    HUDText_object->AddComponent(std::make_shared<components::TextRenderer>(HUDTextShader, "..."));
     HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
 
@@ -317,7 +317,7 @@ int main()
 
         Timer::Update(delta_time);
         utility::DebugCameraMovement(window, camera, delta_time);
-        Input::InputManager::i_->Update();
+        input::InputManager::i_->Update();
 
 #pragma region Collisions and Physics
         static float cp_time = 0;
@@ -406,7 +406,7 @@ int main()
 
         if (cp_idx == 30)
         {
-            HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+            HUDText_object->GetComponent<components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
         }
         HUDText_root->PropagateUpdate();
 
@@ -428,7 +428,7 @@ int main()
     pbd::PBDManager::Destroy();
     physics::PhysicsManager::Destroy();
     collisions::CollisionManager::Destroy();
-    Input::InputManager::Destroy();
+    input::InputManager::Destroy();
     
     shader->End();
     glfwTerminate();

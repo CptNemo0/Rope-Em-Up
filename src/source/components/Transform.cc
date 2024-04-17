@@ -1,6 +1,6 @@
-#include "../headers/Transform.h"
+#include "../../headers/components/Transform.h"
 
-Components::Transform::Transform()
+components::Transform::Transform()
 {
     model_matrix_ = glm::mat4(1.0f);
     position_ = { 0.0f, 0.0f, 0.0f };
@@ -8,29 +8,29 @@ Components::Transform::Transform()
     scale_    = { 1.0f, 1.0f, 1.0f };
 }
 
-void Components::Transform::AddChild(std::shared_ptr<Transform> child)
+void components::Transform::AddChild(std::shared_ptr<Transform> child)
 {
     children_.push_back(child);
     child->parent_ = this;
     child->CalculateModelMatrix(model_matrix_);
 }
 
-const glm::vec3 Components::Transform::get_position() const
+const glm::vec3 components::Transform::get_position() const
 {
     return position_;
 }
 
-const glm::vec3 Components::Transform::get_previous_position() const
+const glm::vec3 components::Transform::get_previous_position() const
 {
     return previous_position_;
 }
 
-const glm::vec3 Components::Transform::get_rotation() const
+const glm::vec3 components::Transform::get_rotation() const
 {
     return rotation_;
 }
 
-void Components::Transform::RemoveChild(std::shared_ptr<Transform> child)
+void components::Transform::RemoveChild(std::shared_ptr<Transform> child)
 {
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end())
@@ -40,12 +40,12 @@ void Components::Transform::RemoveChild(std::shared_ptr<Transform> child)
     }
 }
 
-const glm::vec3 Components::Transform::get_scale() const
+const glm::vec3 components::Transform::get_scale() const
 {
     return scale_;
 }
 
-void Components::Transform::UpdateSelfAndChildren()
+void components::Transform::UpdateSelfAndChildren()
 {
     CalculateModelMatrix(parent_ ? parent_->model_matrix_ : glm::mat4(1.0f));
     for (auto& child : children_)
@@ -54,7 +54,7 @@ void Components::Transform::UpdateSelfAndChildren()
     }
 }
 
-void Components::Transform::set_position(const glm::vec3 & position)
+void components::Transform::set_position(const glm::vec3 & position)
 {
     previous_position_ = position_;
     position_ = position;
@@ -62,19 +62,19 @@ void Components::Transform::set_position(const glm::vec3 & position)
     UpdateSelfAndChildren();
 }
 
-void Components::Transform::set_rotation(const glm::vec3 & rotation)
+void components::Transform::set_rotation(const glm::vec3 & rotation)
 {
     rotation_ = rotation;
     UpdateSelfAndChildren();
 }
 
-void Components::Transform::set_scale(const glm::vec3 & scale)
+void components::Transform::set_scale(const glm::vec3 & scale)
 {
     scale_ = scale;
     UpdateSelfAndChildren();
 }
 
-void Components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
+void components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
 {
     const glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), scale_);
 
@@ -87,19 +87,19 @@ void Components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
     model_matrix_ = translation * rotation_Y * rotation_X * rotation_Z * scale_matrix * parent_model;
 }
 
-const glm::mat4 Components::Transform::get_model_matrix()
+const glm::mat4 components::Transform::get_model_matrix()
 {
     return model_matrix_;
 }
 
-void Components::Transform::add_position(const glm::vec3 & translation)
+void components::Transform::add_position(const glm::vec3 & translation)
 {
     previous_position_ = position_;
     position_ += translation;
     UpdateSelfAndChildren();
 }
 
-void Components::Transform::add_rotation(const glm::vec3 &rotation) 
+void components::Transform::add_rotation(const glm::vec3 &rotation) 
 {
     rotation_ += rotation;
     UpdateSelfAndChildren();
@@ -117,23 +117,23 @@ void Components::Transform::add_rotation(const glm::vec3 &rotation)
     forward = rotation_Z * forward;
 }
 
-void Components::Transform::add_scale(const glm::vec3 &scale)
+void components::Transform::add_scale(const glm::vec3 &scale)
 {
     scale_ += scale;
     UpdateSelfAndChildren();
 }
 
-const glm::vec3 Components::Transform::get_predicted_position() const
+const glm::vec3 components::Transform::get_predicted_position() const
 {
     return predicted_position_;
 }
 
-void Components::Transform::set_predicted_position(const glm::vec3& position)
+void components::Transform::set_predicted_position(const glm::vec3& position)
 {
     predicted_position_ = position;
 }
 
-const glm::mat4 Components::Transform::get_prediction_matrix() const
+const glm::mat4 components::Transform::get_prediction_matrix() const
 {
     const glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), scale_);
 
@@ -146,17 +146,17 @@ const glm::mat4 Components::Transform::get_prediction_matrix() const
     return translation * rotation_Y * rotation_X * rotation_Z * scale_matrix * parent_->get_model_matrix();
 }
 
-const glm::vec3 Components::Transform::get_up() const
+const glm::vec3 components::Transform::get_up() const
 {
     return up_;
 }
 
-const glm::vec3 Components::Transform::get_forward() const
+const glm::vec3 components::Transform::get_forward() const
 {
     return forward_;
 }
 
-const glm::vec3 Components::Transform::get_right() const
+const glm::vec3 components::Transform::get_right() const
 {
     return right_;
 }

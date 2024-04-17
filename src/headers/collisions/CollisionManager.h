@@ -9,13 +9,13 @@
 
 #include "Collider.h"
 #include "Collisions.h"
-#include "GameObject.h"
-#include "Mesh.h"
-#include "Physics.h"
-#include "PBD.h"
-#include "Transform.h"
+#include "../GameObject.h"
+#include "../Mesh.h"
+#include "../physics/Physics.h"
+#include "../physics/PBD.h"
+#include "../components/Transform.h"
 
-class Components::Collider;
+class components::Collider;
 
 namespace collisions
 {
@@ -29,7 +29,7 @@ namespace collisions
 
         int collision_layers[32];
 
-        void AddCollider(std::shared_ptr<Components::Collider> collider);
+        void AddCollider(std::shared_ptr<components::Collider> collider);
 
     public:
         
@@ -50,14 +50,14 @@ namespace collisions
             }
         }
 
-        std::vector<std::shared_ptr<Components::Collider>> colliders_;
+        std::vector<std::shared_ptr<components::Collider>> colliders_;
 
-        std::shared_ptr<Components::Collider> CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<Components::Transform> transform);
-        void RemoveCollider(std::shared_ptr<Components::Collider> collider);
+        std::shared_ptr<components::Collider> CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<components::Transform> transform);
+        void RemoveCollider(std::shared_ptr<components::Collider> collider);
        
         void CollisionCheck(std::vector<physics::Contact>& contacts);
         void CollisionCheckPBD(std::vector<pbd::Contact>& contacts);
-        void Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b, float wa, float wb);
+        void Separation(std::shared_ptr<components::Collider> a, std::shared_ptr<components::Collider> b, float wa, float wb);
         void AddCollisionBetweenLayers(int layer_1, int layer_2);
         void RemoveCollisionBetweenLayers(int layer_1, int layer_2);
         inline bool LayerCheck(int layer_1, int layer_2)

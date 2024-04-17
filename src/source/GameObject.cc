@@ -2,7 +2,7 @@
 
 GameObject::GameObject()
 {
-	transform_ = std::make_shared<Components::Transform>();
+	transform_ = std::make_shared<components::Transform>();
 }
 
 std::shared_ptr<GameObject> GameObject::Create()

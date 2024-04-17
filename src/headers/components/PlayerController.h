@@ -1,17 +1,16 @@
 #ifndef PLAYERCONTROLLER_H
 #define PLAYERCONTROLLER_H
 
-#include "GameObject.h"
-#include "InputObserver.h"
-#include "InputManager.h"
-#include "Physics.h"
-#include "PBD.h"
-#include "Timer.h"
+#include "../GameObject.h"
+#include "../input/InputObserver.h"
+#include "../input/InputManager.h"
+#include "../physics/PBD.h"
+#include "../Timer.h"
 
-namespace Components
+namespace components
 {
 
-class PlayerController : public Component, public Input::InputObserver, public std::enable_shared_from_this<PlayerController>
+class PlayerController : public Component, public input::InputObserver, public std::enable_shared_from_this<PlayerController>
 {
 private:
     int gamepadID_;
@@ -28,7 +27,7 @@ public:
     void Update() override;
     void Destroy() override;
 
-    void OnAction(Action action, Input::State state) override;
+    void OnAction(Action action, input::State state) override;
 };
 
 } // namespace Components

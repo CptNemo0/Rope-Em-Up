@@ -4,10 +4,10 @@
 #include "stb_easy_font.h"
 #include <vector>
 
-#include "GameObject.h"
-#include "Transform.h"
+#include "../GameObject.h"
+#include "../components/Transform.h"
 
-namespace Components
+namespace components
 {
 
 class TextRenderer : public Component

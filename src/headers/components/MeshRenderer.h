@@ -6,14 +6,14 @@
 #include <memory>
 
 
-#include "GameObject.h"
-#include "Model.h"
-#include "Texture.h"
+#include "../GameObject.h"
+#include "../Model.h"
+#include "../Texture.h"
 
-#include "Shader.h"
-#include "Transform.h"
+#include "../Shader.h"
+#include "../components/Transform.h"
 
-namespace Components
+namespace components
 {
 
     class MeshRenderer : public Component

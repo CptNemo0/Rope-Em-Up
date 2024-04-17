@@ -1,4 +1,4 @@
-#include "../headers/PBD.h"
+#include "../../headers/physics/PBD.h"
 
 pbd::PBDManager* pbd::PBDManager::i_ = nullptr;
 
@@ -28,17 +28,17 @@ void ClampElementwise(glm::vec3& v, float max, float min)
 	v.z = pbd::Clampf(v.z, max, min);
 }
 
-void Components::PBDParticle::AddForce(glm::vec3 force)
+void components::PBDParticle::AddForce(glm::vec3 force)
 {
 	forces_ += force;
 }
 
-void Components::PBDParticle::ZeroForces()
+void components::PBDParticle::ZeroForces()
 {
 	forces_ = glm::vec3(0.0f);
 }
 
-void Components::PBDParticle::SympleticEulerIntegration(float t)
+void components::PBDParticle::SympleticEulerIntegration(float t)
 {
 	UpdateVelocity(t);
 	DampVelocity();
@@ -46,24 +46,24 @@ void Components::PBDParticle::SympleticEulerIntegration(float t)
 	PredictPosition(t);
 }
 
-void Components::PBDParticle::DampVelocity()
+void components::PBDParticle::DampVelocity()
 {
 	velocity_ *= damping_factor_;
 }
 
-void Components::PBDParticle::UpdateVelocity(float t)
+void components::PBDParticle::UpdateVelocity(float t)
 {
 	ClampElementwise(forces_, 1000.0f, -1000.0f);
 	//velocity_ = velocity_ + t * inverse_mass_ * forces_;
 	velocity_ = (transform_->get_position() - transform_->get_previous_position()) / t + t * inverse_mass_ * forces_;
 }
 
-void Components::PBDParticle::PredictPosition(float t)
+void components::PBDParticle::PredictPosition(float t)
 {
 	transform_->set_predicted_position(transform_->get_position() + t * velocity_);
 }
 
-void Components::PBDParticle::UpdatePosition(float t)
+void components::PBDParticle::UpdatePosition(float t)
 {
 	if (glm::length(velocity_) != 0.0f && transform_->get_position() == transform_->get_predicted_position())
 	{
@@ -79,15 +79,15 @@ void Components::PBDParticle::UpdatePosition(float t)
 	
 }
 
-void Components::PBDParticle::Start()
+void components::PBDParticle::Start()
 {
 }
 
-void Components::PBDParticle::Update()
+void components::PBDParticle::Update()
 {
 }
 
-void Components::PBDParticle::Destroy()
+void components::PBDParticle::Destroy()
 {
 	auto &vec = pbd::PBDManager::i_->constraints_;
 	auto this_shared = shared_from_this();
@@ -101,13 +101,13 @@ void Components::PBDParticle::Destroy()
 	}
 }
 
-Components::PBDParticle::~PBDParticle()
+components::PBDParticle::~PBDParticle()
 {
 	std::cout << "DELETING PARTICLE!\n";
 }
 
 
-void pbd::BasicGenerator::GenerateForce(std::shared_ptr<Components::PBDParticle> particle)
+void pbd::BasicGenerator::GenerateForce(std::shared_ptr<components::PBDParticle> particle)
 {
 	particle->AddForce(direction_ * magnitude_);
 }
@@ -119,7 +119,7 @@ void pbd::FGRRecord::Generate()
 }
 
 
-pbd::Contact::Contact(std::shared_ptr<Components::PBDParticle> p1, std::shared_ptr<Components::PBDParticle> p2)
+pbd::Contact::Contact(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2)
 {
 	a = p1;
 	b = p2;
@@ -142,7 +142,7 @@ pbd::Contact::~Contact()
 }
 
 
-pbd::RopeConstraint::RopeConstraint(std::shared_ptr<Components::PBDParticle> p1, std::shared_ptr<Components::PBDParticle> p2, float ml)
+pbd::RopeConstraint::RopeConstraint(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2, float ml)
 {
 	p1_ = p1;
 	p2_ = p2;
@@ -176,7 +176,7 @@ void pbd::RopeConstraint::Enforce()
 }
 
 
-void pbd::WallConstraint::Enforce(std::shared_ptr<Components::PBDParticle> particle)
+void pbd::WallConstraint::Enforce(std::shared_ptr<components::PBDParticle> particle)
 {
 	auto pp = particle->transform_->get_predicted_position();
 
@@ -215,7 +215,7 @@ void pbd::WallConstraint::Enforce(std::shared_ptr<Components::PBDParticle> parti
 
 pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall)
 {
-	particles_ = std::vector<std::shared_ptr<Components::PBDParticle>>();
+	particles_ = std::vector<std::shared_ptr<components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
 	constraints_ = std::vector<pbd::RopeConstraint>();
 	contacts_ = std::vector<pbd::Contact>();
@@ -236,7 +236,7 @@ void pbd::PBDManager::RemoveRecord(std::shared_ptr<ForceGenerator> g)
     }
 }
 
-void pbd::PBDManager::RemoveRecord(std::shared_ptr<Components::PBDParticle> p)
+void pbd::PBDManager::RemoveRecord(std::shared_ptr<components::PBDParticle> p)
 {
 	auto it = std::find_if(generator_registry_.begin(), generator_registry_.end(), [p](const pbd::FGRRecord &record)
     {
@@ -272,7 +272,7 @@ void pbd::PBDManager::ProjectConstraints(float t)
 	}
 }
 
-float pbd::PBDManager::GetDistanceToClosestWall(std::shared_ptr<Components::PBDParticle> particle)
+float pbd::PBDManager::GetDistanceToClosestWall(std::shared_ptr<components::PBDParticle> particle)
 {
 	float return_value;
 
@@ -309,21 +309,21 @@ float pbd::PBDManager::GetDistanceToClosestWall(std::shared_ptr<Components::PBDP
 	return std::max(diff_x, diff_z);
 }
 
-std::shared_ptr<Components::PBDParticle> pbd::PBDManager::CreateParticle(float mass, float damping_factor, std::shared_ptr<Components::Transform> transform)
+std::shared_ptr<components::PBDParticle> pbd::PBDManager::CreateParticle(float mass, float damping_factor, std::shared_ptr<components::Transform> transform)
 {
-	auto p = std::make_shared<Components::PBDParticle>(mass, damping_factor, transform);
+	auto p = std::make_shared<components::PBDParticle>(mass, damping_factor, transform);
 	particles_.push_back(p);
 	
 	return p;
 }
 
-void pbd::PBDManager::CreateFGRRecord(std::shared_ptr<Components::PBDParticle> p, std::shared_ptr<pbd::BasicGenerator> g)
+void pbd::PBDManager::CreateFGRRecord(std::shared_ptr<components::PBDParticle> p, std::shared_ptr<pbd::BasicGenerator> g)
 {
 	pbd::FGRRecord fgrr = pbd::FGRRecord(p, g);
 	generator_registry_.push_back(fgrr);
 }
 
-void pbd::PBDManager::CreateRopeConstraint(std::shared_ptr<Components::PBDParticle> p1, std::shared_ptr<Components::PBDParticle> p2, float ml)
+void pbd::PBDManager::CreateRopeConstraint(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2, float ml)
 {
 	RopeConstraint constraint = RopeConstraint(p1, p2, ml);
 	constraints_.push_back(constraint);

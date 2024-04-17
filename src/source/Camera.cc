@@ -30,11 +30,11 @@ void llr::Camera::UpdateDirectionVectors()
     up_ = glm::normalize(glm::cross(right_, front_));
 }
 
-void Components::CameraComponent::Start()
+void components::CameraComponent::Start()
 {
 }
 
-void Components::CameraComponent::Update()
+void components::CameraComponent::Update()
 {
 	camera_->set_position(transfrom_->get_position());
 	camera_->set_right(transfrom_->get_right());

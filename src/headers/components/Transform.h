@@ -9,7 +9,7 @@
 
 class GameObject;
 
-namespace Components
+namespace components
 {
 
 class Transform

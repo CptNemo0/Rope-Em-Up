@@ -5,7 +5,7 @@
 
 #include "glm/glm.hpp"
 
-namespace Input
+namespace input
 {
 
 union State

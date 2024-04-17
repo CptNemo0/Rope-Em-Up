@@ -9,10 +9,10 @@
 #include <typeindex>
 
 #include "Texture.h"
-#include "Transform.h"
+#include "components/Transform.h"
 #include "Mesh.h"
 #include "Shader.h"
-#include "Component.h"
+#include "components/Component.h"
 
 class GameObject : public std::enable_shared_from_this<GameObject>
 {
@@ -22,7 +22,7 @@ private:
 public:
 	GameObject();
 	~GameObject() = default;
-	std::shared_ptr<Components::Transform> transform_;
+	std::shared_ptr<components::Transform> transform_;
 
 	static std::shared_ptr<GameObject> Create();
 	static std::shared_ptr<GameObject> Create(std::shared_ptr<GameObject> parent);

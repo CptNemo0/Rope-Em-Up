@@ -1,8 +1,8 @@
-#include "../headers/InputManager.h"
+#include "../../headers/input/InputManager.h"
 
-Input::InputManager *Input::InputManager::i_ = nullptr;
+input::InputManager *input::InputManager::i_ = nullptr;
 
-Input::InputManager::InputManager(GLFWwindow *window)
+input::InputManager::InputManager(GLFWwindow *window)
     : window_(window)
 {
     glfwSetJoystickCallback(JoystickStateCallback);
@@ -45,7 +45,7 @@ Input::InputManager::InputManager(GLFWwindow *window)
     };
 }
 
-void Input::InputManager::JoystickStateCallback(int jid, int event)
+void input::InputManager::JoystickStateCallback(int jid, int event)
 {
     if (event == GLFW_CONNECTED)
     {
@@ -57,7 +57,7 @@ void Input::InputManager::JoystickStateCallback(int jid, int event)
     }
 }
 
-void Input::InputManager::UpdateGamepadState(int gamepadID)
+void input::InputManager::UpdateGamepadState(int gamepadID)
 {
     GLFWgamepadstate new_gamepad_state;
     if (glfwGetGamepadState(gamepadID, &new_gamepad_state))
@@ -90,7 +90,7 @@ void Input::InputManager::UpdateGamepadState(int gamepadID)
     }
 }
 
-void Input::InputManager::UpdateKeyboardState(int gamepadID)
+void input::InputManager::UpdateKeyboardState(int gamepadID)
 {
     auto &move_action_buttons = keyboard_mappings[gamepadID][Action::MOVE].buttonIDs;
     glm::vec2 axis_state(0.0f);
@@ -116,25 +116,25 @@ void Input::InputManager::UpdateKeyboardState(int gamepadID)
 
     auto &pull_rope_button = keyboard_mappings[gamepadID][Action::PULL_ROPE].buttonID;
     int pull_rope_button_state = glfwGetKey(window_, pull_rope_button);
-    if (pull_rope_button_state != keyboard_state[pull_rope_button])
+    if (pull_rope_button_state != (int)keyboard_state[pull_rope_button])
     {
         keyboard_state[pull_rope_button] = pull_rope_button_state;
         NotifyAction(gamepadID, Action::PULL_ROPE, State{.button = pull_rope_button_state});
     }
 }
 
-void Input::InputManager::AddObserver(int gamepadID, std::shared_ptr<InputObserver> observer)
+void input::InputManager::AddObserver(int gamepadID, std::shared_ptr<InputObserver> observer)
 {
     observers_[gamepadID].push_back(observer);
 }
 
-void Input::InputManager::RemoveObserver(int gamepadID, std::shared_ptr<InputObserver> observer)
+void input::InputManager::RemoveObserver(int gamepadID, std::shared_ptr<InputObserver> observer)
 {
     auto &observers = observers_[gamepadID];
     observers.erase(std::remove(observers.begin(), observers.end(), observer), observers.end());
 }
 
-void Input::InputManager::NotifyAction(int gamepadID, Action action, State state)
+void input::InputManager::NotifyAction(int gamepadID, Action action, State state)
 {
     for (auto &observer : observers_[gamepadID])
     {
@@ -142,7 +142,7 @@ void Input::InputManager::NotifyAction(int gamepadID, Action action, State state
     }
 }
 
-void Input::InputManager::Update()
+void input::InputManager::Update()
 {
     for (int gamepadID = GLFW_JOYSTICK_1; gamepadID <= GLFW_JOYSTICK_2; gamepadID++)
     {

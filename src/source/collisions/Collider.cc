@@ -1,8 +1,8 @@
-#include "../headers/Collider.h"
+#include "../../headers/collisions/Collider.h"
 
-#include "../headers/CollisionManager.h"
+#include "../../headers/collisions/CollisionManager.h"
 
-Components::Collider::Collider(int layer, int precision, const std::shared_ptr<Mesh> mesh, std::shared_ptr<Components::Transform> transform_)
+components::Collider::Collider(int layer, int precision, const std::shared_ptr<Mesh> mesh, std::shared_ptr<components::Transform> transform_)
 {
 	this->transform_ = transform_;
 	this->layer_ = layer;
@@ -12,27 +12,27 @@ Components::Collider::Collider(int layer, int precision, const std::shared_ptr<M
 	collisions::UpdateVertices(np_collider_, transform_->get_model_matrix());
 }
 
-void Components::Collider::Start()
+void components::Collider::Start()
 {
 }
 
-void Components::Collider::Update()
+void components::Collider::Update()
 {
 	
 }
 
-void Components::Collider::Destroy()
+void components::Collider::Destroy()
 {
 	collisions::CollisionManager::i_->RemoveCollider(shared_from_this());
 }
 
-void Components::Collider::UpdateColliders()
+void components::Collider::UpdateColliders()
 {
 	collisions::UpdateCentre(bp_collider_, transform_->get_position());
 	collisions::UpdateVertices(np_collider_, transform_->get_model_matrix());
 }
 
-void Components::Collider::PredictColliders()
+void components::Collider::PredictColliders()
 {
 	collisions::UpdateCentre(bp_collider_, transform_->get_predicted_position());
 	collisions::UpdateVertices(np_collider_, transform_->get_prediction_matrix());
