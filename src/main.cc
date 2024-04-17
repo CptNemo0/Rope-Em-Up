@@ -20,6 +20,7 @@
 #include "headers/Model.h"
 #include "headers/MeshRenderer.h"
 #include "headers/Physics.h"
+#include "headers/PBD.h"
 #include "headers/Rope.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
@@ -28,9 +29,6 @@
 #include "headers/HUDRenderer.h"
 #include "headers/TextRenderer.h"
 #include "headers/PlayerController.h"
-#include "headers/HDRCubemap.h"
-
-unsigned int loadTexture(char const* path);
 
 int main()
 {
@@ -38,16 +36,6 @@ int main()
 
     const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
     const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
-
-    const std::string kPBRVertexShaderPath = "res/shaders/PBRVertexShader.vert";
-    const std::string kPBRFragmentShaderPath = "res/shaders/PBRFragmentShader.frag";
-    
-    const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemapVertexShader.vert";
-    const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemapFragmentShader.frag";
-    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolutionFragmentShader.frag";
-    
-    const std::string kBackgroundVertexShaderPath = "res/shaders/BackgroundVertexShader.vert";
-    const std::string kBackgroundFragmentShaderPath = "res/shaders/BackgroundFragmentShader.frag";
 
     const std::string kHUDVertexShaderPath = "res/shaders/HUDVertexShader.vert";
     const std::string kHUDFragmentShaderPath = "res/shaders/HUDFragmentShader.frag";
@@ -60,8 +48,6 @@ int main()
     const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
     const std::string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
 
-    const std::string kHDREquirectangularPath = "res/cubemaps/HDR_placeholder.hdr";
-
     const std::string kCubeMeshPath = "res/models/cube_2.obj";
     const std::string kPlayerMeshPath = "res/models/player.obj";
     const std::string kDebugMeshPath = "res/models/debug_thingy.obj";
@@ -70,12 +56,6 @@ int main()
     const std::string kWallPath = "res/models/simple_wall.obj";
 
     float kMsPerUpdate = 5.0f / 1000.0f;
-
-    /*unsigned int albedo = loadTexture("res/textures/test/test_basecolor.png");
-    unsigned int normal = loadTexture("res/textures/test/test_normal.png");
-    unsigned int metallic = loadTexture("res/textures/test/test_metallic.png");
-    unsigned int roughness = loadTexture("res/textures/test/test_roughness.png");*/
-    //unsigned int ao = TextureFromFile("res/textures/test/ao.png", "");
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -111,14 +91,8 @@ int main()
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
-    auto PBRShader = std::make_shared<Shader>(kPBRVertexShaderPath, kPBRFragmentShaderPath);
-    auto EquirectangularToCubemapShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kHDREquirectangularToCubemapFragmentShaderPath);
-    auto BackgroundShader = std::make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
-    auto IrradianceShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
     auto HUDshader = std::make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
     auto HUDTextShader = std::make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
-
-    auto cubemap = std::make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
     point_light.intensity = 100.0f;
@@ -126,21 +100,6 @@ int main()
     point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
-
-    // lights
-    // ------
-    glm::vec3 lightPositions[] = {
-        glm::vec3(-10.0f,  10.0f, 10.0f),
-        glm::vec3(10.0f,  10.0f, 10.0f),
-        glm::vec3(-10.0f, -10.0f, 10.0f),
-        glm::vec3(10.0f, -10.0f, 10.0f),
-    };
-    glm::vec3 lightColors[] = {
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f)
-    };
 
     auto test_model = std::make_shared<Model>(kTestPath);
 
@@ -155,7 +114,6 @@ int main()
 
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
-    //collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(1, 2);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
 
     auto scene_root = GameObject::Create();
@@ -187,51 +145,22 @@ int main()
     enemy_1->AddComponent(std::make_shared<Components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
-    rope::Rope rope = rope::Rope();
-
-
-
-    ////test
-    auto test = GameObject::Create(scene_root);
-    test->transform_->set_position(glm::vec3(-3.0f, 0.0f,-3.0f));
-    test->AddComponent(std::make_shared<Components::MeshRenderer>(test_model, PBRShader));
-
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
-    player_1->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_1->transform_, 2.0f));
-    player_1->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_1->transform_));
-
-    rope.AddSegment(player_1->GetComponent<Components::RopeSegment>());
+    player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
+    player_1->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/5.0f), 0.0f, 0.0f));
     player_2->transform_->set_position(glm::vec3(10.0f + (1.0f / 5.0f), 0.0f, 0.0f));
     player_2->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
-    player_2->AddComponent(physics::PhysicsManager::i_->CreateParticle(player_2->transform_, 2.0f));
-    player_2->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, player_2->transform_));
-
-
-    for (int i = 1; i < 20; i++)
-    {
-        auto new_object = GameObject::Create(scene_root);
-        new_object->transform_->set_position(glm::vec3(i * rope::kMaxDistance, 0.0f, 0.0f));
-        new_object->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
-        new_object->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
-        new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], new_object->transform_));
-        new_object->AddComponent(physics::PhysicsManager::i_->CreateParticle(new_object->transform_, 1.0f));
-        new_object->AddComponent(std::make_shared<Components::RopeSegment>(nullptr, nullptr, new_object->transform_));
-        rope.AddSegment(new_object->GetComponent<Components::RopeSegment>());
-    }
-
-    rope.AddSegment(player_2->GetComponent<Components::RopeSegment>());
-    
-    std::cout << rope.Size() << std::endl;
-
+    player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
+    player_2->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_2));
 
     /*for (int i = 1; i < 10; i++)
     {
@@ -291,46 +220,15 @@ int main()
     HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
 
-    //----------------
-    auto generator = std::make_shared<physics::BasicGenerator>();
-    physics::PhysicsManager::i_->AddFGRRecord(generator, player_1->GetComponent<Components::Particle>());
-    
-    std::vector<physics::Contact> contacts = std::vector<physics::Contact>();
+    auto generator_1 = std::make_shared<pbd::BasicGenerator>();
+    auto generator_2 = std::make_shared<pbd::BasicGenerator>();
 
-    //----------------sobie pogram w 
+    pbd::PBDManager::i_->CreateFGRRecord(player_1->GetComponent<Components::PBDParticle>(), generator_1);
+    pbd::PBDManager::i_->CreateFGRRecord(player_2->GetComponent<Components::PBDParticle>(), generator_2);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
-    /*PBRShader->Use();
-    PBRShader->SetInt("irradiance_map", 0);
-    PBRShader->SetInt("albedo_map", 1);
-    PBRShader->SetInt("normal_map", 2);
-    PBRShader->SetInt("metallic_map", 3);
-    PBRShader->SetInt("roughness_map", 4)*/;
-    //PBRShader->SetInt("ao_map", 4);
-
-
-    BackgroundShader->Use();
-    BackgroundShader->SetInt("environmentMap", 0);
-
-    cubemap->LoadHDRimg(window, camera);
-
-    // initialize static shader uniforms before rendering
-    // --------------------------------------------------
-    glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
-    /*PBRShader->Use();
-    PBRShader->SetMatrix4("projection_matrix", projection);*/
-
-    BackgroundShader->Use();
-    BackgroundShader->SetMatrix4("projection_matrix", projection);
-
-    // then before rendering, configure the viewport to the original framebuffer's screen dimensions
-    int scrWidth, scrHeight;
-    glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
-    glViewport(0, 0, scrWidth, scrHeight);
-
-    
+    scene_root->PropagateStart();
+    HUD_root->PropagateStart();
+    HUDText_root->PropagateStart();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -399,45 +297,10 @@ int main()
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-
-        /*PBRShader->Use();
-        PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        PBRShader->SetVec3("camera_position", camera->get_position());*/
-
-
-
-        /*glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, albedo);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, normal);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, metallic);
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, roughness);*/
-
         scene_root->PropagateUpdate();
 
-        /*for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
-        {
-            glm::vec3 newPos = lightPositions[i] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
-            newPos = lightPositions[i];
-            PBRShader->SetVec3("light_positions[" + std::to_string(i) + "]", newPos);
-            PBRShader->SetVec3("light_colors[" + std::to_string(i) + "]", lightColors[i]);
-
-            auto model = glm::mat4(1.0f);
-            model = glm::translate(model, newPos);
-            model = glm::scale(model, glm::vec3(0.5f));
-            PBRShader->SetMatrix4("model_matrix", model);
-            PBRShader->SetMatrix4("model_matrix", model);
-            scene_root->PropagateUpdate();
-        }*/
-
-        BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-
-        cubemap->RenderCube();
+#pragma endregion
+#pragma region Interface
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -466,50 +329,12 @@ int main()
 #pragma endregion
     }
 
+    pbd::PBDManager::Destroy();
     physics::PhysicsManager::Destroy();
     collisions::CollisionManager::Destroy();
     Input::InputManager::Destroy();
     
     shader->End();
-    BackgroundShader->End();
-    IrradianceShader->End();
     glfwTerminate();
     return 0;
-}
-
-unsigned int loadTexture(char const* path)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
 }

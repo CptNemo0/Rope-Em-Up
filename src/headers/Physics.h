@@ -1,10 +1,6 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#define gCOEFFIECENT_OF_RESTITUTION 0.9f;
-#define gCLAMP_MAX 1000.0f;
-#define gCLAMP_MIN -1000.0f;
-
 #include "glm/glm.hpp"
 #include <memory>
 #include "Transform.h"
@@ -26,18 +22,21 @@ namespace Components
 	public:
 		float inverse_mass_;
 		float mass_;
+		
+		float drag_;
+
 		glm::vec3 forces_ = glm::vec3(0.0f);
 
 		std::shared_ptr<Components::Transform> transform_;
 		glm::vec3 velocity_ = glm::vec3(0.0f);
 		glm::vec3 acceleration_ = glm::vec3(0.0f);
 
-		Particle(std::shared_ptr<Components::Transform> transform, float mass) : transform_(transform), inverse_mass_(1.0f / mass), mass_(mass) {}
+		Particle(std::shared_ptr<Components::Transform> transform, float mass, float drag) : transform_(transform), inverse_mass_(1.0f / mass), mass_(mass), drag_(drag) {}
 
 		void UpdateAcceleration();
 		void UpdateVelocity(float t);
 		void UpdatePosition(float t);
-		void AddForce(glm::vec3 force);
+		void AddForce(const glm::vec3& force);
 		void ZeroForces();
 		void UpdatePhysics(float t);
 
@@ -49,6 +48,8 @@ namespace Components
 
 namespace physics
 {
+	const float kMaxForce = 100.0f;
+	const float kCoeffiecentOfResitution = 0.5f;
 	class ForceGenerator
 	{
 	public:
@@ -94,8 +95,10 @@ namespace physics
 
 	struct Contact
 	{
+		Contact(std::shared_ptr<Components::Particle> p1, std::shared_ptr<Components::Particle> p2);
 		std::shared_ptr<Components::Particle> a;
 		std::shared_ptr<Components::Particle> b;
+		glm::vec3 contact_normal;
 	};
 
 	class PhysicsManager
@@ -104,7 +107,6 @@ namespace physics
 		static PhysicsManager* i_;
 	private:
 		std::vector<FGRRecord> generator_registry_;
-		std::shared_ptr<DragGenerator> common_drag_generator_;
 		std::vector<std::shared_ptr<Components::Particle>> particles_;
 		PhysicsManager();
 		~PhysicsManager() = default;
@@ -126,17 +128,19 @@ namespace physics
 			}
 		}
 
-		std::shared_ptr<Components::Particle> CreateParticle(std::shared_ptr<Components::Transform> transform, float mass);
+		std::shared_ptr<Components::Particle> CreateParticle(std::shared_ptr<Components::Transform> transform, float mass, float drag);
 		void GeneratorUpdate();
 		void ParticleUpdate(float t);
 		void AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<Components::Particle> particle);
 		void ResolveContact(physics::Contact& contact);
 		void ResolveContacts(std::vector<physics::Contact> contacts);
+		void RealizePositions();
 	};
 
 	void LogVec3(glm::vec3 v);
 	float Clampf(float v, float max, float min);
 	void ClampElementwise(glm::vec3& v, float max, float min);
+	void Sigmoid(glm::vec3& v);
 } //physics
 
 #endif // !PHYSICS_H
