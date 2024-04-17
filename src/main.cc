@@ -199,7 +199,7 @@ int main()
         rope_segments.push_back(rope_segment);
     }
 
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.31f);
+   // pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.31f);
 
     auto HUD_root = GameObject::Create();
 
