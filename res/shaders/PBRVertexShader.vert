@@ -14,8 +14,9 @@ uniform mat4 projection_matrix;
 void main()
 {
 	vec4 mm = model_matrix * vec4(iv_position, 1.0);
-	gl_Position = projection_matrix * view_matrix * mm;
 	World_position = vec3(mm);
 	Normal = normalize(vec3(transpose(inverse(model_matrix)) * vec4(iv_normal, 1.0)));;
 	Texture_coords = iv_texture;
+
+	gl_Position = projection_matrix * view_matrix * mm;
 }
