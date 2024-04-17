@@ -15,7 +15,6 @@ class PlayerController : public Component, public Input::InputObserver, public s
 {
 private:
     int gamepadID_;
-    std::shared_ptr<Transform> transform_;
     std::shared_ptr<pbd::BasicGenerator> move_generator_;
     std::shared_ptr<pbd::BasicGenerator> pull_generator_;
     int speed_ = 2000;
@@ -27,6 +26,7 @@ public:
 
     void Start() override;
     void Update() override;
+    void Destroy() override;
 
     void OnAction(Action action, Input::State state) override;
 };

@@ -21,6 +21,7 @@ private:
 
 public:
 	GameObject();
+	~GameObject() = default;
 	std::shared_ptr<Components::Transform> transform_;
 
 	static std::shared_ptr<GameObject> Create();
@@ -29,6 +30,7 @@ public:
 	void Update();
 	void PropagateUpdate();
 	void PropagateStart();
+	void Destroy();
 
 	template <typename T>
 	void AddComponent(std::shared_ptr<T> component)
@@ -43,6 +45,9 @@ public:
 		assert(components_.find(typeid(T).name()) != components_.end());
 		return std::dynamic_pointer_cast<T>(components_[typeid(T).name()]);
 	}
+
+	// If we ever need to remove a single component from a GameObject
+	// Remember to refactor Destroys so it works
 };
 
 

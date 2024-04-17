@@ -30,6 +30,16 @@ const glm::vec3 Components::Transform::get_rotation() const
     return rotation_;
 }
 
+void Components::Transform::RemoveChild(std::shared_ptr<Transform> child)
+{
+    auto it = std::find(children_.begin(), children_.end(), child);
+    if (it != children_.end())
+    {
+        children_.erase(it);
+        child->parent_ = nullptr;
+    }
+}
+
 const glm::vec3 Components::Transform::get_scale() const
 {
     return scale_;

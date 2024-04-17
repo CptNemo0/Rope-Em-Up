@@ -87,6 +87,20 @@ void Components::PBDParticle::Update()
 {
 }
 
+void Components::PBDParticle::Destroy()
+{
+	auto &vec = pbd::PBDManager::i_->constraints_;
+	auto this_shared = shared_from_this();
+	auto it = std::find_if(vec.begin(), vec.end(), [this_shared](const pbd::RopeConstraint &constraint)
+	{
+		return constraint.p1_ == this_shared || constraint.p2_ == this_shared;
+	});
+	if (it != vec.end())
+	{
+		vec.erase(it);
+	}
+}
+
 Components::PBDParticle::~PBDParticle()
 {
 	std::cout << "DELETING PARTICLE!\n";
@@ -182,6 +196,30 @@ pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution)
 	contacts_ = std::vector<pbd::Contact>();
 	solver_iterations_ = it;
 	coeffiecent_of_restitution_ = coeffiecent_of_restitution;
+}
+
+void pbd::PBDManager::RemoveRecord(std::shared_ptr<ForceGenerator> g)
+{
+	auto it = std::find_if(generator_registry_.begin(), generator_registry_.end(), [g](const pbd::FGRRecord &record)
+    {
+        return record.generator == g;
+    });
+    if (it != generator_registry_.end())
+    {
+        generator_registry_.erase(it);
+    }
+}
+
+void pbd::PBDManager::RemoveRecord(std::shared_ptr<Components::PBDParticle> p)
+{
+	auto it = std::find_if(generator_registry_.begin(), generator_registry_.end(), [p](const pbd::FGRRecord &record)
+    {
+        return record.particle == p;
+    });
+    if (it != generator_registry_.end())
+    {
+        generator_registry_.erase(it);
+    }
 }
 
 void pbd::PBDManager::Integration(float t)

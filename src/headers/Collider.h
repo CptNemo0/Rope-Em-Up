@@ -15,7 +15,7 @@ namespace Components
 	class GameObject;
 	
 
-	class Collider : public Component
+	class Collider : public Component, public std::enable_shared_from_this<Collider>
 	{
 	public:
 		std::shared_ptr<Components::Transform> transform_;
@@ -28,6 +28,7 @@ namespace Components
 		// Inherited via Component
 		void Start() override;
 		void Update() override;
+		void Destroy() override;
 		void UpdateColliders();
 		void PredictColliders();
 	};

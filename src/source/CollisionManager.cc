@@ -24,6 +24,15 @@ std::shared_ptr<Components::Collider> collisions::CollisionManager::CreateCollid
     return return_value;
 }
 
+void collisions::CollisionManager::RemoveCollider(std::shared_ptr<Components::Collider> c)
+{
+    auto it = std::find(colliders_.begin(), colliders_.end(), c);
+	if (it != colliders_.end())
+	{
+		colliders_.erase(it);
+	}
+}
+
 void collisions::CollisionManager::Separation(std::shared_ptr<Components::Collider> a, std::shared_ptr<Components::Collider> b, float wa, float wb)
 {
     auto separation_vector = GetSeparatingVector(a->np_collider_,

@@ -28,8 +28,6 @@ namespace collisions
         ~CollisionManager() = default;
 
         int collision_layers[32];
-        std::vector<std::shared_ptr<Components::Collider>> colliders_;
-        
 
         void AddCollider(std::shared_ptr<Components::Collider> collider);
 
@@ -52,7 +50,10 @@ namespace collisions
             }
         }
 
+        std::vector<std::shared_ptr<Components::Collider>> colliders_;
+
         std::shared_ptr<Components::Collider> CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<Components::Transform> transform);
+        void RemoveCollider(std::shared_ptr<Components::Collider> collider);
        
         void CollisionCheck(std::vector<physics::Contact>& contacts);
         void CollisionCheckPBD(std::vector<pbd::Contact>& contacts);
