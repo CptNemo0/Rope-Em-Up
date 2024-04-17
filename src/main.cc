@@ -154,7 +154,7 @@ int main()
     auto scene_root = GameObject::Create();
 
     rope::Rope rope = rope::Rope();
-
+    std::cout<< rope.Size() << std::endl;
 
 
     ////test
