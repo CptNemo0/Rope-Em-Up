@@ -32,6 +32,7 @@
 
 int main()
 {
+    std::cout << "Byæ czy nie byæ oto jest pytanie.\n";
     const std::string kWindowTitle = "Modul Sumatywny";
 
     const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
