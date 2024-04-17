@@ -179,7 +179,6 @@ int main()
     wall_left->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 2.0f);
-    pbd::PBDManager::i_->set_walls(walls);
 
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
@@ -366,8 +365,8 @@ int main()
             collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
             pbd::PBDManager::i_->ResolveContacts();
             pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
-            /*walls.Enforce(player_1->GetComponent<Components::PBDParticle>());
-            walls.Enforce(player_2->GetComponent<Components::PBDParticle>());*/
+            walls.Enforce(player_1->GetComponent<Components::PBDParticle>());
+            walls.Enforce(player_2->GetComponent<Components::PBDParticle>());
             pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
             pbd::PBDManager::i_->ClearContacts();
 
