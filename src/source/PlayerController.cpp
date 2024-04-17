@@ -7,7 +7,6 @@ Components::PlayerController::PlayerController(int gamepadID)
 
 void Components::PlayerController::Start()
 {
-    transform_ = gameObject_.lock()->transform_;
     Input::InputManager::i_->AddObserver(gamepadID_, shared_from_this());
 
     move_generator_ = std::make_shared<pbd::BasicGenerator>();
@@ -27,6 +26,13 @@ void Components::PlayerController::Update()
     {
         move_generator_->direction_ = direction_;
     }
+}
+
+void Components::PlayerController::Destroy()
+{
+    Input::InputManager::i_->RemoveObserver(gamepadID_, shared_from_this());
+    pbd::PBDManager::i_->RemoveRecord(move_generator_);
+    pbd::PBDManager::i_->RemoveRecord(pull_generator_);
 }
 
 void Components::PlayerController::OnAction(Action action, Input::State state)

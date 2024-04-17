@@ -23,7 +23,7 @@ void Components::HUDRenderer::Start()
 
 void Components::HUDRenderer::Update()
 {
-    shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
+    shader_->SetMatrix4("model_matrix", transform_.lock()->get_model_matrix());
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_->id_);
 

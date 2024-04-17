@@ -47,3 +47,13 @@ void GameObject::PropagateStart()
 		child->game_object_->PropagateStart();
 	}
 }
+
+void GameObject::Destroy()
+{
+	for (auto& component : components_)
+	{
+		component.second->Destroy();
+	}
+	transform_->game_object_ = nullptr;
+	transform_->parent_->RemoveChild(transform_);
+}

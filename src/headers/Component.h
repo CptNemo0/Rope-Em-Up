@@ -14,6 +14,7 @@ public:
     virtual ~Component() {};
     virtual void Start() = 0;
     virtual void Update() = 0;
+    virtual void Destroy() = 0;
 };
 
 #endif // !COMPONENT_H

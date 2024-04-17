@@ -147,7 +147,11 @@ int main()
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
+    GameObject *test_obj;
+
+{
     auto player_1 = GameObject::Create(scene_root);
+    test_obj = player_1.get();
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
@@ -200,7 +204,8 @@ int main()
         rope_segments.push_back(rope_segment);
     }
 
-   // pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.31f);
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.21f);
+}
 
     auto HUD_root = GameObject::Create();
 
@@ -221,15 +226,11 @@ int main()
     HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
 
-    auto generator_1 = std::make_shared<pbd::BasicGenerator>();
-    auto generator_2 = std::make_shared<pbd::BasicGenerator>();
-
-    pbd::PBDManager::i_->CreateFGRRecord(player_1->GetComponent<Components::PBDParticle>(), generator_1);
-    pbd::PBDManager::i_->CreateFGRRecord(player_2->GetComponent<Components::PBDParticle>(), generator_2);
-
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
     HUDText_root->PropagateStart();
+
+    test_obj->Destroy();
 
     while (!glfwWindowShouldClose(window))
     {

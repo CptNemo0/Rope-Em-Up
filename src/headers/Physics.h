@@ -43,6 +43,7 @@ namespace Components
 		// Inherited via Component
 		void Start() override;
 		void Update() override;
+		void Destroy() override {}
 	};
 }
 

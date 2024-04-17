@@ -12,7 +12,7 @@
 
 namespace Components
 {
-	class PBDParticle : public Component
+	class PBDParticle : public Component, public std::enable_shared_from_this<PBDParticle>
 	{
 	public:
 		std::shared_ptr<Components::Transform> transform_;
@@ -41,6 +41,7 @@ namespace Components
 		// Inherited via Component
 		void Start() override;
 		void Update() override;
+		void Destroy() override;
 
 		~PBDParticle();
 	};
@@ -170,6 +171,9 @@ namespace pbd
                 i_ = nullptr;
             }
         }
+
+		void RemoveRecord(std::shared_ptr<ForceGenerator> g);
+		void RemoveRecord(std::shared_ptr<Components::PBDParticle> p);
 
 		void Integration(float t);
 		
