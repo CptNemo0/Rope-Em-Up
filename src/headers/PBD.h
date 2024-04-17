@@ -105,10 +105,25 @@ namespace pbd
 		~RopeConstraint() = default;
 		std::shared_ptr<Components::PBDParticle> p1_;
 		std::shared_ptr<Components::PBDParticle> p2_;
-		
 		float max_distance_;
 
 		void Enforce() override;
+	};
+
+	class WallConstraint
+	{
+	public:
+
+		glm::vec3 up_left_;
+		glm::vec3 down_right_;
+		float offset_;
+		WallConstraint(glm::vec3 up_left, glm::vec3 down_right, float offset) :
+			up_left_(up_left), down_right_(down_right), offset_(offset){}
+		
+		WallConstraint() = default;
+		~WallConstraint() = default;
+
+		void Enforce(std::shared_ptr<Components::PBDParticle> particle);
 	};
 
 	struct Contact

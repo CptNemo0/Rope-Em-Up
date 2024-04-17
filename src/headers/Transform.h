@@ -23,6 +23,10 @@ private:
     glm::vec3 rotation_;
     glm::vec3 scale_;
 
+    glm::vec3 up_;
+    glm::vec3 forward_;
+    glm::vec3 right_;
+
     glm::vec3 previous_position_ = glm::vec3(0.0f);
     glm::vec3 predicted_position_ = glm::vec3(0.0f);
 
@@ -53,6 +57,10 @@ public:
     void add_scale(const glm::vec3& scale);
     const glm::mat4 get_model_matrix();
     const glm::mat4 get_prediction_matrix() const;
+
+    const glm::vec3 get_up() const;
+    const glm::vec3 get_forward() const;
+    const glm::vec3 get_right() const;
 };
 
 };

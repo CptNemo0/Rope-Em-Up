@@ -53,14 +53,9 @@ int main()
     const std::string kDebugMeshPath = "res/models/debug_thingy.obj";
     const std::string kEnemyMeshPath = "res/models/enemy.obj";
     const std::string kTestPath = "res/models/test2.obj";
+    const std::string kWallPath = "res/models/simple_wall.obj";
 
     float kMsPerUpdate = 5.0f / 1000.0f;
-
-//#if DEBUG
-//    kMsPerUpdate = 6.0f / 1000.0f;
-//#else
-//    kMsPerUpdate = 1.0 / 1000.0f;
-//#endif
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -112,6 +107,7 @@ int main()
     auto player_model = std::make_shared<Model>(kPlayerMeshPath);
     auto debug_model = std::make_shared<Model>(kDebugMeshPath);
     auto enemy_model = std::make_shared<Model>(kEnemyMeshPath);
+    auto wall_model = std::make_shared<Model>(kWallPath);
     
     auto HUD_texture = std::make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = std::make_shared<tmp::Texture>(kHUDTexturePath2);
@@ -121,6 +117,26 @@ int main()
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
 
     auto scene_root = GameObject::Create();
+
+    auto wall_up = GameObject::Create(scene_root);
+    wall_up->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    wall_up->transform_->set_position(glm::vec3(0.0f, 0.0f, 17.0f));
+    wall_up->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
+
+    auto wall_down = GameObject::Create(scene_root);
+    wall_down->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    wall_down->transform_->set_position(glm::vec3(0.0f, 0.0f, -17.0f));
+    wall_down->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
+
+    auto wall_right = GameObject::Create(scene_root);
+    wall_right->transform_->set_position(glm::vec3(17.0f, 0.0f, 0.0f));
+    wall_right->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
+
+    auto wall_left = GameObject::Create(scene_root);
+    wall_left->transform_->set_position(glm::vec3(-17.0f, 0.0f, 0.0f));
+    wall_left->AddComponent(std::make_shared<Components::MeshRenderer>(wall_model, shader));
+
+    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 2.0f);
 
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
@@ -145,7 +161,7 @@ int main()
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(std::make_shared<Components::PlayerController>(GLFW_JOYSTICK_2));
 
-    for (int i = 1; i < 10; i++)
+    /*for (int i = 1; i < 10; i++)
     {
         for (int j = 1; j < 10; j++)
         {
@@ -156,7 +172,7 @@ int main()
             new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, player_model->meshes_[0], new_object->transform_));
             new_object->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.88f, new_object->transform_));
         }
-    }
+    }*/
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
@@ -166,24 +182,23 @@ int main()
         rope_segment->transform_->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f)/5.0f, 0.0f, 0.0f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-        physics::LogVec3(rope_segment->transform_->get_position());
         rope_segment->AddComponent(std::make_shared<Components::MeshRenderer>(debug_model, shader));
         rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, debug_model->meshes_[0], rope_segment->transform_));
         rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
         if (i == 0)
         {
-            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.21f);
+            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.31f);
         }
         else
         {
-            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.21f);
+            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), rope_segment->GetComponent<Components::PBDParticle>(), 0.31f);
         }
 
         rope_segments.push_back(rope_segment);
     }
 
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.21f);
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<Components::PBDParticle>(), player_2->GetComponent<Components::PBDParticle>(), 0.31f);
 
     auto HUD_root = GameObject::Create();
 
@@ -236,12 +251,10 @@ int main()
         Input::InputManager::i_->Update();
 
 #pragma region Collisions and Physics
-
+        static float cp_time = 0;
+        static int cp_idx = 0;
         if (lag >= kMsPerUpdate)
         {
-            static float cp_time = 0;
-            static int cp_idx = 0;
-
             std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
 
             pbd::PBDManager::i_->GeneratorUpdate();
@@ -250,25 +263,27 @@ int main()
             collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
             pbd::PBDManager::i_->ResolveContacts();
             pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
+            walls.Enforce(player_1->GetComponent<Components::PBDParticle>());
+            walls.Enforce(player_2->GetComponent<Components::PBDParticle>());
             pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
             pbd::PBDManager::i_->ClearContacts();
+
+            
 
             std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
             cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
             cp_idx++;
 
-
-            if (cp_idx == 60)
-            {
-                std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
-                cp_idx = 0;
-                cp_time = 0.0f;
-            }
-
             lag -= kMsPerUpdate;
         }
 
-        
+        if (cp_idx == 60)
+        {
+            std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
+            cp_idx = 0;
+            cp_time = 0.0f;
+        }
+
 #pragma endregion
 #pragma region GO Update and Draw
 
@@ -297,7 +312,10 @@ int main()
 
         HUDTextShader->Use();
 
-        HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+        if (cp_idx == 30)
+        {
+            HUDText_object->GetComponent<Components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+        }
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
