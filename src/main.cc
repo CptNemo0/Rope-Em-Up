@@ -29,6 +29,8 @@
 #include "headers/HUDRenderer.h"
 #include "headers/TextRenderer.h"
 #include "headers/PlayerController.h"
+#include "headers/HDRCubemap.h"
+
 
 int main()
 {
@@ -44,10 +46,22 @@ int main()
     const std::string kHUDTextVertexShaderPath = "res/shaders/HUDTextVertexShader.vert";
     const std::string kHUDTextFragmentShaderPath = "res/shaders/HUDTextFragmentShader.frag";
 
+    const std::string kPBRVertexShaderPath = "res/shaders/PBRVertexShader.vert";
+    const std::string kPBRFragmentShaderPath = "res/shaders/PBRFragmentShader.frag";
+
+    const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemapVertexShader.vert";
+    const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemapFragmentShader.frag";
+    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolutionFragmentShader.frag";
+
+    const std::string kBackgroundVertexShaderPath = "res/shaders/BackgroundVertexShader.vert";
+    const std::string kBackgroundFragmentShaderPath = "res/shaders/BackgroundFragmentShader.frag";
+
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
     const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
     const std::string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
+
+    const std::string kHDREquirectangularPath = "res/cubemaps/HDR_placeholder.hdr";
 
     const std::string kCubeMeshPath = "res/models/cube_2.obj";
     const std::string kPlayerMeshPath = "res/models/player.obj";
@@ -94,6 +108,12 @@ int main()
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
     auto HUDshader = std::make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
     auto HUDTextShader = std::make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
+    auto PBRShader = std::make_shared<Shader>(kPBRVertexShaderPath, kPBRFragmentShaderPath);
+    auto EquirectangularToCubemapShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kHDREquirectangularToCubemapFragmentShaderPath);
+    auto BackgroundShader = std::make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
+    auto IrradianceShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
+
+    auto cubemap = std::make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
     point_light.intensity = 100.0f;
@@ -101,6 +121,21 @@ int main()
     point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
+
+    // lights
+   // ------
+    glm::vec3 lightPositions[] = {
+        glm::vec3(-10.0f,  10.0f, 10.0f),
+        glm::vec3(10.0f,  10.0f, 10.0f),
+        glm::vec3(-10.0f, -10.0f, 10.0f),
+        glm::vec3(10.0f, -10.0f, 10.0f),
+    };
+    glm::vec3 lightColors[] = {
+        glm::vec3(300.0f, 300.0f, 300.0f),
+        glm::vec3(300.0f, 300.0f, 300.0f),
+        glm::vec3(300.0f, 300.0f, 300.0f),
+        glm::vec3(300.0f, 300.0f, 300.0f)
+    };
 
     auto test_model = std::make_shared<Model>(kTestPath);
 
@@ -148,6 +183,11 @@ int main()
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
     GameObject *test_obj;
+
+    ////test
+    auto test = GameObject::Create(scene_root);
+    test->transform_->set_position(glm::vec3(-3.0f, 0.0f, -3.0f));
+    test->AddComponent(std::make_shared<Components::MeshRenderer>(test_model, PBRShader));
 
 {
     auto player_1 = GameObject::Create(scene_root);
@@ -230,6 +270,37 @@ int main()
     HUD_root->PropagateStart();
     HUDText_root->PropagateStart();
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+
+    /*PBRShader->Use();
+   PBRShader->SetInt("irradiance_map", 0);
+   PBRShader->SetInt("albedo_map", 1);
+   PBRShader->SetInt("normal_map", 2);
+   PBRShader->SetInt("metallic_map", 3);
+   PBRShader->SetInt("roughness_map", 4)*/;
+   //PBRShader->SetInt("ao_map", 4);
+
+
+   BackgroundShader->Use();
+   BackgroundShader->SetInt("environmentMap", 0);
+
+   cubemap->LoadHDRimg(window, camera);
+
+   // initialize static shader uniforms before rendering
+   // --------------------------------------------------
+   glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+   /*PBRShader->Use();
+   PBRShader->SetMatrix4("projection_matrix", projection);*/
+
+   BackgroundShader->Use();
+   BackgroundShader->SetMatrix4("projection_matrix", projection);
+
+   // then before rendering, configure the viewport to the original framebuffer's screen dimensions
+   int scrWidth, scrHeight;
+   glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
+   glViewport(0, 0, scrWidth, scrHeight);
+
     test_obj->Destroy();
 
     while (!glfwWindowShouldClose(window))
@@ -299,7 +370,34 @@ int main()
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
+        /*PBRShader->Use();
+        PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        PBRShader->SetVec3("camera_position", camera->get_position());*/
+
+
+
+        /*glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, albedo);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, normal);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, metallic);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, roughness);*/
+
         scene_root->PropagateUpdate();
+
+
+        BackgroundShader->Use();
+        BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+
+        cubemap->RenderCube();
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 #pragma endregion
 #pragma region Interface
@@ -323,6 +421,11 @@ int main()
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
+
+        BackgroundShader->Use();
+        BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+
+        cubemap->RenderCube();
 
 #pragma endregion
 
