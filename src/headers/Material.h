@@ -31,6 +31,7 @@ public:
         textures_loaded.push_back(albedoMap);
         textures_loaded.push_back(normalMap);
         textures_loaded.push_back(metallicMap);
+        std::cout << "Material created" << std::endl;
 
     }
     Material() = default;
