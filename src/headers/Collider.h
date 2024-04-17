@@ -30,7 +30,6 @@ namespace Components
 		void Update() override;
 		void Destroy() override;
 		void UpdateColliders();
-		void PredictColliders();
 	};
 }
 

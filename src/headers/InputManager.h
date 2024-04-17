@@ -3,7 +3,6 @@
 
 #include "InputObserver.h"
 #include "GamepadAxisType.h"
-#include "ActionMappingType.h"
 
 #include <memory>
 #include <iostream>
@@ -16,7 +15,19 @@
 namespace Input
 {
 
-static const glm::vec2 axis_directions[] = {glm::vec2(0.0f, -1.0f), glm::vec2(0.0f, 1.0f), glm::vec2(-1.0f, 0.0f), glm::vec2(1.0f, 0.0f)};
+static std::unordered_map<int, std::array<int, 4>> axis_keyboard_mappings =
+{
+    {GLFW_JOYSTICK_1, {GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D}},
+    {GLFW_JOYSTICK_2, {GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT}}
+};
+
+static const glm::vec2 axis_directions[] = {glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, -1.0f), glm::vec2(-1.0f, 0.0f), glm::vec2(1.0f, 0.0f)};
+
+static std::unordered_map<int, std::vector<int>> button_keyboard_mappings =
+{
+    {GLFW_JOYSTICK_1, {GLFW_KEY_E}},
+    {GLFW_JOYSTICK_2, {GLFW_KEY_SLASH}}
+};
 
 class InputManager
 {
@@ -50,12 +61,8 @@ public:
 
 // Input stuff
 private:
-    std::unordered_map<int, std::vector<std::shared_ptr<InputObserver>>> observers_;
+    std::vector<std::pair<InputObserver *, int>> observers_;
     std::unordered_map<int, GLFWgamepadstate> old_gamepad_states_;
-    std::unordered_map<int, bool> keyboard_state;
-
-    std::unordered_map<int, std::unordered_map<Action, ActionMappingType>> keyboard_mappings;
-    std::unordered_map<int, std::unordered_map<Action, ActionMappingType>> gamepad_mappings;
 
     static void JoystickStateCallback(int jid, int event);
 
@@ -63,25 +70,12 @@ private:
     void UpdateKeyboardState(int gamepadID);
 
 public:
-    float deadzone_ = 0.1f;
-
-    void AddObserver(int gamepadID, std::shared_ptr<InputObserver> observer);
-    void RemoveObserver(int gamepadID, std::shared_ptr<InputObserver> observer);
-    void NotifyAction(int gamepadID, Action action, State state);
+    void AddObserver(InputObserver *observer, int gamepadID);
+    void RemoveObserver(InputObserver *observer);
+    void NotifyAxisChange(int gamepadID, GamepadAxisType axis_type, glm::vec2 state);
+    void NotifyButtonChange(int gamepadID, int buttonID, bool state);
 
     void Update();
-
-    glm::vec2 SafeNormalize(glm::vec2 vector)
-    {
-        if (glm::length(vector) > 0.0f)
-        {
-            return glm::normalize(vector);
-        }
-        else
-        {
-            return glm::vec2(0.0f);
-        }
-    }
 };
 
 }; // namespace Input
