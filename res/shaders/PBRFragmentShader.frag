@@ -5,8 +5,8 @@ in vec3 World_position;
 in vec3 Normal;
 in vec2 Texture_coords;
 
-uniform vec3 light_positions[4];
-uniform vec3 light_colors[4];
+uniform vec3 light_positions[1];
+uniform vec3 light_colors[1];
 
 uniform vec3 camera_position;
 
