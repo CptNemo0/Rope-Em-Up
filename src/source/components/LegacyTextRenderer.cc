@@ -1,6 +1,6 @@
-#include "../../headers/components/TextRenderer.h"
+#include "../../headers/components/LegacyTextRenderer.h"
 
-components::TextRenderer::TextRenderer(std::shared_ptr<Shader> shader, std::string text)
+components::LegacyTextRenderer::LegacyTextRenderer(std::shared_ptr<Shader> shader, std::string text)
 {
     this->shader_ = shader;
 
@@ -15,7 +15,7 @@ components::TextRenderer::TextRenderer(std::shared_ptr<Shader> shader, std::stri
     glEnableVertexAttribArray(0);
 }
 
-void components::TextRenderer::ChangeText(std::string text)
+void components::LegacyTextRenderer::ChangeText(std::string text)
 {
     int size = text.length() * 300;
     std::vector<float> temp_vertices_buffer;
@@ -54,12 +54,12 @@ void components::TextRenderer::ChangeText(std::string text)
     glBufferData(GL_ARRAY_BUFFER, new_size, vertices_buffer_.data(), GL_DYNAMIC_DRAW);
 }
 
-void components::TextRenderer::Start()
+void components::LegacyTextRenderer::Start()
 {
     this->transform_ = gameObject_.lock()->transform_;
 }
 
-void components::TextRenderer::Update()
+void components::LegacyTextRenderer::Update()
 {
     shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
     glBindVertexArray(VAO_);

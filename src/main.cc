@@ -27,14 +27,13 @@
 #include "headers/utility.h"
 #include "headers/input/InputManager.h"
 #include "headers/components/HUDRenderer.h"
-#include "headers/components/TextRenderer.h"
+#include "headers/components/LegacyTextRenderer.h"
 #include "headers/components/PlayerController.h"
 #include "headers/HDRCubemap.h"
 
-
 int main()
 {
-    std::cout << "Byæ czy nie byæ oto jest pytanie.\n";
+    std::cout << "Byc czy nie byc oto jest pytanie.\n";
     const std::string kWindowTitle = "Modul Sumatywny";
 
     const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
@@ -274,7 +273,7 @@ int main()
     auto HUDText_root = GameObject::Create();
 
     auto HUDText_object = GameObject::Create(HUDText_root);
-    HUDText_object->AddComponent(std::make_shared<components::TextRenderer>(HUDTextShader, "..."));
+    HUDText_object->AddComponent(std::make_shared<components::LegacyTextRenderer>(HUDTextShader, "..."));
     HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
 
@@ -417,7 +416,7 @@ int main()
 
         if (cp_idx == 30)
         {
-            HUDText_object->GetComponent<components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+            HUDText_object->GetComponent<components::LegacyTextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
         }
         HUDText_root->PropagateUpdate();
 

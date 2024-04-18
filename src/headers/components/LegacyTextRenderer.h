@@ -10,7 +10,7 @@
 namespace components
 {
 
-class TextRenderer : public Component
+class LegacyTextRenderer : public Component
 {
 private:
     unsigned int VAO_, VBO_, quads_count_;
@@ -18,7 +18,7 @@ private:
     std::shared_ptr<Shader> shader_;
     std::shared_ptr<Transform> transform_;
 public:
-    TextRenderer(std::shared_ptr<Shader> shader, std::string text);
+    LegacyTextRenderer(std::shared_ptr<Shader> shader, std::string text);
     void ChangeText(std::string text);
 
     void Start() override;
