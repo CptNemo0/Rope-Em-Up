@@ -130,7 +130,7 @@ int main()
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
     camera->set_position(glm::vec3(0.0f, 25.0f, 0.0f));
     camera->set_pitch(-90.0f);
-    camera->set_yaw(-90.0f);
+    camera->set_yaw(+90.0f);
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
 
@@ -238,7 +238,7 @@ int main()
     test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));*/
 
 {
-    /*auto player_1 = GameObject::Create(scene_root);
+    auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->AddComponent(std::make_shared<components::MeshRenderer>(player_model, shader));
@@ -278,7 +278,7 @@ int main()
         rope_segments.push_back(rope_segment);
     }
 
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);*/
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
 }
 
     auto HUD_root = GameObject::Create();
