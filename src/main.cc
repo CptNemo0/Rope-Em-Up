@@ -13,6 +13,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/vector_angle.hpp"
 #include "stb_easy_font.h"
+#include "ft2build.h"
+#include FT_FREETYPE_H
 
 #include "headers/Camera.h"
 #include "headers/collisions/Collider.h"
@@ -29,9 +31,10 @@
 #include "headers/utility.h"
 #include "headers/input/InputManager.h"
 #include "headers/components/HUDRenderer.h"
-#include "headers/components/LegacyTextRenderer.h"
+#include "headers/components/TextRenderer.h"
 #include "headers/components/PlayerController.h"
 #include "headers/HDRCubemap.h"
+#include "headers/Font.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -91,6 +94,7 @@ int main()
     const std::string kTestBallPath = "res/models/test_ball.obj";
 
     srand(static_cast <unsigned> (time(0)));
+    const std::string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
     float kMsPerUpdate = 5.0f / 1000.0f;
 
@@ -128,6 +132,7 @@ int main()
     camera->set_pitch(-90.0f);
     camera->set_yaw(-90.0f);
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+    auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
     auto HUDshader = std::make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
@@ -290,10 +295,18 @@ int main()
 
     auto HUDText_root = GameObject::Create();
 
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+    {
+        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        return -1;
+    }
+    auto maturasc_font = std::make_shared<Font>(ft, kFontPath.c_str());
+
     auto HUDText_object = GameObject::Create(HUDText_root);
-    HUDText_object->AddComponent(std::make_shared<components::LegacyTextRenderer>(HUDTextShader, "..."));
-    HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
-    HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
+    HUDText_object->AddComponent(std::make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "TEST", glm::vec3(1.0f)));
+    HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
+    HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
 
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
@@ -430,7 +443,7 @@ int main()
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        cubemap->RenderCube();
+        // cubemap->RenderCube();
 
 #pragma endregion
 #pragma region Interface
@@ -441,14 +454,15 @@ int main()
 
         HUDshader->Use();
 
-        HUD_root->PropagateUpdate();
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
+        HUD_root->PropagateUpdate();
 
         HUDTextShader->Use();
+        HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
 
         if (cp_idx == 30)
         {
-            HUDText_object->GetComponent<components::LegacyTextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+            HUDText_object->GetComponent<components::TextRenderer>()->text_ = "fps: " + std::to_string(1.0f / delta_time);
         }
         HUDText_root->PropagateUpdate();
 
