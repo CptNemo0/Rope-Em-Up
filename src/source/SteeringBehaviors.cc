@@ -31,7 +31,7 @@ glm::vec3 Wander(std::shared_ptr<components::Transform> actor, Vehicle& vehicle,
 
 	auto vel = (actor->get_position() - actor->get_previous_position()) / t;
 	
-	return glm::normalize(vel + target);
+	return glm::normalize(vel + target) * vehicle.wander_weight;
 }
 
 glm::vec3 WallAvoidance(std::shared_ptr<components::Transform> actor, Vehicle& vehicle, float t)
@@ -110,7 +110,7 @@ glm::vec3 WallAvoidance(std::shared_ptr<components::Transform> actor, Vehicle& v
 	}
 	else
 	{
-		return glm::normalize(return_value);
+		return glm::normalize(return_value) * vehicle.wall_avoidance_weight;
 	}
 }
 
@@ -127,15 +127,15 @@ glm::vec3 Pursuit(glm::vec3 target, glm::vec3 target_forward, std::shared_ptr<co
 
 	if (glm::dot(to_evader, pursuer->get_forward()) > 0 && (relative_heading < -0.95))
 	{
-		return Seek(target, pursuer->get_position());
+		return Seek(target, pursuer->get_position()) * vehicle.pursuit_weight;
 	}
 
-	return Seek(target + target_forward + vehicle.pursuit_distance, pursuer->get_position());
+	return Seek(target + target_forward + vehicle.pursuit_distance, pursuer->get_position()) * vehicle.pursuit_weight;
 }
 
 glm::vec3 ExtrapolatedPursuit(glm::vec3 target, glm::vec3 target_forward, std::shared_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
 {
-	return Pursuit(target + target_forward * vehicle.extrapolation_distance, target_forward, pursuer, vehicle, t);
+	return Pursuit(target + target_forward * vehicle.extrapolation_distance, target_forward, pursuer, vehicle, t) * vehicle.extrapolation_weight;
 }
 
 glm::vec3 Evade(glm::vec3 pursuer, glm::vec3 pursuer_forward, std::shared_ptr<components::Transform> pursued, Vehicle& vehicle, float t)
@@ -147,5 +147,5 @@ glm::vec3 Evade(glm::vec3 pursuer, glm::vec3 pursuer_forward, std::shared_ptr<co
 		return glm::vec3(0.0f);
 	}
 
-	return Flee(pursuer + pursuer_forward + vehicle.evade_distance, pursued->get_position());
+	return Flee(pursuer + pursuer_forward + vehicle.evade_distance, pursued->get_position()) * vehicle.evade_weight;
 }

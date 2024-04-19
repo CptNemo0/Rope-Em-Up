@@ -5,6 +5,8 @@
 
 struct Vehicle
 {
+	float rest_lenght;
+
 	glm::vec3 wander_target;
 	float wander_radius;
 	float wander_distance;

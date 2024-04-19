@@ -231,14 +231,14 @@ int main()
     enemy_vehicle.wander_weight = 1.0f;
 
     enemy_vehicle.wall_avoidance_distance = 5.0f;
-    enemy_vehicle.wall_avoidance_weight = 1.0f;
+    enemy_vehicle.wall_avoidance_weight = 3.0f;
 
     enemy_vehicle.pursuit_range = 8.0f;
     enemy_vehicle.pursuit_distance = 0.5f;
     enemy_vehicle.pursuit_weight = 1.0f;
     
     enemy_vehicle.extrapolation_distance = 5.0f;
-    enemy_vehicle.extrapolation_weight = 2.0f;
+    enemy_vehicle.extrapolation_weight = 1.0f;
     
     enemy_vehicle.evade_distance = 5.0f;
     enemy_vehicle.evade_range = 5.0f;
@@ -388,16 +388,25 @@ int main()
             std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
 
         
-            /*glm::vec3 wander_force = Wander(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
-            glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);*/
+            /*glm::vec3 wander_force = Wander(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);*/
+            glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
             glm::vec3 extrapolation_force = ExtrapolatedPursuit(player_1->transform_->get_position(), player_1->transform_->get_forward(), enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
             
-            glm::vec3 center = (player_1->transform_->get_position() + player_2->transform_->get_position()) * 0.5f;
-            glm::vec3 players_forward = glm::normalize(player_1->transform_->get_forward() + player_2->transform_->get_forward());
+            glm::vec3 rope_center;
+            glm::vec3 rope_forward;
 
-            glm::vec3 evade_force = Evade(center, players_forward, enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            for (auto& segment : rope_segments)
+            {
+                rope_center += segment->transform_->get_position();
+                rope_forward += segment->transform_->get_forward();
+            }
 
-            glm::vec3 output_force = extrapolation_force * enemy_vehicle.extrapolation_weight + evade_force * enemy_vehicle.extrapolation_weight;
+            rope_center /= rope_segments.size();
+            rope_forward = glm::normalize(rope_forward);
+
+            glm::vec3 evade_force = Evade(rope_center, rope_forward, enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+
+            glm::vec3 output_force = extrapolation_force * enemy_vehicle.extrapolation_weight + evade_force * enemy_vehicle.extrapolation_weight + wall_avoid_force * enemy_vehicle.wall_avoidance_weight;
 
             if (output_force != glm::vec3(0.0f))
             {
