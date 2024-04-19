@@ -16,12 +16,14 @@ struct Vehicle
 	float wall_avoidance_distance;
 	float wall_avoidance_weight;
 
-	float look_ahead_distance;
+	float pursuit_range;
+	float pursuit_distance;
 	float pursuit_weight;
 
 	float extrapolation_distance;
 	float extrapolation_weight;
-
+	
+	float evade_distance;
 	float evade_range;
 	float evade_weight;
 };

@@ -221,20 +221,28 @@ int main()
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
     Vehicle enemy_vehicle;
+
+    enemy_vehicle.max_speed = 2000.0f;
+
     enemy_vehicle.wander_target = glm::vec3(0.0f);
     enemy_vehicle.wander_distance = 2.0f;
     enemy_vehicle.wander_radius = 2.0f;
-    enemy_vehicle.max_speed = 2000.0f;
     enemy_vehicle.wander_jitter = 0.5f;
     enemy_vehicle.wander_weight = 1.0f;
+
     enemy_vehicle.wall_avoidance_distance = 5.0f;
     enemy_vehicle.wall_avoidance_weight = 1.0f;
-    enemy_vehicle.look_ahead_distance = 0.5f;
+
+    enemy_vehicle.pursuit_range = 8.0f;
+    enemy_vehicle.pursuit_distance = 0.5f;
     enemy_vehicle.pursuit_weight = 1.0f;
-    enemy_vehicle.evade_weight = 1.0f;
-    enemy_vehicle.extrapolation_weight = 2.0f;
+    
     enemy_vehicle.extrapolation_distance = 5.0f;
+    enemy_vehicle.extrapolation_weight = 2.0f;
+    
+    enemy_vehicle.evade_distance = 5.0f;
     enemy_vehicle.evade_range = 5.0f;
+    enemy_vehicle.evade_weight = 1.0f;
 
     auto enemy_movement_generator = std::make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
