@@ -47,6 +47,10 @@ CPMAddPackage("gh:g-truc/glm#1.0.1")
 CPMAddPackage("gh:ocornut/imgui@1.90.4")
 CPMAddPackage("gh:gabime/spdlog@1.13.0")
 CPMAddPackage("gh:kcat/openal-soft#1.23.1")
+CPMAddPackage(
+	NAME freetype
+	URL https://gitlab.freedesktop.org/freetype/freetype/-/archive/master/freetype-master.zip
+)
 
 set(imgui_SOURCE_DIR ${imgui_SOURCE_DIR} CACHE INTERNAL "")
 add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
