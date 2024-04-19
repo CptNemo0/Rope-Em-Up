@@ -80,8 +80,8 @@ namespace utility
 
     void DebugCameraMovement(GLFWwindow* window, std::shared_ptr <llr::Camera> camera, float delta_time)
     {
-        static float move_speed = 1.0f;
-        static float look_speed = 100.0f;
+        static float move_speed = 5.0f;
+        static float look_speed = 200.0f;
 
         if (glfwGetKey(window, GLFW_KEY_W))
         {
