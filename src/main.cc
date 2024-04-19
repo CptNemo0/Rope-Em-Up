@@ -1,4 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include <chrono>
 #include <ctime>
@@ -10,6 +11,7 @@
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/vector_angle.hpp"
 #include "stb_easy_font.h"
 
 #include "headers/Camera.h"
@@ -31,9 +33,20 @@
 #include "headers/components/PlayerController.h"
 #include "headers/HDRCubemap.h"
 
-
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
+
+void FixOrientation(std::shared_ptr<GameObject> enemy_1)
+{
+    auto current_forward = enemy_1->transform_->get_position() - enemy_1->transform_->get_previous_position();
+    if (glm::length(current_forward))
+    {
+        current_forward = glm::normalize(current_forward);
+    }
+    float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+    enemy_1->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
+}
+
 
 int main()
 {
@@ -196,17 +209,20 @@ int main()
     pbd::PBDManager::i_->set_walls(walls);
 
     auto enemy_1 = GameObject::Create(scene_root);
-    enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
-    enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
+    //enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
+    //enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
     enemy_1->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
     Vehicle enemy_vehicle;
     enemy_vehicle.wander_target = glm::vec3(0.0f);
-    enemy_vehicle.wander_distance = 5.0f;
-    enemy_vehicle.wander_radius = 2.5f;
+    enemy_vehicle.wander_distance = 2.0f;
+    enemy_vehicle.wander_radius = 2.0f;
     enemy_vehicle.max_speed = 1000.0f;
+    enemy_vehicle.wander_jitter = 0.5f;
+    enemy_vehicle.wander_weight = 1.0f;
+    enemy_vehicle.wall_avoidance_distance = 5.0f;
 
     auto enemy_movement_generator = std::make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
@@ -339,18 +355,16 @@ int main()
         static float cp_time = 0;
         static int cp_idx = 0;
 
-        if (!cp_idx)
-        {
-            glm::vec3 force = Wander(enemy_1->transform_, enemy_vehicle, delta_time);
-            //physics::LogVec3(force);
-            enemy_movement_generator->magnitude_ = enemy_vehicle.max_speed;
-            enemy_movement_generator->direction_ = force;
-        }
-        
-
         if (lag >= kMsPerUpdate)
         {
             std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
+
+        
+            glm::vec3 wander_force = Wander(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            enemy_movement_generator->magnitude_ = enemy_vehicle.max_speed;
+            enemy_movement_generator->direction_ = glm::normalize(2.0f * wall_avoid_force +  wander_force);
+            
 
             pbd::PBDManager::i_->GeneratorUpdate();
             pbd::PBDManager::i_->Integration(kMsPerUpdate);
@@ -360,6 +374,12 @@ int main()
             pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
             pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
             pbd::PBDManager::i_->ClearContacts();
+
+            FixOrientation(enemy_1);
+
+           
+
+            physics::LogVec3(enemy_1->transform_->get_forward());
 
             std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
             cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
@@ -435,6 +455,12 @@ int main()
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
 
+        if (glfwGetKey(window, GLFW_KEY_R))
+        {
+            auto r = enemy_1->transform_->get_rotation();
+            enemy_1->transform_->set_rotation(glm::vec3(r.x, r.y + 10 * delta_time , r.z));
+            physics::LogVec3(enemy_1->transform_->get_rotation());
+        }
 
 #pragma endregion
 

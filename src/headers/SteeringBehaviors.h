@@ -16,6 +16,8 @@ glm::vec3 Flee(std::shared_ptr<components::Transform> target, std::shared_ptr<co
 
 glm::vec3 Wander(std::shared_ptr<components::Transform> actor, Vehicle& vehicle, float t);
 
+glm::vec3 WallAvoidance(std::shared_ptr<components::Transform> actor, Vehicle& vehicle, float t);
+
 glm::vec3 ObstacleAvoidance(std::shared_ptr<components::PBDParticle> actor);
 
 glm::vec3 Pursuit(std::shared_ptr<components::PBDParticle> target, std::shared_ptr<components::PBDParticle> actor);

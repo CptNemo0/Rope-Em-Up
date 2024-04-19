@@ -6,6 +6,9 @@ components::Transform::Transform()
     position_ = { 0.0f, 0.0f, 0.0f };
     rotation_ = { 0.0f, 0.0f, 0.0f };
     scale_    = { 1.0f, 1.0f, 1.0f };
+    forward_ = { 0.0f, 0.0f, 1.0f };
+    right_ = { 1.0f, 0.0f, 0.0f };
+    up_ = { 0.0f, 1.0f, 0.0f };
 }
 
 void components::Transform::AddChild(std::shared_ptr<Transform> child)
@@ -56,8 +59,6 @@ void components::Transform::UpdateSelfAndChildren()
 
 void components::Transform::set_position(const glm::vec3 & position)
 {
-    
-
     previous_position_ = position_;
     position_ = position;
     predicted_position_ = position_;
@@ -88,6 +89,13 @@ void components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
     const glm::mat4 translation = glm::translate(glm::mat4(1.0f), position_);
 
     model_matrix_ = translation * rotation_Y * rotation_X * rotation_Z * scale_matrix * parent_model;
+
+    auto up = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    auto forward = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    auto right = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+    right_ = (rotation_Y * right);
+    forward_ = (rotation_Y * forward);
 }
 
 const glm::mat4 components::Transform::get_model_matrix()
@@ -162,4 +170,15 @@ const glm::vec3 components::Transform::get_forward() const
 const glm::vec3 components::Transform::get_right() const
 {
     return right_;
+}
+
+void components::Transform::FixOrientation()
+{
+    auto current_forward = get_position() - get_predicted_position();
+    if (glm::length(current_forward))
+    {
+        current_forward = glm::normalize(current_forward);
+    }
+    float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+    set_rotation(glm::vec3(0.0f, angle, 0.0f));
 }
