@@ -114,21 +114,33 @@ glm::vec3 WallAvoidance(std::shared_ptr<components::Transform> actor, Vehicle& v
 	}
 }
 
-glm::vec3 Pursuit(std::shared_ptr<components::Transform> target, std::shared_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
+glm::vec3 Pursuit(glm::vec3 target, glm::vec3 target_forward, std::shared_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
 {
-	/*if (glm::distance(target->get_position(), pursuer->get_position()) < 2.0f)
-	{
-		return glm::vec3(0.0f);
-	}*/
+	glm::vec3 to_evader = target - pursuer->get_position();
 
-	glm::vec3 to_evader = target->get_position() - pursuer->get_position();
-
-	float relative_heading = glm::dot(pursuer->get_forward(), target->get_forward());
+	float relative_heading = glm::dot(pursuer->get_forward(), target_forward);
 
 	if (glm::dot(to_evader, pursuer->get_forward()) > 0 && (relative_heading < -0.95))
 	{
-		return Seek(target->get_position(), pursuer->get_position());
+		return Seek(target, pursuer->get_position());
 	}
 
-	return Seek(target->get_position() + target->get_forward() + vehicle.look_ahead_distance, pursuer->get_position());
+	return Seek(target + target_forward + vehicle.look_ahead_distance, pursuer->get_position());
+}
+
+glm::vec3 ExtrapolatedPursuit(glm::vec3 target, glm::vec3 target_forward, std::shared_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
+{
+	return Pursuit(target + target_forward * vehicle.extrapolation_distance, target_forward, pursuer, vehicle, t);
+}
+
+glm::vec3 Evade(glm::vec3 pursuer, glm::vec3 pursuer_forward, std::shared_ptr<components::Transform> pursued, Vehicle& vehicle, float t)
+{
+	glm::vec3 to_pursuer = pursuer - pursued->get_position();
+
+	if (glm::length2(to_pursuer) > vehicle.evade_range * vehicle.evade_range)
+	{
+		return glm::vec3(0.0f);
+	}
+
+	return Flee(pursuer + pursuer_forward + vehicle.look_ahead_distance, pursued->get_position());
 }

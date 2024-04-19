@@ -224,11 +224,17 @@ int main()
     enemy_vehicle.wander_target = glm::vec3(0.0f);
     enemy_vehicle.wander_distance = 2.0f;
     enemy_vehicle.wander_radius = 2.0f;
-    enemy_vehicle.max_speed = 1000.0f;
+    enemy_vehicle.max_speed = 2000.0f;
     enemy_vehicle.wander_jitter = 0.5f;
     enemy_vehicle.wander_weight = 1.0f;
     enemy_vehicle.wall_avoidance_distance = 5.0f;
+    enemy_vehicle.wall_avoidance_weight = 1.0f;
     enemy_vehicle.look_ahead_distance = 0.5f;
+    enemy_vehicle.pursuit_weight = 1.0f;
+    enemy_vehicle.evade_weight = 1.0f;
+    enemy_vehicle.extrapolation_weight = 2.0f;
+    enemy_vehicle.extrapolation_distance = 5.0f;
+    enemy_vehicle.evade_range = 5.0f;
 
     auto enemy_movement_generator = std::make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
@@ -376,9 +382,14 @@ int main()
         
             /*glm::vec3 wander_force = Wander(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
             glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);*/
-            glm::vec3 pursuit_force = Pursuit(player_1->transform_, enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            glm::vec3 extrapolation_force = ExtrapolatedPursuit(player_1->transform_->get_position(), player_1->transform_->get_forward(), enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            
+            glm::vec3 center = (player_1->transform_->get_position() + player_2->transform_->get_position()) * 0.5f;
+            glm::vec3 players_forward = glm::normalize(player_1->transform_->get_forward() + player_2->transform_->get_forward());
 
-            glm::vec3 output_force = pursuit_force;
+            glm::vec3 evade_force = Evade(center, players_forward, enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+
+            glm::vec3 output_force = extrapolation_force * enemy_vehicle.extrapolation_weight + evade_force * enemy_vehicle.extrapolation_weight;
 
             if (output_force != glm::vec3(0.0f))
             {
