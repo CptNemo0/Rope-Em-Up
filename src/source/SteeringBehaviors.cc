@@ -1,13 +1,17 @@
 #include "../headers/SteeringBehaviors.h"
 
-glm::vec3 Seek(std::shared_ptr<components::Transform> target, std::shared_ptr<components::Transform> actor)
+glm::vec3 Seek(glm::vec3 target, glm::vec3 actor)
 {
-	return glm::normalize(target->get_position() - actor->get_position());
+	auto return_value = target - actor;
+	return_value.y = 0;
+	return glm::normalize(return_value);
 }
 
-glm::vec3 Flee(std::shared_ptr<components::Transform> target, std::shared_ptr<components::Transform> actor)
+glm::vec3 Flee(glm::vec3 target, glm::vec3 actor)
 {
-	return glm::normalize(actor->get_position() - target->get_position());
+	auto return_value = actor - target;
+	return_value.y = 0;
+	return glm::normalize(return_value);
 }
 
 glm::vec3 Wander(std::shared_ptr<components::Transform> actor, Vehicle& vehicle, float t)
@@ -108,4 +112,23 @@ glm::vec3 WallAvoidance(std::shared_ptr<components::Transform> actor, Vehicle& v
 	{
 		return glm::normalize(return_value);
 	}
+}
+
+glm::vec3 Pursuit(std::shared_ptr<components::Transform> target, std::shared_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
+{
+	/*if (glm::distance(target->get_position(), pursuer->get_position()) < 2.0f)
+	{
+		return glm::vec3(0.0f);
+	}*/
+
+	glm::vec3 to_evader = target->get_position() - pursuer->get_position();
+
+	float relative_heading = glm::dot(pursuer->get_forward(), target->get_forward());
+
+	if (glm::dot(to_evader, pursuer->get_forward()) > 0 && (relative_heading < -0.95))
+	{
+		return Seek(target->get_position(), pursuer->get_position());
+	}
+
+	return Seek(target->get_position() + target->get_forward() + vehicle.look_ahead_distance, pursuer->get_position());
 }

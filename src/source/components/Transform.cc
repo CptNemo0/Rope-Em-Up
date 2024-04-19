@@ -113,19 +113,7 @@ void components::Transform::add_position(const glm::vec3 & translation)
 void components::Transform::add_rotation(const glm::vec3 &rotation) 
 {
     rotation_ += rotation;
-    UpdateSelfAndChildren();
-
-    auto up = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    auto forward = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-    auto right = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-
-    const glm::mat4 rotation_X = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    const glm::mat4 rotation_Y = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    const glm::mat4 rotation_Z = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    up = rotation_Y * up;
-    right = rotation_X * right;
-    forward = rotation_Z * forward;
+    UpdateSelfAndChildren();   
 }
 
 void components::Transform::add_scale(const glm::vec3 &scale)

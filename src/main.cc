@@ -39,15 +39,15 @@
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
 
-void FixOrientation(std::shared_ptr<GameObject> enemy_1)
+void FixOrientation(std::shared_ptr<GameObject> go)
 {
-    auto current_forward = enemy_1->transform_->get_position() - enemy_1->transform_->get_previous_position();
+    auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
     if (glm::length(current_forward))
     {
         current_forward = glm::normalize(current_forward);
     }
     float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
-    enemy_1->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
+    go->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
 }
 
 
@@ -214,8 +214,8 @@ int main()
     pbd::PBDManager::i_->set_walls(walls);
 
     auto enemy_1 = GameObject::Create(scene_root);
-    //enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
-    //enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
+    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
+    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
     enemy_1->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
@@ -228,6 +228,7 @@ int main()
     enemy_vehicle.wander_jitter = 0.5f;
     enemy_vehicle.wander_weight = 1.0f;
     enemy_vehicle.wall_avoidance_distance = 5.0f;
+    enemy_vehicle.look_ahead_distance = 0.5f;
 
     auto enemy_movement_generator = std::make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
@@ -237,7 +238,7 @@ int main()
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
     test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));*/
 
-{
+
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -279,7 +280,7 @@ int main()
     }
 
     pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
-}
+
 
     auto HUD_root = GameObject::Create();
 
@@ -373,24 +374,29 @@ int main()
             std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
 
         
-            glm::vec3 wander_force = Wander(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
-            glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            /*glm::vec3 wander_force = Wander(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);*/
+            glm::vec3 pursuit_force = Pursuit(player_1->transform_, enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+
+            glm::vec3 output_force = pursuit_force;
+
+            if (output_force != glm::vec3(0.0f))
+            {
+                output_force = glm::normalize(output_force);
+            }
+
             enemy_movement_generator->magnitude_ = enemy_vehicle.max_speed;
-            enemy_movement_generator->direction_ = glm::normalize(2.0f * wall_avoid_force +  wander_force);
+            enemy_movement_generator->direction_ = output_force;
             
 
             pbd::PBDManager::i_->GeneratorUpdate();
             pbd::PBDManager::i_->Integration(kMsPerUpdate);
             collisions::CollisionManager::i_->PredictColliders();
             collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
-            pbd::PBDManager::i_->ResolveContacts();
+            //pbd::PBDManager::i_->ResolveContacts();
             pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
             pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
             pbd::PBDManager::i_->ClearContacts();
-
-            FixOrientation(enemy_1);
-
-           
 
             physics::LogVec3(enemy_1->transform_->get_forward());
 
@@ -407,6 +413,10 @@ int main()
             cp_idx = 0;
             cp_time = 0.0f;
         }
+
+        FixOrientation(enemy_1);
+        FixOrientation(player_1);
+        FixOrientation(player_2);
 
 #pragma endregion
 #pragma region GO Update and Draw

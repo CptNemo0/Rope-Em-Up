@@ -14,6 +14,10 @@ struct Vehicle
 	float max_speed;
 
 	float wall_avoidance_distance;
+	float wall_avoidance_weight;
+
+	float look_ahead_distance;
+	float pursuit_weight;
 };
 
 #endif
