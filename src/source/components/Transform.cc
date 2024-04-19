@@ -56,9 +56,12 @@ void components::Transform::UpdateSelfAndChildren()
 
 void components::Transform::set_position(const glm::vec3 & position)
 {
+    
+
     previous_position_ = position_;
     position_ = position;
     predicted_position_ = position_;
+
     UpdateSelfAndChildren();
 }
 

@@ -32,6 +32,9 @@
 #include "headers/HDRCubemap.h"
 
 
+#include "headers/SteeringBehaviors.h"
+#include "headers/Vehicle.h"
+
 int main()
 {
     std::cout << "Byæ czy nie byæ oto jest pytanie.\n";
@@ -73,6 +76,8 @@ int main()
     const std::string kModule2Path = "res/models/module2.obj";
     const std::string kSimpleFloodPath = "res/models/simple_floor.obj";
     const std::string kTestBallPath = "res/models/test_ball.obj";
+
+    srand(static_cast <unsigned> (time(0)));
 
     float kMsPerUpdate = 5.0f / 1000.0f;
 
@@ -197,13 +202,22 @@ int main()
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
 
+    Vehicle enemy_vehicle;
+    enemy_vehicle.wander_target = glm::vec3(0.0f);
+    enemy_vehicle.wander_distance = 5.0f;
+    enemy_vehicle.wander_radius = 2.5f;
+    enemy_vehicle.max_speed = 1000.0f;
+
+    auto enemy_movement_generator = std::make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
+
     ////test
     /*auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
     test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));*/
 
 {
-    auto player_1 = GameObject::Create(scene_root);
+    /*auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->AddComponent(std::make_shared<components::MeshRenderer>(player_model, shader));
@@ -218,19 +232,6 @@ int main()
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
-
-    /*for (int i = 1; i < 10; i++)
-    {
-        for (int j = 1; j < 10; j++)
-        {
-            auto new_object = GameObject::Create(scene_root);
-            new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
-            new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
-            new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
-            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, player_model->meshes_[0], new_object->transform_));
-            new_object->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.88f, new_object->transform_));
-        }
-    }*/
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
@@ -256,7 +257,7 @@ int main()
         rope_segments.push_back(rope_segment);
     }
 
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);*/
 }
 
     auto HUD_root = GameObject::Create();
@@ -337,6 +338,16 @@ int main()
 #pragma region Collisions and Physics
         static float cp_time = 0;
         static int cp_idx = 0;
+
+        if (!cp_idx)
+        {
+            glm::vec3 force = Wander(enemy_1->transform_, enemy_vehicle, delta_time);
+            //physics::LogVec3(force);
+            enemy_movement_generator->magnitude_ = enemy_vehicle.max_speed;
+            enemy_movement_generator->direction_ = force;
+        }
+        
+
         if (lag >= kMsPerUpdate)
         {
             std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
@@ -357,7 +368,7 @@ int main()
             lag -= kMsPerUpdate;
         }
 
-        if (cp_idx == 60)
+        if (cp_idx == 120)
         {
             std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
             cp_idx = 0;
