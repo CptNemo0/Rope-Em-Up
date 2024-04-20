@@ -1,4 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include <chrono>
 #include <ctime>
@@ -10,7 +11,10 @@
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/vector_angle.hpp"
 #include "stb_easy_font.h"
+#include "ft2build.h"
+#include FT_FREETYPE_H
 
 #include "headers/Camera.h"
 #include "headers/collisions/Collider.h"
@@ -30,11 +34,26 @@
 #include "headers/components/TextRenderer.h"
 #include "headers/components/PlayerController.h"
 #include "headers/HDRCubemap.h"
+#include "headers/Font.h"
+
+#include "headers/SteeringBehaviors.h"
+#include "headers/Vehicle.h"
+
+void FixOrientation(std::shared_ptr<GameObject> go)
+{
+    auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
+    if (glm::length(current_forward))
+    {
+        current_forward = glm::normalize(current_forward);
+    }
+    float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+    go->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
+}
 
 
 int main()
 {
-    std::cout << "Byæ czy nie byæ oto jest pytanie.\n";
+    std::cout << "Byc czy nie byc oto jest pytanie.\n";
     const std::string kWindowTitle = "Modul Sumatywny";
 
     const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
@@ -74,6 +93,9 @@ int main()
     const std::string kSimpleFloodPath = "res/models/simple_floor.obj";
     const std::string kTestBallPath = "res/models/test_ball.obj";
 
+    srand(static_cast <unsigned> (time(0)));
+    const std::string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
+
     float kMsPerUpdate = 5.0f / 1000.0f;
 
     const float kFov = 90.0f;
@@ -106,10 +128,12 @@ int main()
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(-5.0f, 2.0f, 0.0f));
-    camera->set_pitch(-45.0f);
-    camera->set_yaw(-120.0f);
+    camera->set_position(glm::vec3(0.0f, 25.0f, 0.0f));
+    camera->set_pitch(-90.0f);
+    camera->set_yaw(+90.0f);
+
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+    auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
 
     auto shader = std::make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
     auto HUDshader = std::make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
@@ -191,18 +215,46 @@ int main()
     pbd::PBDManager::i_->set_walls(walls);
 
     auto enemy_1 = GameObject::Create(scene_root);
-    enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));    
-    enemy_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -2.0f));
-    enemy_1->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, PBRShader));
+  
+    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
+    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
+    enemy_1->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
+
+    Vehicle enemy_vehicle;
+
+    enemy_vehicle.max_speed = 2000.0f;
+
+    enemy_vehicle.wander_target = glm::vec3(0.0f);
+    enemy_vehicle.wander_distance = 2.0f;
+    enemy_vehicle.wander_radius = 2.0f;
+    enemy_vehicle.wander_jitter = 0.5f;
+    enemy_vehicle.wander_weight = 1.0f;
+
+    enemy_vehicle.wall_avoidance_distance = 5.0f;
+    enemy_vehicle.wall_avoidance_weight = 3.0f;
+
+    enemy_vehicle.pursuit_range = 8.0f;
+    enemy_vehicle.pursuit_distance = 0.5f;
+    enemy_vehicle.pursuit_weight = 1.0f;
+    
+    enemy_vehicle.extrapolation_distance = 5.0f;
+    enemy_vehicle.extrapolation_weight = 1.0f;
+    
+    enemy_vehicle.evade_distance = 5.0f;
+    enemy_vehicle.evade_range = 5.0f;
+    enemy_vehicle.evade_weight = 1.0f;
+
+    auto enemy_movement_generator = std::make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
 
     ////test
     auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
     test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));
 
-{
+
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -218,19 +270,6 @@ int main()
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
-
-    /*for (int i = 1; i < 10; i++)
-    {
-        for (int j = 1; j < 10; j++)
-        {
-            auto new_object = GameObject::Create(scene_root);
-            new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
-            new_object->transform_->set_position(glm::vec3(i * 1, 0, j * 1));
-            new_object->AddComponent(std::make_shared<Components::MeshRenderer>(player_model, shader));
-            new_object->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, player_model->meshes_[0], new_object->transform_));
-            new_object->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.88f, new_object->transform_));
-        }
-    }*/
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
@@ -257,7 +296,7 @@ int main()
     }
 
     pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
-}
+
 
     auto HUD_root = GameObject::Create();
 
@@ -273,10 +312,18 @@ int main()
 
     auto HUDText_root = GameObject::Create();
 
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+    {
+        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        return -1;
+    }
+    auto maturasc_font = std::make_shared<Font>(ft, kFontPath.c_str());
+
     auto HUDText_object = GameObject::Create(HUDText_root);
-    HUDText_object->AddComponent(std::make_shared<components::TextRenderer>(HUDTextShader, "..."));
-    HUDText_object->transform_->set_scale(glm::vec3(0.005f, 0.005f, 1.0f));
-    HUDText_object->transform_->set_position(glm::vec3(-0.95f, 0.95f, 0.0f));
+    HUDText_object->AddComponent(std::make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "TEST", glm::vec3(1.0f)));
+    HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
+    HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
 
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
@@ -333,18 +380,51 @@ int main()
 #pragma region Collisions and Physics
         static float cp_time = 0;
         static int cp_idx = 0;
+
         if (lag >= kMsPerUpdate)
         {
             std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
+
+        
+            /*glm::vec3 wander_force = Wander(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);*/
+            glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            glm::vec3 extrapolation_force = ExtrapolatedPursuit(player_1->transform_->get_position(), player_1->transform_->get_forward(), enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            
+            glm::vec3 rope_center;
+            glm::vec3 rope_forward;
+
+            for (auto& segment : rope_segments)
+            {
+                rope_center += segment->transform_->get_position();
+                rope_forward += segment->transform_->get_forward();
+            }
+
+            rope_center /= rope_segments.size();
+            rope_forward = glm::normalize(rope_forward);
+
+            glm::vec3 evade_force = Evade(rope_center, rope_forward, enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+
+            glm::vec3 output_force = extrapolation_force * enemy_vehicle.extrapolation_weight + evade_force * enemy_vehicle.extrapolation_weight + wall_avoid_force * enemy_vehicle.wall_avoidance_weight;
+
+            if (output_force != glm::vec3(0.0f))
+            {
+                output_force = glm::normalize(output_force);
+            }
+
+            enemy_movement_generator->magnitude_ = enemy_vehicle.max_speed;
+            enemy_movement_generator->direction_ = output_force;
+            
 
             pbd::PBDManager::i_->GeneratorUpdate();
             pbd::PBDManager::i_->Integration(kMsPerUpdate);
             collisions::CollisionManager::i_->PredictColliders();
             collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
-            pbd::PBDManager::i_->ResolveContacts();
+            //pbd::PBDManager::i_->ResolveContacts();
             pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
             pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
             pbd::PBDManager::i_->ClearContacts();
+
+            physics::LogVec3(enemy_1->transform_->get_forward());
 
             std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
             cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
@@ -353,12 +433,16 @@ int main()
             lag -= kMsPerUpdate;
         }
 
-        if (cp_idx == 60)
+        if (cp_idx == 120)
         {
             std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
             cp_idx = 0;
             cp_time = 0.0f;
         }
+
+        FixOrientation(enemy_1);
+        FixOrientation(player_1);
+        FixOrientation(player_2);
 
 #pragma endregion
 #pragma region GO Update and Draw
@@ -392,7 +476,7 @@ int main()
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        cubemap->RenderCube();
+        // cubemap->RenderCube();
 
 #pragma endregion
 #pragma region Interface
@@ -403,20 +487,27 @@ int main()
 
         HUDshader->Use();
 
-        HUD_root->PropagateUpdate();
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
+        HUD_root->PropagateUpdate();
 
         HUDTextShader->Use();
+        HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
 
         if (cp_idx == 30)
         {
-            HUDText_object->GetComponent<components::TextRenderer>()->ChangeText("fps: " + std::to_string(1.0f / delta_time));
+            HUDText_object->GetComponent<components::TextRenderer>()->text_ = "fps: " + std::to_string(1.0f / delta_time);
         }
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
 
+        if (glfwGetKey(window, GLFW_KEY_R))
+        {
+            auto r = enemy_1->transform_->get_rotation();
+            enemy_1->transform_->set_rotation(glm::vec3(r.x, r.y + 10 * delta_time , r.z));
+            physics::LogVec3(enemy_1->transform_->get_rotation());
+        }
 
 #pragma endregion
 

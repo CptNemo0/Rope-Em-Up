@@ -1,11 +1,9 @@
 #ifndef TEXTRENDERER_H
 #define TEXTRENDERER_H
 
-#include "stb_easy_font.h"
-#include <vector>
+#include "../Font.h"
 
 #include "../GameObject.h"
-#include "../components/Transform.h"
 
 namespace components
 {
@@ -13,19 +11,21 @@ namespace components
 class TextRenderer : public Component
 {
 private:
-    unsigned int VAO_, VBO_, quads_count_;
-    std::vector<float> vertices_buffer_;
     std::shared_ptr<Shader> shader_;
     std::shared_ptr<Transform> transform_;
+    unsigned int VAO_, VBO_;
 public:
-    TextRenderer(std::shared_ptr<Shader> shader, std::string text);
-    void ChangeText(std::string text);
+    std::string text_;
+    glm::vec3 color_;
+    std::shared_ptr<Font> font_;
+
+    TextRenderer(std::shared_ptr<Shader> shader, std::shared_ptr<Font> font, std::string text, glm::vec3 color = glm::vec3(0.0f));
 
     void Start() override;
     void Update() override;
     void Destroy() override {}
 };
 
-};
+}
 
 #endif // !TEXTRENDERER_H

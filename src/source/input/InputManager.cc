@@ -77,7 +77,7 @@ void input::InputManager::UpdateGamepadState(int gamepadID)
 
         if (new_axis_state != old_axis_state)
         {
-            NotifyAction(gamepadID, Action::MOVE, State(new_axis_state));
+            NotifyAction(gamepadID, Action::MOVE, State(-1.0f * new_axis_state));
         }
 
         auto pull_rope_button = gamepad_mappings[gamepadID][Action::PULL_ROPE].buttonID;

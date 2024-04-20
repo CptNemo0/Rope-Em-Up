@@ -1,8 +1,13 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif GLM_ENABLE_EXPERIMENTAL
+
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/vector_angle.hpp"
 
 #include <vector>
 #include <memory>
@@ -61,6 +66,8 @@ public:
     const glm::vec3 get_up() const;
     const glm::vec3 get_forward() const;
     const glm::vec3 get_right() const;
+
+    void FixOrientation();
 };
 
 };

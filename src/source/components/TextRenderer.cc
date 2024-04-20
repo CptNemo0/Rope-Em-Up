@@ -1,68 +1,69 @@
 #include "../../headers/components/TextRenderer.h"
 
-components::TextRenderer::TextRenderer(std::shared_ptr<Shader> shader, std::string text)
+components::TextRenderer::TextRenderer(std::shared_ptr<Shader> shader, std::shared_ptr<Font> font, std::string text, glm::vec3 color)
 {
-    this->shader_ = shader;
-
+    shader_ = shader;
+    text_ = text;
+    color_ = color;
+    font_ = font;
     glGenVertexArrays(1, &VAO_);
-    glBindVertexArray(VAO_);
-
     glGenBuffers(1, &VBO_);
+    glBindVertexArray(VAO_);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-    ChangeText(text);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
     glEnableVertexAttribArray(0);
-}
-
-void components::TextRenderer::ChangeText(std::string text)
-{
-    int size = text.length() * 300;
-    std::vector<float> temp_vertices_buffer;
-    temp_vertices_buffer.resize(size);
-
-    stb_easy_font_spacing(0.5f);
-
-    quads_count_ = stb_easy_font_print(0.0f, 0.0f, (char*)(text.c_str()), nullptr, temp_vertices_buffer.data(), size);
-
-    int new_size = size * (3.0f / 4.0f);
-    vertices_buffer_.resize(new_size);
-    int k = 0;
-    for (int i = 0; i < quads_count_; i++)
-    {
-        vertices_buffer_[k] = temp_vertices_buffer[i * 16];
-        vertices_buffer_[k + 1] = temp_vertices_buffer[i * 16 + 1];
-
-        vertices_buffer_[k + 2] = temp_vertices_buffer[i * 16 + 4];
-        vertices_buffer_[k + 3] = temp_vertices_buffer[i * 16 + 5];
-
-        vertices_buffer_[k + 4] = temp_vertices_buffer[i * 16 + 8];
-        vertices_buffer_[k + 5] = temp_vertices_buffer[i * 16 + 9];
-
-        vertices_buffer_[k + 6] = temp_vertices_buffer[i * 16 + 8];
-        vertices_buffer_[k + 7] = temp_vertices_buffer[i * 16 + 9];
-
-        vertices_buffer_[k + 8] = temp_vertices_buffer[i * 16 + 12];
-        vertices_buffer_[k + 9] = temp_vertices_buffer[i * 16 + 13];
-
-        vertices_buffer_[k + 10] = temp_vertices_buffer[i * 16];
-        vertices_buffer_[k + 11] = temp_vertices_buffer[i * 16 + 1];
-
-        k += 12;
-    }
-
-    glBufferData(GL_ARRAY_BUFFER, new_size, vertices_buffer_.data(), GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);  
 }
 
 void components::TextRenderer::Start()
 {
-    this->transform_ = gameObject_.lock()->transform_;
+    transform_ = gameObject_.lock()->transform_;
 }
 
 void components::TextRenderer::Update()
 {
+    shader_->SetInt("tex", 0);
     shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
+    shader_->SetVec3("tex_color", color_);
+    glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO_);
-    glDrawArrays(GL_TRIANGLES, 0, quads_count_ * 6.0f);
+
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR)
+    {
+        std::cout << "OpenGL Error: " << error << std::endl;
+    }
+
+    float x = 0, y = 0;
+
+    for (auto c : text_)
+    {
+        auto &glyph = font_->glyphs_[c];
+
+        float x_pos = x + glyph.bearing_x;
+        float y_pos = y - (glyph.height - glyph.bearing_y);
+
+        float vertices[24] = {
+            x_pos, (y_pos + glyph.height), 0.0f, 0.0f,
+            x_pos, y_pos, 0.0f, 1.0f,
+            (x_pos + glyph.width), y_pos, 1.0f, 1.0f,
+
+            x_pos, (y_pos + glyph.height), 0.0f, 0.0f,
+            (x_pos + glyph.width), y_pos, 1.0f, 1.0f,
+            (x_pos + glyph.width), (y_pos + glyph.height), 1.0f, 0.0f
+        };
+
+        glBindTexture(GL_TEXTURE_2D, glyph.texture_id);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        x += glyph.advance >> 6;
+    }
     glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

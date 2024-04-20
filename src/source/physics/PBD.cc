@@ -131,7 +131,7 @@ pbd::Contact::Contact(std::shared_ptr<components::PBDParticle> p1, std::shared_p
 	contact_normal.x = tmp.x;
 	contact_normal.y = tmp.y;
 	contact_normal.z = tmp.z;
-	glm::normalize(contact_normal);
+	contact_normal = glm::normalize(contact_normal);
 }
 
 pbd::Contact::~Contact()
