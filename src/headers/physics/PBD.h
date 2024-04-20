@@ -49,6 +49,8 @@ namespace components
 
 namespace pbd
 {
+	const float kMsPerUpdate = 5.0f / 1000.0f;
+
 	class ForceGenerator
 	{
 	public:

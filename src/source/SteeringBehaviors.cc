@@ -118,11 +118,6 @@ glm::vec3 Pursuit(glm::vec3 target, glm::vec3 target_forward, std::shared_ptr<co
 {
 	glm::vec3 to_evader = target - pursuer->get_position();
 
-	if (glm::length2(to_evader) > vehicle.pursuit_range * vehicle.pursuit_range)
-	{
-		return glm::vec3(0.0f);
-	}
-
 	float relative_heading = glm::dot(pursuer->get_forward(), target_forward);
 
 	if (glm::dot(to_evader, pursuer->get_forward()) > 0 && (relative_heading < -0.95))
@@ -141,11 +136,6 @@ glm::vec3 ExtrapolatedPursuit(glm::vec3 target, glm::vec3 target_forward, std::s
 glm::vec3 Evade(glm::vec3 pursuer, glm::vec3 pursuer_forward, std::shared_ptr<components::Transform> pursued, Vehicle& vehicle, float t)
 {
 	glm::vec3 to_pursuer = pursuer - pursued->get_position();
-
-	if (glm::length2(to_pursuer) > vehicle.evade_range * vehicle.evade_range)
-	{
-		return glm::vec3(0.0f);
-	}
 
 	return Flee(pursuer + pursuer_forward + vehicle.evade_distance, pursued->get_position()) * vehicle.evade_weight;
 }

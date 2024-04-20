@@ -38,6 +38,9 @@
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
+#include "headers/ai/EnemyAIManager.h"
+#include "headers/ai/EnemyState.h"
+#include "headers/ai/EnemyStateMachine.h"
 
 void FixOrientation(std::shared_ptr<GameObject> go)
 {
@@ -96,7 +99,7 @@ int main()
     srand(static_cast <unsigned> (time(0)));
     const std::string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
-    float kMsPerUpdate = 5.0f / 1000.0f;
+    //float kMsPerUpdate = 5.0f / 1000.0f;
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -122,6 +125,7 @@ int main()
     collisions::CollisionManager::Initialize();
     physics::PhysicsManager::Initialize();
     pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
+    ai::EnemyAIManager::Initialize();
 
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -146,7 +150,7 @@ int main()
     auto cubemap = std::make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
-    point_light.intensity = 100.0f;
+    point_light.intensity = 200.0f;
     point_light.position = glm::vec3(-3.0f, 3.0f, -3.0f);
     point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
@@ -214,6 +218,8 @@ int main()
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
+    ////////////////////////////////////
+
     auto enemy_1 = GameObject::Create(scene_root);
   
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
@@ -224,6 +230,8 @@ int main()
 
     Vehicle enemy_vehicle;
 
+    enemy_vehicle.rest_lenght = 4.0f;
+
     enemy_vehicle.max_speed = 2000.0f;
 
     enemy_vehicle.wander_target = glm::vec3(0.0f);
@@ -231,23 +239,44 @@ int main()
     enemy_vehicle.wander_radius = 2.0f;
     enemy_vehicle.wander_jitter = 0.5f;
     enemy_vehicle.wander_weight = 1.0f;
+    enemy_vehicle.wander_speed_ = 1000.f / 2;
 
     enemy_vehicle.wall_avoidance_distance = 5.0f;
     enemy_vehicle.wall_avoidance_weight = 3.0f;
 
-    enemy_vehicle.pursuit_range = 8.0f;
     enemy_vehicle.pursuit_distance = 0.5f;
     enemy_vehicle.pursuit_weight = 1.0f;
+    enemy_vehicle.pursuit_speed_ = 1500.f / 2;
     
     enemy_vehicle.extrapolation_distance = 5.0f;
     enemy_vehicle.extrapolation_weight = 1.0f;
+    enemy_vehicle.extrapolation_speed_ = 1600.f / 2;
     
     enemy_vehicle.evade_distance = 5.0f;
-    enemy_vehicle.evade_range = 5.0f;
     enemy_vehicle.evade_weight = 1.0f;
+    enemy_vehicle.evade_speed_ = 1700.f;
 
     auto enemy_movement_generator = std::make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
+
+    auto enemy_state_machine = std::make_shared<ai::EnemyStateMachine>();
+    enemy_state_machine->transfrom_ = enemy_1->transform_;
+    enemy_state_machine->partcile_ = enemy_1->GetComponent<components::PBDParticle>();
+    enemy_state_machine->generator_ = enemy_movement_generator;
+    enemy_state_machine->rest_timer_ = 0.0f;
+    enemy_state_machine->vehicle_ = enemy_vehicle;
+    enemy_state_machine->current_state_ = ai::PatrolState::Instance();
+
+    if (enemy_state_machine->current_state_ != nullptr)
+    {
+        std::cout << enemy_state_machine->current_state_->Name() << std::endl;
+    }
+    else
+    {
+        std::cout << "NULL" << std::endl;
+    }
+
+    ////////////////////////////////////
 
     ////test
     auto test = GameObject::Create(scene_root);
@@ -356,6 +385,22 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);
 
+
+    ////////////////////
+    ai::EnemyAIManager::i_->player_1_ = player_1;
+    ai::EnemyAIManager::i_->player_2_ = player_2;
+    ai::EnemyAIManager::i_->choked_tentacles_ = 0;
+    ai::EnemyAIManager::i_->multi_chokes_ = 0;
+    ai::EnemyAIManager::i_->choke_threshold_ = 5;
+    ai::EnemyAIManager::i_->multi_threshold_ = 5;
+    ai::EnemyAIManager::i_->wall_proximity_threshold_ = 1.0f;
+    ai::EnemyAIManager::i_->attack_damage_ = 1.0f;
+    ai::EnemyAIManager::i_->attack_range_ = 2.5f;
+    ai::EnemyAIManager::i_->sense_range_ = 7.0f;
+    
+    
+    ////////////////////
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -381,14 +426,14 @@ int main()
         static float cp_time = 0;
         static int cp_idx = 0;
 
-        if (lag >= kMsPerUpdate)
+        if (lag >= pbd::kMsPerUpdate)
         {
             std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
 
         
             /*glm::vec3 wander_force = Wander(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);*/
-            glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
-            glm::vec3 extrapolation_force = ExtrapolatedPursuit(player_1->transform_->get_position(), player_1->transform_->get_forward(), enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            /*glm::vec3 wall_avoid_force = WallAvoidance(enemy_1->transform_, enemy_vehicle, pbd::kMsPerUpdate);
+            glm::vec3 extrapolation_force = ExtrapolatedPursuit(player_1->transform_->get_position(), player_1->transform_->get_forward(), enemy_1->transform_, enemy_vehicle, pbd::kMsPerUpdate);
             
             glm::vec3 rope_center;
             glm::vec3 rope_forward;
@@ -402,7 +447,7 @@ int main()
             rope_center /= rope_segments.size();
             rope_forward = glm::normalize(rope_forward);
 
-            glm::vec3 evade_force = Evade(rope_center, rope_forward, enemy_1->transform_, enemy_vehicle, kMsPerUpdate);
+            glm::vec3 evade_force = Evade(rope_center, rope_forward, enemy_1->transform_, enemy_vehicle, pbd::kMsPerUpdate);
 
             glm::vec3 output_force = extrapolation_force * enemy_vehicle.extrapolation_weight + evade_force * enemy_vehicle.extrapolation_weight + wall_avoid_force * enemy_vehicle.wall_avoidance_weight;
 
@@ -412,25 +457,23 @@ int main()
             }
 
             enemy_movement_generator->magnitude_ = enemy_vehicle.max_speed;
-            enemy_movement_generator->direction_ = output_force;
+            enemy_movement_generator->direction_ = output_force;*/
             
+            ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
 
             pbd::PBDManager::i_->GeneratorUpdate();
-            pbd::PBDManager::i_->Integration(kMsPerUpdate);
+            pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
             collisions::CollisionManager::i_->PredictColliders();
             collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
-            //pbd::PBDManager::i_->ResolveContacts();
-            pbd::PBDManager::i_->ProjectConstraints(kMsPerUpdate);
-            pbd::PBDManager::i_->UpdatePositions(kMsPerUpdate);
+            pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
+            pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
             pbd::PBDManager::i_->ClearContacts();
-
-            physics::LogVec3(enemy_1->transform_->get_forward());
 
             std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
             cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
             cp_idx++;
 
-            lag -= kMsPerUpdate;
+            lag -= pbd::kMsPerUpdate;
         }
 
         if (cp_idx == 120)
@@ -516,8 +559,8 @@ int main()
 #pragma endregion
     }
 
+    ai::EnemyAIManager::Destroy();
     pbd::PBDManager::Destroy();
-    physics::PhysicsManager::Destroy();
     collisions::CollisionManager::Destroy();
     input::InputManager::Destroy();
     

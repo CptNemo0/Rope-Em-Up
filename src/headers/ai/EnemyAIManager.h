@@ -6,6 +6,8 @@
 #include "State.h"
 #include "../GameObject.h"
 #include "../physics/PBD.h"
+//#include "EnemyStateMachine.h"
+#include "EnemyState.h"
 
 namespace ai
 {
@@ -14,7 +16,7 @@ namespace ai
 	public:
 		static EnemyAIManager* i_;
 	private:
-		EnemyAIManager();
+		EnemyAIManager() = default;
 		~EnemyAIManager() = default;
 
 	public:
@@ -30,10 +32,7 @@ namespace ai
 		int choke_threshold_;
 		int multi_threshold_;
 
-		float wander_speed_;
-		float pursuit_speed_;
-		float evasion_speed_;
-		float caution_speed_;
+		float wall_proximity_threshold_;
 
 		float attack_damage_;
 		float attack_range_;
@@ -56,6 +55,9 @@ namespace ai
 				i_ = nullptr;
 			}
 		}
+	
+		void UpdateEnemyStateMachine(std::shared_ptr<ai::EnemyStateMachine> machine);
+		
 	};
 }
 

@@ -1,7 +1,6 @@
 #ifndef STATE_H
 #define STATE_H
 
-
 namespace ai
 {
 	class StateMachine;
