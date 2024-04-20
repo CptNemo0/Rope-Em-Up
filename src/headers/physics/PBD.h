@@ -83,7 +83,7 @@ namespace pbd
 		FGRRecord() :
 		particle(nullptr), generator(nullptr) {}
 		
-
+		~FGRRecord();
 		void Generate();
 	};
 

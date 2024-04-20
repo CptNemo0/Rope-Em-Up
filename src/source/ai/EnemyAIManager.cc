@@ -1,23 +1,40 @@
 #include "../../headers/ai/EnemyAIManager.h"
 
-ai::EnemyAIManager* ai::EnemyAIManager::i_ = nullptr;
+ai::EnemyAIManager*			 ai::EnemyAIManager::i_ = nullptr;
+std::shared_ptr<GameObject>  ai::EnemyAIManager::player_1_ = nullptr;
+std::shared_ptr<GameObject>  ai::EnemyAIManager::player_2_ = nullptr;
+bool						 ai::EnemyAIManager::players_set = false;
+
+ai::EnemyAIManager::EnemyAIManager(const EnemyAIManagerInitStruct& init_struct, const Vehicle& vehicle)
+{
+	this->player_1_ = nullptr;
+	this->player_2_ = nullptr;
+	this->vehicle_template_ = vehicle;
+
+	this->choked_tentacles_ = init_struct.choked_tentacles;
+	this->multi_chokes_ = init_struct.multi_chokes;
+
+	this->choke_threshold_ = init_struct.choke_threshold;
+	this->multi_threshold_ = init_struct.multi_threshold;
+
+	this->wall_proximity_threshold_ = init_struct.wall_proximity_threshold;
+
+	this->attack_damage_ = init_struct.attack_damage;
+	this->attack_range_ = init_struct.attack_range;
+
+	this->sense_range_ = init_struct.sense_range;
+
+	this->players_set = false;
+}
 
 void ai::EnemyAIManager::UpdateEnemyStateMachine(std::shared_ptr<EnemyStateMachine> machine)
 {
-	if (machine->current_state_ != nullptr)
+	if (!players_set)
 	{
-		std::cout << machine->current_state_->Name() << std::endl;
+		std::cout << "First set player_1_ and player_2_ variables of EnemyAIManager!!!\n";
 	}
-	else
-	{
-		std::cout << "NULL" << std::endl;
-		return;
-	}
-	////Update facing wall:
-	//glm::vec3 velocity = (machine->transfrom_->get_position() - machine->transfrom_->get_predicted_position())/pbd::kMsPerUpdate;
-	//float velocity_mag_2 = glm::length2(velocity);
 
-	//machine->facing_wall_ = (velocity_mag_2 < wall_proximity_threshold_ * wall_proximity_threshold_);
+	assert(players_set);
 
 	glm::vec3 to_p_1 = player_1_->transform_->get_position() - machine->transfrom_->get_position();
 	float to_p_1_mag2 = glm::length2(to_p_1);
@@ -48,7 +65,7 @@ void ai::EnemyAIManager::UpdateEnemyStateMachine(std::shared_ptr<EnemyStateMachi
 	}
 
 	machine->pursuit_ = (!(choked_tentacles_ > choke_threshold_) && !(multi_chokes_ > multi_threshold_));
-	machine->extrapolation_ = (machine->pursuit_ && ((choked_tentacles_ > choke_threshold_) && !(multi_chokes_ > multi_threshold_)));
+	machine->extrapolation_ = (!machine->pursuit_ && ((choked_tentacles_ > choke_threshold_) && !(multi_chokes_ > multi_threshold_)));
 	machine->evasive_manoeuvres_ = ((choked_tentacles_ > choke_threshold_) && (multi_chokes_ > multi_threshold_));
 
 	

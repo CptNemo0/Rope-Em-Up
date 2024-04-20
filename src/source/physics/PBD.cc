@@ -87,6 +87,12 @@ void components::PBDParticle::Update()
 {
 }
 
+components::PBDParticle::~PBDParticle()
+{
+	transform_ = nullptr;
+	std::cout << "DELETING PARTICLE!\n";
+}
+
 void components::PBDParticle::Destroy()
 {
 	auto &vec = pbd::PBDManager::i_->constraints_;
@@ -101,17 +107,17 @@ void components::PBDParticle::Destroy()
 	}
 }
 
-components::PBDParticle::~PBDParticle()
-{
-	std::cout << "DELETING PARTICLE!\n";
-}
-
-
 void pbd::BasicGenerator::GenerateForce(std::shared_ptr<components::PBDParticle> particle)
 {
 	particle->AddForce(direction_ * magnitude_);
 }
 
+
+pbd::FGRRecord::~FGRRecord()
+{
+	particle = nullptr;
+	generator = nullptr;
+}
 
 void pbd::FGRRecord::Generate()
 {
@@ -232,6 +238,7 @@ void pbd::PBDManager::RemoveRecord(std::shared_ptr<ForceGenerator> g)
     });
     if (it != generator_registry_.end())
     {
+		generator_registry_[it - generator_registry_.begin()].~FGRRecord();;
         generator_registry_.erase(it);
     }
 }
@@ -244,6 +251,7 @@ void pbd::PBDManager::RemoveRecord(std::shared_ptr<components::PBDParticle> p)
     });
     if (it != generator_registry_.end())
     {
+		generator_registry_[it - generator_registry_.begin()].~FGRRecord();;
         generator_registry_.erase(it);
     }
 }

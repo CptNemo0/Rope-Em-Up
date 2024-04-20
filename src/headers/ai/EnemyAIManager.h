@@ -6,25 +6,42 @@
 #include "State.h"
 #include "../GameObject.h"
 #include "../physics/PBD.h"
-//#include "EnemyStateMachine.h"
 #include "EnemyState.h"
 
 namespace ai
 {
+	struct EnemyAIManagerInitStruct
+	{
+		int choked_tentacles;
+		int multi_chokes;
+
+		int choke_threshold;
+		int multi_threshold;
+
+		float wall_proximity_threshold;
+
+		float attack_damage;
+		float attack_range;
+
+		float sense_range;
+	};
+
 	class EnemyAIManager
 	{
 	public:
 		static EnemyAIManager* i_;
+
 	private:
-		EnemyAIManager() = default;
+		static bool players_set;
+		static std::shared_ptr<GameObject> player_1_;
+		static std::shared_ptr<GameObject> player_2_;
+
+		EnemyAIManager(const EnemyAIManagerInitStruct& init_struct, const Vehicle& vehicle);
 		~EnemyAIManager() = default;
 
 	public:
 
-		std::shared_ptr<GameObject> player_1_;
-		std::shared_ptr<GameObject> player_2_;
-
-		std::shared_ptr<pbd::WallConstraint> walls_;
+		Vehicle vehicle_template_;
 
 		int choked_tentacles_;
 		int multi_chokes_;
@@ -39,12 +56,26 @@ namespace ai
 
 		float sense_range_;
 
-		static void Initialize()
+		
+
+		static void Initialize(const EnemyAIManagerInitStruct& init_struct, const Vehicle& vehicle)
 		{
 			if (i_ == nullptr)
 			{
-				i_ = new EnemyAIManager();
+				i_ = new EnemyAIManager(init_struct, vehicle);
 			}
+		}
+
+		static void SetPlayers(std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2)
+		{
+			assert(player_1 != nullptr);
+			assert(player_2 != nullptr);
+			assert(player_1 != player_2);
+
+			player_1_ = player_1;
+			player_2_ = player_1;
+
+			players_set = true;
 		}
 
 		static void Destroy()
@@ -54,6 +85,9 @@ namespace ai
 				delete i_;
 				i_ = nullptr;
 			}
+
+			player_1_ = nullptr;
+			player_2_ = nullptr;
 		}
 	
 		void UpdateEnemyStateMachine(std::shared_ptr<ai::EnemyStateMachine> machine);

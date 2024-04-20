@@ -13,12 +13,12 @@ namespace ai
 	public:
 		EnemyState() = default;
 		virtual ~EnemyState() {}
-
+		
 		virtual void Execute(EnemyStateMachine* machine) = 0;
 		std::string Name()
 		{
 			return typeid(*this).name();
-		}
+		}		
 	};
 
 	class PatrolState : public EnemyState
@@ -108,7 +108,7 @@ namespace ai
 	{
 	public:
 
-		EnemyStateMachine() = default;
+		EnemyStateMachine(std::shared_ptr<GameObject> game_object, std::shared_ptr<pbd::BasicGenerator> generator, const Vehicle& vehicle);
 		~EnemyStateMachine() = default;
 
 		EnemyState* current_state_;

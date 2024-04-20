@@ -37,6 +37,7 @@ void ai::IdleState::Execute(EnemyStateMachine* machine)
 	}
 }
 
+
 ai::PatrolState* ai::PatrolState::Instance()
 {
 	if (i_ == nullptr)
@@ -203,8 +204,6 @@ void ai::ExtrapolationState::Execute(EnemyStateMachine* machine)
 			auto t = machine->target_player_->transform_;
 			glm::vec3 pursuit = ExtrapolatedPursuit(t->get_position(), t->get_forward(), machine->transfrom_, machine->vehicle_, pbd::kMsPerUpdate);
 			glm::vec3 wall_avoidance = WallAvoidance(machine->transfrom_, machine->vehicle_, pbd::kMsPerUpdate);
-			//glm::vec3 evasion = Evade(); 
-			//to implement
 
 			glm::vec3 output_force = pursuit + wall_avoidance;
 			if (output_force != glm::vec3(0.0f))
@@ -265,4 +264,29 @@ void ai::EvasionState::Execute(EnemyStateMachine* machine)
 			machine->current_state_ = PatrolState::Instance();
 		}
 	}
+}
+
+ai::EnemyStateMachine::EnemyStateMachine(std::shared_ptr<GameObject> game_object, std::shared_ptr<pbd::BasicGenerator> generator, const Vehicle& vehicle)
+{
+	current_state_ = PatrolState::Instance();
+
+	vehicle_ = vehicle;
+
+	target_player_ = nullptr;
+	transfrom_ = game_object->transform_;
+	partcile_ = game_object->GetComponent<components::PBDParticle>();
+	generator_ = generator;
+
+	rest_timer_ = 0.0f;
+
+	is_choked_ = false;
+
+	facing_wall_ = false;
+	in_sense_range_ = false;	
+	in_attack_range_ = false;
+
+	another_tentacle_is_choked_ = false;
+	pursuit_ = false;
+	extrapolation_ = false;
+	evasive_manoeuvres_ = false;
 }
