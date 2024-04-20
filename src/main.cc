@@ -131,6 +131,7 @@ int main()
     camera->set_position(glm::vec3(0.0f, 25.0f, 0.0f));
     camera->set_pitch(-90.0f);
     camera->set_yaw(+90.0f);
+
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
 
@@ -146,20 +147,20 @@ int main()
 
     PointLight point_light;
     point_light.intensity = 100.0f;
-    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    point_light.position = glm::vec3(-3.0f, 3.0f, -3.0f);
     point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
     // lights
-   // ------
-    glm::vec3 lightPositions[] = {
-        glm::vec3(-10.0f,  10.0f, 10.0f),
+    // ------
+    glm::vec3 light_Positions[] = {
+        glm::vec3(0.0f,  10.0f, 0.0f),
         glm::vec3(10.0f,  10.0f, 10.0f),
         glm::vec3(-10.0f, -10.0f, 10.0f),
         glm::vec3(10.0f, -10.0f, 10.0f),
     };
-    glm::vec3 lightColors[] = {
+    glm::vec3 light_Colors[] = {
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f),
@@ -190,30 +191,31 @@ int main()
     auto wall_up = GameObject::Create(scene_root);
     wall_up->transform_->set_position(glm::vec3(0.0f, 0.0f, 17.0f));
     wall_up->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    wall_up->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
+    wall_up->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, PBRShader));
 
     auto wall_down = GameObject::Create(scene_root);
     wall_down->transform_->set_position(glm::vec3(0.0f, 0.0f, -17.0f));
     wall_down->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    wall_down->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
+    wall_down->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, PBRShader));
 
     auto wall_right = GameObject::Create(scene_root);
     wall_right->transform_->set_position(glm::vec3(17.0f, 0.0f, 0.0f));
-    wall_right->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
+    wall_right->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, PBRShader));
 
     auto wall_left = GameObject::Create(scene_root);
     wall_left->transform_->set_position(glm::vec3(-17.0f, 0.0f, 0.0f));
-    wall_left->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, shader));
+    wall_left->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, PBRShader));
 
     auto floor = GameObject::Create(scene_root);
     floor->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     floor->transform_->set_scale(glm::vec3(3.0f, 0.0f, 3.0f));
-    floor->AddComponent(std::make_shared<components::MeshRenderer>(simple_floor_model, shader));
+    floor->AddComponent(std::make_shared<components::MeshRenderer>(simple_floor_model, PBRShader));
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
     auto enemy_1 = GameObject::Create(scene_root);
+  
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
     enemy_1->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
@@ -248,15 +250,15 @@ int main()
     pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
 
     ////test
-    /*auto test = GameObject::Create(scene_root);
+    auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
-    test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));*/
+    test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));
 
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    player_1->AddComponent(std::make_shared<components::MeshRenderer>(player_model, shader));
+    player_1->AddComponent(std::make_shared<components::MeshRenderer>(player_model, PBRShader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
@@ -264,7 +266,7 @@ int main()
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/5.0f), 0.0f, 0.0f));
     player_2->transform_->set_position(glm::vec3(10.0f + (1.0f / 5.0f), 0.0f, 0.0f));
-    player_2->AddComponent(std::make_shared<components::MeshRenderer>(player_model, shader));
+    player_2->AddComponent(std::make_shared<components::MeshRenderer>(player_model, PBRShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
@@ -330,13 +332,9 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    /*PBRShader->Use();
-    PBRShader->SetInt("irradiance_map", 0);
-    PBRShader->SetInt("albedo_map", 1);
-    PBRShader->SetInt("normal_map", 2);
-    PBRShader->SetInt("metallic_map", 3);
-    PBRShader->SetInt("roughness_map", 4)*/;
-    //PBRShader->SetInt("ao_map", 4);
+    PBRShader->Use();
+    PBRShader->SetInt("irradiance_map", 5);
+
 
 
     BackgroundShader->Use();
@@ -347,8 +345,8 @@ int main()
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
     glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
-    /*PBRShader->Use();
-    PBRShader->SetMatrix4("projection_matrix", projection);*/
+    PBRShader->Use();
+    PBRShader->SetMatrix4("projection_matrix", projection);
 
     BackgroundShader->Use();
     BackgroundShader->SetMatrix4("projection_matrix", projection);
@@ -449,31 +447,28 @@ int main()
 #pragma endregion
 #pragma region GO Update and Draw
 
-        shader->Use();
+       /* shader->Use();
 
         shader->SetVec3("camera_position", camera->get_position());
         shader->SetFloat("shininess", 50.0f);
 
         shader->SetPointLight("light", point_light);
         shader->SetMatrix4("projection_matrix", projection_matrix);
-        shader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        shader->SetMatrix4("view_matrix", camera->GetViewMatrix());*/
 
-        /*PBRShader->Use();
+        PBRShader->Use();
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        PBRShader->SetVec3("camera_position", camera->get_position());*/
+        PBRShader->SetVec3("camera_position", camera->get_position());
 
-
-
-        /*glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, albedo);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, normal);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, metallic);
         glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, roughness);*/
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
+
+        glm::vec3 newPos = light_Positions[0] /* + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0)*/;
+        PBRShader->SetVec3("light_positions[0]", newPos);
+        PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        PBRShader->SetMatrix4("model_matrix", model);
 
         scene_root->PropagateUpdate();
 

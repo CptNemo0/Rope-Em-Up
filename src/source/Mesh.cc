@@ -51,23 +51,23 @@ void Mesh::Init()
 
 void Mesh::Draw(std::shared_ptr<Shader> shader) const
 {
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-    unsigned int normalNr = 1;
-    unsigned int heightNr = 1;
+    unsigned int albedoeNr = 0;
+    unsigned int normalNr = 0;
+    unsigned int metalicNr = 0;
+    unsigned int roughnesstNr = 0;
     for (unsigned int i = 0; i < textures_.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
         std::string number;
         std::string name = textures_[i].type_;
-        if (name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if (name == "texture_specular")
-            number = std::to_string(specularNr++);
+        if (name == "texture_albedo")
+            number = std::to_string(albedoeNr++);
         else if (name == "texture_normal")
             number = std::to_string(normalNr++);
-        else if (name == "texture_height")
-            number = std::to_string(heightNr++);
+        else if (name == "texture_metallic")
+            number = std::to_string(metalicNr++);
+        else if (name == "texture_roughness")
+            number = std::to_string(roughnesstNr++);
 
         glUniform1i(glGetUniformLocation(shader->id_, (name + number).c_str()), i);
         glBindTexture(GL_TEXTURE_2D, textures_[i].id_);
