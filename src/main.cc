@@ -128,6 +128,21 @@ int main()
     point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
     point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
+    // lights
+    // ------
+    glm::vec3 light_Positions[] = {
+        glm::vec3(0.0f,  10.0f, 0.0f),
+        glm::vec3(10.0f,  10.0f, 10.0f),
+        glm::vec3(-10.0f, -10.0f, 10.0f),
+        glm::vec3(10.0f, -10.0f, 10.0f),
+    };
+    glm::vec3 light_Colors[] = {
+        glm::vec3(300.0f, 300.0f, 300.0f),
+        glm::vec3(300.0f, 300.0f, 300.0f),
+        glm::vec3(300.0f, 300.0f, 300.0f),
+        glm::vec3(300.0f, 300.0f, 300.0f)
+    };
+
     auto test_model = std::make_shared<Model>(kTestPath);
 
     auto cube_model = std::make_shared<Model>(kCubeMeshPath);
@@ -364,9 +379,9 @@ int main()
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
 
-        glm::vec3 newPos = point_light.position + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
+        glm::vec3 newPos = light_Positions[0] /* + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0)*/;
         PBRShader->SetVec3("light_positions[0]", newPos);
-        PBRShader->SetVec3("light_colors[0]", point_light.diffuse_colour);
+        PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
 
         glm::mat4 model = glm::mat4(1.0f);
         PBRShader->SetMatrix4("model_matrix", model);
