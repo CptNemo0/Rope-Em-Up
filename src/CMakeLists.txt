@@ -31,20 +31,20 @@ ${stb_image_SOURCE_DIR}
 ${STB_EASY_FONT_SOURCE_DIR}
 ${imgui_SOURCE_DIR})
 
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} glad)
-target_link_libraries(${PROJECT_NAME} stb_image)
-target_link_libraries(${PROJECT_NAME} stb_easy_font)
-target_link_libraries(${PROJECT_NAME} stb_image_write)
-target_link_libraries(${PROJECT_NAME} stb_image_resize)
-target_link_libraries(${PROJECT_NAME} stb_truetype)
-target_link_libraries(${PROJECT_NAME} assimp)
-target_link_libraries(${PROJECT_NAME} glfw)
-target_link_libraries(${PROJECT_NAME} imgui)
-target_link_libraries(${PROJECT_NAME} spdlog)
-target_link_libraries(${PROJECT_NAME} glm::glm)
-target_link_libraries(${PROJECT_NAME} OpenAL::OpenAL)
-target_link_libraries(${PROJECT_NAME} freetype)
+target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES}
+	glad
+	stb_image
+	stb_easy_font
+	stb_image_write
+	stb_image_resize
+	stb_truetype
+	assimp
+	glfw
+	imgui
+	spdlog
+	glm::glm
+	OpenAL::OpenAL
+	freetype)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
 				   COMMAND ${CMAKE_COMMAND} -E create_symlink 
