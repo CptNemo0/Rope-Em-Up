@@ -16,8 +16,8 @@ private:
     int gamepadID_;
     std::shared_ptr<pbd::BasicGenerator> move_generator_;
     std::shared_ptr<pbd::BasicGenerator> pull_generator_;
-    int speed_ = 2000;
-    int pull_power_ = 3000;
+    int speed_ = 500;
+    int pull_power_ = 1000;
     bool is_pulling_ = false, pulling_cooldown_ = false;
     glm::vec3 direction_ = glm::vec3(0.0f);
 public:

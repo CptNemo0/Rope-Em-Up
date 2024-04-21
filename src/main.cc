@@ -375,6 +375,19 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);
 
+    auto fixed_update_timer = Timer::CreateTimer(1.0f / 60.0f, [enemy_state_machine]()
+    {
+        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
+
+        pbd::PBDManager::i_->GeneratorUpdate();
+        pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
+        collisions::CollisionManager::i_->PredictColliders();
+        collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
+        pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
+        pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
+        pbd::PBDManager::i_->ClearContacts();
+    }, nullptr, true);
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -397,36 +410,8 @@ int main()
         input::InputManager::i_->Update();
 
 #pragma region Collisions and Physics
-        static float cp_time = 0;
-        static int cp_idx = 0;
-
-        if (lag >= pbd::kMsPerUpdate)
-        {
-            std::chrono::steady_clock::time_point cp_begin = std::chrono::steady_clock::now();
-
-            ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
-
-            pbd::PBDManager::i_->GeneratorUpdate();
-            pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
-            collisions::CollisionManager::i_->PredictColliders();
-            collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
-            pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
-            pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
-            pbd::PBDManager::i_->ClearContacts();
-
-            std::chrono::steady_clock::time_point cp_end = std::chrono::steady_clock::now();
-            cp_time += std::chrono::duration_cast<std::chrono::microseconds> (cp_end - cp_begin).count();
-            cp_idx++;
-
-            lag -= pbd::kMsPerUpdate;
-        }
-
-        if (cp_idx == 120)
-        {
-            std::cout << "Collisions and Physic time = " << cp_time / cp_idx << "[micro s]" << std::endl;
-            cp_idx = 0;
-            cp_time = 0.0f;
-        }
+        
+        Timer::UpdateTimer(fixed_update_timer, delta_time);
 
         FixOrientation(enemy_1);
         FixOrientation(player_1);
@@ -481,10 +466,7 @@ int main()
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
 
-        if (cp_idx == 30)
-        {
-            HUDText_object->GetComponent<components::TextRenderer>()->text_ = "fps: " + std::to_string(1.0f / delta_time);
-        }
+        HUDText_object->GetComponent<components::TextRenderer>()->text_ = "fps: " + std::to_string(1.0f / delta_time);
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);

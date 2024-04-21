@@ -7,14 +7,49 @@ std::vector<Timer> timers;
 std::vector<unsigned int> ids_to_remove;
 unsigned int next_id = 0;
 
-void AddTimer(float seconds, std::function<void()> finish_callback, std::function<void(float)> update_callback)
+Timer CreateTimer(float delay, std::function<void()> finish_callback, std::function<void(float)> update_callback, bool loop)
 {
     Timer timer;
     timer.id = next_id++;
-    timer.expiration_time = std::chrono::microseconds(static_cast<int>(seconds * 1000000));
+    timer.delay = delay;
+    timer.expiration_time = std::chrono::microseconds(static_cast<int>(delay * 1000000));
     timer.finish_callback = finish_callback;
     timer.update_callback = update_callback;
-    timers.push_back(timer);
+    timer.loop = loop;
+    return timer;
+}
+
+void AddTimer(float delay, std::function<void()> finish_callback, std::function<void(float)> update_callback, bool loop)
+{
+    timers.push_back(CreateTimer(delay, finish_callback, update_callback, loop));
+}
+
+bool UpdateTimer(Timer &timer, float delta_time)
+{
+    timer.expiration_time -= std::chrono::microseconds(static_cast<int>(delta_time * 1000000));
+    if (timer.expiration_time <= std::chrono::microseconds(0))
+    {
+        if (timer.finish_callback)
+        {
+            timer.finish_callback();
+        }
+        if (timer.loop)
+        {
+            timer.expiration_time = std::chrono::microseconds(static_cast<int>(timer.delay * 1000000));
+        }
+        else
+        {
+            return true;
+        }
+    }
+    else
+    {
+        if (timer.update_callback)
+        {
+            timer.update_callback(delta_time);
+        }
+    }
+    return false;
 }
 
 void Update(float delta_time)
@@ -23,21 +58,10 @@ void Update(float delta_time)
     for (size_t idx = 0u; idx < size; ++idx)
     {
         auto &timer = timers[idx];
-        timer.expiration_time -= std::chrono::microseconds(static_cast<int>(delta_time * 1000000));
-        if (timer.expiration_time <= std::chrono::microseconds(0))
+        bool finished = UpdateTimer(timer, delta_time);
+        if (finished)
         {
-            if (timer.finish_callback)
-            {
-                timer.finish_callback();
-            }
             ids_to_remove.push_back(timer.id);
-        }
-        else
-        {
-            if (timer.update_callback)
-            {
-                timer.update_callback(delta_time);
-            }
         }
     }
     for (auto &id : ids_to_remove)

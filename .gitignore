@@ -10,3 +10,4 @@ CTestTestfile.cmake
 
 [Bb]uild/
 /.vscode
+/.vs
