@@ -375,7 +375,7 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);
 
-    auto fixed_update_timer = Timer::CreateTimer(1.0f / 60.0f, [enemy_state_machine]()
+    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine, &fixed_update_timer]()
     {
         ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
 

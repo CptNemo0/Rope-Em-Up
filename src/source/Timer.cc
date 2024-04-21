@@ -35,7 +35,10 @@ bool UpdateTimer(Timer &timer, float delta_time)
         }
         if (timer.loop)
         {
-            timer.expiration_time = std::chrono::microseconds(static_cast<int>(timer.delay * 1000000));
+            while ((timer.expiration_time += std::chrono::microseconds(static_cast<int>(timer.delay * 1000000))) <= std::chrono::microseconds(0))
+            {
+                timer.finish_callback();
+            }
         }
         else
         {

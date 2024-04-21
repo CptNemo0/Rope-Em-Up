@@ -49,7 +49,10 @@ namespace components
 
 namespace pbd
 {
-	const float kMsPerUpdate = 1.0f / 120.0f;
+	// Fixed delta time
+	// Right now it's half of actual fixed delta time
+	// so that the game doesn't run too fast
+	const float kMsPerUpdate = 1.0f / 240.0f;
 
 	class ForceGenerator
 	{
