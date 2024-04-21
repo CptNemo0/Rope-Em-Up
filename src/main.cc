@@ -92,8 +92,8 @@ int main()
     const std::string kTestPath = "res/models/test2.obj";
     const std::string kWallPath = "res/models/simple_wall.obj";
     const std::string kModule1Path = "res/models/module1.obj";
-    const std::string kModule2Path = "res/models/module2.obj";
-    const std::string kSimpleFloodPath = "res/models/simple_floor.obj";
+    const std::string kModule2Path = "res/models/enviroment/modules/module2.obj";
+    const std::string kSimpleFloodPath = "res/models/enviroment/floor/floor.obj";
     const std::string kTestBallPath = "res/models/test_ball.obj";
 
     srand(static_cast <unsigned> (time(0)));
@@ -114,25 +114,25 @@ int main()
     enemy_vehicle_template.wander_radius = 2.0f;
     enemy_vehicle_template.wander_jitter = 0.5f;
     enemy_vehicle_template.wander_weight = 1.0f;
-    enemy_vehicle_template.wander_speed_ = 1000.f / 2;
+    enemy_vehicle_template.wander_speed_ = 1000.f;
 
     enemy_vehicle_template.wall_avoidance_distance = 2.0f;
     enemy_vehicle_template.wall_avoidance_weight = 3.0f;
 
     enemy_vehicle_template.pursuit_distance = 0.5f;
     enemy_vehicle_template.pursuit_weight = 1.0f;
-    enemy_vehicle_template.pursuit_speed_ = 1500.f / 2;
+    enemy_vehicle_template.pursuit_speed_ = 1500.f;
 
     enemy_vehicle_template.extrapolation_distance = 5.0f;
     enemy_vehicle_template.extrapolation_weight = 1.0f;
-    enemy_vehicle_template.extrapolation_speed_ = 1600.f / 2;
+    enemy_vehicle_template.extrapolation_speed_ = 1600.f;
 
     enemy_vehicle_template.evade_distance = 5.0f;
     enemy_vehicle_template.evade_weight = 1.0f;
     enemy_vehicle_template.evade_speed_ = 1700.f;
 
     ai::EnemyAIManagerInitStruct enemy_ai_init;
-    enemy_ai_init.choked_tentacles = 0;
+    enemy_ai_init.choked_tentacles = 10;
     enemy_ai_init.multi_chokes = 0;
     enemy_ai_init.choke_threshold = 5;
     enemy_ai_init.multi_threshold = 5;
@@ -228,27 +228,27 @@ int main()
 
     auto scene_root = GameObject::Create();
 
-    auto wall_up = GameObject::Create(scene_root);
-    wall_up->transform_->set_position(glm::vec3(0.0f, 0.0f, 17.0f));
-    wall_up->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    wall_up->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, PBRShader));
+    auto wall_up_1 = GameObject::Create(scene_root);
+    wall_up_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, -16.0f));
+    wall_up_1->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    auto wall_up_2 = GameObject::Create(scene_root);
+    wall_up_2->transform_->set_position(glm::vec3(8.0f, 0.0f, -16.0f));
+    wall_up_2->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
 
-    auto wall_down = GameObject::Create(scene_root);
-    wall_down->transform_->set_position(glm::vec3(0.0f, 0.0f, -17.0f));
-    wall_down->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    wall_down->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, PBRShader));
+    auto wall_right_1 = GameObject::Create(scene_root);
+    wall_right_1->transform_->set_position(glm::vec3(-16.0f, 0.0f, -8.0f));
+    wall_right_1->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    wall_right_1->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
 
-    auto wall_right = GameObject::Create(scene_root);
-    wall_right->transform_->set_position(glm::vec3(17.0f, 0.0f, 0.0f));
-    wall_right->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, PBRShader));
+    auto wall_right_2 = GameObject::Create(scene_root);
+    wall_right_2->transform_->set_position(glm::vec3(-16.0f, 0.0f, 8.0f));
+    wall_right_2->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    wall_right_2->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
 
-    auto wall_left = GameObject::Create(scene_root);
-    wall_left->transform_->set_position(glm::vec3(-17.0f, 0.0f, 0.0f));
-    wall_left->AddComponent(std::make_shared<components::MeshRenderer>(wall_model, PBRShader));
 
     auto floor = GameObject::Create(scene_root);
     floor->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    floor->transform_->set_scale(glm::vec3(3.0f, 0.0f, 3.0f));
+    floor->transform_->set_scale(glm::vec3(2.0f, 0.0f, 2.0f));
     floor->AddComponent(std::make_shared<components::MeshRenderer>(simple_floor_model, PBRShader));
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
@@ -269,9 +269,9 @@ int main()
     auto enemy_state_machine = std::make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator, enemy_vehicle_template);
 
     ////test
-    auto test = GameObject::Create(scene_root);
+    /*auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
-    test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));
+    test->AddComponent(std::make_shared<components::MeshRenderer>(test_model, PBRShader));*/
 
 
     auto player_1 = GameObject::Create(scene_root);
@@ -464,7 +464,7 @@ int main()
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        // cubemap->RenderCube();
+        cubemap->RenderCube();
 
 #pragma endregion
 #pragma region Interface
@@ -489,12 +489,6 @@ int main()
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-
-        if (glfwGetKey(window, GLFW_KEY_R))
-        {
-            auto r = enemy_1->transform_->get_rotation();
-            enemy_1->transform_->set_rotation(glm::vec3(r.x, r.y + 10 * delta_time , r.z));
-        }
 
 #pragma endregion
 
