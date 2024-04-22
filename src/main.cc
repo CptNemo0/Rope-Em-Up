@@ -20,6 +20,7 @@
 #include "headers/collisions/Collider.h"
 #include "headers/collisions/Collisions.h"
 #include "headers/collisions/CollisionManager.h"
+#include "headers/collisions/Raycast.h"
 #include "headers/GameObject.h"
 #include "headers/Model.h"
 #include "headers/components/MeshRenderer.h"
@@ -96,12 +97,13 @@ int main()
     const std::string kSimpleFloodPath = "res/models/enviroment/floor/floor.obj";
     const std::string kTestBallPath = "res/models/test_ball.obj";
 
-    srand(static_cast <unsigned> (time(0)));
     const std::string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
     const float kFar = 1000.0f;
+
+    srand(static_cast <unsigned> (time(0)));
 
     Vehicle enemy_vehicle_template;
 
@@ -289,6 +291,8 @@ int main()
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
+
+    auto a = collisions::Raycast(glm::vec3(10.0, 0.0f, 10.0f), glm::vec3(-1.0f, 0.0f, -1.0f), 100.f, 0);
 
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
 

@@ -40,7 +40,6 @@ namespace ai
 		~EnemyAIManager() = default;
 
 	public:
-
 		Vehicle vehicle_template_;
 
 		int choked_tentacles_;
@@ -56,7 +55,7 @@ namespace ai
 
 		float sense_range_;
 
-		
+
 
 		static void Initialize(const EnemyAIManagerInitStruct& init_struct, const Vehicle& vehicle)
 		{
@@ -91,7 +90,6 @@ namespace ai
 		}
 	
 		void UpdateEnemyStateMachine(std::shared_ptr<ai::EnemyStateMachine> machine);
-		
 	};
 }
 
