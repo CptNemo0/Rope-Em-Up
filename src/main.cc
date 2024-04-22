@@ -292,9 +292,14 @@ int main()
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
-    auto a = collisions::Raycast(glm::vec3(10.0, 0.0f, 10.0f), glm::vec3(-1.0f, 0.0f, -1.0f), 100.f, 0);
-
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
+    //ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
+
+    auto start = glm::vec3(-0.2, 0.0f, 2.0f);
+    auto end = glm::vec3(0.2, 0.0f, -2.0f);
+    auto dir = glm::normalize(end - start);
+
+    auto hit = collisions::Raycast(start, dir, 20.0f, 0);
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 

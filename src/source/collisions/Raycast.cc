@@ -1,6 +1,6 @@
 #include "../../headers/collisions/Raycast.h"
 
-std::shared_ptr<GameObject> collisions::Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer)
+collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer)
 {
     if (glm::length2(dir) != 1.0f)
     {
@@ -34,7 +34,7 @@ std::shared_ptr<GameObject> collisions::Raycast(glm::vec3 start, glm::vec3 dir, 
 
     CollisionManager::i_->colliders_;
 
-    std::shared_ptr<GameObject> return_value;
+    std::shared_ptr<GameObject> rv_object = nullptr;
     float rv_distance = INFINITY;
 
     for (int i = 0; i < CollisionManager::i_->colliders_.size(); i++)
@@ -66,12 +66,51 @@ std::shared_ptr<GameObject> collisions::Raycast(glm::vec3 start, glm::vec3 dir, 
                     auto new_distance = glm::distance(collider->transform_->get_position(), start);
                     if (new_distance < rv_distance)
                     {
-                        return_value = collider->gameObject_.lock();
+                        rv_object = collider->gameObject_.lock();
                         rv_distance = new_distance;
                     }
                 }
             }
         }
     }
+
+    bool imprecise_hit = true;
+    bool precise_hit = false;
+    //SegmentsIntersectionPoint
+
+    auto collider = rv_object->GetComponent<components::Collider>();
+    rv_distance = INFINITY;
+    glm::vec3 rv_point = glm::vec3(0.0f);
+    for (int i = 0; i < gPRECISION; i++)
+    {
+        glm::vec3 point;
+        if (i == gPRECISION - 1)
+        {
+            point = SegmentsIntersectionPoint(start, end, collider->np_collider_->vertices[i], collider->np_collider_->vertices[0]);
+        }
+        else
+        {
+            point = SegmentsIntersectionPoint(start, end, collider->np_collider_->vertices[i], collider->np_collider_->vertices[i + 1]);
+        }
+
+        auto d = glm::distance(point, start);
+        //d < rv_distance &&
+        if ( d < distance)
+        {
+            rv_distance = d;
+            rv_point = point;
+            precise_hit = true;
+        }
+    }
+
+   
+
+    RaycastHit return_value;
+    return_value.object = rv_object;
+    return_value.distance = rv_distance;
+    return_value.point = rv_point;
+    return_value.precise_hit = precise_hit;
+    return_value.imprecise_hit = imprecise_hit;
+
     return return_value;
 }
