@@ -36,6 +36,7 @@
 #include "headers/components/PlayerController.h"
 #include "headers/HDRCubemap.h"
 #include "headers/Font.h"
+#include "headers/components/ParticleEmitter.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -60,24 +61,28 @@ int main()
     std::cout << "Byc czy nie byc oto jest pytanie.\n";
     const std::string kWindowTitle = "Modul Sumatywny";
 
-    const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
-    const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
+    const std::string kVertexShaderPath = "res/shaders/Basic.vert";
+    const std::string kFragmentShaderPath = "res/shaders/Basic.frag";
 
-    const std::string kHUDVertexShaderPath = "res/shaders/HUDVertexShader.vert";
-    const std::string kHUDFragmentShaderPath = "res/shaders/HUDFragmentShader.frag";
+    const std::string kHUDVertexShaderPath = "res/shaders/HUD.vert";
+    const std::string kHUDFragmentShaderPath = "res/shaders/HUD.frag";
 
-    const std::string kHUDTextVertexShaderPath = "res/shaders/HUDTextVertexShader.vert";
-    const std::string kHUDTextFragmentShaderPath = "res/shaders/HUDTextFragmentShader.frag";
+    const std::string kHUDTextVertexShaderPath = "res/shaders/HUDText.vert";
+    const std::string kHUDTextFragmentShaderPath = "res/shaders/HUDText.frag";
 
-    const std::string kPBRVertexShaderPath = "res/shaders/PBRVertexShader.vert";
-    const std::string kPBRFragmentShaderPath = "res/shaders/PBRFragmentShader.frag";
+    const std::string kPBRVertexShaderPath = "res/shaders/PBR.vert";
+    const std::string kPBRFragmentShaderPath = "res/shaders/PBR.frag";
 
-    const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemapVertexShader.vert";
-    const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemapFragmentShader.frag";
-    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolutionFragmentShader.frag";
+    const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemap.vert";
+    const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemap.frag";
+    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolution.frag";
 
-    const std::string kBackgroundVertexShaderPath = "res/shaders/BackgroundVertexShader.vert";
-    const std::string kBackgroundFragmentShaderPath = "res/shaders/BackgroundFragmentShader.frag";
+    const std::string kBackgroundVertexShaderPath = "res/shaders/Background.vert";
+    const std::string kBackgroundFragmentShaderPath = "res/shaders/Background.frag";
+
+    const std::string kParticleVertexShaderPath = "res/shaders/Particle.vert";
+    const std::string kParticleGeometryShaderPath = "res/shaders/Particle.geom";
+    const std::string kParticleFragmentShaderPath = "res/shaders/Particle.frag";
 
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
@@ -184,6 +189,7 @@ int main()
     auto EquirectangularToCubemapShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kHDREquirectangularToCubemapFragmentShaderPath);
     auto BackgroundShader = std::make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
     auto IrradianceShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
+    auto ParticleShader = std::make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
 
     auto cubemap = std::make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
@@ -270,6 +276,14 @@ int main()
 
     auto enemy_state_machine = std::make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator, enemy_vehicle_template);
 
+    auto enemy_2 = GameObject::Create(scene_root);
+
+    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
+    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
+    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
+
     ////test
     /*auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
@@ -292,9 +306,14 @@ int main()
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(std::make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
-    auto a = collisions::Raycast(glm::vec3(10.0, 0.0f, 10.0f), glm::vec3(-1.0f, 0.0f, -1.0f), 100.f, 0);
-
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
+    //ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
+
+    /*auto start = glm::vec3(-0.2, 0.0f, 2.0f);
+    auto end = glm::vec3(0.2, 0.0f, -2.0f);
+    auto dir = glm::normalize(end - start);
+
+    auto hit = collisions::Raycast(start, dir, 20.0f, 0);*/
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
@@ -350,9 +369,16 @@ int main()
     HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
 
+    auto particle_root = GameObject::Create();
+
+    auto particle_emitter = GameObject::Create(particle_root);
+    particle_emitter->transform_->set_position(glm::vec3(0.0f, 10.0f, 0.0f));
+    particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(HUD_texture, ParticleShader));
+
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
     HUDText_root->PropagateStart();
+    particle_root->PropagateStart();
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -371,6 +397,9 @@ int main()
     PBRShader->Use();
     PBRShader->SetMatrix4("projection_matrix", projection);
 
+    ParticleShader->Use();
+    ParticleShader->SetMatrix4("projection_matrix", projection);
+
     BackgroundShader->Use();
     BackgroundShader->SetMatrix4("projection_matrix", projection);
 
@@ -381,7 +410,7 @@ int main()
 
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine, &fixed_update_timer]()
     {
-        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
+        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
 
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
@@ -410,6 +439,8 @@ int main()
         previous_time = current_time;
 
         Timer::Update(delta_time);
+        collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         utility::DebugCameraMovement(window, camera, delta_time);
         input::InputManager::i_->Update();
 
@@ -449,11 +480,20 @@ int main()
 
         scene_root->PropagateUpdate();
 
-
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
         cubemap->RenderCube();
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        ParticleShader->Use();
+        ParticleShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+
+        particle_root->PropagateUpdate();
+
+        glDisable(GL_BLEND);
 
 #pragma endregion
 #pragma region Interface
