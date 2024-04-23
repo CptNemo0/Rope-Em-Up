@@ -151,16 +151,14 @@ bool collisions::ChokeCheck(std::shared_ptr<GameObject> caster, int precision, i
         }
     }
 
-    std::cout << "hits: " << hits << std::endl;
-
     if (hits >= threshold)
     {
         return_value = true;
-        std::cout << "CHOKED!!!" << std::endl;
+        std::cout << "CHOKED!!!\n";;
     }
     else
     {
-        std::cout << "NOT CHOKED!!!" << std::endl;
+        std::cout << "NOT CHOKED!!!\n";
     }
 
     return return_value;
