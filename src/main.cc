@@ -60,24 +60,26 @@ int main()
     std::cout << "Byc czy nie byc oto jest pytanie.\n";
     const std::string kWindowTitle = "Modul Sumatywny";
 
-    const std::string kVertexShaderPath = "res/shaders/BasicVertexShader.vert";
-    const std::string kFragmentShaderPath = "res/shaders/BasicFragmentShader.frag";
+    const std::string kVertexShaderPath = "res/shaders/Basic.vert";
+    const std::string kFragmentShaderPath = "res/shaders/Basic.frag";
 
-    const std::string kHUDVertexShaderPath = "res/shaders/HUDVertexShader.vert";
-    const std::string kHUDFragmentShaderPath = "res/shaders/HUDFragmentShader.frag";
+    const std::string kHUDVertexShaderPath = "res/shaders/HUD.vert";
+    const std::string kHUDFragmentShaderPath = "res/shaders/HUD.frag";
 
-    const std::string kHUDTextVertexShaderPath = "res/shaders/HUDTextVertexShader.vert";
-    const std::string kHUDTextFragmentShaderPath = "res/shaders/HUDTextFragmentShader.frag";
+    const std::string kHUDTextVertexShaderPath = "res/shaders/HUDText.vert";
+    const std::string kHUDTextFragmentShaderPath = "res/shaders/HUDText.frag";
 
-    const std::string kPBRVertexShaderPath = "res/shaders/PBRVertexShader.vert";
-    const std::string kPBRFragmentShaderPath = "res/shaders/PBRFragmentShader.frag";
+    const std::string kPBRVertexShaderPath = "res/shaders/PBR.vert";
+    const std::string kPBRFragmentShaderPath = "res/shaders/PBR.frag";
 
-    const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemapVertexShader.vert";
-    const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemapFragmentShader.frag";
-    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolutionFragmentShader.frag";
+    const std::string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemap.vert";
+    const std::string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemap.frag";
+    const std::string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolution.frag";
 
-    const std::string kBackgroundVertexShaderPath = "res/shaders/BackgroundVertexShader.vert";
-    const std::string kBackgroundFragmentShaderPath = "res/shaders/BackgroundFragmentShader.frag";
+    const std::string kBackgroundVertexShaderPath = "res/shaders/Background.vert";
+    const std::string kBackgroundFragmentShaderPath = "res/shaders/Background.frag";
+
+
 
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
