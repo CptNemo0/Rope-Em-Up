@@ -4,6 +4,7 @@
 #include "../Gameobject.h"
 #include "Collisions.h"
 #include "CollisionManager.h"
+#include "glm/gtx/rotate_vector.hpp"
 namespace collisions
 {
     struct RaycastHit
@@ -20,7 +21,7 @@ namespace collisions
 	/*
 	* Zwraca trafiony GameObject albo NULLa jeœli nic nie trafi
 	*/
-    RaycastHit Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer);
+    RaycastHit Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer, std::shared_ptr<GameObject> caster);
 
 	inline glm::vec3 SupportRaycast(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
 	{
@@ -29,7 +30,6 @@ namespace collisions
 
 		return vertex_a - vertex_b;
 	}
-
 
     inline glm::vec3 SegmentsIntersectionPoint(glm::vec3 p0, glm::vec3 p1, glm::vec3 q0, glm::vec3 q1) 
     {
@@ -79,6 +79,8 @@ namespace collisions
         }
         
     }
+
+    bool ChokeCheck(std::shared_ptr<GameObject> caster, int precision, int threshold, float distance);
 }
 
 

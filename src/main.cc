@@ -270,6 +270,14 @@ int main()
 
     auto enemy_state_machine = std::make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator, enemy_vehicle_template);
 
+    auto enemy_2 = GameObject::Create(scene_root);
+
+    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
+    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
+    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
+
     ////test
     /*auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
@@ -295,11 +303,11 @@ int main()
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     //ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
 
-    auto start = glm::vec3(-0.2, 0.0f, 2.0f);
+    /*auto start = glm::vec3(-0.2, 0.0f, 2.0f);
     auto end = glm::vec3(0.2, 0.0f, -2.0f);
     auto dir = glm::normalize(end - start);
 
-    auto hit = collisions::Raycast(start, dir, 20.0f, 0);
+    auto hit = collisions::Raycast(start, dir, 20.0f, 0);*/
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
@@ -386,7 +394,7 @@ int main()
 
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine, &fixed_update_timer]()
     {
-        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
+        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
 
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
@@ -415,6 +423,8 @@ int main()
         previous_time = current_time;
 
         Timer::Update(delta_time);
+        collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         utility::DebugCameraMovement(window, camera, delta_time);
         input::InputManager::i_->Update();
 
