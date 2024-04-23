@@ -89,6 +89,124 @@ Shader::Shader(const std::string& vertex_shader_path, const std::string& fragmen
     glDeleteShader(fragmt);
 }
 
+Shader::Shader(const std::string &vertex_shader_path, const std::string &geometry_shader_path, const std::string &fragment_shader_path)
+{
+        // Zmienne z kodem zrodlowym shaderow
+    std::string v;
+    std::string g;
+    std::string f;
+
+    std::ifstream vertexReader;
+    std::ifstream geomReader;
+    std::ifstream fragmtReader;
+
+    try
+    {
+        std::stringstream vertexStream;
+        std::stringstream fragmtStream;
+        std::stringstream geomStream;
+
+        // Otworzenie plikow
+        vertexReader.open(vertex_shader_path);
+        fragmtReader.open(fragment_shader_path);
+        geomReader.open(geometry_shader_path);
+
+        // Odczyt
+        vertexStream << vertexReader.rdbuf();
+        fragmtStream << fragmtReader.rdbuf();
+        geomStream << geomReader.rdbuf();
+
+        vertexReader.close();
+        fragmtReader.close();
+        geomReader.close();
+
+        v = vertexStream.str();
+        f = fragmtStream.str();
+        g = geomStream.str();
+    }
+    catch (std::fstream::failure e)
+    {
+        printf("You have f'ed up!");
+    }
+
+    const char* vertexSource = v.c_str();
+    const char* fragmtSource = f.c_str();
+    const char* geomSource = g.c_str();
+
+    unsigned int vertex;
+    unsigned int fragmt;
+    unsigned int geom;
+
+    int success;
+    char* infoLog = new char[512];
+
+    // Kompilacja shaderow
+    // Vertex shader
+    vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vertexSource, NULL);
+    glCompileShader(vertex);
+
+    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+        printf("Vertex shader compilation failed\n");
+        printf(infoLog);
+        exit(1);
+    }
+    else
+    {
+        printf("Vertex shader compiled\n");
+    }
+
+    // Geometry shader
+    geom = glCreateShader(GL_GEOMETRY_SHADER);
+    glShaderSource(geom, 1, &geomSource, NULL);
+    glCompileShader(geom);
+
+    glGetShaderiv(geom, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(geom, 512, NULL, infoLog);
+        printf("Geometry shader compilation failed\n");
+        printf(infoLog);
+        exit(1);
+    }
+    else
+    {
+        printf("Vertex shader compiled\n");
+    }
+
+    // Fragment shader
+    fragmt = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmt, 1, &fragmtSource, NULL);
+    glCompileShader(fragmt);
+    // check for shader compile errors
+    glGetShaderiv(fragmt, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmt, 512, NULL, infoLog);
+        printf("Fragment shader compilation failed\n");
+        printf(infoLog);
+        exit(1);
+    }
+    else
+    {
+        printf("Fragment shader compiled\n");
+    }
+
+    // Stworzenie programu wykonujacego shadery
+    id_ = glCreateProgram();     // Tworzenie programy shaderow
+    glAttachShader(id_, vertex); // Przyczepienie vertex shaderu do dzielonego programu
+    glAttachShader(id_, geom);   // Przyczepienie geometry shaderu do dzielonego programu
+    glAttachShader(id_, fragmt); // Przyczepienie fragment shaderu do dzielonego programu
+    glLinkProgram(id_);          // Utworzenie ostatecznego obiektu programu polaczonego z shaderami
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragmt);
+    glDeleteShader(geom);
+}
+
 Shader::~Shader()
 {
     End();
