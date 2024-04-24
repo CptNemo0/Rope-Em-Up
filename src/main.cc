@@ -373,10 +373,10 @@ int main()
     auto particle_root = GameObject::Create();
 
     auto particle_emitter = GameObject::Create(player_1);
-    particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
     particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(HUD_texture, ParticleShader));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
-    particle_emitter_component->emission_rate_ = 0.1f;
+    particle_emitter_component->emission_rate_ = 0.01f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
     particle_emitter_component->start_size_ = glm::vec2(0.1f, 0.0f);
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
@@ -427,7 +427,7 @@ int main()
         pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
         pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
         pbd::PBDManager::i_->ClearContacts();
-
+        
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);
@@ -454,7 +454,7 @@ int main()
         collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
         collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " miliseconds" << std::endl;
+        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " miliseconds" << std::endl;
         utility::DebugCameraMovement(window, camera, delta_time);
         input::InputManager::i_->Update();
 

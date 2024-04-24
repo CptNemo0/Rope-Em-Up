@@ -2,6 +2,8 @@
 #define PARTICLEEMITTER_H
 
 #include <chrono>
+#include <deque>
+#include <unordered_set>
 
 #include "../GameObject.h"
 #include "../Texture.h"
@@ -28,14 +30,14 @@ namespace components
 class ParticleEmitter : public Component, public std::enable_shared_from_this<ParticleEmitter>
 {
 private:
-    const int MAX_PARTICLES = 1000;
+    const int MAX_PARTICLES = 10000;
 
     std::shared_ptr<tmp::Texture> texture_;
     std::shared_ptr<Shader> shader_;
     std::shared_ptr<Transform> transform_;
 
-    std::vector<Particle> particles_;
-    std::vector<int> particle_indeces_to_remove_;
+    std::deque<Particle> particles_;
+    std::unordered_set<int> particle_indeces_to_remove_;
 
     unsigned int VAO_, VBO_;
 

@@ -63,7 +63,7 @@ void components::ParticleEmitter::UpdateParticles(float delta_time)
         if (particle.expiration_time < std::chrono::microseconds(0))
         {
             particle.expiration_time = std::chrono::microseconds(0);
-            particle_indeces_to_remove_.push_back(particle.id_);
+            particle_indeces_to_remove_.insert(particle.id_);
         }
         particle.position += particle.velocity * delta_time;
         particle.velocity += start_acceleration_ * delta_time;
@@ -72,13 +72,10 @@ void components::ParticleEmitter::UpdateParticles(float delta_time)
         particle.size = glm::mix(start_size_.x, end_size_.x, t);
     }
 
-    for (auto &particle : particle_indeces_to_remove_)
+    std::erase_if(particles_, [this](const Particle &p)
     {
-        particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [particle](const Particle &p)
-        {
-            return p.id_ == particle;
-        }), particles_.end());
-    }
+        return particle_indeces_to_remove_.find(p.id_) != particle_indeces_to_remove_.end();
+    });
     particle_indeces_to_remove_.clear();
 }
 
@@ -112,7 +109,10 @@ void components::ParticleEmitter::DrawParticles()
 
     glBindVertexArray(VAO_);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, particles_count * sizeof(Particle), particles_.data());
+
+    std::vector<Particle> particle_data(particles_.begin(), particles_.end());
+
+    glBufferSubData(GL_ARRAY_BUFFER, 0, particles_count * sizeof(Particle), particle_data.data());
 
     glDrawArrays(GL_POINTS, 0, particles_count);
 }
