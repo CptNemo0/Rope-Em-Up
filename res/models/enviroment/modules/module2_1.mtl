@@ -1,4 +1,4 @@
-# Blender 4.0.2 MTL File: 'enviro.blend'
+# Blender 4.1.1 MTL File: 'enviro.blend'
 # www.blender.org
 
 newmtl Material
@@ -55,13 +55,13 @@ newmtl full_m2
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
-Ni 1.000000
+Ni 1.500000
 d 1.000000
 illum 2
 map_Kd ../../../textures/enviroment/modules/module2_albedo.png
-map_Pr ../../../textures/enviroment/modules/module2_roughness.png
+map_Pr ../../../textures/enviroment/modules/module2_roughness_I.png
 map_Pm ../../../textures/enviroment/modules/module2_metallic.png
-map_Bump -bm 20.000000 ../../../textures/enviroment/modules/module2_normal.png
+map_Bump -bm 1.000000 ../../../textures/enviroment/modules/module2_normal.png
 
 newmtl grass
 Ns 0.000000

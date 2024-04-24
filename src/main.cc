@@ -36,6 +36,7 @@
 #include "headers/components/PlayerController.h"
 #include "headers/HDRCubemap.h"
 #include "headers/Font.h"
+#include "headers/components/ParticleEmitter.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -79,7 +80,9 @@ int main()
     const std::string kBackgroundVertexShaderPath = "res/shaders/Background.vert";
     const std::string kBackgroundFragmentShaderPath = "res/shaders/Background.frag";
 
-
+    const std::string kParticleVertexShaderPath = "res/shaders/Particle.vert";
+    const std::string kParticleGeometryShaderPath = "res/shaders/Particle.geom";
+    const std::string kParticleFragmentShaderPath = "res/shaders/Particle.frag";
 
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
@@ -186,6 +189,7 @@ int main()
     auto EquirectangularToCubemapShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kHDREquirectangularToCubemapFragmentShaderPath);
     auto BackgroundShader = std::make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
     auto IrradianceShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
+    auto ParticleShader = std::make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
 
     auto cubemap = std::make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
@@ -205,7 +209,7 @@ int main()
         glm::vec3(10.0f, -10.0f, 10.0f),
     };
     glm::vec3 light_Colors[] = {
-        glm::vec3(300.0f, 300.0f, 300.0f),
+        glm::vec3(500.0f, 500.0f, 500.0f),
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f)
@@ -364,9 +368,16 @@ int main()
     HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
 
+    auto particle_root = GameObject::Create();
+
+    auto particle_emitter = GameObject::Create(particle_root);
+    particle_emitter->transform_->set_position(glm::vec3(0.0f, 10.0f, 0.0f));
+    particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(HUD_texture, ParticleShader));
+
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
     HUDText_root->PropagateStart();
+    particle_root->PropagateStart();
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -384,6 +395,9 @@ int main()
     glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     PBRShader->Use();
     PBRShader->SetMatrix4("projection_matrix", projection);
+
+    ParticleShader->Use();
+    ParticleShader->SetMatrix4("projection_matrix", projection);
 
     BackgroundShader->Use();
     BackgroundShader->SetMatrix4("projection_matrix", projection);
@@ -466,11 +480,20 @@ int main()
 
         scene_root->PropagateUpdate();
 
-
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
         cubemap->RenderCube();
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        ParticleShader->Use();
+        ParticleShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+
+        particle_root->PropagateUpdate();
+
+        glDisable(GL_BLEND);
 
 #pragma endregion
 #pragma region Interface

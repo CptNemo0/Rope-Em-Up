@@ -21,6 +21,7 @@ public:
     unsigned int id_; // bylo wczesniej prywatne ale testuje
     Shader() = default;
     Shader(const std::string& vertex_shader_path, const std::string& fragment_shader_path);
+    Shader(const std::string& vertex_shader_path, const std::string& geometry_shader_path, const std::string& fragment_shader_path);
     
     ~Shader();
 
