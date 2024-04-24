@@ -266,25 +266,24 @@ int main()
 
 
     auto enemy_1 = GameObject::Create(scene_root);
-  
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
     enemy_1->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
-
-    auto enemy_movement_generator = std::make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator);
-
-    auto enemy_state_machine = std::make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator, enemy_vehicle_template);
+    auto enemy_movement_generator_1 = std::make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
+    auto enemy_state_machine_1 = std::make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
 
     auto enemy_2 = GameObject::Create(scene_root);
-
     enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
     enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
     enemy_2->AddComponent(std::make_shared<components::MeshRenderer>(enemy_model, shader));
     enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
     enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
+    auto enemy_movement_generator_2 = std::make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
+    auto enemy_state_machine_2 = std::make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
 
     ////test
     /*auto test = GameObject::Create(scene_root);
@@ -319,7 +318,7 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 40; i++)
     {
         auto rope_segment = GameObject::Create(scene_root);
         rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
@@ -413,9 +412,10 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);
 
-    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine, &fixed_update_timer]()
+    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine_1, enemy_state_machine_2, &fixed_update_timer]()
     {
-        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine);
+        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
+        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_2);
 
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
@@ -447,8 +447,11 @@ int main()
         previous_time = current_time;
 
         Timer::Update(delta_time);
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
         collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " miliseconds" << std::endl;
         utility::DebugCameraMovement(window, camera, delta_time);
         input::InputManager::i_->Update();
 

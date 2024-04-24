@@ -12,8 +12,7 @@ namespace collisions
         std::shared_ptr<GameObject> object;
         glm::vec3 point;
         float distance;
-        bool precise_hit;
-        bool imprecise_hit;
+        bool hit;
     };
 
 	const float kRaycastDX = 0.01f;
