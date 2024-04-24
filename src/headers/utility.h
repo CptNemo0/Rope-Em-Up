@@ -201,6 +201,7 @@ namespace utility
             }
         }
     }
+
 } //utility
 
 #endif // !UTILITY_H

@@ -10,7 +10,7 @@ components::ParticleEmitter::ParticleEmitter(std::shared_ptr<tmp::Texture> textu
     glBindVertexArray(VAO_);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_);
     // BUFFERED FOR SINGLE PARTICLE
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * 1, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * MAX_PARTICLES, NULL, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *)offsetof(Particle, position));
@@ -27,13 +27,22 @@ void components::ParticleEmitter::Start()
 {
     transform_ = gameObject_.lock()->transform_;
 
-    Particle particle;
-    particle.position = transform_->get_position();
-    particle.size = 1.0f;
-    particle.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    particle.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    this->emitter_timer_ = std::make_shared<Timer::Timer>(Timer::CreateTimer(pbd::kMsPerUpdate,
+    [this]()
+    {
+        this->UpdateParticles(pbd::kMsPerUpdate);
+    },
+    nullptr, true));
+    ParticleEmitterManager::i_->emitter_timers_.push_back(emitter_timer_);
 
-    particles_.push_back(particle);
+    Timer::AddTimer(emission_rate_, [this]()
+    {
+        if (active_)
+        {
+            this->EmitParticles();
+        }
+    },
+    nullptr, true);
 }
 
 void components::ParticleEmitter::Update()
@@ -52,4 +61,52 @@ void components::ParticleEmitter::Update()
 
 void components::ParticleEmitter::Destroy()
 {
+}
+
+void components::ParticleEmitter::UpdateParticles(float delta_time)
+{
+    float inverse_life_time = 1.0f / static_cast<float>(std::chrono::microseconds(static_cast<int>(life_time_ * 1000000)).count());
+    for (auto &particle : particles_)
+    {
+        particle.expiration_time -= std::chrono::microseconds(static_cast<int>(delta_time * 1000000));
+        if (particle.expiration_time < std::chrono::microseconds(0))
+        {
+            particle.expiration_time = std::chrono::microseconds(0);
+            particle_indeces_to_remove_.push_back(particle.id_);
+        }
+        particle.position += particle.velocity * delta_time;
+        particle.velocity += start_acceleration_ * delta_time;
+        float t = 1.0f - (particle.expiration_time.count() * inverse_life_time);
+        particle.color = glm::mix(start_color_, end_color_, t);
+        particle.size = glm::mix(start_size_.x, end_size_.x, t);
+    }
+
+    for (auto &particle : particle_indeces_to_remove_)
+    {
+        particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [particle](const Particle &p)
+        {
+            return p.id_ == particle;
+        }), particles_.end());
+    }
+    particle_indeces_to_remove_.clear();
+}
+
+void components::ParticleEmitter::EmitParticles()
+{
+    int rand_amount = rand_int(spawns_per_emission_.x, spawns_per_emission_.y);
+
+    for (int i = 0; i < rand_amount; i++)
+    {
+        Particle particle;
+        particle.life_time = std::chrono::microseconds(static_cast<int>(life_time_ * 1000000));
+        particle.expiration_time = particle.life_time;
+        particle.size = rand_float(start_size_.x, start_size_.y);
+        particle.color = start_color_;
+        particle.position = transform_->get_position() + rand_sphere_vec3() * start_position_displacement_;
+        particle.velocity = start_velocity_ + glm::vec3(rand_float(-start_velocity_displacement_, start_velocity_displacement_),
+                                                        rand_float(-start_velocity_displacement_, start_velocity_displacement_),
+                                                        rand_float(-start_velocity_displacement_, start_velocity_displacement_));
+        particle.id_ = current_id_++;
+        particles_.push_back(particle);
+    }
 }

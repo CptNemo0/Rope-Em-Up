@@ -37,6 +37,7 @@
 #include "headers/HDRCubemap.h"
 #include "headers/Font.h"
 #include "headers/components/ParticleEmitter.h"
+#include "headers/ParticleEmitterManager.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -169,6 +170,7 @@ int main()
     physics::PhysicsManager::Initialize();
     pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
+    ParticleEmitterManager::Initialize();
 
     auto camera = std::make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -374,6 +376,9 @@ int main()
     auto particle_emitter = GameObject::Create(particle_root);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 10.0f, 0.0f));
     particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(HUD_texture, ParticleShader));
+    auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
+    particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, -9.81f, 0.0f);
+    particle_emitter_component->start_position_displacement_ = 10.0f;
 
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
@@ -419,6 +424,9 @@ int main()
         pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
         pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
         pbd::PBDManager::i_->ClearContacts();
+
+        ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
+
     }, nullptr, true);
 
     while (!glfwWindowShouldClose(window))
