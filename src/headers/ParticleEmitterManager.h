@@ -6,6 +6,11 @@
 #include "components/ParticleEmitter.h"
 #include "Timer.h"
 
+namespace components
+{
+    class ParticleEmitter;
+}
+
 class ParticleEmitterManager
 {
 private:
@@ -32,8 +37,10 @@ public:
     }
 public:
     std::vector<std::shared_ptr<Timer::Timer>> emitter_timers_;
+    std::vector<std::shared_ptr<components::ParticleEmitter>> emitters_;
 
     void Update(float delta_time);
+    void Draw();
 };
 
 #endif // PARTICLEEMITTERMANAGER_H

@@ -23,6 +23,11 @@ const glm::vec3 components::Transform::get_position() const
     return position_;
 }
 
+const glm::vec3 components::Transform::get_global_position() const
+{
+    return glm::vec3(model_matrix_[3]);
+}
+
 const glm::vec3 components::Transform::get_previous_position() const
 {
     return previous_position_;

@@ -25,7 +25,7 @@ struct Particle
 namespace components
 {
 
-class ParticleEmitter : public Component
+class ParticleEmitter : public Component, public std::enable_shared_from_this<ParticleEmitter>
 {
 private:
     const int MAX_PARTICLES = 1000;
@@ -44,7 +44,7 @@ private:
     unsigned int current_id_ = 0;
 public:
     bool active_ = true;
-    float emission_rate_ = 0.01f;
+    float emission_rate_ = 0.05f;
     glm::ivec2 spawns_per_emission_ = glm::ivec2(1, 1);
     float life_time_ = 1.0f;
     glm::vec2 start_size_ = glm::vec2(1.0f, 1.0f);
@@ -63,6 +63,7 @@ public:
 
     void UpdateParticles(float delta_time);
     void EmitParticles();
+    void DrawParticles();
 
     // inclusive
     static inline float rand_float(float min, float max)

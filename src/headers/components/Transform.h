@@ -47,6 +47,7 @@ public:
     void RemoveChild(std::shared_ptr<Transform> child);
 
     const glm::vec3 get_position() const;
+    const glm::vec3 get_global_position() const;
     const glm::vec3 get_previous_position() const;
     const glm::vec3 get_predicted_position() const;
     const glm::vec3 get_rotation() const;

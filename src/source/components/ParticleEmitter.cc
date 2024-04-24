@@ -34,6 +34,7 @@ void components::ParticleEmitter::Start()
     },
     nullptr, true));
     ParticleEmitterManager::i_->emitter_timers_.push_back(emitter_timer_);
+    ParticleEmitterManager::i_->emitters_.push_back(shared_from_this());
 
     Timer::AddTimer(emission_rate_, [this]()
     {
@@ -47,16 +48,6 @@ void components::ParticleEmitter::Start()
 
 void components::ParticleEmitter::Update()
 {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_->id_);
-
-    int particles_count = particles_.size();
-
-    glBindVertexArray(VAO_);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, particles_count * sizeof(Particle), particles_.data());
-
-    glDrawArrays(GL_POINTS, 0, particles_count);
 }
 
 void components::ParticleEmitter::Destroy()
@@ -102,11 +93,26 @@ void components::ParticleEmitter::EmitParticles()
         particle.expiration_time = particle.life_time;
         particle.size = rand_float(start_size_.x, start_size_.y);
         particle.color = start_color_;
-        particle.position = transform_->get_position() + rand_sphere_vec3() * start_position_displacement_;
+        particle.position = transform_->get_global_position() + rand_sphere_vec3() * start_position_displacement_;
         particle.velocity = start_velocity_ + glm::vec3(rand_float(-start_velocity_displacement_, start_velocity_displacement_),
                                                         rand_float(-start_velocity_displacement_, start_velocity_displacement_),
                                                         rand_float(-start_velocity_displacement_, start_velocity_displacement_));
         particle.id_ = current_id_++;
         particles_.push_back(particle);
     }
+}
+
+void components::ParticleEmitter::DrawParticles()
+{
+    shader_->Use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_->id_);
+
+    int particles_count = particles_.size();
+
+    glBindVertexArray(VAO_);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, particles_count * sizeof(Particle), particles_.data());
+
+    glDrawArrays(GL_POINTS, 0, particles_count);
 }

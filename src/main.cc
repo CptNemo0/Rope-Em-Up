@@ -324,7 +324,7 @@ int main()
         rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-        rope_segment->AddComponent(std::make_shared<components::MeshRenderer>(test_ball_model, shader));
+        rope_segment->AddComponent(std::make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
         rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
         rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
@@ -372,12 +372,15 @@ int main()
 
     auto particle_root = GameObject::Create();
 
-    auto particle_emitter = GameObject::Create(particle_root);
-    particle_emitter->transform_->set_position(glm::vec3(0.0f, 10.0f, 0.0f));
+    auto particle_emitter = GameObject::Create(player_1);
+    particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(HUD_texture, ParticleShader));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
-    particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, -9.81f, 0.0f);
-    particle_emitter_component->start_position_displacement_ = 10.0f;
+    particle_emitter_component->emission_rate_ = 0.1f;
+    particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
+    particle_emitter_component->start_size_ = glm::vec2(0.1f, 0.0f);
+    particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
+    particle_emitter_component->start_position_displacement_ = 1.0f;
 
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
@@ -502,7 +505,7 @@ int main()
         ParticleShader->Use();
         ParticleShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        particle_root->PropagateUpdate();
+        ParticleEmitterManager::i_->Draw();
 
         glDisable(GL_BLEND);
 

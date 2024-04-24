@@ -9,3 +9,11 @@ void ParticleEmitterManager::Update(float delta_time)
         Timer::UpdateTimer(*timer, delta_time);
     }
 }
+
+void ParticleEmitterManager::Draw()
+{
+    for (auto &emitter : emitters_)
+    {
+        emitter->DrawParticles();
+    }
+}
