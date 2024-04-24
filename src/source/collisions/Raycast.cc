@@ -2,6 +2,12 @@
 
 collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer, std::shared_ptr<GameObject> caster)
 {
+    RaycastHit return_value;
+    return_value.object = nullptr;
+    return_value.distance = FLT_MAX;
+    return_value.point = glm::vec3(0.0f, 0.0f, 0.0f);
+    return_value.hit = false;
+
     if (glm::length2(dir) != 1.0f)
     {
         dir = glm::normalize(dir);
@@ -10,16 +16,15 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
     glm::vec3 end = start + distance * dir;
     glm::vec3 center = start + distance * 0.5f * dir;
 
-    glm::vec3 normal = glm::normalize(glm::cross(dir, glm::vec3(0.0f, 1.0f, 0.0f)));
+    //glm::vec3 normal = glm::normalize(glm::cross(dir, glm::vec3(0.0f, 1.0f, 0.0f)));
 
     float half_lenght = distance * 0.5f;
 
     std::shared_ptr<AABB> aabb = std::make_shared<AABB>();
-
     aabb->centre = center;
     aabb->extremes = glm::vec3(half_lenght, 0.0f, half_lenght);
 
-    glm::vec3 a = start + normal * kRaycastDX;
+    /*glm::vec3 a = start + normal * kRaycastDX;
     glm::vec3 b = start - normal * kRaycastDX;
     glm::vec3 c = end + normal * kRaycastDX;
     glm::vec3 d = end - normal * kRaycastDX;
@@ -32,11 +37,13 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
     hull->local_vertices = vertices;
     hull->vertices = vertices;
 
-    CollisionManager::i_->colliders_;
+    CollisionManager::i_->colliders_;*/
 
     std::shared_ptr<GameObject> rv_object = nullptr;
+    glm::vec3 rv_point = glm::vec3(0.0f);
     float rv_distance = INFINITY;
-    bool imprecise_hit = false;
+    bool hit = false;
+
     for (int i = 0; i < CollisionManager::i_->colliders_.size(); i++)
     {
         auto collider = CollisionManager::i_->colliders_[i];
@@ -47,7 +54,29 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
             {
                 if (AABBCollisionCheck(collider->bp_collider_, aabb))
                 {
-                    auto minkowski = std::vector<glm::vec3>();
+                    for (int i = 0; i < gPRECISION; i++)
+                    {
+                        glm::vec3 point;
+                        if (i == gPRECISION - 1)
+                        {
+                            point = SegmentsIntersectionPoint(start, end, collider->np_collider_->vertices[i], collider->np_collider_->vertices[0]);
+                        }
+                        else
+                        {
+                            point = SegmentsIntersectionPoint(start, end, collider->np_collider_->vertices[i], collider->np_collider_->vertices[i + 1]);
+                        }
+
+                        auto d = glm::distance(point, start);
+                        if (d < distance)
+                        {
+                            return_value.object = collider->gameObject_.lock();
+                            return_value.distance = d;
+                            return_value.point = point;
+                            return_value.hit = true;
+                        }
+                    }
+
+                    /*auto minkowski = std::vector<glm::vec3>();
                     auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
                     float current_rotation = 0;
                     int precision = fmax(collider->np_collider_->vertices.size(), hull->vertices.size());
@@ -72,54 +101,39 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
                             rv_distance = new_distance;
                             imprecise_hit = true;
                         }
-                    }
+                    }*/
                 }
             }
         }
     }
 
     
-    bool precise_hit = false;
-    //SegmentsIntersectionPoint
-    rv_distance = INFINITY;
-    glm::vec3 rv_point = glm::vec3(0.0f);
-    if (imprecise_hit)
-    {
-        auto collider = rv_object->GetComponent<components::Collider>();
-        
-        for (int i = 0; i < gPRECISION; i++)
-        {
-            glm::vec3 point;
-            if (i == gPRECISION - 1)
-            {
-                point = SegmentsIntersectionPoint(start, end, collider->np_collider_->vertices[i], collider->np_collider_->vertices[0]);
-            }
-            else
-            {
-                point = SegmentsIntersectionPoint(start, end, collider->np_collider_->vertices[i], collider->np_collider_->vertices[i + 1]);
-            }
+    //if (imprecise_hit)
+    //{
+    //    auto collider = rv_object->GetComponent<components::Collider>();
+    //    
+    //    for (int i = 0; i < gPRECISION; i++)
+    //    {
+    //        glm::vec3 point;
+    //        if (i == gPRECISION - 1)
+    //        {
+    //            point = SegmentsIntersectionPoint(start, end, collider->np_collider_->vertices[i], collider->np_collider_->vertices[0]);
+    //        }
+    //        else
+    //        {
+    //            point = SegmentsIntersectionPoint(start, end, collider->np_collider_->vertices[i], collider->np_collider_->vertices[i + 1]);
+    //        }
 
-            auto d = glm::distance(point, start);
-            //d < rv_distance &&
-            if (d < distance)
-            {
-                rv_distance = d;
-                rv_point = point;
-                precise_hit = true;
-            }
-        }
-    }
-
-    
-
-   
-
-    RaycastHit return_value;
-    return_value.object = rv_object;
-    return_value.distance = rv_distance;
-    return_value.point = rv_point;
-    return_value.precise_hit = precise_hit;
-    return_value.imprecise_hit = imprecise_hit;
+    //        auto d = glm::distance(point, start);
+    //        //d < rv_distance &&
+    //        if (d < distance)
+    //        {
+    //            rv_distance = d;
+    //            rv_point = point;
+    //            precise_hit = true;
+    //        }
+    //    }
+    //}
 
     return return_value;
 }
@@ -133,10 +147,10 @@ bool collisions::ChokeCheck(std::shared_ptr<GameObject> caster, int precision, i
     auto collider = caster->GetComponent<components::Collider>();
 
     auto forward = caster->transform_->get_forward();
-    auto begining = glm::vec3(forward.x, 0.0, forward.z);
+    //auto begining = glm::vec3(forward.x, 0.0, forward.z);
 
     int angle_step = 360 / precision;
-    int current_step = angle_step;
+    //int current_step = angle_step;
 
     int hits = 0;
 
@@ -144,16 +158,17 @@ bool collisions::ChokeCheck(std::shared_ptr<GameObject> caster, int precision, i
     {
         auto direction = glm::rotateY(glm::vec3(forward.x, 0.0f, forward.z), (float)glm::radians((float)(angle_step * i)));
         auto raycast_data = Raycast(caster->transform_->get_position(), direction, distance, collider->layer_, caster);
-
-        if (raycast_data.imprecise_hit)
+        hits = hits + (int)raycast_data.hit;
+        /*if (raycast_data.hit)
         {
             hits++;
-        }
+        }*/
     }
 
-    if (hits >= threshold)
+    return_value = (hits >= threshold);
+
+    if (return_value)
     {
-        return_value = true;
         std::cout << "CHOKED!!!\n";;
     }
 

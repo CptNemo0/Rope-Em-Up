@@ -316,7 +316,7 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 40; i++)
     {
         auto rope_segment = GameObject::Create(scene_root);
         rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
@@ -409,8 +409,8 @@ int main()
 
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine_1, enemy_state_machine_2, &fixed_update_timer]()
     {
-        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
-        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_2);
+        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
+        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_2);
 
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
@@ -439,8 +439,11 @@ int main()
         previous_time = current_time;
 
         Timer::Update(delta_time);
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
         collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " miliseconds" << std::endl;
         utility::DebugCameraMovement(window, camera, delta_time);
         input::InputManager::i_->Update();
 
