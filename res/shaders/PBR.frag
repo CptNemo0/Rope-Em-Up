@@ -15,6 +15,9 @@ uniform sampler2D normal_map;
 uniform sampler2D metallic_map;
 uniform sampler2D roughness_map;
 uniform sampler2D ao_map;
+
+uniform samplerCube irradianceMap;
+
  
 const float PI = 3.14159265359;
 

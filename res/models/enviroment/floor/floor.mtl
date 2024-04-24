@@ -19,6 +19,6 @@ Ni 1.500000
 d 1.000000
 illum 2
 map_Kd ../../../textures/enviroment/floor/floor_albedo.png
-map_Ns ../../../textures/enviroment/floor/floor_roughness.png
-map_refl ../../../textures/enviroment/floor/floor_metallic.png
+map_Pr ../../../textures/enviroment/floor/floor_roughness.png
+map_Pm ../../../textures/enviroment/floor/floor_metallic.png
 map_Bump -bm 1.000000 ../../../textures/enviroment/floor/floor_normal.png
