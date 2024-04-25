@@ -59,7 +59,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd ../../../textures/enviroment/modules/module2_albedo.png
-map_Pr ../../../textures/enviroment/modules/module2_roughness.png
+map_Ns ../../../textures/enviroment/modules/module2_roughness.png
 map_Pm ../../../textures/enviroment/modules/module2_metallic.png
 map_Bump -bm 20.000000 ../../../textures/enviroment/modules/module2_normal.png
 

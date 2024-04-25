@@ -14,9 +14,10 @@ uniform sampler2D albedo_map;
 uniform sampler2D normal_map;
 uniform sampler2D metallic_map;
 uniform sampler2D roughness_map;
-uniform sampler2D ao_map;
-
-uniform samplerCube irradianceMap;
+//uniform sampler2D ao_map;
+uniform float ao;
+// IBL
+uniform samplerCube irradiance_map;
 
  
 const float PI = 3.14159265359;
@@ -25,6 +26,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+    {
+        return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+    }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness) //funkcja rozk³adu wektorów normalnych Trowbridge-Reitz GGX
 {
@@ -66,10 +72,11 @@ void main()
 		vec3 albedo = texture(albedo_map, Texture_coords).rgb;
 		float metallic = texture(metallic_map, Texture_coords).r;
 		float roughness = texture(roughness_map, Texture_coords).r;
-		float ao = texture(ao_map, Texture_coords).r;
+		//float ao = texture(ao_map, Texture_coords).r;
 
         vec3 N = normalize(Normal); 
         vec3 V = normalize(camera_position - World_position);
+        vec3 R = reflect(-V, N);
 
         vec3 F0 = vec3(0.04);
         F0 = mix(F0, albedo, metallic);
@@ -106,12 +113,20 @@ void main()
 			float NdotL = max(dot(N, L), 0.0);
 			Lo += (kD * albedo / PI + specular) * radiance * NdotL;
         } 
+        vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+        vec3 kD = 1.0 - kS;
+        kD *= 1.0 - metallic;
+        vec3 irradiance = texture(irradiance_map, N).rgb;
+        vec3 diffuse = irradiance * albedo;
+        vec3 ambient = (kD * diffuse) * ao;
 
-        vec3 ambient = vec3(0.03) * albedo * ao;
-        vec3 color   = ambient + Lo;
+        vec3 color = ambient + Lo;
 
+        // HDR tonemapping
         color = color / (color + vec3(1.0));
+        // gamma correction
         color = pow(color, vec3(1.0/2.2)); 
+
         FragColor = vec4(color, 1.0);
 }
 

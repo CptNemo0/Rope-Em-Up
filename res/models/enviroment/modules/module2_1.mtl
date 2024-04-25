@@ -61,7 +61,7 @@ illum 2
 map_Kd ../../../textures/enviroment/modules/module2_albedo.png
 map_Pr ../../../textures/enviroment/modules/module2_roughness_I.png
 map_Pm ../../../textures/enviroment/modules/module2_metallic.png
-map_Bump -bm 1.000000 ../../../textures/enviroment/modules/module2_normal.png
+norm ../../../textures/enviroment/modules/module2_normal.png
 
 newmtl grass
 Ns 0.000000
