@@ -89,6 +89,7 @@ int main()
     const std::string kRedTexturePath = "res/textures/red_texture.png";
     const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
     const std::string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
+    const std::string kTestSmokeTexturePath = "res/textures/test_smoke.png";
 
     const std::string kHDREquirectangularPath = "res/cubemaps/HDR_placeholder.hdr";
 
@@ -102,6 +103,7 @@ int main()
     const std::string kModule2Path = "res/models/enviroment/modules/module2.obj";
     const std::string kSimpleFloodPath = "res/models/enviroment/floor/floor.obj";
     const std::string kTestBallPath = "res/models/test_ball.obj";
+    const std::string kGatePath = "res/models/gate.obj";
 
     const std::string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
@@ -228,9 +230,11 @@ int main()
     auto module_2_model = std::make_shared<Model>(kModule2Path);
     auto simple_floor_model = std::make_shared<Model>(kSimpleFloodPath);
     auto test_ball_model = std::make_shared<Model>(kTestBallPath);
+    auto gate_model = std::make_shared<Model>(kGatePath);
 
     auto HUD_texture = std::make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = std::make_shared<tmp::Texture>(kHUDTexturePath2);
+    auto Smoke_texture = std::make_shared<tmp::Texture>(kTestSmokeTexturePath);
 
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
@@ -238,23 +242,31 @@ int main()
 
     auto scene_root = GameObject::Create();
 
+    auto gate_1 = GameObject::Create(scene_root);
+    gate_1->AddComponent(std::make_shared<components::MeshRenderer>(gate_model, PBRShader));
+
+    auto gate_2 = GameObject::Create(scene_root);
+    gate_2->AddComponent(std::make_shared<components::MeshRenderer>(gate_model, PBRShader));
+
     auto wall_up_1 = GameObject::Create(scene_root);
     wall_up_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, -16.0f));
     wall_up_1->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    wall_up_1->transform_->AddChild(gate_1->transform_);
+
     auto wall_up_2 = GameObject::Create(scene_root);
     wall_up_2->transform_->set_position(glm::vec3(8.0f, 0.0f, -16.0f));
     wall_up_2->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
-
+    
     auto wall_right_1 = GameObject::Create(scene_root);
     wall_right_1->transform_->set_position(glm::vec3(-16.0f, 0.0f, -8.0f));
     wall_right_1->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_right_1->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    wall_right_1->transform_->AddChild(gate_2->transform_);
 
     auto wall_right_2 = GameObject::Create(scene_root);
     wall_right_2->transform_->set_position(glm::vec3(-16.0f, 0.0f, 8.0f));
     wall_right_2->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_right_2->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
-
 
     auto floor = GameObject::Create(scene_root);
     floor->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -374,7 +386,7 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(HUD_texture, ParticleShader));
+    particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(Smoke_texture, ParticleShader));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.01f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
