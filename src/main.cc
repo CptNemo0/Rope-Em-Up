@@ -386,9 +386,9 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(Smoke_texture, ParticleShader));
+    particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(Smoke_texture, ParticleShader, camera));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
-    particle_emitter_component->emission_rate_ = 0.01f;
+    particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
     particle_emitter_component->start_size_ = glm::vec2(0.1f, 0.0f);
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
