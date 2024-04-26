@@ -27,6 +27,7 @@
 #include "headers/physics/Physics.h"
 #include "headers/physics/PBD.h"
 #include "headers/physics/Rope.h"
+#include "headers/Postprocessing.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
 #include "headers/utility.h"
@@ -84,6 +85,9 @@ int main()
     const std::string kParticleVertexShaderPath = "res/shaders/Particle.vert";
     const std::string kParticleGeometryShaderPath = "res/shaders/Particle.geom";
     const std::string kParticleFragmentShaderPath = "res/shaders/Particle.frag";
+
+    const std::string kPostprocessingVertexShaderPath = "res/shaders/PostprocessingShader.vert";
+    const std::string kPostprocessingFragmentShaderPath = "res/shaders/PostprocessingShader.frag";
 
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
@@ -194,7 +198,10 @@ int main()
     auto BackgroundShader = std::make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
     auto IrradianceShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
     auto ParticleShader = std::make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
+    auto PostprocessingShader = std::make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
 
+    ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
+    postprocessor.Bind();
     auto cubemap = std::make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
@@ -322,12 +329,6 @@ int main()
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     //ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
 
-    /*auto start = glm::vec3(-0.2, 0.0f, 2.0f);
-    auto end = glm::vec3(0.2, 0.0f, -2.0f);
-    auto dir = glm::normalize(end - start);
-
-    auto hit = collisions::Raycast(start, dir, 20.0f, 0);*/
-
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
     for (int i = 0; i < 40; i++)
@@ -443,6 +444,9 @@ int main()
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);
+    
+    // wireframe
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -460,6 +464,8 @@ int main()
         #endif
 
         previous_time = current_time;
+
+        //postprocessor.Bind();
 
         Timer::Update(delta_time);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -480,7 +486,7 @@ int main()
 
 #pragma endregion
 #pragma region GO Update and Draw
-
+        postprocessor.Bind();
        /* shader->Use();
 
         shader->SetVec3("camera_position", camera->get_position());
@@ -490,6 +496,7 @@ int main()
         shader->SetMatrix4("projection_matrix", projection_matrix);
         shader->SetMatrix4("view_matrix", camera->GetViewMatrix());*/
 
+        
         PBRShader->Use();
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         PBRShader->SetVec3("camera_position", camera->get_position());
@@ -504,38 +511,39 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         PBRShader->SetMatrix4("model_matrix", model);
 
+        
         scene_root->PropagateUpdate();
-
+        
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-
+        
         cubemap->RenderCube();
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+        
         ParticleShader->Use();
         ParticleShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
-
+        
         glDisable(GL_BLEND);
-
+        postprocessor.Draw();
 #pragma endregion
 #pragma region Interface
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+        
         HUDshader->Use();
 
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
         HUD_root->PropagateUpdate();
-
+        
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
-
+        
         HUDText_object->GetComponent<components::TextRenderer>()->text_ = "fps: " + std::to_string(1.0f / delta_time);
         HUDText_root->PropagateUpdate();
 
