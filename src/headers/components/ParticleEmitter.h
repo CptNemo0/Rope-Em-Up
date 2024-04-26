@@ -34,7 +34,7 @@ namespace components
 class ParticleEmitter : public Component, public std::enable_shared_from_this<ParticleEmitter>
 {
 private:
-    const int MAX_PARTICLES = 1000000;
+    int max_particles_;
 
     std::shared_ptr<tmp::Texture> texture_;
     std::shared_ptr<Shader> shader_;
@@ -63,7 +63,7 @@ public:
     float start_velocity_displacement_ = 0.0f;
     glm::vec3 start_acceleration_ = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    ParticleEmitter(std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader, std::shared_ptr<llr::Camera> camera);
+    ParticleEmitter(int max_particles, std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader, std::shared_ptr<llr::Camera> camera);
     void Start() override;
     void Update() override;
     void Destroy() override;

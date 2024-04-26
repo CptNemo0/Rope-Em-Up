@@ -1,17 +1,18 @@
 #include "../../headers/components/ParticleEmitter.h"
 
-components::ParticleEmitter::ParticleEmitter(std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader, std::shared_ptr<llr::Camera> camera)
+components::ParticleEmitter::ParticleEmitter(int max_particles, std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader, std::shared_ptr<llr::Camera> camera)
 {
     this->texture_ = texture;
     this->shader_ = shader;
     this->camera_ = camera;
+    this->max_particles_ = max_particles;
 
     glGenVertexArrays(1, &VAO_);
     glGenBuffers(1, &VBO_);
     glBindVertexArray(VAO_);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-    // BUFFERED FOR SINGLE PARTICLE
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * MAX_PARTICLES, NULL, GL_DYNAMIC_DRAW);
+    // BUFFERED FOR MAX PARTICLES
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * max_particles_, NULL, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *)offsetof(Particle, position));
