@@ -5,6 +5,10 @@ ppc::Postprocessor::Postprocessor(int width, int height, std::shared_ptr<Shader>
 	width_ = width;
 	height_ = height;
     shader_ = shader;
+
+    gamma_ = 1.8f;
+    contrast_ = 1.0f;
+    brightness_ = 0.0f;
 	Init();
 }
 
@@ -63,15 +67,41 @@ void ppc::Postprocessor::Bind()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void ppc::Postprocessor::Unbind()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void ppc::Postprocessor::Draw()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_DEPTH_TEST); 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shader_->Use();
+    Update();
     glBindVertexArray(vao_);
     glBindTexture(GL_TEXTURE_2D, texture_color_buffer_);	// use the color attachment texture as the texture of the quad plane
     glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void ppc::Postprocessor::UpdatetContrast()
+{  
+    shader_->SetFloat("contrast_ppc", contrast_);
+}
+
+void ppc::Postprocessor::UpdateBrightness()
+{
+    shader_->SetFloat("brightness_ppc", brightness_);
+}
+
+void ppc::Postprocessor::UpdateGamma()
+{
+    shader_->SetFloat("gamma_ppc", gamma_);
+}
+
+void ppc::Postprocessor::Update()
+{
+    shader_->SetVec3("cbg", glm::vec3(contrast_, brightness_, gamma_));
 }

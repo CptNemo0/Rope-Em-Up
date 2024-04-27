@@ -8,6 +8,9 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+#include "imgui_impl/imgui_impl_glfw.h"
+#include "imgui_impl/imgui_impl_opengl3.h"
+
 #include "Camera.h"
 
 namespace utility
@@ -74,8 +77,29 @@ namespace utility
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_DEBUG_OUTPUT);
-        //glDebugMessageCallback(MessageCallback, 0);
+        glDebugMessageCallback(MessageCallback, 0);
         return return_value;
+    }
+
+    void InitImGUI(GLFWwindow*& window)
+    {
+        bool return_value = false;
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsLight();
+
+        // Setup Platform/Renderer backends
+        return_value = ImGui_ImplGlfw_InitForOpenGL(window, true);
+#ifdef __EMSCRIPTEN__
+        ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
+#endif
+        return_value *= ImGui_ImplOpenGL3_Init("#version 330");
     }
 
     void DebugCameraMovement(GLFWwindow* window, std::shared_ptr <llr::Camera> camera, float delta_time)

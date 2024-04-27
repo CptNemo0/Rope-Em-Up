@@ -29,7 +29,12 @@ namespace ppc
         unsigned int vbo_;
         unsigned int framebuffer_;
         unsigned int texture_color_buffer_;
+        unsigned int texture_depth_buffer_;
         unsigned int rbo_;
+
+        float gamma_;
+        float brightness_;
+        float contrast_;
 
         std::shared_ptr<Shader> shader_;
 
@@ -38,7 +43,14 @@ namespace ppc
         void Init();
         void Destroy();
         void Bind();
+        void Unbind();
         void Draw();
+
+        void UpdatetContrast();
+        void UpdateBrightness();
+        void UpdateGamma();
+
+        void Update();
     };
 }
 

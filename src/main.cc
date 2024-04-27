@@ -46,6 +46,9 @@
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
 
+#include "imgui_impl/imgui_impl_glfw.h"
+#include "imgui_impl/imgui_impl_opengl3.h"
+
 void FixOrientation(std::shared_ptr<GameObject> go)
 {
     auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
@@ -170,6 +173,8 @@ int main()
         exit(return_value);
     }
     std::cout << "GLAD Initialized.\n";
+
+    utility::InitImGUI(window);
 
     input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
@@ -448,11 +453,23 @@ int main()
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    // GAME LOOP GAME LOOP GAME LOOP GAME LOOP 
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        static float gamma_value = 1.0f;
+        static float brightness_value = 0.0f;
+        static float contrast_value = 1.0f;
 
         static float lag = 0.0f;
         static float previous_time = glfwGetTime();
@@ -465,8 +482,7 @@ int main()
 
         previous_time = current_time;
 
-        //postprocessor.Bind();
-
+    
         Timer::Update(delta_time);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
@@ -486,7 +502,7 @@ int main()
 
 #pragma endregion
 #pragma region GO Update and Draw
-        postprocessor.Bind();
+       postprocessor.Bind();
        /* shader->Use();
 
         shader->SetVec3("camera_position", camera->get_position());
@@ -507,11 +523,9 @@ int main()
         glm::vec3 newPos = light_Positions[0] /* + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0)*/;
         PBRShader->SetVec3("light_positions[0]", newPos);
         PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
-
         glm::mat4 model = glm::mat4(1.0f);
         PBRShader->SetMatrix4("model_matrix", model);
 
-        
         scene_root->PropagateUpdate();
         
         BackgroundShader->Use();
@@ -528,6 +542,7 @@ int main()
         ParticleEmitterManager::i_->Draw();
         
         glDisable(GL_BLEND);
+        
         postprocessor.Draw();
 #pragma endregion
 #pragma region Interface
@@ -552,15 +567,34 @@ int main()
 
 #pragma endregion
 
+#pragma region ImGUI
+        
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::Begin("Colors");
+        ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::End();
+        ImGui::Render();
+        
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+#pragma endregion 
         glfwSwapBuffers(window);
 
-#pragma endregion
+
     }
 
     ai::EnemyAIManager::Destroy();
     pbd::PBDManager::Destroy();
     collisions::CollisionManager::Destroy();
     input::InputManager::Destroy();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     shader->End();
     glfwTerminate();
