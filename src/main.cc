@@ -92,6 +92,10 @@ int main()
     const std::string kPostprocessingVertexShaderPath = "res/shaders/PostprocessingShader.vert";
     const std::string kPostprocessingFragmentShaderPath = "res/shaders/PostprocessingShader.frag";
 
+    const std::string kGBufferPassVertexShaderPath = "res/shaders/GBufferPass.vert";
+    const std::string kGBufferPassFragmentShaderPath = "res/shaders/GBufferPass.frag";
+
+
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
     const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
@@ -204,6 +208,7 @@ int main()
     auto IrradianceShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
     auto ParticleShader = std::make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
     auto PostprocessingShader = std::make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
+    auto GBufferPassShader = std::make_shared<Shader>(kGBufferPassVertexShaderPath, kGBufferPassFragmentShaderPath);
 
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
     postprocessor.Bind();
@@ -488,7 +493,7 @@ int main()
         collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
         collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " miliseconds" << std::endl;
+
         utility::DebugCameraMovement(window, camera, delta_time);
         input::InputManager::i_->Update();
 
@@ -502,7 +507,7 @@ int main()
 
 #pragma endregion
 #pragma region GO Update and Draw
-        postprocessor.Bind();        
+        //postprocessor.Bind();        
         PBRShader->Use();
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         PBRShader->SetVec3("camera_position", camera->get_position());
@@ -533,7 +538,7 @@ int main()
         
         glDisable(GL_BLEND);
         
-        postprocessor.Draw();
+        //postprocessor.Draw();
 #pragma endregion
 #pragma region Interface
 
