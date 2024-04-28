@@ -502,17 +502,7 @@ int main()
 
 #pragma endregion
 #pragma region GO Update and Draw
-       postprocessor.Bind();
-       /* shader->Use();
-
-        shader->SetVec3("camera_position", camera->get_position());
-        shader->SetFloat("shininess", 50.0f);
-
-        shader->SetPointLight("light", point_light);
-        shader->SetMatrix4("projection_matrix", projection_matrix);
-        shader->SetMatrix4("view_matrix", camera->GetViewMatrix());*/
-
-        
+        postprocessor.Bind();        
         PBRShader->Use();
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         PBRShader->SetVec3("camera_position", camera->get_position());
@@ -520,7 +510,7 @@ int main()
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
 
-        glm::vec3 newPos = light_Positions[0] /* + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0)*/;
+        glm::vec3 newPos = light_Positions[0]; /* +glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);*/
         PBRShader->SetVec3("light_positions[0]", newPos);
         PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
         glm::mat4 model = glm::mat4(1.0f);
