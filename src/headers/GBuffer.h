@@ -4,6 +4,8 @@
 #include "glad/glad.h"
 #include <stdlib.h>  
 #include <memory>
+
+#include "global.h"
 #include "Shader.h"
 
 class GBuffer
@@ -18,7 +20,7 @@ public:
 
 	unsigned int rbo_;
 
-	std::shared_ptr<Shader> light_pass_shader;
+	s_ptr<Shader> light_pass_shader;
 
 	void Initialize(int height, int width);
 	void Bind();

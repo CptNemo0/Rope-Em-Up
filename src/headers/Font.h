@@ -8,6 +8,8 @@
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
+#include "global.h"
+
 struct Glyph
 {
     unsigned int texture_id;

@@ -2,17 +2,17 @@
 
 GameObject::GameObject()
 {
-	transform_ = std::make_shared<components::Transform>();
+	transform_ = make_shared<components::Transform>();
 }
 
-std::shared_ptr<GameObject> GameObject::Create()
+s_ptr<GameObject> GameObject::Create()
 {
-    auto game_object = std::make_shared<GameObject>();
+    auto game_object = make_shared<GameObject>();
 	game_object->transform_->game_object_ = game_object;
 	return game_object;
 }
 
-std::shared_ptr<GameObject> GameObject::Create(std::shared_ptr<GameObject> parent)
+s_ptr<GameObject> GameObject::Create(s_ptr<GameObject> parent)
 {
     auto game_object = Create();
 	parent->transform_->AddChild(game_object->transform_);

@@ -4,27 +4,27 @@ collisions::CollisionManager* collisions::CollisionManager::i_ = nullptr;
 
 collisions::CollisionManager::CollisionManager()
 {
-    colliders_ = std::vector<std::shared_ptr<components::Collider>>();
+    colliders_ = std::vector<s_ptr<components::Collider>>();
     for (int i = 0; i < 32; i++)
     {
         collision_layers[i] = (1 << i);
     }
 }
 
-void collisions::CollisionManager::AddCollider(std::shared_ptr<components::Collider> collider)
+void collisions::CollisionManager::AddCollider(s_ptr<components::Collider> collider)
 {
     colliders_.push_back(collider);
 }
 
-std::shared_ptr<components::Collider> collisions::CollisionManager::CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<components::Transform> transform)
+s_ptr<components::Collider> collisions::CollisionManager::CreateCollider(int layer, int precision, s_ptr<Mesh> mesh, s_ptr<components::Transform> transform)
 {
     assert(layer > -1 && layer < 32);
-    auto return_value = std::make_shared<components::Collider>(layer, precision, mesh, transform);
+    auto return_value = make_shared<components::Collider>(layer, precision, mesh, transform);
     AddCollider(return_value);
     return return_value;
 }
 
-void collisions::CollisionManager::RemoveCollider(std::shared_ptr<components::Collider> c)
+void collisions::CollisionManager::RemoveCollider(s_ptr<components::Collider> c)
 {
     auto it = std::find(colliders_.begin(), colliders_.end(), c);
 	if (it != colliders_.end())
@@ -33,7 +33,7 @@ void collisions::CollisionManager::RemoveCollider(std::shared_ptr<components::Co
 	}
 }
 
-void collisions::CollisionManager::Separation(std::shared_ptr<components::Collider> a, std::shared_ptr<components::Collider> b, float wa, float wb)
+void collisions::CollisionManager::Separation(s_ptr<components::Collider> a, s_ptr<components::Collider> b, float wa, float wb)
 {
     auto separation_vector = GetSeparatingVector(a->np_collider_,
         a->transform_->get_predicted_position(),
@@ -110,8 +110,8 @@ void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>&
     {
         for (int j = i + 1; j < colliders_.size(); j++)
         {
-            std::shared_ptr<components::Collider> a = colliders_[i];
-            std::shared_ptr<components::Collider> b = colliders_[j];
+            s_ptr<components::Collider> a = colliders_[i];
+            s_ptr<components::Collider> b = colliders_[j];
 
             bool layer_check = LayerCheck(a->layer_, b->layer_);
             
@@ -151,8 +151,8 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
     {
         for (int j = i + 1; j < colliders_.size(); j++)
         {
-            std::shared_ptr<components::Collider> a = colliders_[i];
-            std::shared_ptr<components::Collider> b = colliders_[j];
+            s_ptr<components::Collider> a = colliders_[i];
+            s_ptr<components::Collider> b = colliders_[j];
 
             bool layer_check = LayerCheck(a->layer_, b->layer_);
 

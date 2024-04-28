@@ -2,7 +2,7 @@
 
 void physics::LogVec3(glm::vec3 a)
 {
-	std::cout << "x: " << a.x << " y: " << a.y << " z: " << a.z << "\n";
+	cout << "x: " << a.x << " y: " << a.y << " z: " << a.z << "\n";
 }
 
 float physics::Clampf(float v, float max, float min)
@@ -87,7 +87,7 @@ physics::DragGenerator::DragGenerator(float k1, float k2)
 	this->k2_ = k2;
 }
 
-void physics::DragGenerator::GenerateForce(std::shared_ptr<components::Particle> partilce)
+void physics::DragGenerator::GenerateForce(s_ptr<components::Particle> partilce)
 {
 	auto force = partilce->velocity_;
 
@@ -106,7 +106,7 @@ physics::BasicGenerator::BasicGenerator()
 	magnitude_ = 0.0f;
 }
 
-void physics::BasicGenerator::GenerateForce(std::shared_ptr<components::Particle> particle)
+void physics::BasicGenerator::GenerateForce(s_ptr<components::Particle> particle)
 {
 	particle->AddForce(direction_ * magnitude_);
 }
@@ -123,12 +123,12 @@ physics::PhysicsManager* physics::PhysicsManager::i_ = nullptr;
 physics::PhysicsManager::PhysicsManager()
 {
 	generator_registry_ = std::vector<FGRRecord>();
-	particles_ = std::vector<std::shared_ptr<components::Particle>>();
+	particles_ = std::vector<s_ptr<components::Particle>>();
 }
 
-std::shared_ptr<components::Particle> physics::PhysicsManager::CreateParticle(std::shared_ptr<components::Transform> transform, float mass, float drag)
+s_ptr<components::Particle> physics::PhysicsManager::CreateParticle(s_ptr<components::Transform> transform, float mass, float drag)
 {
-	auto return_value = std::make_shared<components::Particle>(transform, mass, drag);
+	auto return_value = make_shared<components::Particle>(transform, mass, drag);
 	particles_.push_back(return_value);
 	return return_value;
 }
@@ -149,7 +149,7 @@ void physics::PhysicsManager::ParticleUpdate(float t)
 	}
 }
 
-void physics::PhysicsManager::AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<components::Particle> particle)
+void physics::PhysicsManager::AddFGRRecord(s_ptr<physics::ForceGenerator> generator, s_ptr<components::Particle> particle)
 {
 	assert(generator != nullptr);
 	FGRRecord new_record;
@@ -203,7 +203,7 @@ void physics::PhysicsManager::RealizePositions()
 }
 	
 
-physics::Contact::Contact(std::shared_ptr<components::Particle> p1, std::shared_ptr<components::Particle> p2)
+physics::Contact::Contact(s_ptr<components::Particle> p1, s_ptr<components::Particle> p2)
 {
 	a = p1;
 	b = p2;

@@ -10,6 +10,7 @@
 #include "assimp/postprocess.h"
 #include "glad/glad.h"
 
+#include "global.h"
 #include "Vertex.h"
 #include "Shader.h"
 #include "Texture.h"
@@ -24,12 +25,12 @@ public:
 	std::vector<Texture> textures_;
 
 	Mesh() = default;
-	//Mesh(std::string mesh_path);
+	//Mesh(string mesh_path);
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	~Mesh();
 
 	void Init();
-	void Draw(std::shared_ptr<Shader> shader) const;
+	void Draw(s_ptr<Shader> shader) const;
 };
 
 #endif //MESH_H

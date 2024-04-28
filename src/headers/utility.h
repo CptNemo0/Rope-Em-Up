@@ -35,7 +35,7 @@ namespace utility
             type, severity, message);
     }
 
-    int InitGLFW(GLFWwindow*& window, GLFWmonitor*& monitor, GLFWvidmode*& mode, const std::string& window_name)
+    int InitGLFW(GLFWwindow*& window, GLFWmonitor*& monitor, GLFWvidmode*& mode, const string& window_name)
     {
         int return_value = 0;
         if (!glfwInit())
@@ -102,7 +102,7 @@ namespace utility
         return_value *= ImGui_ImplOpenGL3_Init("#version 330");
     }
 
-    void DebugCameraMovement(GLFWwindow* window, std::shared_ptr <llr::Camera> camera, float delta_time)
+    void DebugCameraMovement(GLFWwindow* window, s_ptr <llr::Camera> camera, float delta_time)
     {
         static float move_speed = 5.0f;
         static float look_speed = 200.0f;
@@ -169,7 +169,7 @@ namespace utility
         }
     }
     
-    void DebugCameraMovementJoystick(GLFWwindow* window, std::shared_ptr <llr::Camera> camera, float delta_time)
+    void DebugCameraMovementJoystick(GLFWwindow* window, s_ptr <llr::Camera> camera, float delta_time)
     {
         static float move_speed = 1.0f;
         static float look_speed = 100.0f;

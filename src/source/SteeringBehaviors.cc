@@ -14,7 +14,7 @@ glm::vec3 Flee(glm::vec3 target, glm::vec3 actor)
 	return glm::normalize(return_value);
 }
 
-glm::vec3 Wander(std::shared_ptr<components::Transform> actor, Vehicle& vehicle, float t)
+glm::vec3 Wander(s_ptr<components::Transform> actor, Vehicle& vehicle, float t)
 {
 	float x = random::RandFloat(-1, 1);
 	float z = random::RandFloat(-1, 1);
@@ -34,7 +34,7 @@ glm::vec3 Wander(std::shared_ptr<components::Transform> actor, Vehicle& vehicle,
 	return glm::normalize(vel + target) * vehicle.wander_weight;
 }
 
-glm::vec3 WallAvoidance(std::shared_ptr<components::Transform> actor, Vehicle& vehicle, float t)
+glm::vec3 WallAvoidance(s_ptr<components::Transform> actor, Vehicle& vehicle, float t)
 {
 	float up    = pbd::PBDManager::i_->walls_.up_left_.z;
 	float left  = pbd::PBDManager::i_->walls_.up_left_.x;
@@ -114,7 +114,7 @@ glm::vec3 WallAvoidance(std::shared_ptr<components::Transform> actor, Vehicle& v
 	}
 }
 
-glm::vec3 Pursuit(glm::vec3 target, glm::vec3 target_forward, std::shared_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
+glm::vec3 Pursuit(glm::vec3 target, glm::vec3 target_forward, s_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
 {
 	glm::vec3 to_evader = target - pursuer->get_position();
 
@@ -128,12 +128,12 @@ glm::vec3 Pursuit(glm::vec3 target, glm::vec3 target_forward, std::shared_ptr<co
 	return Seek(target + target_forward + vehicle.pursuit_distance, pursuer->get_position()) * vehicle.pursuit_weight;
 }
 
-glm::vec3 ExtrapolatedPursuit(glm::vec3 target, glm::vec3 target_forward, std::shared_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
+glm::vec3 ExtrapolatedPursuit(glm::vec3 target, glm::vec3 target_forward, s_ptr<components::Transform> pursuer, Vehicle& vehicle, float t)
 {
 	return Pursuit(target + target_forward * vehicle.extrapolation_distance, target_forward, pursuer, vehicle, t) * vehicle.extrapolation_weight;
 }
 
-glm::vec3 Evade(glm::vec3 pursuer, glm::vec3 pursuer_forward, std::shared_ptr<components::Transform> pursued, Vehicle& vehicle, float t)
+glm::vec3 Evade(glm::vec3 pursuer, glm::vec3 pursuer_forward, s_ptr<components::Transform> pursued, Vehicle& vehicle, float t)
 {
 	glm::vec3 to_pursuer = pursuer - pursued->get_position();
 

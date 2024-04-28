@@ -1,6 +1,6 @@
 #include "../../headers/components/LegacyTextRenderer.h"
 
-components::LegacyTextRenderer::LegacyTextRenderer(std::shared_ptr<Shader> shader, std::string text)
+components::LegacyTextRenderer::LegacyTextRenderer(s_ptr<Shader> shader, string text)
 {
     this->shader_ = shader;
 
@@ -15,7 +15,7 @@ components::LegacyTextRenderer::LegacyTextRenderer(std::shared_ptr<Shader> shade
     glEnableVertexAttribArray(0);
 }
 
-void components::LegacyTextRenderer::ChangeText(std::string text)
+void components::LegacyTextRenderer::ChangeText(string text)
 {
     int size = text.length() * 300;
     std::vector<float> temp_vertices_buffer;

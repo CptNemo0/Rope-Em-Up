@@ -12,7 +12,7 @@ Timer CreateTimer(float delay, std::function<void()> finish_callback, std::funct
     Timer timer;
     timer.id = next_id++;
     timer.delay = delay;
-    timer.expiration_time = std::chrono::microseconds(static_cast<int>(delay * 1000000));
+    timer.expiration_time = microseconds(static_cast<int>(delay * 1000000));
     timer.finish_callback = finish_callback;
     timer.update_callback = update_callback;
     timer.loop = loop;
@@ -26,8 +26,8 @@ void AddTimer(float delay, std::function<void()> finish_callback, std::function<
 
 bool UpdateTimer(Timer &timer, float delta_time)
 {
-    timer.expiration_time -= std::chrono::microseconds(static_cast<int>(delta_time * 1000000));
-    if (timer.expiration_time <= std::chrono::microseconds(0))
+    timer.expiration_time -= microseconds(static_cast<int>(delta_time * 1000000));
+    if (timer.expiration_time <= microseconds(0))
     {
         if (timer.finish_callback)
         {
@@ -35,7 +35,7 @@ bool UpdateTimer(Timer &timer, float delta_time)
         }
         if (timer.loop)
         {
-            while ((timer.expiration_time += std::chrono::microseconds(static_cast<int>(timer.delay * 1000000))) <= std::chrono::microseconds(0))
+            while ((timer.expiration_time += microseconds(static_cast<int>(timer.delay * 1000000))) <= microseconds(0))
             {
                 timer.finish_callback();
             }

@@ -4,7 +4,7 @@ pbd::PBDManager* pbd::PBDManager::i_ = nullptr;
 
 void LogVec3(glm::vec3 a)
 {
-	std::cout << "x: " << a.x << " y: " << a.y << " z: " << a.z << "\n";
+	cout << "x: " << a.x << " y: " << a.y << " z: " << a.z << "\n";
 }
 
 float pbd::Clampf(float v, float max, float min)
@@ -90,7 +90,7 @@ void components::PBDParticle::Update()
 components::PBDParticle::~PBDParticle()
 {
 	transform_ = nullptr;
-	std::cout << "DELETING PARTICLE!\n";
+	cout << "DELETING PARTICLE!\n";
 }
 
 void components::PBDParticle::Destroy()
@@ -107,7 +107,7 @@ void components::PBDParticle::Destroy()
 	}
 }
 
-void pbd::BasicGenerator::GenerateForce(std::shared_ptr<components::PBDParticle> particle)
+void pbd::BasicGenerator::GenerateForce(s_ptr<components::PBDParticle> particle)
 {
 	particle->AddForce(direction_ * magnitude_);
 }
@@ -125,7 +125,7 @@ void pbd::FGRRecord::Generate()
 }
 
 
-pbd::Contact::Contact(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2)
+pbd::Contact::Contact(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2)
 {
 	a = p1;
 	b = p2;
@@ -148,7 +148,7 @@ pbd::Contact::~Contact()
 }
 
 
-pbd::RopeConstraint::RopeConstraint(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2, float ml)
+pbd::RopeConstraint::RopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml)
 {
 	p1_ = p1;
 	p2_ = p2;
@@ -182,7 +182,7 @@ void pbd::RopeConstraint::Enforce()
 }
 
 
-void pbd::WallConstraint::Enforce(std::shared_ptr<components::PBDParticle> particle)
+void pbd::WallConstraint::Enforce(s_ptr<components::PBDParticle> particle)
 {
 	auto pp = particle->transform_->get_predicted_position();
 
@@ -221,7 +221,7 @@ void pbd::WallConstraint::Enforce(std::shared_ptr<components::PBDParticle> parti
 
 pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall)
 {
-	particles_ = std::vector<std::shared_ptr<components::PBDParticle>>();
+	particles_ = std::vector<s_ptr<components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
 	constraints_ = std::vector<pbd::RopeConstraint>();
 	contacts_ = std::vector<pbd::Contact>();
@@ -230,7 +230,7 @@ pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coef
 	coeffiecent_of_restitution_wall_ = coeffiecent_of_restitution_wall;
 }
 
-void pbd::PBDManager::RemoveRecord(std::shared_ptr<ForceGenerator> g)
+void pbd::PBDManager::RemoveRecord(s_ptr<ForceGenerator> g)
 {
 	auto it = std::find_if(generator_registry_.begin(), generator_registry_.end(), [g](const pbd::FGRRecord &record)
     {
@@ -243,7 +243,7 @@ void pbd::PBDManager::RemoveRecord(std::shared_ptr<ForceGenerator> g)
     }
 }
 
-void pbd::PBDManager::RemoveRecord(std::shared_ptr<components::PBDParticle> p)
+void pbd::PBDManager::RemoveRecord(s_ptr<components::PBDParticle> p)
 {
 	auto it = std::find_if(generator_registry_.begin(), generator_registry_.end(), [p](const pbd::FGRRecord &record)
     {
@@ -280,7 +280,7 @@ void pbd::PBDManager::ProjectConstraints(float t)
 	}
 }
 
-float pbd::PBDManager::GetDistanceToClosestWall(std::shared_ptr<components::PBDParticle> particle)
+float pbd::PBDManager::GetDistanceToClosestWall(s_ptr<components::PBDParticle> particle)
 {
 	float return_value;
 
@@ -317,21 +317,21 @@ float pbd::PBDManager::GetDistanceToClosestWall(std::shared_ptr<components::PBDP
 	return std::max(diff_x, diff_z);
 }
 
-std::shared_ptr<components::PBDParticle> pbd::PBDManager::CreateParticle(float mass, float damping_factor, std::shared_ptr<components::Transform> transform)
+s_ptr<components::PBDParticle> pbd::PBDManager::CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform)
 {
-	auto p = std::make_shared<components::PBDParticle>(mass, damping_factor, transform);
+	auto p = make_shared<components::PBDParticle>(mass, damping_factor, transform);
 	particles_.push_back(p);
 	
 	return p;
 }
 
-void pbd::PBDManager::CreateFGRRecord(std::shared_ptr<components::PBDParticle> p, std::shared_ptr<pbd::BasicGenerator> g)
+void pbd::PBDManager::CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pbd::BasicGenerator> g)
 {
 	pbd::FGRRecord fgrr = pbd::FGRRecord(p, g);
 	generator_registry_.push_back(fgrr);
 }
 
-void pbd::PBDManager::CreateRopeConstraint(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2, float ml)
+void pbd::PBDManager::CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml)
 {
 	RopeConstraint constraint = RopeConstraint(p1, p2, ml);
 	constraints_.push_back(constraint);

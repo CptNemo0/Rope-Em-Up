@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "global.h"
 #include "Lights.h"
 
 class Shader
@@ -20,8 +21,8 @@ private:
 public:
     unsigned int id_; // bylo wczesniej prywatne ale testuje
     Shader() = default;
-    Shader(const std::string& vertex_shader_path, const std::string& fragment_shader_path);
-    Shader(const std::string& vertex_shader_path, const std::string& geometry_shader_path, const std::string& fragment_shader_path);
+    Shader(const string& vertex_shader_path, const string& fragment_shader_path);
+    Shader(const string& vertex_shader_path, const string& geometry_shader_path, const string& fragment_shader_path);
     
     ~Shader();
 
@@ -30,16 +31,16 @@ public:
 
     unsigned int get_id() const;
 
-    void SetBool(const std::string& name, bool value) const;
-    void SetInt(const std::string& name, int value) const;
-    void SetFloat(const std::string& name, float value) const;
-    void SetVec3(const std::string& name, glm::vec3 value) const;
-    void SetMatrix4(const std::string& name, glm::mat4 value) const;
+    void SetBool(const string& name, bool value) const;
+    void SetInt(const string& name, int value) const;
+    void SetFloat(const string& name, float value) const;
+    void SetVec3(const string& name, glm::vec3 value) const;
+    void SetMatrix4(const string& name, glm::mat4 value) const;
 
-    void SetLight(const std::string& name, Light value);
-    void SetDirectionalLight(const std::string& name, DirectionalLight value);
-    void SetPointLight(const std::string& name, PointLight value);
-    void SetSpotLight(const std::string& name, SpotLight value);
+    void SetLight(const string& name, Light value);
+    void SetDirectionalLight(const string& name, DirectionalLight value);
+    void SetPointLight(const string& name, PointLight value);
+    void SetSpotLight(const string& name, SpotLight value);
 };
 
 #endif SHADER_H

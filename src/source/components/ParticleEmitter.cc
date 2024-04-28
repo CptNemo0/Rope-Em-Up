@@ -1,6 +1,6 @@
 #include "../../headers/components/ParticleEmitter.h"
 
-components::ParticleEmitter::ParticleEmitter(int max_particles, std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader, std::shared_ptr<llr::Camera> camera)
+components::ParticleEmitter::ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, s_ptr<llr::Camera> camera)
 {
     this->texture_ = texture;
     this->shader_ = shader;
@@ -31,7 +31,7 @@ void components::ParticleEmitter::Start()
 {
     transform_ = gameObject_.lock()->transform_;
 
-    this->emitter_timer_ = std::make_shared<Timer::Timer>(Timer::CreateTimer(pbd::kMsPerUpdate,
+    this->emitter_timer_ = make_shared<Timer::Timer>(Timer::CreateTimer(pbd::kMsPerUpdate,
     [this]()
     {
         this->UpdateParticles(pbd::kMsPerUpdate);
@@ -61,13 +61,13 @@ void components::ParticleEmitter::Destroy()
 void components::ParticleEmitter::UpdateParticles(float delta_time)
 {
     auto view_matrix = camera_->GetViewMatrix();
-    float inverse_life_time = 1.0f / static_cast<float>(std::chrono::microseconds(static_cast<int>(life_time_ * 1000000)).count());
+    float inverse_life_time = 1.0f / static_cast<float>(microseconds(static_cast<int>(life_time_ * 1000000)).count());
     for (auto &particle : particles_)
     {
-        particle.expiration_time -= std::chrono::microseconds(static_cast<int>(delta_time * 1000000));
-        if (particle.expiration_time < std::chrono::microseconds(0))
+        particle.expiration_time -= microseconds(static_cast<int>(delta_time * 1000000));
+        if (particle.expiration_time < microseconds(0))
         {
-            particle.expiration_time = std::chrono::microseconds(0);
+            particle.expiration_time = microseconds(0);
             particle_indeces_to_remove_.insert(particle.id_);
         }
         particle.position += particle.velocity * delta_time;
@@ -97,7 +97,7 @@ void components::ParticleEmitter::EmitParticles()
     for (int i = 0; i < rand_amount; i++)
     {
         Particle particle;
-        particle.life_time = std::chrono::microseconds(static_cast<int>(life_time_ * 1000000));
+        particle.life_time = microseconds(static_cast<int>(life_time_ * 1000000));
         particle.expiration_time = particle.life_time;
         particle.size = random::RandFloat(start_size_.x, start_size_.y);
         particle.color = start_color_;

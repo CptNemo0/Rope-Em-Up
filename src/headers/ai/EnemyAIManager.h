@@ -33,8 +33,8 @@ namespace ai
 
 	private:
 		static bool players_set;
-		static std::shared_ptr<GameObject> player_1_;
-		static std::shared_ptr<GameObject> player_2_;
+		static s_ptr<GameObject> player_1_;
+		static s_ptr<GameObject> player_2_;
 
 		EnemyAIManager(const EnemyAIManagerInitStruct& init_struct, const Vehicle& vehicle);
 		~EnemyAIManager() = default;
@@ -65,7 +65,7 @@ namespace ai
 			}
 		}
 
-		static void SetPlayers(std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2)
+		static void SetPlayers(s_ptr<GameObject> player_1, s_ptr<GameObject> player_2)
 		{
 			assert(player_1 != nullptr);
 			assert(player_2 != nullptr);
@@ -89,7 +89,7 @@ namespace ai
 			player_2_ = nullptr;
 		}
 	
-		void UpdateEnemyStateMachine(std::shared_ptr<ai::EnemyStateMachine> machine);
+		void UpdateEnemyStateMachine(s_ptr<ai::EnemyStateMachine> machine);
 	};
 }
 

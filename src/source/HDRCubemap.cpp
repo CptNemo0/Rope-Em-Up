@@ -2,7 +2,7 @@
 
 
 
-HDRCubemap::HDRCubemap(const std::string& path, std::shared_ptr<Shader> BackgroundShade, std::shared_ptr<Shader> EquirectangularToCubemapShader, std::shared_ptr<Shader> IrrandanceShader)
+HDRCubemap::HDRCubemap(const string& path, s_ptr<Shader> BackgroundShade, s_ptr<Shader> EquirectangularToCubemapShader, s_ptr<Shader> IrrandanceShader)
 {
 	path_ = path;
 	BackgroundShader_ = BackgroundShade;
@@ -12,7 +12,7 @@ HDRCubemap::HDRCubemap(const std::string& path, std::shared_ptr<Shader> Backgrou
 
 
 
-void HDRCubemap::LoadHDRimg(GLFWwindow* window, std::shared_ptr<llr::Camera> camera)
+void HDRCubemap::LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera)
 {
 	
 
@@ -49,7 +49,7 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, std::shared_ptr<llr::Camera> cam
     }
     else
     {
-        std::cout << "Failed to load HDR image." << std::endl;
+        cout << "Failed to load HDR image." << endl;
     }
 
     // pbr: setup cubemap to render to and attach to framebuffer

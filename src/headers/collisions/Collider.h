@@ -18,12 +18,12 @@ namespace components
 	class Collider : public Component, public std::enable_shared_from_this<Collider>
 	{
 	public:
-		std::shared_ptr<components::Transform> transform_;
-		std::shared_ptr<collisions::AABB> bp_collider_;
-		std::shared_ptr<collisions::ConvexHull> np_collider_;
+		s_ptr<components::Transform> transform_;
+		s_ptr<collisions::AABB> bp_collider_;
+		s_ptr<collisions::ConvexHull> np_collider_;
 		int layer_;
 
-		Collider(int layer, int precision, const std::shared_ptr<Mesh> mesh, std::shared_ptr<Transform> transform_);
+		Collider(int layer, int precision, const s_ptr<Mesh> mesh, s_ptr<Transform> transform_);
 		~Collider() = default;
 		// Inherited via Component
 		void Start() override;

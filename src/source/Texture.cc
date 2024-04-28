@@ -1,7 +1,7 @@
 #include "../headers/Texture.h"
 
 
-tmp::Texture::Texture(const std::string& path)
+tmp::Texture::Texture(const string& path)
 {
     id_ = 0;
     glGenTextures(1, &id_);
@@ -23,11 +23,11 @@ tmp::Texture::Texture(const std::string& path)
         else
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
         glGenerateMipmap(GL_TEXTURE_2D);
-        std::cout << "Texture loaded.\n";
+        cout << "Texture loaded.\n";
     }
     else
     {
-        std::cout << "Failed to load a texture!!!\n";
+        cout << "Failed to load a texture!!!\n";
     }
 
     stbi_image_free(img);

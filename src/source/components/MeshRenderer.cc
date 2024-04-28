@@ -1,6 +1,6 @@
 #include "../../headers/components/MeshRenderer.h"
 
-components::MeshRenderer::MeshRenderer(std::shared_ptr<Model> model, std::shared_ptr<Shader> shader)
+components::MeshRenderer::MeshRenderer(s_ptr<Model> model, s_ptr<Shader> shader)
 {
 	this->model_ = model;
 	this->shader_ = shader;

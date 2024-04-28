@@ -1,6 +1,6 @@
 #include "../../headers/components/HUDRenderer.h"
 
-components::HUDRenderer::HUDRenderer(std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader)
+components::HUDRenderer::HUDRenderer(s_ptr<tmp::Texture> texture, s_ptr<Shader> shader)
 {
     this->texture_ = texture;
     this->shader_ = shader;

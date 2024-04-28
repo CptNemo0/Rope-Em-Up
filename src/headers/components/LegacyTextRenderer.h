@@ -4,6 +4,7 @@
 #include "stb_easy_font.h"
 #include <vector>
 
+#include "../global.h"
 #include "../GameObject.h"
 #include "../components/Transform.h"
 
@@ -15,11 +16,11 @@ class LegacyTextRenderer : public Component
 private:
     unsigned int VAO_, VBO_, quads_count_;
     std::vector<float> vertices_buffer_;
-    std::shared_ptr<Shader> shader_;
-    std::shared_ptr<Transform> transform_;
+    s_ptr<Shader> shader_;
+    s_ptr<Transform> transform_;
 public:
-    LegacyTextRenderer(std::shared_ptr<Shader> shader, std::string text);
-    void ChangeText(std::string text);
+    LegacyTextRenderer(s_ptr<Shader> shader, string text);
+    void ChangeText(string text);
 
     void Start() override;
     void Update() override;

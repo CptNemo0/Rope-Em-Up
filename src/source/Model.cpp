@@ -1,12 +1,12 @@
 #include "../headers/Model.h"
 
-Model::Model(std::string path, bool gamma) : gammaCorrection(gamma)
+Model::Model(string path, bool gamma) : gammaCorrection(gamma)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+        cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
         return;
     }
     directory_ = path.substr(0, path.find_last_of('/'));
@@ -14,7 +14,7 @@ Model::Model(std::string path, bool gamma) : gammaCorrection(gamma)
     processNode(scene->mRootNode, scene);
 }
 
-void Model::Draw(std::shared_ptr<Shader> shader) const
+void Model::Draw(s_ptr<Shader> shader) const
 {
     	for (unsigned int i = 0; i < meshes_.size(); i++)
 		meshes_.at(i)->Draw(shader);
@@ -36,7 +36,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 
 }
 
-std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
+s_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -106,10 +106,10 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, "texture_roughness");
     textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
 
-    return std::make_shared<Mesh>(vertices, indices, textures);
+    return make_shared<Mesh>(vertices, indices, textures);
 }
 
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
 {
     std::vector<Texture> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
@@ -140,9 +140,9 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
     return textures;
 }
 
-unsigned int TextureFromFile(const char* path, const std::string& directory)
+unsigned int TextureFromFile(const char* path, const string& directory)
 {
-    std::string filename = std::string(path);
+    string filename = string(path);
     filename = directory + '/' + filename;
 
     unsigned int textureID;
@@ -161,7 +161,7 @@ unsigned int TextureFromFile(const char* path, const std::string& directory)
             format = GL_RGBA;
         else
         {
-            std::cout << "Texture failed to load at path: " << path << std::endl;
+            cout << "Texture failed to load at path: " << path << endl;
             stbi_image_free(data);
         }
 
@@ -178,7 +178,7 @@ unsigned int TextureFromFile(const char* path, const std::string& directory)
     }
     else
     {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
+        cout << "Texture failed to load at path: " << path << endl;
         stbi_image_free(data);
     }
     glBindTexture(GL_TEXTURE_2D, 0);
