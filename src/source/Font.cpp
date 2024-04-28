@@ -5,7 +5,7 @@ Font::Font(FT_Library &ft, const char *font_path)
     FT_Face face;
     if (FT_New_Face(ft, font_path, 0, &face))
     {
-        std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        std::cerr << "ERROR::FREETYPE: Failed to load font" << endl;
         return;
     }
     FT_Set_Pixel_Sizes(face, 0, 48);
@@ -16,7 +16,7 @@ Font::Font(FT_Library &ft, const char *font_path)
     {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
         {
-            std::cerr << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
+            std::cerr << "ERROR::FREETYPE: Failed to load Glyph" << endl;
             continue;
         }
 

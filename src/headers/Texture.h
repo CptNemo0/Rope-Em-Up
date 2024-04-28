@@ -6,10 +6,12 @@
 #include "stb_image.h"
 #include <iostream>
 
+#include "global.h"
+
 struct Texture {
     unsigned int id_;
-    std::string type_;
-    std::string path_;
+    string type_;
+    string path_;
 };
 
 namespace tmp
@@ -22,7 +24,7 @@ namespace tmp
   
         int width_;
         int height_;
-        Texture(const std::string& path);
+        Texture(const string& path);
     };
 }
 

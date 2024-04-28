@@ -29,7 +29,7 @@ namespace collisions
 
         int collision_layers[32];
 
-        void AddCollider(std::shared_ptr<components::Collider> collider);
+        void AddCollider(s_ptr<components::Collider> collider);
 
     public:
         
@@ -50,14 +50,14 @@ namespace collisions
             }
         }
 
-        std::vector<std::shared_ptr<components::Collider>> colliders_;
+        std::vector<s_ptr<components::Collider>> colliders_;
 
-        std::shared_ptr<components::Collider> CreateCollider(int layer, int precision, std::shared_ptr<Mesh> mesh, std::shared_ptr<components::Transform> transform);
-        void RemoveCollider(std::shared_ptr<components::Collider> collider);
+        s_ptr<components::Collider> CreateCollider(int layer, int precision, s_ptr<Mesh> mesh, s_ptr<components::Transform> transform);
+        void RemoveCollider(s_ptr<components::Collider> collider);
        
         void CollisionCheck(std::vector<physics::Contact>& contacts);
         void CollisionCheckPBD(std::vector<pbd::Contact>& contacts);
-        void Separation(std::shared_ptr<components::Collider> a, std::shared_ptr<components::Collider> b, float wa, float wb);
+        void Separation(s_ptr<components::Collider> a, s_ptr<components::Collider> b, float wa, float wb);
         void AddCollisionBetweenLayers(int layer_1, int layer_2);
         void RemoveCollisionBetweenLayers(int layer_1, int layer_2);
         inline bool LayerCheck(int layer_1, int layer_2)

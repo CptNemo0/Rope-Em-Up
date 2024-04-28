@@ -11,7 +11,7 @@ components::Transform::Transform()
     up_ = { 0.0f, 1.0f, 0.0f };
 }
 
-void components::Transform::AddChild(std::shared_ptr<Transform> child)
+void components::Transform::AddChild(s_ptr<Transform> child)
 {
     children_.push_back(child);
     child->parent_ = this;
@@ -38,7 +38,7 @@ const glm::vec3 components::Transform::get_rotation() const
     return rotation_;
 }
 
-void components::Transform::RemoveChild(std::shared_ptr<Transform> child)
+void components::Transform::RemoveChild(s_ptr<Transform> child)
 {
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end())

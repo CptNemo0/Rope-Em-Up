@@ -2,7 +2,9 @@
 #define POSTPROCESSING_H
 
 #include "glad/glad.h"
-#include <stdlib.h>   
+#include <stdlib.h>
+
+#include "global.h"
 #include "Shader.h"
 
 const float kQuadVertices[] =
@@ -36,9 +38,9 @@ namespace ppc
         float brightness_;
         float contrast_;
 
-        std::shared_ptr<Shader> shader_;
+        s_ptr<Shader> shader_;
 
-        Postprocessor(int width, int height, std::shared_ptr<Shader> shader);
+        Postprocessor(int width, int height, s_ptr<Shader> shader);
 
         void Init();
         void Destroy();

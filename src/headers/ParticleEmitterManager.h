@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "global.h"
 #include "components/ParticleEmitter.h"
 #include "Timer.h"
 #include "Camera.h"
@@ -37,9 +38,9 @@ public:
         }
     }
 public:
-    std::shared_ptr<llr::Camera> camera;
-    std::vector<std::shared_ptr<Timer::Timer>> emitter_timers_;
-    std::vector<std::shared_ptr<components::ParticleEmitter>> emitters_;
+    s_ptr<llr::Camera> camera;
+    std::vector<s_ptr<Timer::Timer>> emitter_timers_;
+    std::vector<s_ptr<components::ParticleEmitter>> emitters_;
 
     void Update(float delta_time);
     void Draw();

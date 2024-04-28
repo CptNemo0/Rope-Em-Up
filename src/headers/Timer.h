@@ -5,13 +5,15 @@
 #include <functional>
 #include <vector>
 
+#include "global.h"
+
 namespace Timer
 {
     struct Timer
     {
         unsigned int id;
         float delay;
-        std::chrono::microseconds expiration_time;
+        microseconds expiration_time;
         std::function<void()> finish_callback;
         std::function<void(float)> update_callback;
         bool loop;

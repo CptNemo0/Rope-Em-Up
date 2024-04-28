@@ -9,6 +9,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "../global.h"
 #include "../Mesh.h"
 
 namespace collisions
@@ -25,7 +26,7 @@ namespace collisions
 		glm::vec3 extremes = glm::vec3(0.0f);
 	};
 
-	inline const glm::vec3 FindFarthestPointAABB(std::shared_ptr<Mesh> mesh)
+	inline const glm::vec3 FindFarthestPointAABB(s_ptr<Mesh> mesh)
 	{
 		glm::vec3 return_value = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3 a = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -46,14 +47,14 @@ namespace collisions
 		return return_value;
 	}
 
-	inline void UpdateCentre(std::shared_ptr<AABB> aabb, glm::vec3 position)
+	inline void UpdateCentre(s_ptr<AABB> aabb, glm::vec3 position)
 	{
 		aabb->centre = position;
 	}
 
-	inline std::shared_ptr<AABB> CreateAABB(std::shared_ptr<Mesh> mesh)
+	inline s_ptr<AABB> CreateAABB(s_ptr<Mesh> mesh)
 	{
-		auto return_value = std::make_shared<AABB>();
+		auto return_value = make_shared<AABB>();
 
 		glm::vec3 fartherst_point = FindFarthestPointAABB(mesh);
 		float distance = glm::length(fartherst_point);
@@ -73,7 +74,7 @@ namespace collisions
 		std::vector<glm::vec3> vertices;
 	};
 
-	inline const glm::vec3 FindFarthestPointConvexHull(const std::shared_ptr<ConvexHull> hull, const glm::vec3& direction)
+	inline const glm::vec3 FindFarthestPointConvexHull(const s_ptr<ConvexHull> hull, const glm::vec3& direction)
 	{
 		int return_value = 0;
 		float maxproj = -FLT_MAX;
@@ -97,7 +98,7 @@ namespace collisions
 		glm::vec3 fp_hull_b;
 	};
 
-	inline const F2FStruct Find2FarthestPoints(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b, const glm::vec3& direction)
+	inline const F2FStruct Find2FarthestPoints(const s_ptr<ConvexHull> hull_a, const s_ptr<ConvexHull> hull_b, const glm::vec3& direction)
 	{
 		assert(gPRECISION == hull_a->vertices.size());
 		assert(gPRECISION == hull_b->vertices.size());
@@ -135,7 +136,7 @@ namespace collisions
 		return return_value;
 	}
 
-	inline void UpdateVertices(std::shared_ptr<ConvexHull> hull, const glm::mat4& model_matrix)
+	inline void UpdateVertices(s_ptr<ConvexHull> hull, const glm::mat4& model_matrix)
 	{
 		int size = hull->vertices.size();
 		assert(size == hull->local_vertices.size());
@@ -148,12 +149,12 @@ namespace collisions
 		}
 	}
 
-	inline std::shared_ptr<ConvexHull> CreateConvexHull(int precision, std::shared_ptr<Mesh> mesh)
+	inline s_ptr<ConvexHull> CreateConvexHull(int precision, s_ptr<Mesh> mesh)
 	{
 		assert((360 % precision) == 0);
 		int angle = 360 / precision;
 
-		auto return_value = std::make_shared<ConvexHull>();
+		auto return_value = make_shared<ConvexHull>();
 		return_value->local_vertices = std::vector<glm::vec3>();
 
 		auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -189,7 +190,7 @@ namespace collisions
 
 #pragma region Helpers
 
-	inline glm::vec3 Support(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
+	inline glm::vec3 Support(const s_ptr<ConvexHull> hull_a, const s_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
 	{
 		//auto vertex_a = FindFarthestPointConvexHull(hull_a, direction);
 		//auto vertex_b = FindFarthestPointConvexHull(hull_b, -direction);
@@ -199,7 +200,7 @@ namespace collisions
 		return result.fp_hull_a - result.fp_hull_b;
 	}
 
-	inline std::vector<glm::vec3> MinkowskisDifference(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
+	inline std::vector<glm::vec3> MinkowskisDifference(const s_ptr<ConvexHull> hull_a, const s_ptr<ConvexHull> hull_b)
 	{
 		auto minkowski = std::vector<glm::vec3>();
 		auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -242,7 +243,7 @@ namespace collisions
 		return true;
 	}
 
-	inline bool ConvexHullCheckFaster(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
+	inline bool ConvexHullCheckFaster(const s_ptr<ConvexHull> hull_a, const s_ptr<ConvexHull> hull_b)
 	{
 		auto minkowski = std::vector<glm::vec3>();
 		auto start_dir_vec = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -284,7 +285,7 @@ namespace collisions
 		return true;
 	}
 
-	inline bool ConvexHullCheckFaster2(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b) 
+	inline bool ConvexHullCheckFaster2(const s_ptr<ConvexHull> hull_a, const s_ptr<ConvexHull> hull_b) 
 	{
 		static const int PRECISION = fmax(hull_a->vertices.size(), hull_b->vertices.size());
 		static const float ANGLE = 360.0f / PRECISION;
@@ -317,7 +318,7 @@ namespace collisions
 		return true;
 	}
 
-	inline void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const std::shared_ptr<collisions::ConvexHull> A, const std::shared_ptr<collisions::ConvexHull> B)
+	inline void WriteDebugFIles(const std::vector<glm::vec3>& polygon, const s_ptr<collisions::ConvexHull> A, const s_ptr<collisions::ConvexHull> B)
 	{
 		std::ofstream polygon_file("res/logs/polygon_debug.csv");
 		for (int i = 0; i < polygon.size(); i++)
@@ -345,14 +346,14 @@ namespace collisions
 	
 #pragma region Collisions and Separation
 
-	inline bool AABBCollisionCheck(std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
+	inline bool AABBCollisionCheck(s_ptr<AABB> a, s_ptr<AABB> b)
 	{
 		if (fabsf(a->centre.x - b->centre.x) > (a->extremes.x + b->extremes.x)) return false;
 		if (fabsf(a->centre.z - b->centre.z) > (a->extremes.z + b->extremes.z)) return false;
 		return 1;
 	}
 
-	inline bool ConvexHullCollisionCheck(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr<ConvexHull> hull_b)
+	inline bool ConvexHullCollisionCheck(const s_ptr<ConvexHull> hull_a, const s_ptr<ConvexHull> hull_b)
 	{
 		return InsideDifference(MinkowskisDifference(hull_a, hull_b));
 	}
@@ -363,7 +364,7 @@ namespace collisions
 		glm::vec3 sep_b;
 	};
 
-	inline SeparationVectors GetSeparatingVector(const std::shared_ptr<ConvexHull> hull_a, glm::vec3 a, const std::shared_ptr<ConvexHull> hull_b, glm::vec3 b)
+	inline SeparationVectors GetSeparatingVector(const s_ptr<ConvexHull> hull_a, glm::vec3 a, const s_ptr<ConvexHull> hull_b, glm::vec3 b)
 	{
 		SeparationVectors return_value;
 

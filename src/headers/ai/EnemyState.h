@@ -15,7 +15,7 @@ namespace ai
 		virtual ~EnemyState() {}
 		
 		virtual void Execute(EnemyStateMachine* machine) = 0;
-		std::string Name()
+		string Name()
 		{
 			return typeid(*this).name();
 		}		
@@ -108,18 +108,18 @@ namespace ai
 	{
 	public:
 
-		EnemyStateMachine(std::shared_ptr<GameObject> game_object, std::shared_ptr<pbd::BasicGenerator> generator, const Vehicle& vehicle);
+		EnemyStateMachine(s_ptr<GameObject> game_object, s_ptr<pbd::BasicGenerator> generator, const Vehicle& vehicle);
 		~EnemyStateMachine() = default;
 
 		EnemyState* current_state_;
 
 		Vehicle vehicle_;
 
-		std::shared_ptr<components::Transform> transfrom_;
-		std::shared_ptr<components::PBDParticle> partcile_;
-		std::shared_ptr<pbd::BasicGenerator> generator_;
+		s_ptr<components::Transform> transfrom_;
+		s_ptr<components::PBDParticle> partcile_;
+		s_ptr<pbd::BasicGenerator> generator_;
 
-		std::shared_ptr<GameObject> target_player_;
+		s_ptr<GameObject> target_player_;
 
 		float rest_timer_;
 

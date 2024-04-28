@@ -1,10 +1,10 @@
 #include "../headers/Shader.h"
 
-Shader::Shader(const std::string& vertex_shader_path, const std::string& fragment_shader_path)
+Shader::Shader(const string& vertex_shader_path, const string& fragment_shader_path)
 {
     // Zmienne z kodem zrodlowym shaderow
-    std::string v;
-    std::string f;
+    string v;
+    string f;
 
     std::ifstream vertexReader;
     std::ifstream fragmtReader;
@@ -89,12 +89,12 @@ Shader::Shader(const std::string& vertex_shader_path, const std::string& fragmen
     glDeleteShader(fragmt);
 }
 
-Shader::Shader(const std::string &vertex_shader_path, const std::string &geometry_shader_path, const std::string &fragment_shader_path)
+Shader::Shader(const string &vertex_shader_path, const string &geometry_shader_path, const string &fragment_shader_path)
 {
         // Zmienne z kodem zrodlowym shaderow
-    std::string v;
-    std::string g;
-    std::string f;
+    string v;
+    string g;
+    string f;
 
     std::ifstream vertexReader;
     std::ifstream geomReader;
@@ -227,35 +227,35 @@ unsigned int Shader::get_id() const
     return id_;
 }
 
-void Shader::SetBool(const std::string& name, bool value) const
+void Shader::SetBool(const string& name, bool value) const
 {
     glUniform1i(glGetUniformLocation(id_, name.c_str()), (int)value);
 }
-void Shader::SetInt(const std::string& name, int value) const
+void Shader::SetInt(const string& name, int value) const
 {
     glUniform1i(glGetUniformLocation(id_, name.c_str()), value);
 }
-void Shader::SetFloat(const std::string& name, float value) const
+void Shader::SetFloat(const string& name, float value) const
 {
     glUniform1f(glGetUniformLocation(id_, name.c_str()), value);
 }
-void Shader::SetMatrix4(const std::string& name, glm::mat4 value) const
+void Shader::SetMatrix4(const string& name, glm::mat4 value) const
 {
     glUniformMatrix4fv(glGetUniformLocation(id_, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::SetVec3(const std::string& name, glm::vec3 value) const
+void Shader::SetVec3(const string& name, glm::vec3 value) const
 {
     glUniform3f(glGetUniformLocation(id_, name.c_str()), value.x, value.y, value.z);
 
 }
 
-void Shader::SetLight(const std::string& name, Light value)
+void Shader::SetLight(const string& name, Light value)
 {
-    std::string intensity_name = name + ".intensity";
-    std::string ambient_colour_name = name + ".ambient_colour";
-    std::string diffuse_colour_name = name + ".diffuse_colour";
-    std::string specular_colour_name = name + ".specular_colour";
+    string intensity_name = name + ".intensity";
+    string ambient_colour_name = name + ".ambient_colour";
+    string diffuse_colour_name = name + ".diffuse_colour";
+    string specular_colour_name = name + ".specular_colour";
 
     SetFloat(intensity_name, value.intensity);
     SetVec3(ambient_colour_name, value.ambient_colour);
@@ -263,29 +263,29 @@ void Shader::SetLight(const std::string& name, Light value)
     SetVec3(specular_colour_name, value.specular_colour);
 }
 
-void Shader::SetDirectionalLight(const std::string& name, DirectionalLight value)
+void Shader::SetDirectionalLight(const string& name, DirectionalLight value)
 {
     SetLight(name, value);
 
-    std::string direction_name = name + ".direction";
+    string direction_name = name + ".direction";
     SetVec3(direction_name, value.direction);
 }
 
-void Shader::SetPointLight(const std::string& name, PointLight value)
+void Shader::SetPointLight(const string& name, PointLight value)
 {
     SetLight(name, value);
 
-    std::string position_name = name + ".position";
+    string position_name = name + ".position";
     SetVec3(position_name, value.position);
 }
 
-void Shader::SetSpotLight(const std::string& name, SpotLight value)
+void Shader::SetSpotLight(const string& name, SpotLight value)
 {
     SetLight(name, value);
 
-    std::string position_name = name + ".position";
-    std::string direction_name = name + ".direction";
-    std::string cut_off_name = name + ".cut_off";
+    string position_name = name + ".position";
+    string direction_name = name + ".direction";
+    string cut_off_name = name + ".cut_off";
 
     SetVec3(position_name, value.position);
     SetVec3(direction_name, value.direction);

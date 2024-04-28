@@ -2,7 +2,7 @@
 
 #include "../../headers/collisions/CollisionManager.h"
 
-components::Collider::Collider(int layer, int precision, const std::shared_ptr<Mesh> mesh, std::shared_ptr<components::Transform> transform_)
+components::Collider::Collider(int layer, int precision, const s_ptr<Mesh> mesh, s_ptr<components::Transform> transform_)
 {
 	this->transform_ = transform_;
 	this->layer_ = layer;

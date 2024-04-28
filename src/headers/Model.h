@@ -10,25 +10,26 @@
 #include "assimp/postprocess.h"
 #include "glad/glad.h"
 
+#include "global.h"
 #include "Vertex.h"
 #include "Mesh.h"
 
-unsigned int TextureFromFile(const char* path, const std::string& directory);
+unsigned int TextureFromFile(const char* path, const string& directory);
 
 class Model
 {
 public:
-		std::vector<std::shared_ptr<Mesh>> meshes_;
-		std::vector <Texture> textures_loaded_; //na razie nie robi³am oddzielnych materia³ów bo tak by³o w sumie szybciej i nie wiem czy klasa Model jest nam rzeczywiœcie potrzebna D:
-		std::string directory_;
+		std::vector<s_ptr<Mesh>> meshes_;
+		std::vector <Texture> textures_loaded_; //na razie nie robiï¿½am oddzielnych materiaï¿½ï¿½w bo tak byï¿½o w sumie szybciej i nie wiem czy klasa Model jest nam rzeczywiï¿½cie potrzebna D:
+		string directory_;
 		bool gammaCorrection;
 
-		Model(std::string path, bool gamma = false);
+		Model(string path, bool gamma = false);
 
-		void Draw(std::shared_ptr<Shader> shader) const;
+		void Draw(s_ptr<Shader> shader) const;
 		void processNode(aiNode* node, const aiScene* scene);
-		std::shared_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
-		std::vector <Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+		s_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
+		std::vector <Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
 };
 
 

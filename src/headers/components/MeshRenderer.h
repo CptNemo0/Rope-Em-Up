@@ -5,7 +5,7 @@
 
 #include <memory>
 
-
+#include "../global.h"
 #include "../GameObject.h"
 #include "../Model.h"
 #include "../Texture.h"
@@ -20,12 +20,12 @@ namespace components
     {
     public:
 
-        MeshRenderer(std::shared_ptr<Model> model,
-                    std::shared_ptr<Shader> shader);
+        MeshRenderer(s_ptr<Model> model,
+                    s_ptr<Shader> shader);
 
-        std::shared_ptr<Transform> transform_;
-        std::shared_ptr<Model> model_;
-        std::shared_ptr<Shader> shader_;
+        s_ptr<Transform> transform_;
+        s_ptr<Model> model_;
+        s_ptr<Shader> shader_;
 
         void Start() override;
         void Update() override;

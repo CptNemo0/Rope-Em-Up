@@ -120,7 +120,7 @@ ai::AttackState* ai::AttackState::Instance()
 
 void ai::AttackState::Execute(EnemyStateMachine* machine)
 {
-	std::cout << "ATTACK!!\n";
+	cout << "ATTACK!!\n";
 	assert(machine->current_state_ && PatrolState::Instance());
 	machine->current_state_ = PatrolState::Instance();
 }
@@ -266,7 +266,7 @@ void ai::EvasionState::Execute(EnemyStateMachine* machine)
 	}
 }
 
-ai::EnemyStateMachine::EnemyStateMachine(std::shared_ptr<GameObject> game_object, std::shared_ptr<pbd::BasicGenerator> generator, const Vehicle& vehicle)
+ai::EnemyStateMachine::EnemyStateMachine(s_ptr<GameObject> game_object, s_ptr<pbd::BasicGenerator> generator, const Vehicle& vehicle)
 {
 	current_state_ = PatrolState::Instance();
 

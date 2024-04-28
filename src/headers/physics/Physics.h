@@ -27,11 +27,11 @@ namespace components
 
 		glm::vec3 forces_ = glm::vec3(0.0f);
 
-		std::shared_ptr<components::Transform> transform_;
+		s_ptr<components::Transform> transform_;
 		glm::vec3 velocity_ = glm::vec3(0.0f);
 		glm::vec3 acceleration_ = glm::vec3(0.0f);
 
-		Particle(std::shared_ptr<components::Transform> transform, float mass, float drag) : transform_(transform), inverse_mass_(1.0f / mass), mass_(mass), drag_(drag) {}
+		Particle(s_ptr<components::Transform> transform, float mass, float drag) : transform_(transform), inverse_mass_(1.0f / mass), mass_(mass), drag_(drag) {}
 
 		void UpdateAcceleration();
 		void UpdateVelocity(float t);
@@ -56,7 +56,7 @@ namespace physics
 	public:
 		ForceGenerator() = default;
 		~ForceGenerator() = default;
-		virtual void GenerateForce(std::shared_ptr<components::Particle> particle) = 0;
+		virtual void GenerateForce(s_ptr<components::Particle> particle) = 0;
 	};
 
 	class BasicGenerator : public ForceGenerator
@@ -69,7 +69,7 @@ namespace physics
 		~BasicGenerator() = default;
 
 		// Inherited via ForceGenerator
-		void GenerateForce(std::shared_ptr<components::Particle> particle) override;
+		void GenerateForce(s_ptr<components::Particle> particle) override;
 
 	};
 
@@ -82,23 +82,23 @@ namespace physics
 		DragGenerator(float k1, float k2);
 		~DragGenerator() = default;
 
-		void GenerateForce(std::shared_ptr<components::Particle> particle) override;
+		void GenerateForce(s_ptr<components::Particle> particle) override;
 	};
 
 	//Force Generators Registry Record
 	struct FGRRecord
 	{
-		std::shared_ptr<components::Particle> particle;
-		std::shared_ptr<ForceGenerator> generator;
+		s_ptr<components::Particle> particle;
+		s_ptr<ForceGenerator> generator;
 		
 		void Generate();
 	};
 
 	struct Contact
 	{
-		Contact(std::shared_ptr<components::Particle> p1, std::shared_ptr<components::Particle> p2);
-		std::shared_ptr<components::Particle> a;
-		std::shared_ptr<components::Particle> b;
+		Contact(s_ptr<components::Particle> p1, s_ptr<components::Particle> p2);
+		s_ptr<components::Particle> a;
+		s_ptr<components::Particle> b;
 		glm::vec3 contact_normal;
 	};
 
@@ -108,7 +108,7 @@ namespace physics
 		static PhysicsManager* i_;
 	private:
 		std::vector<FGRRecord> generator_registry_;
-		std::vector<std::shared_ptr<components::Particle>> particles_;
+		std::vector<s_ptr<components::Particle>> particles_;
 		PhysicsManager();
 		~PhysicsManager() = default;
 	public:
@@ -129,10 +129,10 @@ namespace physics
 			}
 		}
 
-		std::shared_ptr<components::Particle> CreateParticle(std::shared_ptr<components::Transform> transform, float mass, float drag);
+		s_ptr<components::Particle> CreateParticle(s_ptr<components::Transform> transform, float mass, float drag);
 		void GeneratorUpdate();
 		void ParticleUpdate(float t);
-		void AddFGRRecord(std::shared_ptr<physics::ForceGenerator> generator, std::shared_ptr<components::Particle> particle);
+		void AddFGRRecord(s_ptr<physics::ForceGenerator> generator, s_ptr<components::Particle> particle);
 		void ResolveContact(physics::Contact& contact);
 		void ResolveContacts(std::vector<physics::Contact> contacts);
 		void RealizePositions();

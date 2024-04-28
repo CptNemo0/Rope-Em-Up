@@ -1,6 +1,6 @@
 #include "../headers/Postprocessing.h"
 
-ppc::Postprocessor::Postprocessor(int width, int height, std::shared_ptr<Shader> shader)
+ppc::Postprocessor::Postprocessor(int width, int height, s_ptr<Shader> shader)
 {
 	width_ = width;
 	height_ = height;

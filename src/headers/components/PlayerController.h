@@ -1,6 +1,7 @@
 #ifndef PLAYERCONTROLLER_H
 #define PLAYERCONTROLLER_H
 
+#include "../global.h"
 #include "../GameObject.h"
 #include "../input/InputObserver.h"
 #include "../input/InputManager.h"
@@ -14,8 +15,8 @@ class PlayerController : public Component, public input::InputObserver, public s
 {
 private:
     int gamepadID_;
-    std::shared_ptr<pbd::BasicGenerator> move_generator_;
-    std::shared_ptr<pbd::BasicGenerator> pull_generator_;
+    s_ptr<pbd::BasicGenerator> move_generator_;
+    s_ptr<pbd::BasicGenerator> pull_generator_;
     int speed_ = 1000;
     int pull_power_ = 1000;
     bool is_pulling_ = false, pulling_cooldown_ = false;

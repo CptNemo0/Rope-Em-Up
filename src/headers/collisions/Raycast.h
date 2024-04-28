@@ -9,7 +9,7 @@ namespace collisions
 {
     struct RaycastHit
     {
-        std::shared_ptr<GameObject> object;
+        s_ptr<GameObject> object;
         glm::vec3 point;
         float distance;
         bool hit;
@@ -18,11 +18,11 @@ namespace collisions
 	const float kRaycastDX = 0.01f;
 
 	/*
-	* Zwraca trafiony GameObject albo NULLa jeœli nic nie trafi
+	* Zwraca trafiony GameObject albo NULLa jeï¿½li nic nie trafi
 	*/
-    RaycastHit Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer, std::shared_ptr<GameObject> caster);
+    RaycastHit Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer, s_ptr<GameObject> caster);
 
-	inline glm::vec3 SupportRaycast(const std::shared_ptr<ConvexHull> hull_a, const std::shared_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
+	inline glm::vec3 SupportRaycast(const s_ptr<ConvexHull> hull_a, const s_ptr <collisions::ConvexHull> hull_b, glm::vec3 direction)
 	{
 		auto vertex_a = FindFarthestPointConvexHull(hull_a, direction);
 		auto vertex_b = FindFarthestPointConvexHull(hull_b, -direction);
@@ -79,7 +79,7 @@ namespace collisions
         
     }
 
-    bool ChokeCheck(std::shared_ptr<GameObject> caster, int precision, int threshold, float distance);
+    bool ChokeCheck(s_ptr<GameObject> caster, int precision, int threshold, float distance);
 }
 
 

@@ -1,8 +1,8 @@
 #include "../../headers/ai/EnemyAIManager.h"
 
 ai::EnemyAIManager*			 ai::EnemyAIManager::i_ = nullptr;
-std::shared_ptr<GameObject>  ai::EnemyAIManager::player_1_ = nullptr;
-std::shared_ptr<GameObject>  ai::EnemyAIManager::player_2_ = nullptr;
+s_ptr<GameObject>  ai::EnemyAIManager::player_1_ = nullptr;
+s_ptr<GameObject>  ai::EnemyAIManager::player_2_ = nullptr;
 bool						 ai::EnemyAIManager::players_set = false;
 
 ai::EnemyAIManager::EnemyAIManager(const EnemyAIManagerInitStruct& init_struct, const Vehicle& vehicle)
@@ -27,11 +27,11 @@ ai::EnemyAIManager::EnemyAIManager(const EnemyAIManagerInitStruct& init_struct, 
 	this->players_set = false;
 }
 
-void ai::EnemyAIManager::UpdateEnemyStateMachine(std::shared_ptr<EnemyStateMachine> machine)
+void ai::EnemyAIManager::UpdateEnemyStateMachine(s_ptr<EnemyStateMachine> machine)
 {
 	if (!players_set)
 	{
-		std::cout << "First set player_1_ and player_2_ variables of EnemyAIManager!!!\n";
+		cout << "First set player_1_ and player_2_ variables of EnemyAIManager!!!\n";
 	}
 
 	assert(players_set);

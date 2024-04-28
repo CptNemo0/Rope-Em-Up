@@ -11,13 +11,13 @@ namespace components
 	class RopeSegment : public Component
 	{
 	public:
-		RopeSegment(std::shared_ptr<RopeSegment> left, std::shared_ptr<RopeSegment> right, std::shared_ptr<components::Transform> transform)
+		RopeSegment(s_ptr<RopeSegment> left, s_ptr<RopeSegment> right, s_ptr<components::Transform> transform)
 			: left_(left), right_(right), transform_(transform){}
 		~RopeSegment() = default;
-		std::shared_ptr<RopeSegment> left_;
-		std::shared_ptr<RopeSegment> right_;
-		std::shared_ptr<components::Transform> transform_;
-		std::string name_;
+		s_ptr<RopeSegment> left_;
+		s_ptr<RopeSegment> right_;
+		s_ptr<components::Transform> transform_;
+		string name_;
 		bool is_puller_;
 		// Inherited via Component
 		void Start() override;
@@ -37,20 +37,20 @@ namespace rope
 	class Rope
 	{
 	public:
-		std::shared_ptr<components::RopeSegment> left_end_;
-		std::shared_ptr<components::RopeSegment> right_end_;
+		s_ptr<components::RopeSegment> left_end_;
+		s_ptr<components::RopeSegment> right_end_;
 
-		std::shared_ptr<components::RopeSegment> left_puller_;
-		std::shared_ptr<components::RopeSegment> right_puller_;
+		s_ptr<components::RopeSegment> left_puller_;
+		s_ptr<components::RopeSegment> right_puller_;
 
 		Rope();
 		~Rope() = default;
 
-		void AddSegment(std::shared_ptr<components::RopeSegment> segment);
-		bool InsertSegment(std::shared_ptr<components::RopeSegment> segment, int index);
+		void AddSegment(s_ptr<components::RopeSegment> segment);
+		bool InsertSegment(s_ptr<components::RopeSegment> segment, int index);
 		int Size();
 
-		void CheckRestraints(std::shared_ptr<components::RopeSegment> a, std::shared_ptr<components::RopeSegment> b, float t);
+		void CheckRestraints(s_ptr<components::RopeSegment> a, s_ptr<components::RopeSegment> b, float t);
 		void EnforceRestraints(float t);
 	};
 }

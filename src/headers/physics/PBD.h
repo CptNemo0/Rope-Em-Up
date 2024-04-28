@@ -15,14 +15,14 @@ namespace components
 	class PBDParticle : public Component, public std::enable_shared_from_this<PBDParticle>
 	{
 	public:
-		std::shared_ptr<components::Transform> transform_;
+		s_ptr<components::Transform> transform_;
 		float mass_;
 		float inverse_mass_;
 		float damping_factor_;
 		glm::vec3 velocity_;
 		glm::vec3 forces_;
 
-		PBDParticle(float mass, float damping_factor, std::shared_ptr<components::Transform> transform) : 
+		PBDParticle(float mass, float damping_factor, s_ptr<components::Transform> transform) : 
 		mass_(mass), 
 		damping_factor_(damping_factor), 
 		transform_(transform), 
@@ -59,7 +59,7 @@ namespace pbd
 	public:
 		ForceGenerator() = default;
 		~ForceGenerator() = default;
-		virtual void GenerateForce(std::shared_ptr<components::PBDParticle> particle) = 0;
+		virtual void GenerateForce(s_ptr<components::PBDParticle> particle) = 0;
 	};
 
 	class BasicGenerator : public ForceGenerator
@@ -73,15 +73,15 @@ namespace pbd
 		~BasicGenerator() = default;
 
 		// Inherited via ForceGenerator
-		void GenerateForce(std::shared_ptr<components::PBDParticle> particle) override;
+		void GenerateForce(s_ptr<components::PBDParticle> particle) override;
 	};
 
 	struct FGRRecord
 	{
-		std::shared_ptr<components::PBDParticle> particle;
-		std::shared_ptr<ForceGenerator> generator;
+		s_ptr<components::PBDParticle> particle;
+		s_ptr<ForceGenerator> generator;
 
-		FGRRecord(std::shared_ptr<components::PBDParticle> p, std::shared_ptr<ForceGenerator> g) :
+		FGRRecord(s_ptr<components::PBDParticle> p, s_ptr<ForceGenerator> g) :
 		particle(p), generator(g) {}
 		FGRRecord() :
 		particle(nullptr), generator(nullptr) {}
@@ -106,11 +106,11 @@ namespace pbd
 	{
 	public:
 
-		RopeConstraint(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2, float ml);
+		RopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
 		RopeConstraint() = default;
 		~RopeConstraint() = default;
-		std::shared_ptr<components::PBDParticle> p1_;
-		std::shared_ptr<components::PBDParticle> p2_;
+		s_ptr<components::PBDParticle> p1_;
+		s_ptr<components::PBDParticle> p2_;
 		float max_distance_;
 
 		void Enforce() override;
@@ -129,15 +129,15 @@ namespace pbd
 		WallConstraint() = default;
 		~WallConstraint() = default;
 
-		void Enforce(std::shared_ptr<components::PBDParticle> particle);
+		void Enforce(s_ptr<components::PBDParticle> particle);
 	};
 
 	struct Contact
 	{
-		Contact(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2);
+		Contact(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2);
 		~Contact();
-		std::shared_ptr<components::PBDParticle> a;
-		std::shared_ptr<components::PBDParticle> b;
+		s_ptr<components::PBDParticle> a;
+		s_ptr<components::PBDParticle> b;
 		glm::vec3 contact_normal;
 	};
 
@@ -150,7 +150,7 @@ namespace pbd
         ~PBDManager() = default;
     public:
 
-		std::vector<std::shared_ptr<components::PBDParticle>> particles_;
+		std::vector<s_ptr<components::PBDParticle>> particles_;
 		std::vector<pbd::FGRRecord> generator_registry_;
 		std::vector<pbd::RopeConstraint> constraints_;
 		std::vector<pbd::Contact> contacts_;
@@ -177,8 +177,8 @@ namespace pbd
             }
         }
 
-		void RemoveRecord(std::shared_ptr<ForceGenerator> g);
-		void RemoveRecord(std::shared_ptr<components::PBDParticle> p);
+		void RemoveRecord(s_ptr<ForceGenerator> g);
+		void RemoveRecord(s_ptr<components::PBDParticle> p);
 
 		void Integration(float t);
 		
@@ -189,11 +189,11 @@ namespace pbd
 			walls_ = walls;
 		}
 
-		float GetDistanceToClosestWall(std::shared_ptr<components::PBDParticle> p);
+		float GetDistanceToClosestWall(s_ptr<components::PBDParticle> p);
 
-		std::shared_ptr<components::PBDParticle> CreateParticle(float mass, float damping_factor, std::shared_ptr<components::Transform> transform);
-		void CreateFGRRecord(std::shared_ptr<components::PBDParticle> p, std::shared_ptr<pbd::BasicGenerator> g);
-		void CreateRopeConstraint(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2, float ml);
+		s_ptr<components::PBDParticle> CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform);
+		void CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pbd::BasicGenerator> g);
+		void CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
 		void ClearContacts();
 		void ResolveContact(const Contact& contact);
 		void ResolveContacts();

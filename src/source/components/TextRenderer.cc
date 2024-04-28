@@ -1,6 +1,6 @@
 #include "../../headers/components/TextRenderer.h"
 
-components::TextRenderer::TextRenderer(std::shared_ptr<Shader> shader, std::shared_ptr<Font> font, std::string text, glm::vec3 color)
+components::TextRenderer::TextRenderer(s_ptr<Shader> shader, s_ptr<Font> font, string text, glm::vec3 color)
 {
     shader_ = shader;
     text_ = text;
@@ -33,7 +33,7 @@ void components::TextRenderer::Update()
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
     {
-        std::cout << "OpenGL Error: " << error << std::endl;
+        cout << "OpenGL Error: " << error << endl;
     }
 
     float x = 0, y = 0;

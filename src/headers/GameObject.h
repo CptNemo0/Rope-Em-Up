@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <typeindex>
 
+#include "global.h"
 #include "Texture.h"
 #include "components/Transform.h"
 #include "Mesh.h"
@@ -17,15 +18,15 @@
 class GameObject : public std::enable_shared_from_this<GameObject>
 {
 private:
-	std::unordered_map<std::string, std::shared_ptr<Component>> components_;
+	std::unordered_map<string, s_ptr<Component>> components_;
 
 public:
 	GameObject();
 	~GameObject() = default;
-	std::shared_ptr<components::Transform> transform_;
+	s_ptr<components::Transform> transform_;
 
-	static std::shared_ptr<GameObject> Create();
-	static std::shared_ptr<GameObject> Create(std::shared_ptr<GameObject> parent);
+	static s_ptr<GameObject> Create();
+	static s_ptr<GameObject> Create(s_ptr<GameObject> parent);
 
 	void Update();
 	void PropagateUpdate();
@@ -33,14 +34,14 @@ public:
 	void Destroy();
 
 	template <typename T>
-	void AddComponent(std::shared_ptr<T> component)
+	void AddComponent(s_ptr<T> component)
 	{
 		components_[typeid(T).name()] = component;
 		component->gameObject_ = shared_from_this();
 	}
 
 	template <typename T>
-	std::shared_ptr<T> GetComponent()
+	s_ptr<T> GetComponent()
 	{
 		assert(components_.find(typeid(T).name()) != components_.end());
 		return std::dynamic_pointer_cast<T>(components_[typeid(T).name()]);

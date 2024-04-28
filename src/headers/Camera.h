@@ -3,10 +3,11 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include <memory>
 
+#include "global.h"
 #include "components/Component.h"
 #include "components/Transform.h"
-#include <memory>
 
 namespace llr
 {
@@ -167,8 +168,8 @@ namespace components
 	class CameraComponent : public Component
 	{
 	public:
-		std::shared_ptr<components::Transform> transfrom_;
-		std::shared_ptr<llr::Camera> camera_;
+		s_ptr<components::Transform> transfrom_;
+		s_ptr<llr::Camera> camera_;
 
 		// Inherited via Component
 		void Start() override;

@@ -4,6 +4,8 @@
 #include "glad/glad.h"
 #include "string"
 #include <iostream>
+
+#include "global.h"
 #include "Camera.h"
 #include "Shader.h"
 #include "Texture.h"	
@@ -12,21 +14,21 @@
 class HDRCubemap
 {
 public:
-	std::string path_;
-	std::shared_ptr<Shader> BackgroundShader_;
-	std::shared_ptr<Shader> EquirectangularToCubemapShader_;
-	std::shared_ptr<Shader> IrrandanceShader_;
+	string path_;
+	s_ptr<Shader> BackgroundShader_;
+	s_ptr<Shader> EquirectangularToCubemapShader_;
+	s_ptr<Shader> IrrandanceShader_;
 
 	unsigned int cubeVAO = 0;
 	unsigned int cubeVBO = 0;
 	unsigned int envCubemap = 0;
 	unsigned int irradianceMap = 0;
 
-	HDRCubemap(const std::string& path, std::shared_ptr<Shader> BackgroundShade, 
-		std::shared_ptr<Shader> EquirectangularToCubemapShader, std::shared_ptr<Shader> IrrandanceShader);
+	HDRCubemap(const string& path, s_ptr<Shader> BackgroundShade, 
+		s_ptr<Shader> EquirectangularToCubemapShader, s_ptr<Shader> IrrandanceShader);
 	~HDRCubemap() = default;
 
-	void LoadHDRimg(GLFWwindow* window, std::shared_ptr<llr::Camera> camera);
+	void LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera);
 	void RenderCube();
 
 };

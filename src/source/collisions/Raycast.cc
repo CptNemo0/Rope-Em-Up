@@ -1,6 +1,6 @@
 #include "../../headers/collisions/Raycast.h"
 
-collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer, std::shared_ptr<GameObject> caster)
+collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer, s_ptr<GameObject> caster)
 {
     RaycastHit return_value;
     return_value.object = nullptr;
@@ -20,7 +20,7 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
 
     float half_lenght = distance * 0.5f;
 
-    std::shared_ptr<AABB> aabb = std::make_shared<AABB>();
+    s_ptr<AABB> aabb = make_shared<AABB>();
     aabb->centre = center;
     aabb->extremes = glm::vec3(half_lenght, 0.0f, half_lenght);
 
@@ -33,13 +33,13 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
 
     glm::mat4 model_matrix = glm::mat4(1.0f);
 
-    std::shared_ptr<ConvexHull> hull = std::make_shared<ConvexHull>();
+    s_ptr<ConvexHull> hull = make_shared<ConvexHull>();
     hull->local_vertices = vertices;
     hull->vertices = vertices;
 
     CollisionManager::i_->colliders_;*/
 
-    std::shared_ptr<GameObject> rv_object = nullptr;
+    s_ptr<GameObject> rv_object = nullptr;
     glm::vec3 rv_point = glm::vec3(0.0f);
     float rv_distance = INFINITY;
     bool hit = false;
@@ -138,7 +138,7 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
     return return_value;
 }
 
-bool collisions::ChokeCheck(std::shared_ptr<GameObject> caster, int precision, int threshold, float distance)
+bool collisions::ChokeCheck(s_ptr<GameObject> caster, int precision, int threshold, float distance)
 {
     assert((360 % precision) == 0);
 
@@ -169,7 +169,7 @@ bool collisions::ChokeCheck(std::shared_ptr<GameObject> caster, int precision, i
 
     if (return_value)
     {
-        std::cout << "CHOKED!!!\n";;
+        cout << "CHOKED!!!\n";;
     }
 
     return return_value;

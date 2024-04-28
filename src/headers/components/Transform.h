@@ -12,6 +12,8 @@
 #include <vector>
 #include <memory>
 
+#include "../global.h"
+
 class GameObject;
 
 namespace components
@@ -37,14 +39,14 @@ private:
     void CalculateModelMatrix(const glm::mat4 parent_model);
 
 public:
-    std::shared_ptr<GameObject> game_object_;
-    std::vector<std::shared_ptr<Transform>> children_;
+    s_ptr<GameObject> game_object_;
+    std::vector<s_ptr<Transform>> children_;
     Transform *parent_ = nullptr;
 
     Transform();
 
-    void AddChild(std::shared_ptr<Transform> child);
-    void RemoveChild(std::shared_ptr<Transform> child);
+    void AddChild(s_ptr<Transform> child);
+    void RemoveChild(s_ptr<Transform> child);
 
     const glm::vec3 get_position() const;
     const glm::vec3 get_global_position() const;

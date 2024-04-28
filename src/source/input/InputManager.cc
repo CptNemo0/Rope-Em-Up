@@ -13,8 +13,8 @@ input::InputManager::InputManager(GLFWwindow *window)
         keyboard_state[i] = false;
     }
 
-    observers_.emplace(GLFW_JOYSTICK_1, std::vector<std::shared_ptr<InputObserver>>());
-    observers_.emplace(GLFW_JOYSTICK_2, std::vector<std::shared_ptr<InputObserver>>());
+    observers_.emplace(GLFW_JOYSTICK_1, std::vector<s_ptr<InputObserver>>());
+    observers_.emplace(GLFW_JOYSTICK_2, std::vector<s_ptr<InputObserver>>());
 
     keyboard_mappings =
     {
@@ -49,11 +49,11 @@ void input::InputManager::JoystickStateCallback(int jid, int event)
 {
     if (event == GLFW_CONNECTED)
     {
-        std::cout << "Joystick connected: " << glfwGetJoystickName(jid) << std::endl;
+        cout << "Joystick connected: " << glfwGetJoystickName(jid) << endl;
     }
     else if (event == GLFW_DISCONNECTED)
     {
-        std::cout << "A joystick disconnected" << std::endl;
+        cout << "A joystick disconnected" << endl;
     }
 }
 
@@ -123,12 +123,12 @@ void input::InputManager::UpdateKeyboardState(int gamepadID)
     }
 }
 
-void input::InputManager::AddObserver(int gamepadID, std::shared_ptr<InputObserver> observer)
+void input::InputManager::AddObserver(int gamepadID, s_ptr<InputObserver> observer)
 {
     observers_[gamepadID].push_back(observer);
 }
 
-void input::InputManager::RemoveObserver(int gamepadID, std::shared_ptr<InputObserver> observer)
+void input::InputManager::RemoveObserver(int gamepadID, s_ptr<InputObserver> observer)
 {
     auto &observers = observers_[gamepadID];
     observers.erase(std::remove(observers.begin(), observers.end(), observer), observers.end());

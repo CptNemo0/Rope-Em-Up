@@ -9,10 +9,10 @@ void components::PlayerController::Start()
 {
     input::InputManager::i_->AddObserver(gamepadID_, shared_from_this());
 
-    move_generator_ = std::make_shared<pbd::BasicGenerator>();
+    move_generator_ = make_shared<pbd::BasicGenerator>();
     move_generator_->magnitude_ = speed_;
 
-    pull_generator_ = std::make_shared<pbd::BasicGenerator>();
+    pull_generator_ = make_shared<pbd::BasicGenerator>();
 
     auto particle_component = gameObject_.lock()->GetComponent<components::PBDParticle>();
 

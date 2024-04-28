@@ -49,7 +49,7 @@ void Mesh::Init()
 }
 
 
-void Mesh::Draw(std::shared_ptr<Shader> shader) const
+void Mesh::Draw(s_ptr<Shader> shader) const
 {
     unsigned int diffuseNr = 0;
     unsigned int normalNr = 0;
@@ -61,8 +61,8 @@ void Mesh::Draw(std::shared_ptr<Shader> shader) const
         glActiveTexture(GL_TEXTURE0 + i);
         std::string number;
         std::string name = textures_[i].type_;
-        if (name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
+        if (name == "texture_albedo")
+            number = std::to_string(albedoeNr++);
         else if (name == "texture_normal")
             number = std::to_string(normalNr++);
         else if (name == "texture_metallic")
