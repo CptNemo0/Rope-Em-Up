@@ -25,8 +25,7 @@ namespace components
 
         std::shared_ptr<Transform> transform_;
         std::shared_ptr<Model> model_;
-	    std::shared_ptr<Shader> shader_;
-        std::shared_ptr<Mesh> mesh_;
+        std::shared_ptr<Shader> shader_;
 
         void Start() override;
         void Update() override;

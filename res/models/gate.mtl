@@ -1,0 +1,44 @@
+# Blender 4.1.1 MTL File: 'enviro.blend'
+# www.blender.org
+
+newmtl Material
+Ns 0.000000
+Ka 0.318182 0.318182 0.318182
+Kd 0.012531 0.000000 0.800219
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+newmtl all_gate
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ../textures/enviroment/gates/gate_albedo.png
+map_Ns ./textures/enviroment/gates/gate_roughness.png
+map_refl ../textures/enviroment/gates/gate_matallic.png
+map_Bump -bm 1.000000 ../textures/enviroment/gates/gate_normal.png
+
+newmtl black
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl brick
+Ns 0.000000
+Ka 0.054545 0.054545 0.054545
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3

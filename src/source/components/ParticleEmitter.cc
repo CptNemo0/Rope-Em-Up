@@ -1,16 +1,18 @@
 #include "../../headers/components/ParticleEmitter.h"
 
-components::ParticleEmitter::ParticleEmitter(std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader)
+components::ParticleEmitter::ParticleEmitter(int max_particles, std::shared_ptr<tmp::Texture> texture, std::shared_ptr<Shader> shader, std::shared_ptr<llr::Camera> camera)
 {
     this->texture_ = texture;
     this->shader_ = shader;
+    this->camera_ = camera;
+    this->max_particles_ = max_particles;
 
     glGenVertexArrays(1, &VAO_);
     glGenBuffers(1, &VBO_);
     glBindVertexArray(VAO_);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-    // BUFFERED FOR SINGLE PARTICLE
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * MAX_PARTICLES, NULL, GL_DYNAMIC_DRAW);
+    // BUFFERED FOR MAX PARTICLES
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * max_particles_, NULL, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *)offsetof(Particle, position));
@@ -18,6 +20,8 @@ components::ParticleEmitter::ParticleEmitter(std::shared_ptr<tmp::Texture> textu
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *)offsetof(Particle, size));
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *)offsetof(Particle, color));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *)offsetof(Particle, rotation_angle));
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -56,6 +60,7 @@ void components::ParticleEmitter::Destroy()
 
 void components::ParticleEmitter::UpdateParticles(float delta_time)
 {
+    auto view_matrix = camera_->GetViewMatrix();
     float inverse_life_time = 1.0f / static_cast<float>(std::chrono::microseconds(static_cast<int>(life_time_ * 1000000)).count());
     for (auto &particle : particles_)
     {
@@ -70,6 +75,7 @@ void components::ParticleEmitter::UpdateParticles(float delta_time)
         float t = 1.0f - (particle.expiration_time.count() * inverse_life_time);
         particle.color = glm::mix(start_color_, end_color_, t);
         particle.size = glm::mix(start_size_.x, end_size_.x, t);
+        particle.camera_distance = (view_matrix * glm::vec4(particle.position, 0.0f)).z;
     }
 
     std::erase_if(particles_, [this](const Particle &p)
@@ -77,6 +83,11 @@ void components::ParticleEmitter::UpdateParticles(float delta_time)
         return particle_indeces_to_remove_.find(p.id_) != particle_indeces_to_remove_.end();
     });
     particle_indeces_to_remove_.clear();
+
+    std::sort(particles_.begin(), particles_.end(), [](const Particle &a, const Particle &b)
+    {
+        return a.camera_distance < b.camera_distance;
+    });
 }
 
 void components::ParticleEmitter::EmitParticles()
@@ -94,6 +105,7 @@ void components::ParticleEmitter::EmitParticles()
         particle.velocity = start_velocity_ + glm::vec3(rand_float(-start_velocity_displacement_, start_velocity_displacement_),
                                                         rand_float(-start_velocity_displacement_, start_velocity_displacement_),
                                                         rand_float(-start_velocity_displacement_, start_velocity_displacement_));
+        particle.rotation_angle = rand_float(0.0f, glm::two_pi<float>());
         particle.id_ = current_id_++;
         particles_.push_back(particle);
     }

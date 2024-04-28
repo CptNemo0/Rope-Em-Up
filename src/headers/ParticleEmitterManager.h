@@ -5,6 +5,7 @@
 
 #include "components/ParticleEmitter.h"
 #include "Timer.h"
+#include "Camera.h"
 
 namespace components
 {
@@ -36,6 +37,7 @@ public:
         }
     }
 public:
+    std::shared_ptr<llr::Camera> camera;
     std::vector<std::shared_ptr<Timer::Timer>> emitter_timers_;
     std::vector<std::shared_ptr<components::ParticleEmitter>> emitters_;
 

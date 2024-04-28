@@ -27,6 +27,7 @@
 #include "headers/physics/Physics.h"
 #include "headers/physics/PBD.h"
 #include "headers/physics/Rope.h"
+#include "headers/Postprocessing.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
 #include "headers/utility.h"
@@ -44,6 +45,9 @@
 #include "headers/ai/EnemyAIManager.h"
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
+
+#include "imgui_impl/imgui_impl_glfw.h"
+#include "imgui_impl/imgui_impl_opengl3.h"
 
 void FixOrientation(std::shared_ptr<GameObject> go)
 {
@@ -85,10 +89,14 @@ int main()
     const std::string kParticleGeometryShaderPath = "res/shaders/Particle.geom";
     const std::string kParticleFragmentShaderPath = "res/shaders/Particle.frag";
 
+    const std::string kPostprocessingVertexShaderPath = "res/shaders/PostprocessingShader.vert";
+    const std::string kPostprocessingFragmentShaderPath = "res/shaders/PostprocessingShader.frag";
+
     const std::string kGreenTexturePath = "res/textures/green_texture.png";
     const std::string kRedTexturePath = "res/textures/red_texture.png";
     const std::string kHUDTexturePath = "res/textures/placeholder_icon.png";
     const std::string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
+    const std::string kTestSmokeTexturePath = "res/textures/test_smoke.png";
 
     const std::string kHDREquirectangularPath = "res/cubemaps/HDR_placeholder.hdr";
 
@@ -102,6 +110,7 @@ int main()
     const std::string kModule2Path = "res/models/enviroment/modules/module2.obj";
     const std::string kSimpleFloodPath = "res/models/enviroment/floor/floor.obj";
     const std::string kTestBallPath = "res/models/test_ball.obj";
+    const std::string kGatePath = "res/models/gate.obj";
 
     const std::string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
@@ -165,6 +174,8 @@ int main()
     }
     std::cout << "GLAD Initialized.\n";
 
+    utility::InitImGUI(window);
+
     input::InputManager::Initialize(window);
     collisions::CollisionManager::Initialize();
     physics::PhysicsManager::Initialize();
@@ -192,7 +203,10 @@ int main()
     auto BackgroundShader = std::make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
     auto IrradianceShader = std::make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
     auto ParticleShader = std::make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
+    auto PostprocessingShader = std::make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
 
+    ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
+    postprocessor.Bind();
     auto cubemap = std::make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
@@ -228,9 +242,11 @@ int main()
     auto module_2_model = std::make_shared<Model>(kModule2Path);
     auto simple_floor_model = std::make_shared<Model>(kSimpleFloodPath);
     auto test_ball_model = std::make_shared<Model>(kTestBallPath);
+    auto gate_model = std::make_shared<Model>(kGatePath);
 
     auto HUD_texture = std::make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = std::make_shared<tmp::Texture>(kHUDTexturePath2);
+    auto Smoke_texture = std::make_shared<tmp::Texture>(kTestSmokeTexturePath);
 
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
@@ -238,23 +254,31 @@ int main()
 
     auto scene_root = GameObject::Create();
 
+    auto gate_1 = GameObject::Create(scene_root);
+    gate_1->AddComponent(std::make_shared<components::MeshRenderer>(gate_model, PBRShader));
+
+    auto gate_2 = GameObject::Create(scene_root);
+    gate_2->AddComponent(std::make_shared<components::MeshRenderer>(gate_model, PBRShader));
+
     auto wall_up_1 = GameObject::Create(scene_root);
     wall_up_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, -16.0f));
     wall_up_1->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    wall_up_1->transform_->AddChild(gate_1->transform_);
+
     auto wall_up_2 = GameObject::Create(scene_root);
     wall_up_2->transform_->set_position(glm::vec3(8.0f, 0.0f, -16.0f));
     wall_up_2->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
-
+    
     auto wall_right_1 = GameObject::Create(scene_root);
     wall_right_1->transform_->set_position(glm::vec3(-16.0f, 0.0f, -8.0f));
     wall_right_1->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_right_1->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    wall_right_1->transform_->AddChild(gate_2->transform_);
 
     auto wall_right_2 = GameObject::Create(scene_root);
     wall_right_2->transform_->set_position(glm::vec3(-16.0f, 0.0f, 8.0f));
     wall_right_2->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_right_2->AddComponent(std::make_shared<components::MeshRenderer>(module_2_model, PBRShader));
-
 
     auto floor = GameObject::Create(scene_root);
     floor->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -309,12 +333,6 @@ int main()
 
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     //ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
-
-    /*auto start = glm::vec3(-0.2, 0.0f, 2.0f);
-    auto end = glm::vec3(0.2, 0.0f, -2.0f);
-    auto dir = glm::normalize(end - start);
-
-    auto hit = collisions::Raycast(start, dir, 20.0f, 0);*/
 
     std::vector<std::shared_ptr<GameObject>> rope_segments;
 
@@ -374,9 +392,9 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(HUD_texture, ParticleShader));
+    particle_emitter->AddComponent(std::make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, camera));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
-    particle_emitter_component->emission_rate_ = 0.01f;
+    particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
     particle_emitter_component->start_size_ = glm::vec2(0.1f, 0.0f);
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
@@ -431,12 +449,27 @@ int main()
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);
+    
+    // wireframe
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    // GAME LOOP GAME LOOP GAME LOOP GAME LOOP 
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    //////////////////////////////////////////
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        static float gamma_value = 1.0f;
+        static float brightness_value = 0.0f;
+        static float contrast_value = 1.0f;
 
         static float lag = 0.0f;
         static float previous_time = glfwGetTime();
@@ -449,6 +482,7 @@ int main()
 
         previous_time = current_time;
 
+    
         Timer::Update(delta_time);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
@@ -468,16 +502,7 @@ int main()
 
 #pragma endregion
 #pragma region GO Update and Draw
-
-       /* shader->Use();
-
-        shader->SetVec3("camera_position", camera->get_position());
-        shader->SetFloat("shininess", 50.0f);
-
-        shader->SetPointLight("light", point_light);
-        shader->SetMatrix4("projection_matrix", projection_matrix);
-        shader->SetMatrix4("view_matrix", camera->GetViewMatrix());*/
-
+        postprocessor.Bind();        
         PBRShader->Use();
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         PBRShader->SetVec3("camera_position", camera->get_position());
@@ -485,45 +510,45 @@ int main()
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
 
-        glm::vec3 newPos = light_Positions[0] /* + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0)*/;
+        glm::vec3 newPos = light_Positions[0]; /* +glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);*/
         PBRShader->SetVec3("light_positions[0]", newPos);
         PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
-
         glm::mat4 model = glm::mat4(1.0f);
         PBRShader->SetMatrix4("model_matrix", model);
 
         scene_root->PropagateUpdate();
-
+        
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-
+        
         cubemap->RenderCube();
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+        
         ParticleShader->Use();
         ParticleShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
-
+        
         glDisable(GL_BLEND);
-
+        
+        postprocessor.Draw();
 #pragma endregion
 #pragma region Interface
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+        
         HUDshader->Use();
 
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
         HUD_root->PropagateUpdate();
-
+        
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
-
+        
         HUDText_object->GetComponent<components::TextRenderer>()->text_ = "fps: " + std::to_string(1.0f / delta_time);
         HUDText_root->PropagateUpdate();
 
@@ -532,15 +557,34 @@ int main()
 
 #pragma endregion
 
+#pragma region ImGUI
+        
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::Begin("Colors");
+        ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::End();
+        ImGui::Render();
+        
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+#pragma endregion 
         glfwSwapBuffers(window);
 
-#pragma endregion
+
     }
 
     ai::EnemyAIManager::Destroy();
     pbd::PBDManager::Destroy();
     collisions::CollisionManager::Destroy();
     input::InputManager::Destroy();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     shader->End();
     glfwTerminate();

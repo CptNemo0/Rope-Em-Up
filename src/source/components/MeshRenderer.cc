@@ -3,7 +3,6 @@
 components::MeshRenderer::MeshRenderer(std::shared_ptr<Model> model, std::shared_ptr<Shader> shader)
 {
 	this->model_ = model;
-	this->mesh_ = model_->meshes_.at(0);
 	this->shader_ = shader;
 }
 
