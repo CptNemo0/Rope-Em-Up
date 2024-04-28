@@ -51,7 +51,7 @@ void Mesh::Init()
 
 void Mesh::Draw(s_ptr<Shader> shader) const
 {
-    unsigned int diffuseNr = 0;
+    unsigned int albedoeNr = 0;
     unsigned int normalNr = 0;
     unsigned int metalicNr = 0;
     unsigned int roughnesstNr = 0;

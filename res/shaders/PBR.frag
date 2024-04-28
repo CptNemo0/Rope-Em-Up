@@ -10,27 +10,47 @@ uniform vec3 light_colors[1];
 
 uniform vec3 camera_position;
 
+// material parameters
 uniform sampler2D albedo_map;
 uniform sampler2D normal_map;
 uniform sampler2D metallic_map;
 uniform sampler2D roughness_map;
-//uniform sampler2D ao_map;
-uniform float ao;
+uniform sampler2D ao_map;
+
 // IBL
 uniform samplerCube irradiance_map;
+uniform samplerCube prefilter_map;
+uniform sampler2D brdfLUT;
 
  
 const float PI = 3.14159265359;
 
+vec3 getNormalFromMap()
+{
+    vec3 tangentNormal = texture(normal_map, Texture_coords).xyz * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(World_position);
+    vec3 Q2  = dFdy(World_position);
+    vec2 st1 = dFdx(Texture_coords);
+    vec2 st2 = dFdy(Texture_coords);
+
+    vec3 N   = normalize(Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
+
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
-    {
-        return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
-    }
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
 
 float DistributionGGX(vec3 N, vec3 H, float roughness) //funkcja rozk³adu wektorów normalnych Trowbridge-Reitz GGX
 {
@@ -69,21 +89,23 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
 void main()
     {
-		vec3 albedo = texture(albedo_map, Texture_coords).rgb;
+		vec3 albedo = texture(albedo_map, Texture_coords).rgb, vec3(2.2));
 		float metallic = texture(metallic_map, Texture_coords).r;
 		float roughness = texture(roughness_map, Texture_coords).r;
-		//float ao = texture(ao_map, Texture_coords).r;
+		float ao = texture(ao_map, Texture_coords).r;
 
-        vec3 N = normalize(Normal); 
+        vec3 N = getNormalFromMap(); 
         vec3 V = normalize(camera_position - World_position);
         vec3 R = reflect(-V, N);
-
+        
+        // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+        // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow) 
         vec3 F0 = vec3(0.04);
         F0 = mix(F0, albedo, metallic);
 
         //The reflectance equation
 		vec3 Lo = vec3(0.0);
-        for(int i = 0; i < 4; ++i) 
+        for(int i = 0; i < 1; ++i) 
         {
             //radiation
             vec3 L = normalize(light_positions[i] - World_position);
@@ -116,9 +138,15 @@ void main()
         vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
         vec3 kD = 1.0 - kS;
         kD *= 1.0 - metallic;
+
         vec3 irradiance = texture(irradiance_map, N).rgb;
         vec3 diffuse = irradiance * albedo;
-        vec3 ambient = (kD * diffuse) * ao;
+
+        const float MAX_REFLECTION_LOD = 4.0;
+        vec3 prefilteredColor = textureLod(prefilter_map, R,  roughness * MAX_REFLECTION_LOD).rgb;    
+        vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+        vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+        vec3 ambient = (kD * diffuse + specular) * ao;
 
         vec3 color = ambient + Lo;
 

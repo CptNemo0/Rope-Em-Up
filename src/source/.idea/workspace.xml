@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="72e558fd-9214-4f0a-9aa5-89b6f73db4ae" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../../res/shaders/GBufferPass.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../res/shaders/GBufferPass.vert" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headers/GBuffer.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headers/Random.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headers/global.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GBuffer.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Random.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../res/shaders/PBR.frag" beforeDir="false" afterPath="$PROJECT_DIR$/../../res/shaders/PBR.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/Camera.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/Camera.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/Font.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/Font.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/GameObject.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/GameObject.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/HDRCubemap.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/HDRCubemap.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/Mesh.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/Mesh.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/Model.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/Model.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/ParticleEmitterManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/ParticleEmitterManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/Postprocessing.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/Postprocessing.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/Shader.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/Shader.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/SteeringBehaviors.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/SteeringBehaviors.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/Texture.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/Texture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/Timer.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/Timer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/ai/EnemyAIManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/ai/EnemyAIManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/ai/EnemyState.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/ai/EnemyState.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/collisions/Collider.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/collisions/Collider.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/collisions/CollisionManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/collisions/CollisionManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/collisions/Collisions.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/collisions/Collisions.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/collisions/Raycast.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/collisions/Raycast.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/components/HUDRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/components/HUDRenderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/components/LegacyTextRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/components/LegacyTextRenderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/components/MeshRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/components/MeshRenderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/components/ParticleEmitter.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/components/ParticleEmitter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/components/PlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/components/PlayerController.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/components/TextRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/components/TextRenderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/components/Transform.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/components/Transform.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/input/InputManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/input/InputManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/physics/PBD.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/physics/PBD.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/physics/Physics.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/physics/Physics.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/physics/Rope.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/physics/Rope.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headers/utility.h" beforeDir="false" afterPath="$PROJECT_DIR$/../headers/utility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/../main.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Font.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Font.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GameObject.cc" beforeDir="false" afterPath="$PROJECT_DIR$/GameObject.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HDRCubemap.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/HDRCubemap.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Mesh.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Model.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Postprocessing.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Postprocessing.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Shader.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Shader.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SteeringBehaviors.cc" beforeDir="false" afterPath="$PROJECT_DIR$/SteeringBehaviors.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Texture.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Texture.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Timer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Timer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai/EnemyAIManager.cc" beforeDir="false" afterPath="$PROJECT_DIR$/ai/EnemyAIManager.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai/EnemyState.cc" beforeDir="false" afterPath="$PROJECT_DIR$/ai/EnemyState.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/collisions/Collider.cc" beforeDir="false" afterPath="$PROJECT_DIR$/collisions/Collider.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/collisions/CollisionManager.cc" beforeDir="false" afterPath="$PROJECT_DIR$/collisions/CollisionManager.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/collisions/Raycast.cc" beforeDir="false" afterPath="$PROJECT_DIR$/collisions/Raycast.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/HUDRenderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/components/HUDRenderer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/LegacyTextRenderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/components/LegacyTextRenderer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/MeshRenderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/components/MeshRenderer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ParticleEmitter.cc" beforeDir="false" afterPath="$PROJECT_DIR$/components/ParticleEmitter.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/PlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/components/PlayerController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/TextRenderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/components/TextRenderer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Transform.cc" beforeDir="false" afterPath="$PROJECT_DIR$/components/Transform.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/input/InputManager.cc" beforeDir="false" afterPath="$PROJECT_DIR$/input/InputManager.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/physics/PBD.cc" beforeDir="false" afterPath="$PROJECT_DIR$/physics/PBD.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/physics/Physics.cc" beforeDir="false" afterPath="$PROJECT_DIR$/physics/Physics.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/physics/Rope.cc" beforeDir="false" afterPath="$PROJECT_DIR$/physics/Rope.cc" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2023" />
+    <option name="minorVersion" value="2.2" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 5
+}]]></component>
+  <component name="ProjectId" id="2fkCD4Al1ZV6nnScFubPHrLUnbX" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "Merging main",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="72e558fd-9214-4f0a-9aa5-89b6f73db4ae" name="Changes" comment="" />
+      <created>1714335567197</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1714335567197</updated>
+      <workItem from="1714335569588" duration="26000" />
+    </task>
+    <servers />
+  </component>
+</project>
