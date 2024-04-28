@@ -92,20 +92,20 @@ void components::ParticleEmitter::UpdateParticles(float delta_time)
 
 void components::ParticleEmitter::EmitParticles()
 {
-    int rand_amount = rand_int(spawns_per_emission_.x, spawns_per_emission_.y);
+    int rand_amount = random::RandInt(spawns_per_emission_.x, spawns_per_emission_.y);
 
     for (int i = 0; i < rand_amount; i++)
     {
         Particle particle;
         particle.life_time = std::chrono::microseconds(static_cast<int>(life_time_ * 1000000));
         particle.expiration_time = particle.life_time;
-        particle.size = rand_float(start_size_.x, start_size_.y);
+        particle.size = random::RandFloat(start_size_.x, start_size_.y);
         particle.color = start_color_;
-        particle.position = transform_->get_global_position() + rand_sphere_vec3() * start_position_displacement_;
-        particle.velocity = start_velocity_ + glm::vec3(rand_float(-start_velocity_displacement_, start_velocity_displacement_),
-                                                        rand_float(-start_velocity_displacement_, start_velocity_displacement_),
-                                                        rand_float(-start_velocity_displacement_, start_velocity_displacement_));
-        particle.rotation_angle = rand_float(0.0f, glm::two_pi<float>());
+        particle.position = transform_->get_global_position() + random::RandInsideSphere() * start_position_displacement_;
+        particle.velocity = start_velocity_ + glm::vec3(random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
+                                                        random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
+                                                        random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_));
+        particle.rotation_angle = random::RandFloat(0.0f, glm::two_pi<float>());
         particle.id_ = current_id_++;
         particles_.push_back(particle);
     }

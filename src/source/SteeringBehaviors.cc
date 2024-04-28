@@ -16,8 +16,8 @@ glm::vec3 Flee(glm::vec3 target, glm::vec3 actor)
 
 glm::vec3 Wander(std::shared_ptr<components::Transform> actor, Vehicle& vehicle, float t)
 {
-	float x = -1  + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2)));
-	float z = -1 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2)));
+	float x = random::RandFloat(-1, 1);
+	float z = random::RandFloat(-1, 1);
 
 	x *= vehicle.wander_jitter;
 	z *= vehicle.wander_jitter;

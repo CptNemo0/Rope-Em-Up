@@ -11,6 +11,7 @@
 #include "../physics/PBD.h"
 #include "../ParticleEmitterManager.h"
 #include "../Camera.h"
+#include "../Random.h"
 
 struct Particle
 {
@@ -71,33 +72,6 @@ public:
     void UpdateParticles(float delta_time);
     void EmitParticles();
     void DrawParticles();
-
-    // inclusive
-    static inline float rand_float(float min, float max)
-    {
-        return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
-    }
-
-    // inclusive
-    static inline int rand_int(int min, int max)
-    {
-        return min + rand() % (max - min + 1);
-    }
-
-    // unit sphere uniform distribution
-    static inline glm::vec3 rand_sphere_vec3()
-    {
-        float u = rand_float(0.0f, 1.0f);
-        float v = rand_float(0.0f, 1.0f);
-        float theta = u * 2.0f * glm::pi<float>();
-        float phi = glm::acos(2.0f * v - 1.0f);
-        float r = std::cbrtf(rand_float(0.0f, 1.0f));
-        float sin_theta = glm::sin(theta);
-        float cos_theta = glm::cos(theta);
-        float sin_phi = glm::sin(phi);
-        float cos_phi = glm::cos(phi);
-        return glm::vec3(r * sin_phi * cos_theta, r * sin_phi * sin_theta, r * cos_phi);
-    }
 };
 
 } // namespace components
