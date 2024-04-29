@@ -429,8 +429,8 @@ int main()
     PBRShader->Use();
     PBRShader->SetMatrix4("projection_matrix", projection);
     
-    GBufferPassShader->Use();
-    GBufferPassShader->SetMatrix4("projection_matrix", projection);
+    //GBufferPassShader->Use();
+    //GBufferPassShader->SetMatrix4("projection_matrix", projection);
 
     ParticleShader->Use();
     ParticleShader->SetMatrix4("projection_matrix", projection);
@@ -518,7 +518,7 @@ int main()
         PBRShader->SetVec3("camera_position", camera->get_position());
 
         //GBufferPassShader->Use();
-        //GBufferPassShader->SetMatrix4("projection_matrix", projection);
+        //GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
