@@ -4,7 +4,7 @@ layout (location = 1) out vec3 albedo_texture;
 layout (location = 2) out vec3 normal_texture;
 layout (location = 3) out vec3 mra_texture;
 
-//out vec4 color;
+out vec4 color;
 
 in vec3 world_pos;
 in vec2 uv;
@@ -27,5 +27,5 @@ void main()
 	normal_texture = texture(normal_map, uv).rgb;
 	mra_texture = vec3(metallic, roughness, ao);
 
-	//color = vec4(vec3(roughness), 1.0f);
+	//color = vec4(texture(normal_map, uv).rgb, 1.0f);
 }

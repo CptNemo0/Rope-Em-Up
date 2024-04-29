@@ -55,7 +55,7 @@ void Mesh::Draw(s_ptr<Shader> shader) const
     unsigned int normalNr = 0;
     unsigned int metalicNr = 0;
     unsigned int roughnesstNr = 0;
-    for (unsigned int i = 0; i < textures_.size(); i++)
+    /*for (unsigned int i = 0; i < textures_.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
         string number;
@@ -71,7 +71,34 @@ void Mesh::Draw(s_ptr<Shader> shader) const
 
         glUniform1i(glGetUniformLocation(shader->id_, (name + number).c_str()), i);
         glBindTexture(GL_TEXTURE_2D, textures_[i].id_);
+    }*/
+
+    for (unsigned int i = 0; i < textures_.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        string name = textures_[i].type_;
+        if (name == "texture_albedo")
+        {
+            glUniform1i(glGetUniformLocation(shader->id_, "albedo_map"), i);
+            glBindTexture(GL_TEXTURE_2D, textures_[i].id_);
+        }
+        else if (name == "texture_normal")
+        {
+            glUniform1i(glGetUniformLocation(shader->id_, "normal_map"), i);
+            glBindTexture(GL_TEXTURE_2D, textures_[i].id_);
+        }
+        else if (name == "texture_metallic")
+        {
+            glUniform1i(glGetUniformLocation(shader->id_, "metallic_map"), i);
+            glBindTexture(GL_TEXTURE_2D, textures_[i].id_);
+        }
+        else if (name == "texture_roughness")
+        {
+            glUniform1i(glGetUniformLocation(shader->id_, "roughness_map"), i);
+            glBindTexture(GL_TEXTURE_2D, textures_[i].id_);
+        }   
     }
+
 
     glBindVertexArray(vao_);
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices_.size()), GL_UNSIGNED_INT, 0);

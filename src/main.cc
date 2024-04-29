@@ -299,7 +299,7 @@ int main()
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
-    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, shader));
+    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, PBRShader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
     auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
@@ -309,7 +309,7 @@ int main()
     auto enemy_2 = GameObject::Create(scene_root);
     enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
     enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, shader));
+    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, PBRShader));
     enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
     enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
     auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
@@ -428,6 +428,9 @@ int main()
     glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     PBRShader->Use();
     PBRShader->SetMatrix4("projection_matrix", projection);
+    
+    GBufferPassShader->Use();
+    GBufferPassShader->SetMatrix4("projection_matrix", projection);
 
     ParticleShader->Use();
     ParticleShader->SetMatrix4("projection_matrix", projection);
@@ -513,6 +516,9 @@ int main()
         PBRShader->Use();
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         PBRShader->SetVec3("camera_position", camera->get_position());
+
+        //GBufferPassShader->Use();
+        //GBufferPassShader->SetMatrix4("projection_matrix", projection);
 
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
