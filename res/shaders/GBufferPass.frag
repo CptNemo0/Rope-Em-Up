@@ -1,10 +1,8 @@
 #version 410 core
-//layout (location = 0) out vec3 position_texture;
-//layout (location = 1) out vec3 albedo_texture;
-//layout (location = 2) out vec3 normal_texture;
-//layout (location = 3) out vec3 mra_texture;
-
-out vec4 color;
+layout (location = 0) out vec3 position_texture;
+layout (location = 1) out vec3 albedo_texture;
+layout (location = 2) out vec3 normal_texture;
+layout (location = 3) out vec3 mra_texture;
 
 in vec3 world_pos;
 in vec2 uv;
@@ -28,6 +26,4 @@ void main()
 	albedo_texture = texture(albedo_map, uv).rgb;
 	normal_texture = normal;
 	mra_texture = vec3(metallic, roughness, ao);
-	
-	color = vec4(normal, 1.0f);
 }

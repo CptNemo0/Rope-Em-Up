@@ -59,21 +59,21 @@ void GBuffer::Unbind()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GBuffer::BindTextures()
+void GBuffer::BindTextures(s_ptr<Shader> shader)
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, position_texture_);
-	light_pass_shader->SetInt("position_texture", 0);
+	shader->SetInt("position_texture", 0);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, normal_texture_);
-	light_pass_shader->SetInt("normal_texture", 1);
+	shader->SetInt("normal_texture", 1);
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, albedo_texture_);
-	light_pass_shader->SetInt("albedo_texture", 2);
+	shader->SetInt("albedo_texture", 2);
 
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, mra_texture_);
-	light_pass_shader->SetInt("mra_texture", 3);
+	shader->SetInt("mra_texture", 3);
 }

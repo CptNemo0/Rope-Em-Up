@@ -24,4 +24,16 @@ using std::chrono::microseconds;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 
+const float kQuadVertices[] =
+{
+    // positions   // texCoords
+    -1.0f,  1.0f,  0.0f, 1.0f,
+    -1.0f, -1.0f,  0.0f, 0.0f,
+     1.0f, -1.0f,  1.0f, 0.0f,
+
+    -1.0f,  1.0f,  0.0f, 1.0f,
+     1.0f, -1.0f,  1.0f, 0.0f,
+     1.0f,  1.0f,  1.0f, 1.0f
+};
+
 #endif // !GLOBAL_H

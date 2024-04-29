@@ -3,7 +3,7 @@ in vec2 if_uv;
 
 out vec4 FragColor;
 
-uniform sampler2D screen_texture;
+uniform sampler2D color_texture;
 
 uniform vec3 cbg;
 
@@ -24,7 +24,7 @@ vec3 adjust_gamma(vec3 color, float value)
 
 void main()
 {
-    vec3 color = vec3(texture(screen_texture, if_uv));
+    vec3 color = vec3(texture(color_texture, if_uv));
     color = adjust_contrast(color, cbg.x);
     color = adjust_brightness(color, cbg.y);
     color = adjust_gamma(color, cbg.z);

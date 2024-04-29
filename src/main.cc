@@ -51,6 +51,9 @@
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
 
+#include "headers/LBuffer.h";
+#include "headers/GBuffer.h";
+
 void FixOrientation(s_ptr<GameObject> go)
 {
     auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
@@ -188,6 +191,9 @@ int main()
     pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
+
+    LBuffer lbuffer = LBuffer(mode->height, mode->width);
+    GBuffer gbuffer = GBuffer(mode->height, mode->width);
 
     auto camera = make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -513,21 +519,20 @@ int main()
 #pragma endregion
 #pragma region GO Update and Draw
         //postprocessor.Bind();        
-        PBRShader->Use();
-        PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        PBRShader->SetVec3("camera_position", camera->get_position());
 
         //GBufferPassShader->Use();
         //GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
-
-        glm::vec3 newPos = light_Positions[0]; /* +glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);*/
+        PBRShader->Use();
+        glm::vec3 newPos = light_Positions[0]; 
         PBRShader->SetVec3("light_positions[0]", newPos);
         PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
-        glm::mat4 model = glm::mat4(1.0f);
-        PBRShader->SetMatrix4("model_matrix", model);
+        PBRShader->SetMatrix4("model_matrix", glm::mat4(1.0f));
+        PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        PBRShader->SetVec3("camera_position", camera->get_position());
+
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
 
         scene_root->PropagateUpdate();
         
