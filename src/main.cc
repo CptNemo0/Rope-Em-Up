@@ -41,6 +41,7 @@
 #include "headers/Font.h"
 #include "headers/components/ParticleEmitter.h"
 #include "headers/ParticleEmitterManager.h"
+#include "headers/generation/RoomGenerator.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -55,6 +56,8 @@
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
 
+#include "headers/LBuffer.h"
+#include "headers/GBuffer.h"
 
 void FixOrientation(s_ptr<GameObject> go)
 {
@@ -419,6 +422,30 @@ int main()
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
     particle_emitter_component->start_position_displacement_ = 1.0f;
 
+    generation::RoomGenerationSettings rgs;
+    rgs.angle = 0.5f;
+    rgs.span = 0.5f;
+    rgs.branch_division_count = 4;
+    rgs.branch_division_min_length = 2.0f;
+    rgs.branch_division_max_length = 3.0f;
+    rgs.sub_branch_count = 3;
+    rgs.sub_branch_span = 0.2f;
+    rgs.sub_branch_min_length = 3.0f;
+    rgs.sub_branch_max_length = 4.0f;
+
+    generation::RoomGenerator rg;
+    std::deque<w_ptr<GameObject>> room_objects;
+
+    for (auto &room : rg.rooms)
+    {
+        cout << '(' << room.first.x << ", " << room.first.y << ')' << endl;
+        auto room_obj = GameObject::Create(scene_root);
+        room_objects.push_back(room_obj);
+        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+        room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
+        room_obj->transform_->set_scale(glm::vec3(3.0f));
+    }
+
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
     HUDText_root->PropagateStart();
@@ -586,11 +613,52 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
         ImGui::Begin("Colors");
         ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::End();
+
+        ImGui::Begin("Generation");
+        ImGui::SliderFloat("Angle", &rgs.angle, 0.0f, 1.0f, "%0.2f");
+        ImGui::SliderFloat("Span", &rgs.span, 0.0f, 2.0f, "%0.2f");
+        ImGui::SliderInt("Branch division count", &rgs.branch_division_count, 1, 10);
+        ImGui::SliderFloat("Branch division min length", &rgs.branch_division_min_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderFloat("Branch division max length", &rgs.branch_division_max_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderInt("Sub branch count", &rgs.sub_branch_count, 0, 20);
+        ImGui::SliderFloat("Sub branch span", &rgs.sub_branch_span, 0.0f, 2.0f, "%0.2f");
+        ImGui::SliderFloat("Sub branch min length", &rgs.sub_branch_min_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderFloat("Sub branch max length", &rgs.sub_branch_max_length, 1.0f, 10.0f, "%0.2f");
+        if (ImGui::Button("Generate"))
+        {
+            rg.GenerateRooms(rgs);
+            for (auto &room : room_objects)
+            {
+                room.lock()->Destroy();
+            }
+            room_objects.clear();
+            for (auto &room : rg.rooms)
+            {
+                auto room_obj = GameObject::Create(scene_root);
+                room_objects.push_back(room_obj);
+                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+                room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
+                room_obj->transform_->set_scale(glm::vec3(3.0f));
+                room_obj->PropagateStart();
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Clear"))
+        {
+            for (auto &room : room_objects)
+            {
+                room.lock()->Destroy();
+            }
+            room_objects.clear();
+        }
+        ImGui::End();
+
         ImGui::Render();
         
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
