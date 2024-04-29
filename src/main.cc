@@ -48,11 +48,13 @@
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
 
+#include "headers/LBuffer.h"
+#include "headers/GBuffer.h"
+#include "headers/RenderManager.h"
+
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
 
-#include "headers/LBuffer.h";
-#include "headers/GBuffer.h";
 
 void FixOrientation(s_ptr<GameObject> go)
 {
@@ -97,9 +99,11 @@ int main()
     const string kPostprocessingVertexShaderPath = "res/shaders/PostprocessingShader.vert";
     const string kPostprocessingFragmentShaderPath = "res/shaders/PostprocessingShader.frag";
 
-    const string kGBufferPassVertexShaderPath = "res/shaders/GBufferPass.vert";
-    const string kGBufferPassFragmentShaderPath = "res/shaders/GBufferPass.frag";
+    const string kGBufferVertexShaderPath = "res/shaders/GBufferPass.vert";
+    const string kGBufferFragmentShaderPath = "res/shaders/GBufferPass.frag";
 
+    const string kLBufferVertexShaderPath = "res/shaders/LBufferPass.vert";
+    const string kLBufferFragmentShaderPath = "res/shaders/LBufferPass.frag";
 
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
@@ -192,9 +196,6 @@ int main()
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
 
-    LBuffer lbuffer = LBuffer(mode->height, mode->width);
-    GBuffer gbuffer = GBuffer(mode->height, mode->width);
-
     auto camera = make_shared<llr::Camera>();
     camera->set_fov(kFov);
     camera->set_near(kNear);
@@ -216,10 +217,15 @@ int main()
     auto IrradianceShader = make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
     auto ParticleShader = make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
     auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
-    auto GBufferPassShader = make_shared<Shader>(kGBufferPassVertexShaderPath, kGBufferPassFragmentShaderPath);
+    auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
+    auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
 
+    LBuffer lbuffer = LBuffer(mode->height, mode->width);
+    GBuffer gbuffer = GBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
-    postprocessor.Bind();
+    //postprocessor.Bind();
+    RenderManager::Initialize(&gbuffer, &lbuffer, &postprocessor, GBufferPassShader, LBufferPassShader);
+
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
