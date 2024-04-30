@@ -1,23 +1,31 @@
 #include "../headers/Random.h"
 
+std::random_device rd;
+std::mt19937 g(rd());
+
+std::mt19937 &random::get_random_device()
+{
+    return g;
+}
+
 float random::RandFloat(float min, float max)
 {
-    return min + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max - min);
+    return min + (static_cast<float>(g()) / static_cast<float>(g.max())) * (max - min);
 }
 
 float random::RandFloatExcl(float min, float max)
 {
-    return min + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX + 1)) * (max - min);
+    return min + (static_cast<float>(g()) / static_cast<float>(g.max() + 1)) * (max - min);
 }
 
 int random::RandInt(int min, int max)
 {
-    return min + rand() % (max - min + 1);
+    return min + g() % (max - min + 1);
 }
 
 int random::RandIntExcl(int min, int max)
 {
-    return min + rand() % (max - min);
+    return min + g() % (max - min);
 }
 
 glm::vec3 random::RandInsideSphere()

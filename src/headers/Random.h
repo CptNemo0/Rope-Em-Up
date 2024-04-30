@@ -1,12 +1,16 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
-#include <cstdlib>
+#include <random>
 #include "glm/glm.hpp"
 #include "glm/gtc/constants.hpp"
 
+#include "global.h"
+
 namespace random
 {
+
+std::mt19937 &get_random_device();
 
 // Inclusive min and max
 float RandFloat(float min, float max);
