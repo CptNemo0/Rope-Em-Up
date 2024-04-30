@@ -41,6 +41,7 @@
 #include "headers/Font.h"
 #include "headers/components/ParticleEmitter.h"
 #include "headers/ParticleEmitterManager.h"
+#include "headers/generation/RoomGenerator.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -48,8 +49,15 @@
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
 
+#include "headers/LBuffer.h"
+#include "headers/GBuffer.h"
+#include "headers/RenderManager.h"
+
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
+
+#include "headers/LBuffer.h"
+#include "headers/GBuffer.h"
 
 void FixOrientation(s_ptr<GameObject> go)
 {
@@ -94,9 +102,11 @@ int main()
     const string kPostprocessingVertexShaderPath = "res/shaders/PostprocessingShader.vert";
     const string kPostprocessingFragmentShaderPath = "res/shaders/PostprocessingShader.frag";
 
-    const string kGBufferPassVertexShaderPath = "res/shaders/GBufferPass.vert";
-    const string kGBufferPassFragmentShaderPath = "res/shaders/GBufferPass.frag";
+    const string kGBufferVertexShaderPath = "res/shaders/GBufferPass.vert";
+    const string kGBufferFragmentShaderPath = "res/shaders/GBufferPass.frag";
 
+    const string kLBufferVertexShaderPath = "res/shaders/LBufferPass.vert";
+    const string kLBufferFragmentShaderPath = "res/shaders/LBufferPass.frag";
 
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
@@ -210,10 +220,15 @@ int main()
     auto IrradianceShader = make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
     auto ParticleShader = make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
     auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
-    auto GBufferPassShader = make_shared<Shader>(kGBufferPassVertexShaderPath, kGBufferPassFragmentShaderPath);
+    auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
+    auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
 
+    LBuffer lbuffer = LBuffer(mode->height, mode->width);
+    GBuffer gbuffer = GBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
-    postprocessor.Bind();
+    //postprocessor.Bind();
+    RenderManager::Initialize(&gbuffer, &lbuffer, &postprocessor, GBufferPassShader, LBufferPassShader);
+
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
@@ -299,7 +314,7 @@ int main()
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
-    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, shader));
+    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, PBRShader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
     auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
@@ -309,7 +324,7 @@ int main()
     auto enemy_2 = GameObject::Create(scene_root);
     enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
     enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, shader));
+    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, PBRShader));
     enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
     enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
     auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
@@ -407,6 +422,30 @@ int main()
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
     particle_emitter_component->start_position_displacement_ = 1.0f;
 
+    generation::RoomGenerationSettings rgs;
+    rgs.angle = 0.5f;
+    rgs.span = 0.5f;
+    rgs.branch_division_count = 4;
+    rgs.branch_division_min_length = 2.0f;
+    rgs.branch_division_max_length = 3.0f;
+    rgs.sub_branch_count = 3;
+    rgs.sub_branch_span = 0.2f;
+    rgs.sub_branch_min_length = 3.0f;
+    rgs.sub_branch_max_length = 4.0f;
+
+    generation::RoomGenerator rg;
+    std::deque<w_ptr<GameObject>> room_objects;
+
+    for (auto &room : rg.rooms)
+    {
+        cout << '(' << room.first.x << ", " << room.first.y << ')' << endl;
+        auto room_obj = GameObject::Create(scene_root);
+        room_objects.push_back(room_obj);
+        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+        room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
+        room_obj->transform_->set_scale(glm::vec3(3.0f));
+    }
+
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
     HUDText_root->PropagateStart();
@@ -428,6 +467,9 @@ int main()
     glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     PBRShader->Use();
     PBRShader->SetMatrix4("projection_matrix", projection);
+    
+    //GBufferPassShader->Use();
+    //GBufferPassShader->SetMatrix4("projection_matrix", projection);
 
     ParticleShader->Use();
     ParticleShader->SetMatrix4("projection_matrix", projection);
@@ -510,18 +552,20 @@ int main()
 #pragma endregion
 #pragma region GO Update and Draw
         //postprocessor.Bind();        
+
+        //GBufferPassShader->Use();
+        //GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+
         PBRShader->Use();
+        glm::vec3 newPos = light_Positions[0]; 
+        PBRShader->SetVec3("light_positions[0]", newPos);
+        PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
+        PBRShader->SetMatrix4("model_matrix", glm::mat4(1.0f));
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         PBRShader->SetVec3("camera_position", camera->get_position());
 
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
-
-        glm::vec3 newPos = light_Positions[0]; /* +glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);*/
-        PBRShader->SetVec3("light_positions[0]", newPos);
-        PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
-        glm::mat4 model = glm::mat4(1.0f);
-        PBRShader->SetMatrix4("model_matrix", model);
 
         scene_root->PropagateUpdate();
         
@@ -569,11 +613,52 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
         ImGui::Begin("Colors");
         ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::End();
+
+        ImGui::Begin("Generation");
+        ImGui::SliderFloat("Angle", &rgs.angle, 0.0f, 1.0f, "%0.2f");
+        ImGui::SliderFloat("Span", &rgs.span, 0.0f, 2.0f, "%0.2f");
+        ImGui::SliderInt("Branch division count", &rgs.branch_division_count, 1, 10);
+        ImGui::SliderFloat("Branch division min length", &rgs.branch_division_min_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderFloat("Branch division max length", &rgs.branch_division_max_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderInt("Sub branch count", &rgs.sub_branch_count, 0, 20);
+        ImGui::SliderFloat("Sub branch span", &rgs.sub_branch_span, 0.0f, 2.0f, "%0.2f");
+        ImGui::SliderFloat("Sub branch min length", &rgs.sub_branch_min_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderFloat("Sub branch max length", &rgs.sub_branch_max_length, 1.0f, 10.0f, "%0.2f");
+        if (ImGui::Button("Generate"))
+        {
+            rg.GenerateRooms(rgs);
+            for (auto &room : room_objects)
+            {
+                room.lock()->Destroy();
+            }
+            room_objects.clear();
+            for (auto &room : rg.rooms)
+            {
+                auto room_obj = GameObject::Create(scene_root);
+                room_objects.push_back(room_obj);
+                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+                room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
+                room_obj->transform_->set_scale(glm::vec3(3.0f));
+                room_obj->PropagateStart();
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Clear"))
+        {
+            for (auto &room : room_objects)
+            {
+                room.lock()->Destroy();
+            }
+            room_objects.clear();
+        }
+        ImGui::End();
+
         ImGui::Render();
         
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

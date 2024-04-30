@@ -20,12 +20,10 @@ public:
 
 	unsigned int rbo_;
 
-	s_ptr<Shader> light_pass_shader;
-
 	void Initialize(int height, int width);
 	void Bind();
 	void Unbind();
-	void BindTextures();
+	void BindTextures(s_ptr<Shader> shader);
 };
 
 #endif // !G_BUFFER

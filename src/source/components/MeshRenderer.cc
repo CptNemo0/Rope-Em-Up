@@ -16,3 +16,9 @@ void components::MeshRenderer::Update()
     shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
 	model_->Draw(shader_);
 }
+
+void components::MeshRenderer::Render(s_ptr<Shader> shader)
+{
+	shader->SetMatrix4("model_matrix", transform_->get_model_matrix());
+	model_->Draw(shader);
+}

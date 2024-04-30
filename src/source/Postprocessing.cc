@@ -48,8 +48,6 @@ void ppc::Postprocessor::Init()
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    shader_->SetInt("screen_texture", 0);
 }
 
 void ppc::Postprocessor::Destroy()
