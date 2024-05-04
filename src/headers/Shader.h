@@ -19,7 +19,7 @@ private:
 
 
 public:
-    unsigned int id_; // bylo wczesniej prywatne ale testuje
+    unsigned int id_; // bylo wczesniej prywatne ale testuje // xD i nie zmieniles na private potem
     Shader() = default;
     Shader(const string& vertex_shader_path, const string& fragment_shader_path);
     Shader(const string& vertex_shader_path, const string& geometry_shader_path, const string& fragment_shader_path);
