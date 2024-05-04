@@ -46,6 +46,7 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);
+        cout << "Loaded HDR image." << endl;
     }
     else
     {
@@ -102,7 +103,7 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera)
 
     // pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
    // --------------------------------------------------------------------------------
-    
+    unsigned int irradianceMap;
     glGenTextures(1, &irradianceMap);
     glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
     for (unsigned int i = 0; i < 6; ++i)
@@ -142,8 +143,6 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera)
 
 void HDRCubemap::RenderCube()
 {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
         if (cubeVAO == 0)
         {
             float vertices[] = {
@@ -205,6 +204,8 @@ void HDRCubemap::RenderCube()
             glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
+
+            cout << "Cube created and shoud be rendered" << endl;
         }
     
     glBindVertexArray(cubeVAO);
