@@ -10,7 +10,7 @@ uniform sampler2D mra_texture;
 
 uniform vec3 camera_position;
 
-const int light_num = 1;
+const int light_num = 3;
 uniform vec3 light_positions[light_num];
 uniform vec3 light_colors[light_num];
 

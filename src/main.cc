@@ -253,7 +253,7 @@ int main()
         glm::vec3(10.0f, -10.0f, 10.0f),
     };
     glm::vec3 light_Colors[] = {
-        glm::vec3(1000.0f, 1000.0f, 1000.0f),
+        glm::vec3(500.0f, 500.0f, 500.0f),
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f)
@@ -308,10 +308,25 @@ int main()
     wall_right_2->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
     wall_right_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
 
-    auto floor = GameObject::Create(scene_root);
-    floor->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    floor->transform_->set_scale(glm::vec3(2.0f, 0.0f, 2.0f));
-    floor->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
+    auto floor_1 = GameObject::Create(scene_root);
+    floor_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, -8.0f));
+    floor_1->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
+    floor_1->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
+
+    auto floor_2 = GameObject::Create(scene_root);
+    floor_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, 8.0f));
+    floor_2->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
+    floor_2->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
+
+    auto floor_3 = GameObject::Create(scene_root);
+    floor_3->transform_->set_position(glm::vec3(8.0f, 0.0f, -8.0f));
+    floor_3->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
+    floor_3->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
+
+    auto floor_4 = GameObject::Create(scene_root);
+    floor_4->transform_->set_position(glm::vec3(8.0f, 0.0f, 8.0f));
+    floor_4->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
+    floor_4->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
@@ -585,6 +600,12 @@ int main()
         gbuffer.BindTextures(LBufferPassShader);
         LBufferPassShader->SetVec3("light_positions[0]", light_Positions[0]);
         LBufferPassShader->SetVec3("light_colors[0]", light_Colors[0]);
+
+        LBufferPassShader->SetVec3("light_positions[1]", player_1->transform_->get_position() + glm::vec3(0.0f, 2.0f, 0.0f));
+        LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
+
+        LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(0.0f, 2.0f, 0.0f));
+        LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
         LBufferPassShader->SetVec3("camera_position", camera->get_position());
 
         glBindVertexArray(lbuffer.vao_);
