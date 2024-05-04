@@ -119,9 +119,7 @@ void generation::RoomGenerator::GenerateRooms(const RoomGenerationSettings &sett
         }
     }
 
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(sub_branch_directions.begin(), sub_branch_directions.end(), g);
+    std::shuffle(sub_branch_directions.begin(), sub_branch_directions.end(), random::get_random_device());
 
     for (int i = 0; i < settings.sub_branch_count; i++)
     {
