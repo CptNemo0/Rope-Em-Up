@@ -161,6 +161,17 @@ namespace llr
 	
 		void UpdateDirectionVectors();
 	};
+
+	class GameplayCamera : public Camera
+	{
+	public:
+		GameplayCamera();
+		~GameplayCamera() = default;
+
+	private:
+
+	};
+
 }
 
 namespace components
@@ -178,7 +189,14 @@ namespace components
 
 	};
 
+	class GameplayCameraComponent : public Component
+	{
+
+	};
+
 
 }
+
+
 
 #endif

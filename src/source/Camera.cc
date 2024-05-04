@@ -40,3 +40,7 @@ void components::CameraComponent::Update()
 	camera_->set_right(transfrom_->get_right());
 	camera_->set_up(transfrom_->get_up());
 }
+
+llr::GameplayCamera::GameplayCamera()
+{
+}

@@ -601,10 +601,10 @@ int main()
         LBufferPassShader->SetVec3("light_positions[0]", light_Positions[0]);
         LBufferPassShader->SetVec3("light_colors[0]", light_Colors[0]);
 
-        LBufferPassShader->SetVec3("light_positions[1]", player_1->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
+        LBufferPassShader->SetVec3("light_positions[1]", player_1->transform_->get_position() + glm::vec3(0.0f, 3.0f, 10.0f));
         LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
 
-        LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
+        LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(0.0f, 3.0f, 10.0f));
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
         LBufferPassShader->SetVec3("camera_position", camera->get_position());
 
