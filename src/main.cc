@@ -42,6 +42,7 @@
 #include "headers/components/ParticleEmitter.h"
 #include "headers/ParticleEmitterManager.h"
 #include "headers/generation/RoomGenerator.h"
+#include "headers/audio/AudioManager.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -129,6 +130,11 @@ int main()
     const string kGatePath = "res/models/gate.obj";
 
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
+
+    const string kBruhPath = "res/sounds/bruh.wav";
+    
+    audio::AudioManager::Initialize();
+    // audio::AudioManager::i_->LoadSound(kBruhPath);
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -498,7 +504,7 @@ int main()
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);
-    
+
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

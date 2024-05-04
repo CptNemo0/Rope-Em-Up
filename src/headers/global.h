@@ -15,6 +15,7 @@ using std::make_shared;
 using std::string;
 using std::cout;
 using std::endl;
+using std::cerr;
 
 using std::chrono::steady_clock;
 using std::chrono::high_resolution_clock;
