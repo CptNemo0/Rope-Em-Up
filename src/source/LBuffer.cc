@@ -22,7 +22,7 @@ void LBuffer::Initialize(int height, int width)
 
 	glGenTextures(1, &color_texture_);
 	glBindTexture(GL_TEXTURE_2D, color_texture_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, height, width, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_texture_, 0);

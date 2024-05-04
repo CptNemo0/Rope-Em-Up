@@ -85,6 +85,19 @@ Shader::Shader(const string& vertex_shader_path, const string& fragment_shader_p
     glAttachShader(id_, fragmt); // Przyczepienie fragment shaderu do dzielonego programu
     glLinkProgram(id_);          // Utworzenie ostatecznego obiektu programu polaczonego z shaderami
 
+    glGetProgramiv(id_, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(id_, 512, NULL, infoLog);
+        printf("Shader linking failed !!! \n");
+        printf(infoLog);
+        exit(1);
+    }
+    else
+    {
+        printf("Shader Linked\n");
+    }
+
     glDeleteShader(vertex);
     glDeleteShader(fragmt);
 }

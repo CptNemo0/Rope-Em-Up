@@ -20,6 +20,7 @@ public:
 
 	unsigned int rbo_;
 
+	GBuffer(int height, int width);
 	void Initialize(int height, int width);
 	void Bind();
 	void Unbind();

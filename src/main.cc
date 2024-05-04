@@ -73,6 +73,7 @@ void FixOrientation(s_ptr<GameObject> go)
 
 int main()
 {
+    char zaza;
     cout << "Byc czy nie byc oto jest pytanie.\n";
     const string kWindowTitle = "Modul Sumatywny";
 
@@ -178,18 +179,21 @@ int main()
     GLFWmonitor* monitor = nullptr;
     GLFWvidmode* mode = nullptr;
 
+
+
     if (int return_value = utility::InitGLFW(window, monitor, mode, kWindowTitle))
     {
         exit(return_value);
     }
     cout << "GLFW Initialized.\n";
+    
 
     if (int return_value = utility::InitGlad())
     {   
         exit(return_value);
     }
     cout << "GLAD Initialized.\n";
-
+    
     utility::InitImGUI(window);
 
     input::InputManager::Initialize(window);
@@ -210,8 +214,8 @@ int main()
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
-
-    auto shader = make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
+    
+    //auto shader = make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
     auto HUDshader = make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
     auto HUDTextShader = make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
     auto PBRShader = make_shared<Shader>(kPBRVertexShaderPath, kPBRFragmentShaderPath);
@@ -222,6 +226,8 @@ int main()
     auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
     auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
     auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
+
+    auto a = glm::mat3(1.0f) * glm::vec3(0.0f);
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
@@ -247,7 +253,7 @@ int main()
         glm::vec3(10.0f, -10.0f, 10.0f),
     };
     glm::vec3 light_Colors[] = {
-        glm::vec3(500.0f, 500.0f, 500.0f),
+        glm::vec3(1000.0f, 1000.0f, 1000.0f),
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f),
         glm::vec3(300.0f, 300.0f, 300.0f)
@@ -277,35 +283,35 @@ int main()
     auto scene_root = GameObject::Create();
 
     auto gate_1 = GameObject::Create(scene_root);
-    gate_1->AddComponent(make_shared<components::MeshRenderer>(gate_model, PBRShader));
+    gate_1->AddComponent(make_shared<components::MeshRenderer>(gate_model, GBufferPassShader));
 
     auto gate_2 = GameObject::Create(scene_root);
-    gate_2->AddComponent(make_shared<components::MeshRenderer>(gate_model, PBRShader));
+    gate_2->AddComponent(make_shared<components::MeshRenderer>(gate_model, GBufferPassShader));
 
     auto wall_up_1 = GameObject::Create(scene_root);
     wall_up_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, -16.0f));
-    wall_up_1->AddComponent(make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    wall_up_1->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
     wall_up_1->transform_->AddChild(gate_1->transform_);
 
     auto wall_up_2 = GameObject::Create(scene_root);
     wall_up_2->transform_->set_position(glm::vec3(8.0f, 0.0f, -16.0f));
-    wall_up_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    wall_up_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
     
     auto wall_right_1 = GameObject::Create(scene_root);
     wall_right_1->transform_->set_position(glm::vec3(-16.0f, 0.0f, -8.0f));
     wall_right_1->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    wall_right_1->AddComponent(make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    wall_right_1->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
     wall_right_1->transform_->AddChild(gate_2->transform_);
 
     auto wall_right_2 = GameObject::Create(scene_root);
     wall_right_2->transform_->set_position(glm::vec3(-16.0f, 0.0f, 8.0f));
     wall_right_2->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    wall_right_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, PBRShader));
+    wall_right_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
 
     auto floor = GameObject::Create(scene_root);
     floor->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     floor->transform_->set_scale(glm::vec3(2.0f, 0.0f, 2.0f));
-    floor->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, PBRShader));
+    floor->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
@@ -314,7 +320,7 @@ int main()
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
-    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, PBRShader));
+    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
     auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
@@ -324,7 +330,7 @@ int main()
     auto enemy_2 = GameObject::Create(scene_root);
     enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
     enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, PBRShader));
+    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
     enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
     auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
@@ -340,7 +346,7 @@ int main()
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, PBRShader));
+    player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
@@ -348,7 +354,7 @@ int main()
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/5.0f), 0.0f, 0.0f));
     player_2->transform_->set_position(glm::vec3(10.0f + (1.0f / 5.0f), 0.0f, 0.0f));
-    player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, PBRShader));
+    player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
@@ -364,7 +370,7 @@ int main()
         rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
         rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-        rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+        rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
         rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
         rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
@@ -441,7 +447,7 @@ int main()
         cout << '(' << room.first.x << ", " << room.first.y << ')' << endl;
         auto room_obj = GameObject::Create(scene_root);
         room_objects.push_back(room_obj);
-        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
         room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
         room_obj->transform_->set_scale(glm::vec3(3.0f));
     }
@@ -467,9 +473,6 @@ int main()
     glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     PBRShader->Use();
     PBRShader->SetMatrix4("projection_matrix", projection);
-    
-    //GBufferPassShader->Use();
-    //GBufferPassShader->SetMatrix4("projection_matrix", projection);
 
     ParticleShader->Use();
     ParticleShader->SetMatrix4("projection_matrix", projection);
@@ -513,7 +516,7 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         static float gamma_value = 1.0f;
@@ -556,18 +559,39 @@ int main()
         //GBufferPassShader->Use();
         //GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
 
-        PBRShader->Use();
+       /* PBRShader->Use();
         glm::vec3 newPos = light_Positions[0]; 
         PBRShader->SetVec3("light_positions[0]", newPos);
         PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
         PBRShader->SetMatrix4("model_matrix", glm::mat4(1.0f));
         PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         PBRShader->SetVec3("camera_position", camera->get_position());
-
-        glActiveTexture(GL_TEXTURE4);
+        glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
+        shader->SetInt("irradianceMap", GL_TEXTURE5);*/    
+
+        
+        gbuffer.Bind();
+        GBufferPassShader->Use();
+        GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
 
         scene_root->PropagateUpdate();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        LBufferPassShader->Use();
+        gbuffer.BindTextures(LBufferPassShader);
+        LBufferPassShader->SetVec3("light_positions[0]", light_Positions[0]);
+        LBufferPassShader->SetVec3("light_colors[0]", light_Colors[0]);
+        LBufferPassShader->SetVec3("camera_position", camera->get_position());
+
+        glBindVertexArray(lbuffer.vao_);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        //scene_root->PropagateUpdate();
         
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
@@ -588,7 +612,7 @@ int main()
 #pragma endregion
 #pragma region Interface
 
-        glDisable(GL_DEPTH_TEST);
+        /*glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
@@ -604,7 +628,7 @@ int main()
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);*/
 
 #pragma endregion
 
@@ -661,7 +685,7 @@ int main()
 
         ImGui::Render();
         
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 
 #pragma endregion 
         glfwSwapBuffers(window);
@@ -677,8 +701,6 @@ int main()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-
-    shader->End();
     glfwTerminate();
     return 0;
 }

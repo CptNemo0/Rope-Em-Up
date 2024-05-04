@@ -1,5 +1,5 @@
-#version 410 core
-layout (location = 0) out vec3 color_texture;
+#version 330 core
+//layout (location = 0) out vec3 color_texture;
 
 out vec4 FragColor;
 
@@ -10,7 +10,7 @@ uniform sampler2D mra_texture;
 
 uniform vec3 camera_position;
 
-uniform const int light_num = 1;
+const int light_num = 1;
 uniform vec3 light_positions[light_num];
 uniform vec3 light_colors[light_num];
 
@@ -63,13 +63,13 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 void main()
 {
     vec3 World_position = texture(position_texture, if_uv).rgb;
-    vec3 albedo = texture(albedo_texture, if_uv).rgb;
+    vec3 albedo = texture(normal_texture, if_uv).rgb;
     vec3 mra = texture(mra_texture, if_uv).rgb;
 	float metallic = mra.r;
 	float roughness = mra.g;
 	float ao = mra.b;
 
-    vec3 N = texture(normal_texture, if_uv).rgb;
+    vec3 N = normalize(texture(albedo_texture, if_uv).rgb * 2.0 -1.0);
     vec3 V = normalize(camera_position - World_position);
 
     vec3 F0 = vec3(0.04);
@@ -77,7 +77,7 @@ void main()
 
     //The reflectance equation
 	vec3 Lo = vec3(0.0);
-    for(int i = 0; i < 4; ++i) 
+    for(int i = 0; i < light_num; ++i) 
     {
         //radiation
         vec3 L = normalize(light_positions[i] - World_position);
@@ -113,6 +113,6 @@ void main()
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
-    color_texture = color;
+    //color_texture = color;
     FragColor = vec4(color, 1.0);
 }
