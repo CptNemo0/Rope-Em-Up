@@ -63,13 +63,13 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 void main()
 {
     vec3 World_position = texture(position_texture, if_uv).rgb;
-    vec3 albedo = texture(normal_texture, if_uv).rgb;
+    vec3 albedo = texture(albedo_texture, if_uv).rgb;
     vec3 mra = texture(mra_texture, if_uv).rgb;
 	float metallic = mra.r;
 	float roughness = mra.g;
 	float ao = mra.b;
 
-    vec3 N = normalize(texture(albedo_texture, if_uv).rgb * 2.0 -1.0);
+    vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 -1.0);
     vec3 V = normalize(camera_position - World_position);
 
     vec3 F0 = vec3(0.04);

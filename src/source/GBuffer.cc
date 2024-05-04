@@ -18,21 +18,20 @@ void GBuffer::Initialize(int height, int width)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, position_texture_, 0);
 
-	glGenTextures(1, &normal_texture_);
-	glBindTexture(GL_TEXTURE_2D, normal_texture_);
-	std::cout << "normal_texture_: " << normal_texture_ << std::endl;
+	glGenTextures(1, &albedo_texture_);
+	glBindTexture(GL_TEXTURE_2D, albedo_texture_);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normal_texture_, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, albedo_texture_, 0);
 
-	glGenTextures(1, &albedo_texture_);
-	glBindTexture(GL_TEXTURE_2D, albedo_texture_);
-	std::cout << "albedo_texture_: " << albedo_texture_ << std::endl;
+	
+	glGenTextures(1, &normal_texture_);
+	glBindTexture(GL_TEXTURE_2D, normal_texture_);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, albedo_texture_, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, normal_texture_, 0);
 
 	glGenTextures(1, &mra_texture_);
 	glBindTexture(GL_TEXTURE_2D, mra_texture_);
@@ -76,12 +75,12 @@ void GBuffer::BindTextures(s_ptr<Shader> shader)
 	glBindTexture(GL_TEXTURE_2D, position_texture_);
 
 	glActiveTexture(GL_TEXTURE1);
-	shader->SetInt("normal_texture", 1);
-	glBindTexture(GL_TEXTURE_2D, normal_texture_);
+	shader->SetInt("albedo_texture", 1);
+	glBindTexture(GL_TEXTURE_2D, albedo_texture_);
 
 	glActiveTexture(GL_TEXTURE2);
-	shader->SetInt("albedo_texture", 2);
-	glBindTexture(GL_TEXTURE_2D, albedo_texture_);
+	shader->SetInt("normal_texture", 2);
+	glBindTexture(GL_TEXTURE_2D, normal_texture_);
 
 	glActiveTexture(GL_TEXTURE3);
 	shader->SetInt("mra_texture", 3);
