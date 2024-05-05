@@ -1,7 +1,7 @@
 #version 330 core
-//layout (location = 0) out vec3 color_texture;
+layout (location = 0) out vec3 color_texture;
 
-out vec4 FragColor;
+//out vec4 FragColor;
 
 uniform sampler2D position_texture;
 uniform sampler2D albedo_texture;
@@ -113,6 +113,6 @@ void main()
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
-    //color_texture = color;
-    FragColor = vec4(color, 1.0);
+    color_texture = color;
+    //FragColor = vec4(color, 1.0);
 }

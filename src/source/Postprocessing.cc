@@ -84,20 +84,6 @@ void ppc::Postprocessor::Draw()
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void ppc::Postprocessor::UpdatetContrast()
-{  
-    shader_->SetFloat("contrast_ppc", contrast_);
-}
-
-void ppc::Postprocessor::UpdateBrightness()
-{
-    shader_->SetFloat("brightness_ppc", brightness_);
-}
-
-void ppc::Postprocessor::UpdateGamma()
-{
-    shader_->SetFloat("gamma_ppc", gamma_);
-}
 
 void ppc::Postprocessor::Update()
 {
