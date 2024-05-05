@@ -2,11 +2,14 @@
 #define AUDIOMANAGER_H
 
 #include <fstream>
+#include <unordered_map>
+#include <vector>
 
 #include <AL/al.h>
 #include <AL/alc.h>
 
 #include "../global.h"
+#include "Sounds.h"
 
 namespace audio
 {
@@ -53,7 +56,9 @@ public:
         }
     }
 
-    void LoadSound(const string path);
+    void LoadSound(Sounds sound, const string path);
+
+    std::unordered_map<Sounds, std::vector<AudioBuffer>> sounds_;
 };
 
 }; // namespace audio
