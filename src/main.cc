@@ -693,7 +693,7 @@ int main()
             {
                 auto room_obj = GameObject::Create(scene_root);
                 room_objects.push_back(room_obj);
-                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
                 room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
                 room_obj->transform_->set_scale(glm::vec3(3.0f));
                 room_obj->PropagateStart();
