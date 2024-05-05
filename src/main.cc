@@ -585,34 +585,40 @@ int main()
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
         shader->SetInt("irradianceMap", GL_TEXTURE5);*/    
 
-        
+        // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
-
         scene_root->PropagateUpdate();
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        //////////////////////////////////
+        
+        // Bind buffer - Use Shader - Draw 
+        lbuffer.Bind();
         LBufferPassShader->Use();
         gbuffer.BindTextures(LBufferPassShader);
         LBufferPassShader->SetVec3("light_positions[0]", light_Positions[0]);
         LBufferPassShader->SetVec3("light_colors[0]", light_Colors[0]);
-
         LBufferPassShader->SetVec3("light_positions[1]", player_1->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
-
         LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
         LBufferPassShader->SetVec3("camera_position", camera->get_position());
-
         glBindVertexArray(lbuffer.vao_);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
-
-        //scene_root->PropagateUpdate();
+        //////////////////////////////////
+        
+        // Bind buffer - Use Shader - Draw 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        PostprocessingShader->Use();
+        lbuffer.BindTextures(PostprocessingShader);
+        postprocessor.Update();
+        glBindVertexArray(lbuffer.vao_);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+        //////////////////////////////////
         
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
