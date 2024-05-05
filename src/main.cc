@@ -134,6 +134,9 @@ int main()
     const float kFov = 90.0f;
     const float kNear = 0.1f;
     const float kFar = 1000.0f;
+    float kpitch = -90.0f;
+    float kyaw = 90.0f;
+    glm::vec3 kposition = glm::vec3(0.0f, 25.0f, 0.0f);
 
     srand(static_cast <unsigned> (time(0)));
 
@@ -212,16 +215,12 @@ int main()
     camera->set_pitch(-90.0f);
     camera->set_yaw(+90.0f);
 
-    auto gameplayCamera = make_shared<llr::GameplayCamera>();
-
-gameplayCamera->camera_->set_near(kNear);
-gameplayCamera->camera_->set_far(kFar);
-
-
+    float kar = ((float)mode->width / (float)mode->height);
 
 
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
+    
     
     //auto shader = make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
     auto HUDshader = make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
@@ -385,10 +384,12 @@ gameplayCamera->camera_->set_far(kFar);
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     //ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
 
-    std::vector<s_ptr<GameObject>> rope_segments;
+    auto gameplayCamera = GameObject::Create(scene_root);
+    gameplayCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
+    auto gameplayCameraComponent = gameplayCamera->GetComponent<components::GameplayCameraComponent>();
 
-    gameplayCamera->set_target1(player_1);
-    gameplayCamera->set_target2(player_2);
+    std::vector<s_ptr<GameObject>> rope_segments;
+ 
 
     for (int i = 0; i < 40; i++)
     {
@@ -446,7 +447,7 @@ gameplayCamera->camera_->set_far(kFar);
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, camera));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, gameplayCameraComponent->camera_));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
@@ -492,11 +493,11 @@ gameplayCamera->camera_->set_far(kFar);
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
 
-    cubemap->LoadHDRimg(window, camera);
+    cubemap->LoadHDRimg(window, gameplayCameraComponent->camera_);
 
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
-    glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+    glm::mat4 projection = glm::perspective(glm::radians(gameplayCameraComponent->camera_->get_fov()), gameplayCameraComponent->camera_->get_aspect_ratio(), gameplayCameraComponent->camera_->get_near(), gameplayCameraComponent->camera_->get_far());
     PBRShader->Use();
     PBRShader->SetMatrix4("projection_matrix", projection);
 
@@ -567,7 +568,9 @@ gameplayCamera->camera_->set_far(kFar);
         collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         steady_clock::time_point end = steady_clock::now();
 
-        utility::DebugCameraMovement(window, camera, delta_time);
+        //utility::DebugCameraMovement(window, gameplayCameraComponent->camera_, delta_time); zast¹pione przez CameraComponent
+        gameplayCameraComponent->Update();
+        gameplayCameraComponent->updateCameraRotation(kpitch, kyaw);
         input::InputManager::i_->Update();
 
 #pragma region Collisions and Physics
@@ -599,7 +602,7 @@ gameplayCamera->camera_->set_far(kFar);
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
-        GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        GBufferPassShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
         scene_root->PropagateUpdate();
         //////////////////////////////////
@@ -614,7 +617,7 @@ gameplayCamera->camera_->set_far(kFar);
         LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
         LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
-        LBufferPassShader->SetVec3("camera_position", camera->get_position());
+        LBufferPassShader->SetVec3("camera_position", gameplayCameraComponent->camera_->get_position());
         glBindVertexArray(lbuffer.vao_);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
@@ -632,7 +635,7 @@ gameplayCamera->camera_->set_far(kFar);
         //////////////////////////////////
         
         BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        BackgroundShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
         
         cubemap->RenderCube();
 
@@ -640,7 +643,7 @@ gameplayCamera->camera_->set_far(kFar);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         ParticleShader->Use();
-        ParticleShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        ParticleShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
         
@@ -683,9 +686,9 @@ gameplayCamera->camera_->set_far(kFar);
         ImGui::End();
 
 ImGui::Begin("Camera");
-ImGui::SliderFloat("FOV", &gameplayCamera->camera_->fov_, 0.0f, 180.0f, "%.2f");
-ImGui::SliderFloat("Near", &gameplayCamera->camera_->near_, 0.0f, 100.0f, "%.2f");
-	ImGui::SliderFloat("Far", &gameplayCamera->camera_->far_, 0.0f, 1000.0f, "%.2f");
+    ImGui::SliderFloat("Pitch", &kpitch, -90.0f, 90.0f, "%.2f");
+    ImGui::SliderFloat("Yaw", &kyaw, -180.0f, 180.0f, "%.2f");
+
 ImGui::End();
 
         ImGui::Begin("Generation");
