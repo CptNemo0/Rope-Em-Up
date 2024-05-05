@@ -41,6 +41,46 @@ void components::CameraComponent::Update()
 	camera_->set_up(transfrom_->get_up());
 }
 
+glm::vec3 llr::GameplayCamera::calculateMidPoint()
+{
+	glm::vec3 midPoint = glm::vec3(0.0f);
+	midPoint = (target1_->transform_->get_position() + target2_->transform_->get_position()) / 2.0f;
+	camera_->set_position(midPoint);
+	return midPoint;
+}
+
 llr::GameplayCamera::GameplayCamera()
 {
+	camera_ = make_shared<Camera>();
+	camera_->UpdateDirectionVectors();
+}
+
+llr::GameplayCamera::GameplayCamera(s_ptr <GameObject> target1, s_ptr <GameObject> target2, float pitch, float yaw, float fov, float near, float far, float ar)
+{
+	target1_ = target1;
+	target2_ = target2;
+	camera_ = make_shared<Camera>();
+	camera_->set_position(calculateMidPoint());
+	camera_->set_pitch(pitch);
+	camera_->set_yaw(yaw);
+	camera_->set_fov(fov);
+	/*camera_->set_near(near);
+	camera_->set_far(far);*/
+	camera_->set_aspect_ratio(ar);
+	camera_->UpdateDirectionVectors();
+}
+
+
+void components::GameplayCameraComponent::Start()
+{
+	glm::vec3 midPoint = GameplayCamera_->calculateMidPoint();
+	transfrom_->set_position(midPoint);
+
+}
+
+void components::GameplayCameraComponent::Update()
+{
+	GameplayCamera_->camera_->set_position(transfrom_->get_position());
+	GameplayCamera_->camera_->set_right(transfrom_->get_right());
+	GameplayCamera_->camera_->set_up(transfrom_->get_up());
 }

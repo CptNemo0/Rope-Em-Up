@@ -8,6 +8,7 @@
 #include "global.h"
 #include "components/Component.h"
 #include "components/Transform.h"
+#include "GameObject.h"
 
 namespace llr
 {
@@ -17,7 +18,7 @@ namespace llr
 
 	class Camera
 	{
-	private:
+	public:
 		
 		glm::vec3 position_;
 		
@@ -33,7 +34,7 @@ namespace llr
 		float far_;
 		float aspect_ratio_;
 
-	public:
+
 
 		Camera();
 		Camera(glm::vec3 position, float pitch, float yaw, float fov, float near, float far, float ar) :
@@ -162,13 +163,40 @@ namespace llr
 		void UpdateDirectionVectors();
 	};
 
-	class GameplayCamera : public Camera
+	class GameplayCamera
 	{
 	public:
-		GameplayCamera();
-		~GameplayCamera() = default;
+			s_ptr <GameObject> target1_;
+			s_ptr <GameObject> target2_;
+			s_ptr <Camera> camera_;
 
-	private:
+			glm::vec3 calculateMidPoint();
+
+			GameplayCamera();
+			GameplayCamera(s_ptr <GameObject> target1, s_ptr <GameObject> target2, float pitch, float yaw, float fov, float near, float far, float ar);
+			
+			inline void set_target1(s_ptr <GameObject> new_target1)
+				{
+					this->target1_ = new_target1;
+				}
+
+			inline s_ptr <GameObject> get_target1()
+				{
+					return target1_;
+				}
+
+			inline void set_target2(s_ptr <GameObject> new_target2)
+				{
+					this->target2_ = new_target2;
+				}
+
+			inline s_ptr <GameObject> get_target2()
+				{
+					return target2_;
+				}
+
+			~GameplayCamera() = default;
+
 
 	};
 
@@ -191,12 +219,17 @@ namespace components
 
 	class GameplayCameraComponent : public Component
 	{
+public:
+		s_ptr<components::Transform> transfrom_;
+		s_ptr<llr::GameplayCamera> GameplayCamera_;
 
+		// Inherited via Component
+		void Start() override;
+
+		void Update() override;
 	};
 
 
 }
-
-
 
 #endif

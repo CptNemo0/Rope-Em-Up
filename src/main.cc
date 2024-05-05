@@ -212,6 +212,14 @@ int main()
     camera->set_pitch(-90.0f);
     camera->set_yaw(+90.0f);
 
+    auto gameplayCamera = make_shared<llr::GameplayCamera>();
+
+gameplayCamera->camera_->set_near(kNear);
+gameplayCamera->camera_->set_far(kFar);
+
+
+
+
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
     
@@ -378,6 +386,9 @@ int main()
     //ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
 
     std::vector<s_ptr<GameObject>> rope_segments;
+
+    gameplayCamera->set_target1(player_1);
+    gameplayCamera->set_target2(player_2);
 
     for (int i = 0; i < 40; i++)
     {
@@ -670,6 +681,12 @@ int main()
         ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::End();
+
+ImGui::Begin("Camera");
+ImGui::SliderFloat("FOV", &gameplayCamera->camera_->fov_, 0.0f, 180.0f, "%.2f");
+ImGui::SliderFloat("Near", &gameplayCamera->camera_->near_, 0.0f, 100.0f, "%.2f");
+	ImGui::SliderFloat("Far", &gameplayCamera->camera_->far_, 0.0f, 1000.0f, "%.2f");
+ImGui::End();
 
         ImGui::Begin("Generation");
         ImGui::SliderFloat("Angle", &rgs.angle, 0.0f, 1.0f, "%0.2f");
