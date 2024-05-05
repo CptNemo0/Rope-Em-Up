@@ -28,17 +28,13 @@ namespace ppc
 
         s_ptr<Shader> shader_;
 
-        Postprocessor(int width, int height, s_ptr<Shader> shader);
+        Postprocessor(int height, int width, s_ptr<Shader> shader);
 
         void Init();
         void Destroy();
         void Bind();
         void Unbind();
         void Draw();
-
-        void UpdatetContrast();
-        void UpdateBrightness();
-        void UpdateGamma();
 
         void Update();
     };

@@ -52,3 +52,10 @@ void LBuffer::BindTextures(s_ptr<Shader> shader)
 	glBindTexture(GL_TEXTURE_2D, color_texture_);
 	shader->SetInt("color_texture", 0);
 }
+
+void LBuffer::Draw()
+{
+	glBindVertexArray(vao_);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+}

@@ -1,6 +1,6 @@
 #include "../headers/Postprocessing.h"
 
-ppc::Postprocessor::Postprocessor(int width, int height, s_ptr<Shader> shader)
+ppc::Postprocessor::Postprocessor(int height, int width, s_ptr<Shader> shader)
 {
 	width_ = width;
 	height_ = height;
@@ -72,16 +72,10 @@ void ppc::Postprocessor::Unbind()
 
 void ppc::Postprocessor::Draw()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDisable(GL_DEPTH_TEST); 
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    shader_->Use();
     Update();
     glBindVertexArray(vao_);
-    glBindTexture(GL_TEXTURE_2D, texture_color_buffer_);	// use the color attachment texture as the texture of the quad plane
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 }
 
 

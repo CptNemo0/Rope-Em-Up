@@ -49,15 +49,12 @@
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
 
-#include "headers/LBuffer.h"
-#include "headers/GBuffer.h"
-#include "headers/RenderManager.h"
-
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
 
 #include "headers/LBuffer.h"
 #include "headers/GBuffer.h"
+#include "headers/SSAO.h"
 
 void FixOrientation(s_ptr<GameObject> go)
 {
@@ -70,6 +67,11 @@ void FixOrientation(s_ptr<GameObject> go)
     go->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
 }
 
+void BindDefault()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
 
 int main()
 {
@@ -108,6 +110,12 @@ int main()
 
     const string kLBufferVertexShaderPath = "res/shaders/LBufferPass.vert";
     const string kLBufferFragmentShaderPath = "res/shaders/LBufferPass.frag";
+
+    const string kSSAOVertexShaderPath = "res/shaders/SSAO.vert";
+    const string kSSAOFragmentShaderPath = "res/shaders/SSAO.frag";
+
+    const string kSSAOBlurVertexShaderPath = "res/shaders/SSAOBlur.vert";
+    const string kSSAOBlurFragmentShaderPath = "res/shaders/SSAOBlur.frag";
 
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
@@ -226,14 +234,17 @@ int main()
     auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
     auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
     auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
+    auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
+    auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
 
     auto a = glm::mat3(1.0f) * glm::vec3(0.0f);
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::MEDIUM_SSAO);
+    SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
-    //postprocessor.Bind();
-    RenderManager::Initialize(&gbuffer, &lbuffer, &postprocessor, GBufferPassShader, LBufferPassShader);
+
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
@@ -495,6 +506,14 @@ int main()
     BackgroundShader->Use();
     BackgroundShader->SetMatrix4("projection_matrix", projection);
 
+    SSAOShader->Use();
+    SSAOShader->SetMatrix4("projection_matrix", projection);
+    SSAOShader->SetInt("height", mode->height);
+    SSAOShader->SetInt("width", mode->width);
+    SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
+    SSAOShader->SetFloat("radius", 0.5);
+    SSAOShader->SetFloat("bias", 0.025);
+
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
@@ -569,58 +588,61 @@ int main()
 
 #pragma endregion
 #pragma region GO Update and Draw
-        //postprocessor.Bind();        
-
-        //GBufferPassShader->Use();
-        //GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-
-       /* PBRShader->Use();
-        glm::vec3 newPos = light_Positions[0]; 
-        PBRShader->SetVec3("light_positions[0]", newPos);
-        PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
-        PBRShader->SetMatrix4("model_matrix", glm::mat4(1.0f));
-        PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        PBRShader->SetVec3("camera_position", camera->get_position());
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
-        shader->SetInt("irradianceMap", GL_TEXTURE5);*/    
 
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
+
         scene_root->PropagateUpdate();
         //////////////////////////////////
         
-        // Bind buffer - Use Shader - Draw 
+        // Bind buffer - Bind textures - Use Shader - Draw 
+        ssao_buffer.Bind();
+        SSAOShader->Use();
+        SSAOShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        ssao_buffer.BindTextures(SSAOShader, gbuffer.position_texture_, gbuffer.normal_texture_);
+        BindDefault();
+        ssao_buffer.Draw();
+        //////////////////////////////////
+
+        // Bind buffer - Bind textures - Use Shader - Draw 
+        ssao_blur_buffer.Bind();
+        SSAOBlurShader->Use();
+        ssao_blur_buffer.BindTextures(SSAOBlurShader, ssao_buffer.ssao_texture_);
+        ssao_blur_buffer.Draw();
+        //////////////////////////////////
+        
+        // Bind buffer - Bind textures - Use Shader - Draw 
         lbuffer.Bind();
         LBufferPassShader->Use();
         gbuffer.BindTextures(LBufferPassShader);
+        glActiveTexture(GL_TEXTURE4);
+        LBufferPassShader->SetInt("ssao_texture", 4);
+        glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
+        LBufferPassShader->SetVec3("camera_position", camera->get_position());
+
+        // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetVec3("light_positions[0]", light_Positions[0]);
         LBufferPassShader->SetVec3("light_colors[0]", light_Colors[0]);
         LBufferPassShader->SetVec3("light_positions[1]", player_1->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
         LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
-        LBufferPassShader->SetVec3("camera_position", camera->get_position());
-        glBindVertexArray(lbuffer.vao_);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
+
+        //lbuffer.Draw();
         //////////////////////////////////
         
-        // Bind buffer - Use Shader - Draw 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        PostprocessingShader->Use();
-        lbuffer.BindTextures(PostprocessingShader);
-        postprocessor.Update();
-        glBindVertexArray(lbuffer.vao_);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        // Bind buffer - Bind textures - Use Shader - Draw 
+        //BindDefault();
+        //PostprocessingShader->Use();
+        //lbuffer.BindTextures(PostprocessingShader);
+        //postprocessor.Draw();
         //////////////////////////////////
         
-        BackgroundShader->Use();
+        /*BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         
         cubemap->RenderCube();
@@ -633,9 +655,8 @@ int main()
 
         ParticleEmitterManager::i_->Draw();
         
-        glDisable(GL_BLEND);
+        glDisable(GL_BLEND);*/
         
-        //postprocessor.Draw();
 #pragma endregion
 #pragma region Interface
 
@@ -661,7 +682,7 @@ int main()
 
 #pragma region ImGUI
         
-        ImGui_ImplOpenGL3_NewFrame();
+        /*ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
@@ -712,12 +733,10 @@ int main()
 
         ImGui::Render();
         
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); */
 
 #pragma endregion 
         glfwSwapBuffers(window);
-
-
     }
 
     ai::EnemyAIManager::Destroy();

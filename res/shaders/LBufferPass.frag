@@ -7,6 +7,7 @@ uniform sampler2D position_texture;
 uniform sampler2D albedo_texture;
 uniform sampler2D normal_texture;
 uniform sampler2D mra_texture;
+uniform sampler2D ssao_texture;
 
 uniform vec3 camera_position;
 
@@ -68,10 +69,11 @@ void main()
 	float metallic = mra.r;
 	float roughness = mra.g;
 	float ao = mra.b;
+    float ssao = texture(ssao_texture, if_uv).r;
 
-    vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 -1.0);
+    vec3 N = normalize(texture(normal_texture, if_uv).rgb);
     vec3 V = normalize(camera_position - World_position);
-
+    
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
 
@@ -108,8 +110,9 @@ void main()
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     } 
 
-    vec3 ambient = vec3(0.03) * albedo * ao;
-    vec3 color   = ambient + Lo;
+    //vec3 ambient = vec3(0.03) * albedo *  ssao;
+    vec3 ambient = albedo *  ssao;
+    vec3 color   = ambient;// + Lo;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
