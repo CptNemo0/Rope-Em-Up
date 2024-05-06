@@ -80,7 +80,7 @@ int main()
 {
     char zaza;
     cout << "Byc czy nie byc oto jest pytanie.\n";
-    const string kWindowTitle = "Modul Sumatywny";
+    const string kWindowTitle = "Rope'em Up!";
 
     const string kVertexShaderPath = "res/shaders/Basic.vert";
     const string kFragmentShaderPath = "res/shaders/Basic.frag";
@@ -224,8 +224,8 @@ int main()
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(0.0f, 5.0f, 0.0f));
-    //camera->set_pitch(-90.0f);
+    camera->set_position(glm::vec3(0.0f, 15.0f, 0.0f));
+    camera->set_pitch(-90.0f);
     camera->set_yaw(-90.0f);
     
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
@@ -245,6 +245,10 @@ int main()
     auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
     auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
 
+    auto HUD_texture = make_shared<tmp::Texture>(kHUDTexturePath);
+    auto HUD_texture2 = make_shared<tmp::Texture>(kHUDTexturePath2);
+    auto Smoke_texture = make_shared<tmp::Texture>(kTestSmokeTexturePath);
+
     auto a = glm::mat3(1.0f) * glm::vec3(0.0f);
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
@@ -252,7 +256,6 @@ int main()
     SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::MEDIUM_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
-
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
@@ -291,9 +294,16 @@ int main()
     auto test_ball_model = make_shared<Model>(kTestBallPath);
     auto gate_model = make_shared<Model>(kGatePath);
 
-    auto HUD_texture = make_shared<tmp::Texture>(kHUDTexturePath);
-    auto HUD_texture2 = make_shared<tmp::Texture>(kHUDTexturePath2);
-    auto Smoke_texture = make_shared<tmp::Texture>(kTestSmokeTexturePath);
+    generation::RoomModels models;
+    models.walls.push_back(module_2_model);
+    models.floors.push_back(simple_floor_model);
+    models.gates.push_back(gate_model);
+
+    generation::RoomGenerationSettings rg_settings;
+    rg_settings.width = 5;
+    rg_settings.height = 4;
+
+    std::deque<w_ptr<GameObject>> room_parts;
 
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
@@ -301,30 +311,34 @@ int main()
 
     auto scene_root = GameObject::Create();
 
-    auto gate_1 = GameObject::Create(scene_root);
+    generation::GenerateRoom(&rg_settings, &models, room_parts, scene_root, GBufferPassShader);
+
+    /*auto gate_1 = GameObject::Create(scene_root);
     gate_1->AddComponent(make_shared<components::MeshRenderer>(gate_model, GBufferPassShader));
 
     auto gate_2 = GameObject::Create(scene_root);
     gate_2->AddComponent(make_shared<components::MeshRenderer>(gate_model, GBufferPassShader));
 
     auto wall_up_1 = GameObject::Create(scene_root);
-    wall_up_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, -16.0f));
+    wall_up_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, 0.0f));
+    wall_up_1->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
     wall_up_1->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
     wall_up_1->transform_->AddChild(gate_1->transform_);
 
     auto wall_up_2 = GameObject::Create(scene_root);
-    wall_up_2->transform_->set_position(glm::vec3(8.0f, 0.0f, -16.0f));
+    wall_up_2->transform_->set_position(glm::vec3(-8.0f - generation::kModuleSize, 0.0f, 0.0f));
+    wall_up_2->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
     wall_up_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
     
     auto wall_right_1 = GameObject::Create(scene_root);
-    wall_right_1->transform_->set_position(glm::vec3(-16.0f, 0.0f, -8.0f));
-    wall_right_1->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    wall_right_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -8.0f));
+    wall_right_1->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
     wall_right_1->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
     wall_right_1->transform_->AddChild(gate_2->transform_);
 
     auto wall_right_2 = GameObject::Create(scene_root);
-    wall_right_2->transform_->set_position(glm::vec3(-16.0f, 0.0f, 8.0f));
-    wall_right_2->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    wall_right_2->transform_->set_position(glm::vec3(0, 0.0f, -8.0f - generation::kModuleSize));
+    wall_right_2->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
     wall_right_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
 
     auto floor_1 = GameObject::Create(scene_root);
@@ -333,21 +347,21 @@ int main()
     floor_1->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
 
     auto floor_2 = GameObject::Create(scene_root);
-    floor_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, 8.0f));
+    floor_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -1.5f * generation::kModuleSize));
     floor_2->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
     floor_2->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
 
     auto floor_3 = GameObject::Create(scene_root);
-    floor_3->transform_->set_position(glm::vec3(8.0f, 0.0f, -8.0f));
+    floor_3->transform_->set_position(glm::vec3(-1.5f * generation::kModuleSize, 0.0f, -1.5f * generation::kModuleSize));
     floor_3->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
     floor_3->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
 
     auto floor_4 = GameObject::Create(scene_root);
-    floor_4->transform_->set_position(glm::vec3(8.0f, 0.0f, 8.0f));
+    floor_4->transform_->set_position(glm::vec3(-1.5f * generation::kModuleSize, 0.0f, -8.0f));
     floor_4->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
     floor_4->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-
-    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
+    */
+    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-2.0 * generation::kModuleSize, 0.0f, -2.0 * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
     auto enemy_1 = GameObject::Create(scene_root);
@@ -375,51 +389,50 @@ int main()
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
     test->AddComponent(make_shared<components::MeshRenderer>(test_model, PBRShader));*/
 
-
     auto player_1 = GameObject::Create(scene_root);
-    player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    player_1->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    player_1->transform_->set_position(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_1->transform_->set_position(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->set_position(glm::vec3(10.0f + (1.0f/5.0f), 0.0f, 0.0f));
-    player_2->transform_->set_position(glm::vec3(10.0f + (1.0f / 5.0f), 0.0f, 0.0f));
+    player_2->transform_->set_position(glm::vec3(-1.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_2->transform_->set_position(glm::vec3(-1.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
-    ai::EnemyAIManager::SetPlayers(player_1, player_2);
-    //ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
+    //ai::EnemyAIManager::SetPlayers(player_1, player_2);
+    ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
 
-    std::vector<s_ptr<GameObject>> rope_segments;
+    //std::vector<s_ptr<GameObject>> rope_segments;
 
-    for (int i = 0; i < 40; i++)
-    {
-        auto rope_segment = GameObject::Create(scene_root);
-        rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
-        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-        rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-        rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
-        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
+    //for (int i = 0; i < 40; i++)
+    //{
+    //    auto rope_segment = GameObject::Create(scene_root);
+    //    rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
+    //    rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
+    //    rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
+    //    rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
+    //    rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
+    //    rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
-        if (i == 0)
-        {
-            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
-        }
-        else
-        {
-            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
-        }
+    //    if (i == 0)
+    //    {
+    //        pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
+    //    }
+    //    else
+    //    {
+    //        pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
+    //    }
 
-        rope_segments.push_back(rope_segment);
-    }
+    //    rope_segments.push_back(rope_segment);
+    //}
 
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
+    //pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
 
 
     auto HUD_root = GameObject::Create();
@@ -461,7 +474,7 @@ int main()
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
     particle_emitter_component->start_position_displacement_ = 1.0f;
 
-    generation::RoomGenerationSettings rgs;
+    generation::RoomLayoutGenerationSettings rgs;
     rgs.angle = 0.5f;
     rgs.span = 0.5f;
     rgs.branch_division_count = 4;
@@ -472,7 +485,7 @@ int main()
     rgs.sub_branch_min_length = 3.0f;
     rgs.sub_branch_max_length = 4.0f;
 
-    generation::RoomGenerator rg;
+    generation::RoomLayoutGenerator rg;
     std::deque<w_ptr<GameObject>> room_objects;
 
     for (auto &room : rg.rooms)
@@ -580,6 +593,7 @@ int main()
 
         previous_time = current_time;
 
+        //physics::LogVec3(player_1->transform_->get_position());
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -725,7 +739,7 @@ int main()
                 auto room_obj = GameObject::Create(scene_root);
                 room_objects.push_back(room_obj);
                 room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-                room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
+                room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
                 room_obj->transform_->set_scale(glm::vec3(3.0f));
                 room_obj->PropagateStart();
             }
@@ -748,6 +762,24 @@ int main()
             audio_test_obj->GetComponent<components::AudioSource>()->PlaySound(audio::Sounds::bruh);
         }
 
+        ImGui::End();
+
+
+        ImGui::Begin("Room Generation");
+        ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
+        ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
+        if (ImGui::Button("Generate"))
+        {
+            for (auto& a : room_parts)
+            {
+                a.lock()->Destroy();
+            }
+            room_parts.clear();
+            generation::GenerateRoom(&rg_settings, &models, room_parts, scene_root, GBufferPassShader);
+
+            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-rg_settings.width * generation::kModuleSize, 0.0f, -rg_settings.height * generation::kModuleSize), 1.0f);
+            pbd::PBDManager::i_->set_walls(walls);
+        }
         ImGui::End();
 
         ImGui::Render();

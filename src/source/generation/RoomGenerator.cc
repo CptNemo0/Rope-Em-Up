@@ -1,6 +1,6 @@
 #include "../../headers/generation/RoomGenerator.h"
 
-std::pair<int, glm::ivec2> generation::RoomGenerator::FindNextClosestPoint(const glm::ivec2 &A, const glm::ivec2 &B, const glm::ivec2 &point, int prev_direction)
+std::pair<int, glm::ivec2> generation::RoomLayoutGenerator::FindNextClosestPoint(const glm::ivec2 &A, const glm::ivec2 &B, const glm::ivec2 &point, int prev_direction)
 {
     glm::ivec2 final_point;
     int final_direction;
@@ -49,7 +49,7 @@ std::pair<int, glm::ivec2> generation::RoomGenerator::FindNextClosestPoint(const
     return {final_direction, final_point};
 }
 
-void generation::RoomGenerator::GenerateRoomsBetweenPoints(const glm::ivec2 &A, const glm::ivec2 &B, const RoomGenerationSettings &settings)
+void generation::RoomLayoutGenerator::GenerateRoomsBetweenPoints(const glm::ivec2 &A, const glm::ivec2 &B, const RoomLayoutGenerationSettings &settings)
 {
 
     glm::ivec2 current_point = A;
@@ -75,7 +75,7 @@ void generation::RoomGenerator::GenerateRoomsBetweenPoints(const glm::ivec2 &A, 
     while (current_point != B);
 }
 
-void generation::RoomGenerator::GenerateRooms(const RoomGenerationSettings &settings)
+void generation::RoomLayoutGenerator::GenerateRooms(const RoomLayoutGenerationSettings &settings)
 {
     rooms.clear();
     rooms_ordered.clear();
@@ -134,7 +134,7 @@ void generation::RoomGenerator::GenerateRooms(const RoomGenerationSettings &sett
     }
 }
 
-void generation::RoomGenerator::AddRoom(glm::ivec2 position)
+void generation::RoomLayoutGenerator::AddRoom(glm::ivec2 position)
 {
     int rooms_size_before = rooms.size();
     rooms.insert(std::make_pair(position, Room(position)));
@@ -142,5 +142,135 @@ void generation::RoomGenerator::AddRoom(glm::ivec2 position)
     if (rooms_size_before != rooms_size_after)
     {
         rooms_ordered.push_back(Room(position));
+    }
+}
+
+void generation::RoomGenerator::IncreaseSize()
+{
+    int r = random::RandInt(0, 1);
+
+    if (r)
+    {
+        settings_.height += 1;
+    }
+    else
+    {
+        settings_.width += 1;
+    }
+}
+
+void generation::RoomGenerator::DecreaseSize()
+{
+    if (settings_.width == 1 && settings_.height == 1)
+    {
+
+    }
+    else if (settings_.width == 1)
+    {
+        settings_.height -= 1;
+    }
+    else if (settings_.height == 1)
+    {
+        settings_.width -= 1;
+    }
+    else
+    {
+        int r = random::RandInt(0, 1);
+
+        if (r)
+        {
+            settings_.height -= 1;
+        }
+        else
+        {
+            settings_.width -= 1;
+        }
+    }
+}
+
+void generation::RoomGenerator::IncreaseEnemies()
+{
+    settings_.enemies += 1;
+}
+
+void generation::RoomGenerator::DecreaseEnemies()
+{
+    settings_.enemies -= 1;
+}
+
+void generation::RoomGenerator::IncreaseHealingSpots()
+{
+    settings_.healing_spots += 1;
+}
+
+void generation::RoomGenerator::DecreaseHealingSpots()
+{
+    settings_.healing_spots -= 1;
+}
+
+void generation::RoomGenerator::GenerateGrid(Room& room)
+{
+    for (float i = kOffset; i < room.width - kOffset; i += kOffset)
+    {
+        for (float j = kOffset; j < room.height - kOffset; j += kOffset)
+        {
+            room.grid.insert(glm::ivec2(i, j));
+        }
+    }
+}
+
+void generation::RoomGenerator::GenerateEnemies(Room& room)
+{
+}
+
+void generation::RoomGenerator::GenerateHealingSpots(Room& room)
+{
+}
+
+void generation::RoomGenerator::Generate()
+{
+
+}
+
+void generation::GenerateRoom(RoomGenerationSettings* rgs, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
+{
+    //generate upper walls
+
+    for (int i = 0; i < rgs->width; i++)
+    {
+        int model_idx =  random::RandInt(0, rm->walls.size() - 1);
+        s_ptr<GameObject> wall_up = GameObject::Create(scene_root);
+        wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+        wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+        wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[model_idx], shader));
+        room_parts.push_back(wall_up);
+        wall_up->PropagateStart();
+    }
+
+    //generate left walls
+
+    for (int i = 0; i < rgs->height; i++)
+    {
+        int model_idx = random::RandInt(0, rm->walls.size() - 1);
+        s_ptr<GameObject> wall_left = GameObject::Create(scene_root);
+        wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+        wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+        wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[model_idx], shader));
+        room_parts.push_back(wall_left);
+        wall_left->PropagateStart();
+    }
+
+    //generate floors
+    int model_idx = random::RandInt(0, rm->floors.size() - 1);
+    for (int i = 0; i < rgs->width; i++)
+    {
+        for (int j = 0; j < rgs->height; j++)
+        {
+            s_ptr<GameObject> floor = GameObject::Create(scene_root);
+            floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+            floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[model_idx], shader));
+            room_parts.push_back(floor);
+            floor->PropagateStart();
+        }
     }
 }
