@@ -1,8 +1,6 @@
 #version 330 core
 layout (location = 0) out vec3 color_texture;
 
-//out vec4 FragColor;
-
 uniform sampler2D position_texture;
 uniform sampler2D albedo_texture;
 uniform sampler2D normal_texture;
@@ -71,7 +69,7 @@ void main()
 	float ao = mra.b;
     float ssao = texture(ssao_texture, if_uv).r;
 
-    vec3 N = normalize(texture(normal_texture, if_uv).rgb);
+    vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
     vec3 V = normalize(camera_position - World_position);
     
     vec3 F0 = vec3(0.04);
@@ -110,12 +108,10 @@ void main()
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     } 
 
-    //vec3 ambient = vec3(0.03) * albedo *  ssao;
-    vec3 ambient = albedo *  ssao;
-    vec3 color   = ambient;// + Lo;
+    vec3 ambient = vec3(0.3) * albedo * ssao;
+    vec3 color   = ambient + Lo;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
     color_texture = color;
-    //FragColor = vec4(color, 1.0);
 }

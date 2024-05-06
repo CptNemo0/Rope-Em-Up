@@ -260,7 +260,11 @@ void Shader::SetMatrix4(const string& name, glm::mat4 value) const
 void Shader::SetVec3(const string& name, glm::vec3 value) const
 {
     glUniform3f(glGetUniformLocation(id_, name.c_str()), value.x, value.y, value.z);
+}
 
+void Shader::SetVec2(const string& name, glm::vec2 value) const
+{
+    glUniform2f(glGetUniformLocation(id_, name.c_str()), value.x, value.y);
 }
 
 void Shader::SetLight(const string& name, Light value)

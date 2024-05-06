@@ -26,7 +26,7 @@ void SSAOBuffer::Init(int height, int width)
     
     glGenTextures(1, &ssao_texture_);
     glBindTexture(GL_TEXTURE_2D, ssao_texture_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_texture_, 0);
@@ -62,19 +62,19 @@ void SSAOBuffer::GenerateKernel(int precision)
     kernel_ = std::vector<glm::vec3>(precision, glm::vec3(0.0));
     std::uniform_real_distribution<GLfloat> distribution(0.0, 1.0);
     std::default_random_engine generator;
-    float inv64= 1.0f / 64.0f;
+    float inv_precison = 1.0f / precision;
     
     for (int i = 0; i < precision; i++)
     {
         glm::vec3 sample(distribution(generator) * 2.0 - 1.0, distribution(generator) * 2.0 - 1.0, distribution(generator));
         sample = glm::normalize(sample);
         sample *= distribution(generator);
-        
-        float scale = (float)(i) * inv64;
+
+        float scale = (float)i * inv_precison;
         scale *= scale;
         scale = 0.1f + scale * 0.9f;
-        sample *= scale;
-        kernel_[i] = sample;
+
+        kernel_[i] = sample * scale;
     }
 }
 
@@ -108,7 +108,7 @@ void SSAOBuffer::SetKernel(s_ptr<Shader> shader)
     }
 }
 
-void SSAOBuffer::BindTextures(std::shared_ptr<Shader> shader, unsigned int position, unsigned int normals)
+void SSAOBuffer::BindTextures(s_ptr<Shader> shader, unsigned int position, unsigned int normals)
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, position);

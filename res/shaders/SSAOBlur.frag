@@ -1,8 +1,6 @@
 #version 410 core
 layout (location = 0) out vec3 color_texture;
 
-out vec4 color;
-
 in vec2 if_uv;
 
 uniform sampler2D ssao_texture;
@@ -23,5 +21,4 @@ void main()
     }
     result *= div;
     color_texture = vec3(result);
-    color = vec4(vec3(result), 1.0f);
 }

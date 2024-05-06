@@ -141,7 +141,7 @@ int main()
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
-    const float kFar = 1000.0f;
+    const float kFar = 100.0f;
 
     srand(static_cast <unsigned> (time(0)));
 
@@ -216,10 +216,10 @@ int main()
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(0.0f, 25.0f, 0.0f));
-    camera->set_pitch(-90.0f);
-    camera->set_yaw(+90.0f);
-
+    camera->set_position(glm::vec3(0.0f, 5.0f, 0.0f));
+    //camera->set_pitch(-90.0f);
+    camera->set_yaw(-90.0f);
+    
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
     
@@ -341,7 +341,6 @@ int main()
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
-
 
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
@@ -512,7 +511,9 @@ int main()
     SSAOShader->SetInt("width", mode->width);
     SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
     SSAOShader->SetFloat("radius", 0.5);
-    SSAOShader->SetFloat("bias", 0.025);
+    SSAOShader->SetFloat("bias", 0.0025);
+    ssao_buffer.SetKernel(SSAOShader);
+
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     int scrWidth, scrHeight;
@@ -601,9 +602,7 @@ int main()
         // Bind buffer - Bind textures - Use Shader - Draw 
         ssao_buffer.Bind();
         SSAOShader->Use();
-        SSAOShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        ssao_buffer.BindTextures(SSAOShader, gbuffer.position_texture_, gbuffer.normal_texture_);
-        BindDefault();
+        ssao_buffer.BindTextures(SSAOShader, gbuffer.view_position_texture_, gbuffer.view_normal_texture_);
         ssao_buffer.Draw();
         //////////////////////////////////
 
@@ -632,17 +631,17 @@ int main()
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
-        //lbuffer.Draw();
+        lbuffer.Draw();
         //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
-        //BindDefault();
-        //PostprocessingShader->Use();
-        //lbuffer.BindTextures(PostprocessingShader);
-        //postprocessor.Draw();
+        BindDefault();
+        PostprocessingShader->Use();
+        lbuffer.BindTextures(PostprocessingShader);
+        postprocessor.Draw();
         //////////////////////////////////
         
-        /*BackgroundShader->Use();
+        BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
         
         cubemap->RenderCube();
@@ -655,12 +654,12 @@ int main()
 
         ParticleEmitterManager::i_->Draw();
         
-        glDisable(GL_BLEND);*/
+        glDisable(GL_BLEND);
         
 #pragma endregion
 #pragma region Interface
 
-        /*glDisable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
@@ -676,13 +675,13 @@ int main()
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);*/
+        glEnable(GL_DEPTH_TEST);
 
 #pragma endregion
 
 #pragma region ImGUI
         
-        /*ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
@@ -733,7 +732,7 @@ int main()
 
         ImGui::Render();
         
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); */
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 
 #pragma endregion 
         glfwSwapBuffers(window);
