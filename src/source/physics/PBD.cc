@@ -186,8 +186,8 @@ void pbd::WallConstraint::Enforce(s_ptr<components::PBDParticle> particle)
 {
 	auto pp = particle->transform_->get_predicted_position();
 
-	float max_x = down_right_.x - offset_;
-	float min_x = up_left_.x + offset_;
+	float max_x = up_left_.x - offset_;
+	float min_x = down_right_.x + offset_;
 	float max_z = up_left_.z - offset_;
 	float min_z = down_right_.z + offset_;
 
@@ -274,6 +274,7 @@ void pbd::PBDManager::ProjectConstraints(float t)
 		}
 	}
 
+	
 	for (auto& particle : particles_)
 	{
 		walls_.Enforce(particle);
