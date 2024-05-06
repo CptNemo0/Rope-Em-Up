@@ -42,6 +42,9 @@
 #include "headers/components/ParticleEmitter.h"
 #include "headers/ParticleEmitterManager.h"
 #include "headers/generation/RoomGenerator.h"
+#include "headers/audio/AudioManager.h"
+#include "headers/audio/Sounds.h"
+#include "headers/components/AudioSource.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -138,6 +141,11 @@ int main()
     const string kGatePath = "res/models/gate.obj";
 
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
+
+    const string kBruhPath = "res/sounds/bruh.wav";
+    
+    audio::AudioManager::Initialize();
+    audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -477,6 +485,9 @@ int main()
         room_obj->transform_->set_scale(glm::vec3(3.0f));
     }
 
+    auto audio_test_obj = GameObject::Create(scene_root);
+    audio_test_obj->AddComponent(make_shared<components::AudioSource>());
+
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
     HUDText_root->PropagateStart();
@@ -536,7 +547,7 @@ int main()
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);
-    
+
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -713,7 +724,7 @@ int main()
             {
                 auto room_obj = GameObject::Create(scene_root);
                 room_objects.push_back(room_obj);
-                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
                 room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
                 room_obj->transform_->set_scale(glm::vec3(3.0f));
                 room_obj->PropagateStart();
@@ -728,6 +739,15 @@ int main()
             }
             room_objects.clear();
         }
+        ImGui::End();
+
+        ImGui::Begin("Sound");
+
+        if (ImGui::Button("Play bruh.wav"))
+        {
+            audio_test_obj->GetComponent<components::AudioSource>()->PlaySound(audio::Sounds::bruh);
+        }
+
         ImGui::End();
 
         ImGui::Render();
