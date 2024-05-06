@@ -42,6 +42,9 @@
 #include "headers/components/ParticleEmitter.h"
 #include "headers/ParticleEmitterManager.h"
 #include "headers/generation/RoomGenerator.h"
+#include "headers/audio/AudioManager.h"
+#include "headers/audio/Sounds.h"
+#include "headers/components/AudioSource.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -49,15 +52,12 @@
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
 
-#include "headers/LBuffer.h"
-#include "headers/GBuffer.h"
-#include "headers/RenderManager.h"
-
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
 
 #include "headers/LBuffer.h"
 #include "headers/GBuffer.h"
+#include "headers/SSAO.h"
 
 void FixOrientation(s_ptr<GameObject> go)
 {
@@ -70,6 +70,11 @@ void FixOrientation(s_ptr<GameObject> go)
     go->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
 }
 
+void BindDefault()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
 
 int main()
 {
@@ -109,6 +114,12 @@ int main()
     const string kLBufferVertexShaderPath = "res/shaders/LBufferPass.vert";
     const string kLBufferFragmentShaderPath = "res/shaders/LBufferPass.frag";
 
+    const string kSSAOVertexShaderPath = "res/shaders/SSAO.vert";
+    const string kSSAOFragmentShaderPath = "res/shaders/SSAO.frag";
+
+    const string kSSAOBlurVertexShaderPath = "res/shaders/SSAOBlur.vert";
+    const string kSSAOBlurFragmentShaderPath = "res/shaders/SSAOBlur.frag";
+
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
     const string kHUDTexturePath = "res/textures/placeholder_icon.png";
@@ -131,12 +142,18 @@ int main()
 
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
+    const string kBruhPath = "res/sounds/bruh.wav";
+    
+    audio::AudioManager::Initialize();
+    audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
+
     const float kFov = 90.0f;
     const float kNear = 0.1f;
-    const float kFar = 1000.0f;
+    const float kFar = 100.0f;
     float kpitch = -90.0f;
     float kyaw = 90.0f;
     glm::vec3 kposition = glm::vec3(0.0f, 25.0f, 0.0f);
+
 
     srand(static_cast <unsigned> (time(0)));
 
@@ -211,13 +228,13 @@ int main()
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(0.0f, 25.0f, 0.0f));
-    camera->set_pitch(-90.0f);
-    camera->set_yaw(+90.0f);
 
     float kar = ((float)mode->width / (float)mode->height);
 
-
+    camera->set_position(glm::vec3(0.0f, 5.0f, 0.0f));
+    //camera->set_pitch(-90.0f);
+    camera->set_yaw(-90.0f);
+    
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
     
@@ -233,14 +250,17 @@ int main()
     auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
     auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
     auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
+    auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
+    auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
 
     auto a = glm::mat3(1.0f) * glm::vec3(0.0f);
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::MEDIUM_SSAO);
+    SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
-    //postprocessor.Bind();
-    RenderManager::Initialize(&gbuffer, &lbuffer, &postprocessor, GBufferPassShader, LBufferPassShader);
+
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
@@ -337,7 +357,6 @@ int main()
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(-17.0f, 0.0f, 17.0f), glm::vec3(17.0f, 0.0f, -17.0f), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
-
 
     auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
@@ -479,6 +498,9 @@ int main()
         room_obj->transform_->set_scale(glm::vec3(3.0f));
     }
 
+    auto audio_test_obj = GameObject::Create(scene_root);
+    audio_test_obj->AddComponent(make_shared<components::AudioSource>());
+
     scene_root->PropagateStart();
     HUD_root->PropagateStart();
     HUDText_root->PropagateStart();
@@ -507,6 +529,16 @@ int main()
     BackgroundShader->Use();
     BackgroundShader->SetMatrix4("projection_matrix", projection);
 
+    SSAOShader->Use();
+    SSAOShader->SetMatrix4("projection_matrix", projection);
+    SSAOShader->SetInt("height", mode->height);
+    SSAOShader->SetInt("width", mode->width);
+    SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
+    SSAOShader->SetFloat("radius", 0.5);
+    SSAOShader->SetFloat("bias", 0.0025);
+    ssao_buffer.SetKernel(SSAOShader);
+
+
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
@@ -528,7 +560,7 @@ int main()
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);
-    
+
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -583,55 +615,62 @@ int main()
 
 #pragma endregion
 #pragma region GO Update and Draw
-        //postprocessor.Bind();        
-
-        //GBufferPassShader->Use();
-        //GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-
-       /* PBRShader->Use();
-        glm::vec3 newPos = light_Positions[0]; 
-        PBRShader->SetVec3("light_positions[0]", newPos);
-        PBRShader->SetVec3("light_colors[0]", light_Colors[0]);
-        PBRShader->SetMatrix4("model_matrix", glm::mat4(1.0f));
-        PBRShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
-        PBRShader->SetVec3("camera_position", camera->get_position());
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradianceMap);
-        shader->SetInt("irradianceMap", GL_TEXTURE5);*/    
 
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
+
         scene_root->PropagateUpdate();
         //////////////////////////////////
         
-        // Bind buffer - Use Shader - Draw 
+        // Bind buffer - Bind textures - Use Shader - Draw 
+        ssao_buffer.Bind();
+        SSAOShader->Use();
+        ssao_buffer.BindTextures(SSAOShader, gbuffer.view_position_texture_, gbuffer.view_normal_texture_);
+        ssao_buffer.Draw();
+        //////////////////////////////////
+
+        // Bind buffer - Bind textures - Use Shader - Draw 
+        ssao_blur_buffer.Bind();
+        SSAOBlurShader->Use();
+        ssao_blur_buffer.BindTextures(SSAOBlurShader, ssao_buffer.ssao_texture_);
+        ssao_blur_buffer.Draw();
+        //////////////////////////////////
+        
+        // Bind buffer - Bind textures - Use Shader - Draw 
         lbuffer.Bind();
         LBufferPassShader->Use();
         gbuffer.BindTextures(LBufferPassShader);
+        glActiveTexture(GL_TEXTURE4);
+        LBufferPassShader->SetInt("ssao_texture", 4);
+        glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
+        LBufferPassShader->SetVec3("camera_position", camera->get_position());
+
+        // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetVec3("light_positions[0]", light_Positions[0]);
         LBufferPassShader->SetVec3("light_colors[0]", light_Colors[0]);
         LBufferPassShader->SetVec3("light_positions[1]", player_1->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
         LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
-        LBufferPassShader->SetVec3("camera_position", gameplayCameraComponent->camera_->get_position());
+
+        /*LBufferPassShader->SetVec3("camera_position", gameplayCameraComponent->camera_->get_position());
         glBindVertexArray(lbuffer.vao_);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        glBindVertexArray(0);*/
+
+        // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
+
+        lbuffer.Draw();
         //////////////////////////////////
         
-        // Bind buffer - Use Shader - Draw 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Bind buffer - Bind textures - Use Shader - Draw 
+        BindDefault();
         PostprocessingShader->Use();
         lbuffer.BindTextures(PostprocessingShader);
-        postprocessor.Update();
-        glBindVertexArray(lbuffer.vao_);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        postprocessor.Draw();
         //////////////////////////////////
         
         BackgroundShader->Use();
@@ -649,11 +688,10 @@ int main()
         
         glDisable(GL_BLEND);
         
-        //postprocessor.Draw();
 #pragma endregion
 #pragma region Interface
 
-        /*glDisable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
@@ -669,7 +707,7 @@ int main()
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);*/
+        glEnable(GL_DEPTH_TEST);
 
 #pragma endregion
 
@@ -713,7 +751,7 @@ ImGui::End();
             {
                 auto room_obj = GameObject::Create(scene_root);
                 room_objects.push_back(room_obj);
-                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, PBRShader));
+                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
                 room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
                 room_obj->transform_->set_scale(glm::vec3(3.0f));
                 room_obj->PropagateStart();
@@ -730,14 +768,21 @@ ImGui::End();
         }
         ImGui::End();
 
+        ImGui::Begin("Sound");
+
+        if (ImGui::Button("Play bruh.wav"))
+        {
+            audio_test_obj->GetComponent<components::AudioSource>()->PlaySound(audio::Sounds::bruh);
+        }
+
+        ImGui::End();
+
         ImGui::Render();
         
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 
 #pragma endregion 
         glfwSwapBuffers(window);
-
-
     }
 
     ai::EnemyAIManager::Destroy();

@@ -22,6 +22,7 @@ public:
 	void Bind();
 	void Unbind();
 	void BindTextures(s_ptr<Shader> shader);
+	void Draw();
 };
 
 #endif // !L_BUFFER_H
