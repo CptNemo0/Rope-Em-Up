@@ -565,8 +565,6 @@ int main()
 
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
-    PBRShader->SetMatrix4("projection_matrix", projection_matrix);
-
     ParticleShader->Use();
     ParticleShader->SetMatrix4("projection_matrix", projection_matrix);
 
@@ -1005,6 +1003,7 @@ ImGui::End();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     glfwTerminate();
+
     audio::AudioManager::Destroy();
 
     return 0;

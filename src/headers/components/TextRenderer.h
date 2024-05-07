@@ -1,6 +1,8 @@
 #ifndef TEXTRENDERER_H
 #define TEXTRENDERER_H
 
+#include "GLFW/glfw3.h"
+
 #include "../global.h"
 #include "../Font.h"
 #include "../GameObject.h"

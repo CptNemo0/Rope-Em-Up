@@ -30,12 +30,6 @@ void components::TextRenderer::Update()
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO_);
 
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR)
-    {
-        cout << "OpenGL Error: " << error << endl;
-    }
-
     float x = 0, y = 0;
 
     for (auto c : text_)
