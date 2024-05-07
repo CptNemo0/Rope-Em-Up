@@ -187,10 +187,10 @@ public:
 		s_ptr <llr::Camera> camera_;
 		s_ptr <GameObject> target1_;
 		s_ptr <GameObject> target2_;
-		float distance_ = 20.0f;
+		float distance_ = 17.0f;
 		float yawAngle_= 0.0f;
 		float pitchAngle_ = 0.0f;
-		float height_ = 15.0f;
+		float height_ = 12.0f;
 
 
 		// Inherited via Component
