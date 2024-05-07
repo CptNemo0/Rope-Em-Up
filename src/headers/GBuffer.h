@@ -19,7 +19,6 @@ public:
 	unsigned int mra_texture_;
 	unsigned int view_position_texture_;
 	unsigned int view_normal_texture_;
-	unsigned int depth_texture_;
 
 	unsigned int rbo_;
 

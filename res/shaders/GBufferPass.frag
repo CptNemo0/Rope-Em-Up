@@ -5,7 +5,6 @@ layout (location = 2) out vec3 normal_texture;
 layout (location = 3) out vec3 mra_texture;
 layout (location = 4) out vec3 view_position_texture;
 layout (location = 5) out vec3 view_normal_texture;
-layout (location = 6) out vec3 depth_texture;
 
 in vec3 world_position;
 in vec3 view_position;
@@ -41,7 +40,4 @@ void main()
 	mra_texture = vec3(metallic, roughness, ao);
 	view_position_texture = view_position;
 	view_normal_texture = normalize(normal_view_matrix * normal) + 1.0 * 0.5;
-	
-	float depth = LinearizeDepth(gl_FragCoord.z) * 0.01;
-	depth_texture = vec3(gl_FragCoord.z);
 }
