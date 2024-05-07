@@ -18,7 +18,7 @@ namespace components
 		s_ptr<RopeSegment> right_;
 		s_ptr<components::Transform> transform_;
 		string name_;
-		bool is_puller_;
+		bool is_puller_ = false;
 		// Inherited via Component
 		void Start() override;
 		void Update() override;

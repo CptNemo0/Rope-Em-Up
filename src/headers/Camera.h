@@ -190,6 +190,7 @@ public:
 		float distance_ = 20.0f;
 		float yawAngle_= 0.0f;
 		float pitchAngle_ = 0.0f;
+		float height_ = 15.0f;
 
 		// Inherited via Component
 		void Start() override;

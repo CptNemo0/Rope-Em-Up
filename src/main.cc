@@ -261,7 +261,7 @@ int main()
 #pragma endregion CamerasConfiguration
 
     
-    auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+    auto projection_matrix = glm::perspective(glm::radians(debugCamera->get_fov()), debugCamera->get_aspect_ratio(), debugCamera->get_near(), debugCamera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
     
     
@@ -287,7 +287,7 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::MEDIUM_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
@@ -534,7 +534,7 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, gameplayCameraComponent->camera_));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, debugCamera));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
@@ -561,22 +561,20 @@ int main()
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
 
-    cubemap->LoadHDRimg(window, gameplayCameraComponent->camera_);
+    
 
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
-    glm::mat4 projection = glm::perspective(glm::radians(gameplayCameraComponent->camera_->get_fov()), gameplayCameraComponent->camera_->get_aspect_ratio(), gameplayCameraComponent->camera_->get_near(), gameplayCameraComponent->camera_->get_far());
-    PBRShader->Use();
-    PBRShader->SetMatrix4("projection_matrix", projection);
+    PBRShader->SetMatrix4("projection_matrix", projection_matrix);
 
     ParticleShader->Use();
-    ParticleShader->SetMatrix4("projection_matrix", projection);
+    ParticleShader->SetMatrix4("projection_matrix", projection_matrix);
 
     BackgroundShader->Use();
-    BackgroundShader->SetMatrix4("projection_matrix", projection);
+    BackgroundShader->SetMatrix4("projection_matrix", projection_matrix);
 
     SSAOShader->Use();
-    SSAOShader->SetMatrix4("projection_matrix", projection);
+    SSAOShader->SetMatrix4("projection_matrix", projection_matrix);
     SSAOShader->SetInt("height", mode->height);
     SSAOShader->SetInt("width", mode->width);
     SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
@@ -584,6 +582,7 @@ int main()
     SSAOShader->SetFloat("bias", 0.0025);
     ssao_buffer.SetKernel(SSAOShader);
 
+    cubemap->LoadHDRimg(window, debugCamera);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     int scrWidth, scrHeight;
@@ -743,7 +742,7 @@ int main()
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
-        GBufferPassShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
+        GBufferPassShader->SetMatrix4("view_matrix", debugCamera->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
 
         scene_root->PropagateUpdate();
@@ -792,7 +791,7 @@ int main()
         //////////////////////////////////
         
         BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
+        BackgroundShader->SetMatrix4("view_matrix", debugCamera->GetViewMatrix());
         
         cubemap->RenderCube();
 
@@ -800,7 +799,7 @@ int main()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         ParticleShader->Use();
-        ParticleShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
+        ParticleShader->SetMatrix4("view_matrix", debugCamera->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
         
@@ -844,7 +843,7 @@ int main()
 ImGui::Begin("Camera");
     ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
     ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
-    ImGui::SliderFloat("Height", &camera->position_.y, 1.0f, 100.0f, "%.2f");
+    ImGui::SliderFloat("Height", &gameplayCameraComponent->height_, 1.0f, 100.0f, "%.2f");
     ImGui::SliderFloat("Distance", &gameplayCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
     ImGui::SliderFloat("Yaw Angle", &gameplayCameraComponent->yawAngle_, -1.0f, 1.0f, "%.1f");
 

@@ -64,14 +64,12 @@ void components::GameplayCameraComponent::Start()
 
 void components::GameplayCameraComponent::Update()
 {
-	//glm::vec3 midPoint = calculateMidPoint();
-	//// Aktualizuj wartoœci kamery na podstawie wprowadzonych zmian z ImGui
-	///*camera_->set_right(transfrom_->get_right());
-	//camera_->set_up(transfrom_->get_up());*/
-
 	glm::vec3 midPoint = calculateMidPoint();
 	glm::vec3 directionToMidpoint = glm::normalize(midPoint - transfrom_->get_position());
 	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint;
+
+	transfrom_->set_position(glm::vec3(cameraPosition.x ,height_, cameraPosition.z));
+	camera_->set_position(transfrom_->get_position());
 
 	glm::vec3 cameraDirectionToMidpoint = glm::normalize(midPoint - camera_->get_position());
 	
@@ -81,7 +79,6 @@ void components::GameplayCameraComponent::Update()
 	camera_->set_pitch(pitch);
 	camera_->set_yaw(yaw);
 
-	transfrom_->set_position(cameraPosition);
 
 	//camera_->set_position(transfrom_->get_position());
 	camera_->set_right(transfrom_->get_right());
