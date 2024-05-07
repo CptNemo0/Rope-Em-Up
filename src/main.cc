@@ -80,6 +80,8 @@ int main()
 {
     char zaza;
     cout << "Byc czy nie byc oto jest pytanie.\n";
+    ///// PATH TO RESOURCES
+#pragma region Res Path
     const string kWindowTitle = "Rope'em Up!";
 
     const string kVertexShaderPath = "res/shaders/Basic.vert";
@@ -143,13 +145,24 @@ int main()
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
     const string kBruhPath = "res/sounds/bruh.wav";
+#pragma endregion Resouces Path
+    /////
     
     audio::AudioManager::Initialize();
     audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
 
+    ///// CAMERA SETTINGS
+#pragma region CameraSettings
     const float kFov = 90.0f;
     const float kNear = 0.1f;
-    const float kFar = 100.0f;
+    const float kFar = 1000.0f;
+    float kpitch = -90.0f;
+    float kyaw = 90.0f;
+    int chosen_camera = 0;
+    std::vector<llr::Camera> cameras;
+
+#pragma endregion CameraSettings
+
 
     srand(static_cast <unsigned> (time(0)));
 
@@ -219,17 +232,33 @@ int main()
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
 
+#pragma region CamerasConfiguration
     auto camera = make_shared<llr::Camera>();
     camera->set_fov(kFov);
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(0.0f, 15.0f, 0.0f));
+    camera->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     camera->set_pitch(-90.0f);
     camera->set_yaw(-90.0f);
+
+    auto debugCamera = make_shared<llr::Camera>();
+    debugCamera->set_fov(kFov);
+    debugCamera->set_near(kNear);
+    debugCamera->set_far(kFar);
+    debugCamera->set_aspect_ratio(((float)mode->width / (float)mode->height));
+    debugCamera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
+    debugCamera->set_pitch(-90.0f);
+    debugCamera->set_yaw(-90.0f);
+
+    cameras.push_back(*camera);
+    cameras.push_back(*debugCamera);
+#pragma endregion CamerasConfiguration
+
     
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
+    
     
     //auto shader = make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
     auto HUDshader = make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
@@ -275,10 +304,10 @@ int main()
         glm::vec3(10.0f, -10.0f, 10.0f),
     };
     glm::vec3 light_Colors[] = {
-        glm::vec3(500.0f, 500.0f, 500.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f)
+        glm::vec3(23.47, 21.31, 20.79),
+        glm::vec3(23.47, 21.31, 20.79),
+        glm::vec3(23.47, 21.31, 20.79),
+        glm::vec3(23.47, 21.31, 20.79)
     };
 
     auto test_model = make_shared<Model>(kTestPath);
@@ -407,6 +436,11 @@ int main()
 
     //ai::EnemyAIManager::SetPlayers(player_1, player_2);
     ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
+    auto gameplayCamera = GameObject::Create(scene_root);
+    gameplayCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+
+    gameplayCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
+    auto gameplayCameraComponent = gameplayCamera->GetComponent<components::GameplayCameraComponent>();
 
     //std::vector<s_ptr<GameObject>> rope_segments;
 
@@ -466,7 +500,7 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, camera));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, gameplayCameraComponent->camera_));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
@@ -515,11 +549,11 @@ int main()
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
 
-    cubemap->LoadHDRimg(window, camera);
+    cubemap->LoadHDRimg(window, gameplayCameraComponent->camera_);
 
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
-    glm::mat4 projection = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+    glm::mat4 projection = glm::perspective(glm::radians(gameplayCameraComponent->camera_->get_fov()), gameplayCameraComponent->camera_->get_aspect_ratio(), gameplayCameraComponent->camera_->get_near(), gameplayCameraComponent->camera_->get_far());
     PBRShader->Use();
     PBRShader->SetMatrix4("projection_matrix", projection);
 
@@ -601,7 +635,8 @@ int main()
         collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         steady_clock::time_point end = steady_clock::now();
 
-        utility::DebugCameraMovement(window, camera, delta_time);
+        utility::DebugCameraMovement(window, debugCamera, delta_time);
+        gameplayCameraComponent->Update();
         input::InputManager::i_->Update();
 
 #pragma region Collisions and Physics
@@ -618,7 +653,7 @@ int main()
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
-        GBufferPassShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        GBufferPassShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
 
         scene_root->PropagateUpdate();
@@ -654,6 +689,12 @@ int main()
         LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
         LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
+
+        /*LBufferPassShader->SetVec3("camera_position", gameplayCameraComponent->camera_->get_position());
+        glBindVertexArray(lbuffer.vao_);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);*/
+
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
         lbuffer.Draw();
@@ -667,7 +708,7 @@ int main()
         //////////////////////////////////
         
         BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        BackgroundShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
         
         cubemap->RenderCube();
 
@@ -675,7 +716,7 @@ int main()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         ParticleShader->Use();
-        ParticleShader->SetMatrix4("view_matrix", camera->GetViewMatrix());
+        ParticleShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
         
@@ -715,6 +756,17 @@ int main()
         ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::End();
+
+ImGui::Begin("Camera");
+    ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
+    ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
+    ImGui::SliderFloat("Height", &camera->position_.y, 1.0f, 100.0f, "%.2f");
+    ImGui::SliderFloat("Distance", &gameplayCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
+    ImGui::SliderFloat("Yaw Angle", &gameplayCameraComponent->yawAngle_, -1.0f, 1.0f, "%.1f");
+
+
+
+ImGui::End();
 
         ImGui::Begin("Generation");
         ImGui::SliderFloat("Angle", &rlgs.angle, 0.0f, 1.0f, "%0.2f");

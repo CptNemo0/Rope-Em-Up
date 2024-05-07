@@ -8,6 +8,7 @@
 #include "global.h"
 #include "components/Component.h"
 #include "components/Transform.h"
+#include "GameObject.h"
 
 namespace llr
 {
@@ -17,7 +18,7 @@ namespace llr
 
 	class Camera
 	{
-	private:
+	public:
 		
 		glm::vec3 position_;
 		
@@ -33,7 +34,7 @@ namespace llr
 		float far_;
 		float aspect_ratio_;
 
-	public:
+
 
 		Camera();
 		Camera(glm::vec3 position, float pitch, float yaw, float fov, float near, float far, float ar) :
@@ -161,6 +162,7 @@ namespace llr
 	
 		void UpdateDirectionVectors();
 	};
+
 }
 
 namespace components
@@ -176,6 +178,35 @@ namespace components
 
 		void Update() override;
 
+	};
+
+	class GameplayCameraComponent : public Component
+	{
+public:
+		s_ptr<components::Transform> transfrom_;
+		s_ptr <llr::Camera> camera_;
+		s_ptr <GameObject> target1_;
+		s_ptr <GameObject> target2_;
+		float distance_ = 20.0f;
+		float yawAngle_= 0.0f;
+		float pitchAngle_ = 0.0f;
+
+		// Inherited via Component
+		void Start() override;
+
+		void Update() override;
+
+		void Destroy() override;
+
+		GameplayCameraComponent(s_ptr <GameObject> target1, s_ptr <GameObject> target2, s_ptr <llr::Camera> camera);
+
+		glm::vec3 calculateMidPoint();
+
+		void RotateCameraAroundMidPoint(float yawAngle);
+
+
+		void SetTargets(s_ptr <GameObject> target1, s_ptr <GameObject> target2);
+ 
 	};
 
 
