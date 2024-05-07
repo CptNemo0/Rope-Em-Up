@@ -76,10 +76,10 @@ void components::GameplayCameraComponent::Update()
 	glm::vec3 cameraDirectionToMidpoint = glm::normalize(midPoint - camera_->get_position());
 	
 	float pitch = glm::degrees(asin(cameraDirectionToMidpoint.y));
-	//float yaw = glm::degrees(atan2(cameraDirectionToMidpoint.x, cameraDirectionToMidpoint.z));
+	float yaw = glm::degrees(atan2(cameraDirectionToMidpoint.x, cameraDirectionToMidpoint.z));
 
 	camera_->set_pitch(pitch);
-	//camera_->set_yaw(yaw);
+	camera_->set_yaw(yaw);
 
 	transfrom_->set_position(cameraPosition);
 

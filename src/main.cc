@@ -80,6 +80,8 @@ int main()
 {
     char zaza;
     cout << "Byc czy nie byc oto jest pytanie.\n";
+    ///// PATH TO RESOURCES
+#pragma region Res Path
     const string kWindowTitle = "Rope'em Up!";
 
     const string kVertexShaderPath = "res/shaders/Basic.vert";
@@ -143,15 +145,23 @@ int main()
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
     const string kBruhPath = "res/sounds/bruh.wav";
+#pragma endregion Resouces Path
+    /////
     
     audio::AudioManager::Initialize();
     audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
 
+    ///// CAMERA SETTINGS
+#pragma region CameraSettings
     const float kFov = 90.0f;
     const float kNear = 0.1f;
     const float kFar = 1000.0f;
     float kpitch = -90.0f;
     float kyaw = 90.0f;
+    int chosen_camera = 0;
+    std::vector<llr::Camera> cameras;
+
+#pragma endregion CameraSettings
 
 
     srand(static_cast <unsigned> (time(0)));
@@ -222,14 +232,29 @@ int main()
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
 
+#pragma region CamerasConfiguration
     auto camera = make_shared<llr::Camera>();
     camera->set_fov(kFov);
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(0.0f, 10.0f, 0.0f));
+    camera->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     camera->set_pitch(-90.0f);
     camera->set_yaw(-90.0f);
+
+    auto debugCamera = make_shared<llr::Camera>();
+    debugCamera->set_fov(kFov);
+    debugCamera->set_near(kNear);
+    debugCamera->set_far(kFar);
+    debugCamera->set_aspect_ratio(((float)mode->width / (float)mode->height));
+    debugCamera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
+    debugCamera->set_pitch(-90.0f);
+    debugCamera->set_yaw(-90.0f);
+
+    cameras.push_back(*camera);
+    cameras.push_back(*debugCamera);
+#pragma endregion CamerasConfiguration
+
     
     auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
@@ -279,10 +304,10 @@ int main()
         glm::vec3(10.0f, -10.0f, 10.0f),
     };
     glm::vec3 light_Colors[] = {
-        glm::vec3(500.0f, 500.0f, 500.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f)
+        glm::vec3(23.47, 21.31, 20.79),
+        glm::vec3(23.47, 21.31, 20.79),
+        glm::vec3(23.47, 21.31, 20.79),
+        glm::vec3(23.47, 21.31, 20.79)
     };
 
     auto test_model = make_shared<Model>(kTestPath);
@@ -610,7 +635,7 @@ int main()
         collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         steady_clock::time_point end = steady_clock::now();
 
-        //utility::DebugCameraMovement(window, gameplayCameraComponent->camera_, delta_time);
+        utility::DebugCameraMovement(window, debugCamera, delta_time);
         gameplayCameraComponent->Update();
         input::InputManager::i_->Update();
 
