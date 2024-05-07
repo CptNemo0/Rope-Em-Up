@@ -35,7 +35,7 @@ class AudioManager
 // Singleton stuff
 private:
     AudioManager();
-    ~AudioManager() = default;
+    ~AudioManager();
 
     ALCdevice *device_;
     ALCcontext *context_;
