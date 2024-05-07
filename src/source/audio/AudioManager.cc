@@ -120,6 +120,14 @@ audio::AudioManager::AudioManager()
 
     // Clear error
     alGetError();
+
+    ALuint sources[NO_SOURCES];
+    alGenSources(NO_SOURCES, sources);
+    CheckALError("alGenSources");
+    for (int i = 0; i < NO_SOURCES; i++)
+    {
+        free_sources_.push_back(sources[i]);
+    }
 }
 
 void audio::AudioManager::LoadSound(Sounds sound, const string path)
@@ -143,6 +151,57 @@ void audio::AudioManager::LoadSound(Sounds sound, const string path)
     delete[] data;
 
     sounds_[sound].push_back(ab);
+}
+
+void audio::AudioManager::Update()
+{
+    for (auto &source : busy_sources_)
+    {
+        ALint state;
+        alGetSourcei(source, AL_SOURCE_STATE, &state);
+        CheckALError("alGetSourcei");
+
+        if (state != AL_PLAYING)
+        {
+            sources_to_free_.insert(source);
+        }
+    }
+    for (auto &source : sources_to_free_)
+    {
+        free_sources_.push_back(source);
+    }
+    std::erase_if(busy_sources_, [this](const ALuint &source)
+    {
+        return sources_to_free_.find(source) != sources_to_free_.end();
+    });
+    sources_to_free_.clear();
+}
+
+const ALuint audio::AudioManager::GetFreeSource()
+{
+    if (!free_sources_.empty())
+    {
+        auto source = free_sources_.at(0);
+        free_sources_.pop_front();
+        return source;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+void audio::AudioManager::PlaySource(const ALuint &source)
+{
+    alSourcePlay(source);
+    busy_sources_.push_back(source);
+}
+
+audio::AudioBuffer audio::AudioManager::GetBuffer(Sounds sound)
+{
+    auto buffers = sounds_[sound];
+    auto rand_it = random::RandIntExcl(0, buffers.size());
+    return buffers[rand_it];
 }
 
 void audio::CheckALError(const string info)

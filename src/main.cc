@@ -638,6 +638,7 @@ int main()
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         gameplayCameraComponent->Update();
         input::InputManager::i_->Update();
+        audio::AudioManager::i_->Update();
 
 #pragma region Collisions and Physics
         

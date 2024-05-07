@@ -4,12 +4,18 @@
 #include <fstream>
 #include <unordered_map>
 #include <vector>
+#include <list>
+#include <deque>
+#include <unordered_set>
 
 #include <AL/al.h>
 #include <AL/alc.h>
 
 #include "../global.h"
 #include "Sounds.h"
+#include "../Random.h"
+
+#define NO_SOURCES 128
 
 namespace audio
 {
@@ -34,6 +40,11 @@ private:
     ALCdevice *device_;
     ALCcontext *context_;
 
+    std::list<ALuint> busy_sources_;
+    std::unordered_set<ALuint> sources_to_free_;
+    std::deque<ALuint> free_sources_;
+    std::unordered_map<Sounds, std::vector<AudioBuffer>> sounds_;
+
     char *LoadWAV(const string path, AudioBuffer &audio_buffer);
 
 public:
@@ -57,8 +68,11 @@ public:
     }
 
     void LoadSound(Sounds sound, const string path);
-
-    std::unordered_map<Sounds, std::vector<AudioBuffer>> sounds_;
+    void Update();
+    // Returns -1 if no free source available
+    const ALuint GetFreeSource();
+    void PlaySource(const ALuint &source);
+    AudioBuffer GetBuffer(Sounds sound);
 };
 
 }; // namespace audio
