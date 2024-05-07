@@ -689,12 +689,6 @@ int main()
         LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
         LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
-
-        /*LBufferPassShader->SetVec3("camera_position", gameplayCameraComponent->camera_->get_position());
-        glBindVertexArray(lbuffer.vao_);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);*/
-
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
         lbuffer.Draw();
@@ -781,6 +775,7 @@ ImGui::End();
         if (ImGui::Button("Generate"))
         {
             rlg.GenerateRooms(rlgs);
+            rlg.GenerateGates();
             for (auto &room : room_objects)
             {
                 room.lock()->Destroy();

@@ -134,6 +134,17 @@ void generation::RoomLayoutGenerator::GenerateRooms(const RoomLayoutGenerationSe
     }
 }
 
+void generation::RoomLayoutGenerator::GenerateGates()
+{
+    for (auto& [position, room] : rooms)
+    {
+        room.up_gate = rooms.contains(position + glm::ivec2(0, 1));
+        room.right_gate = rooms.contains(position + glm::ivec2(1, 0));
+        room.down_gate = rooms.contains(position + glm::ivec2(0, -1));
+        room.left_gate = rooms.contains(position + glm::ivec2(0, 1));
+    }
+}
+
 void generation::RoomLayoutGenerator::AddRoom(glm::ivec2 position)
 {
     int rooms_size_before = rooms.size();

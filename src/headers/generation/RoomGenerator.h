@@ -38,12 +38,22 @@ namespace generation
     struct Room
     {
         glm::ivec2 position;
+
+        bool up_gate;
+        bool right_gate;
+        bool down_gate;
+        bool left_gate;
+
+        bool is_generated = false;
+
+        // Values that will be generated
         int width;
         int height;
+        
         std::unordered_set<glm::ivec2> grid;
         std::vector <glm::ivec2> enemies;
         std::vector <glm::ivec2> healing_spots;
-        bool is_generated = false;
+       
         Room(glm::ivec2 position = glm::ivec2(0, 0)) : position(position) {}
     };
 
@@ -61,6 +71,7 @@ namespace generation
 
         RoomLayoutGenerator() = default;
         void GenerateRooms(const RoomLayoutGenerationSettings &settings);
+        void GenerateGates();
         void AddRoom(glm::ivec2 position);
     };
 
