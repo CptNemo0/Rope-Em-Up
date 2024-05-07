@@ -647,8 +647,9 @@ int main()
         steady_clock::time_point end = steady_clock::now();
 
         utility::DebugCameraMovement(window, debugCamera, delta_time);
-        gameplayCameraComponent->Update();
+        //gameplayCameraComponent->Update();
         input::InputManager::i_->Update();
+        audio::AudioManager::i_->Update();
 
 #pragma region Rooms
 
@@ -656,6 +657,8 @@ int main()
         glm::ivec2 next_room_pos = room->position;
         glm::ivec2 current_room_pos = room->position;
         
+        int input_door = -1;
+
         if (room->up_gate)
         {
             auto p1l = glm::length2(room->up_gate_pos - player_1->transform_->get_global_position());
@@ -665,10 +668,11 @@ int main()
             {
                 cout << "GO UP!!!" << endl;
                 next_room_pos += glm::ivec2(0, -1);
-
+                input_door = 0;
             }
+            
         }
-        else if (room->right_gate)
+        if (room->right_gate)
         {
             auto p1l = glm::length2(room->right_gate_pos - player_1->transform_->get_global_position());
             auto p2l = glm::length2(room->right_gate_pos - player_2->transform_->get_global_position());
@@ -677,9 +681,13 @@ int main()
             {
                 cout << "GO RIGHT!!!" << endl;
                 next_room_pos += glm::ivec2(-1, 0);
+                if (input_door == -1)
+                {
+                    input_door = 1;
+                }
             }
         }
-        else if (room->down_gate)
+        if (room->down_gate)
         {
             auto p1l = glm::length2(room->down_gate_pos - player_1->transform_->get_global_position());
             auto p2l = glm::length2(room->down_gate_pos - player_2->transform_->get_global_position());
@@ -688,41 +696,102 @@ int main()
             {
                 cout << "GO DOWN!!!" << endl;
                 next_room_pos += glm::ivec2(0, 1);
+                if (input_door == -1)
+                {
+                    input_door = 2;
+                }
             }
         }
-        else if (room->left_gate)
+        if (room->left_gate)
         {
             auto p1l = glm::length2(room->left_gate_pos - player_1->transform_->get_global_position());
             auto p2l = glm::length2(room->left_gate_pos - player_2->transform_->get_global_position());
+
+            std::cout << p1l << " " << p2l << endl;
 
             if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
             {
                 cout << "GO LEFT!!!" << endl;
                 next_room_pos += glm::ivec2(1, 0);
+                if (input_door == -1)
+                {
+                    input_door = 3;
+                }
             }
         }
 
         if (current_room_pos != next_room_pos)
         {
+            // Usun obecny pokoj
             for (auto& a : room_parts)
             {
                 a.lock()->Destroy();
             }
             room_parts.clear();
-            room = &rlg.rooms[next_room_pos];
 
-            if (!room->is_generated)
+            // Stworz nowy pokoj
+            if (rlg.rooms.contains(next_room_pos))
             {
-                generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
-                rg_settings.width++;
+                room = &rlg.rooms[next_room_pos];
+
+                if (!room->is_generated)
+                {
+                    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+                    rg_settings.width++;
+                }
+                generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
+
+                pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+                pbd::PBDManager::i_->set_walls(walls);
             }
-            generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
 
-            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
-            pbd::PBDManager::i_->set_walls(walls);
+            //Przetransportuj gracza i line
 
-            cout << room->position.x << " " << room->position.y << endl;
-            cout << room->width << " " << room->height << endl << endl;
+            //przesun graczy
+            glm::vec3 new_center = glm::vec3(0.0f);
+            glm::vec3 player_1_pos = glm::vec3(0.0f);
+            glm::vec3 player_2_pos = glm::vec3(0.0f);
+            switch (input_door) 
+            {
+                case 0: // wychodzi gora wychodzi dolem
+                    new_center = room->down_gate_pos +  glm::vec3(0.0f, 0.0f, 1.0f) * gate_distance_threshold * 1.1f;
+                    player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
+                    player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
+                    player_1->transform_->set_position(player_1_pos);
+                    player_2->transform_->set_position(player_2_pos);
+
+                    break;
+                case 1: // wychodzi od prawej wychodzi od lewej
+                    new_center = room->left_gate_pos + glm::vec3(-1.0f, 0.0f, 0.0f) * gate_distance_threshold * 1.1f;
+                    player_1_pos = new_center + glm::vec3(0.0f, 0.0f, 1.0f);
+                    player_2_pos = new_center - glm::vec3(0.0f, 0.0f, 1.0f);
+                    player_1->transform_->set_position(player_1_pos);
+                    player_2->transform_->set_position(player_2_pos);
+                    break;
+                case 2: // wychodzi do³em wychodzi gora
+                    new_center = room->up_gate_pos + glm::vec3(0.0f, 0.0f, -1.0f) * gate_distance_threshold * 1.1f;
+                    player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
+                    player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
+                    player_1->transform_->set_position(player_1_pos);
+                    player_2->transform_->set_position(player_2_pos);
+                    break;
+                case 3: // wychodzi od lewej wchodzi od prawej
+                    new_center = room->right_gate_pos + glm::vec3(1.0f, 0.0f, 0.0f) * gate_distance_threshold * 1.1f;
+                    player_1_pos = new_center + glm::vec3(0.0f, 0.0f, 1.0f);
+                    player_2_pos = new_center - glm::vec3(0.0f, 0.0f, 1.0f);
+                    player_1->transform_->set_position(player_1_pos);
+                    player_2->transform_->set_position(player_2_pos);
+                    break;
+            }
+
+            //przesun line
+            float step = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position()) / rope_segments.size();
+            glm::vec3 direction = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
+            for (auto& ball : rope_segments)
+            {
+                auto np = ball->transform_->get_position() + direction * step;
+                ball->transform_->set_position(np);
+            }
         }
         
 

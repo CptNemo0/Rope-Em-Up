@@ -11,7 +11,6 @@ namespace components
 class AudioSource : public Component
 {
 private:
-    ALuint source_;
 
 public:
     AudioSource();
