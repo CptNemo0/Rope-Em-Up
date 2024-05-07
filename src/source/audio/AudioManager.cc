@@ -130,6 +130,28 @@ audio::AudioManager::AudioManager()
     }
 }
 
+audio::AudioManager::~AudioManager()
+{
+    for (auto &source : free_sources_)
+    {
+        alDeleteSources(1, &source);
+    }
+    for (auto &source : busy_sources_)
+    {
+        alSourceStop(source);
+        alDeleteSources(1, &source);
+    }
+    for (auto &sound : sounds_)
+    {
+        for (auto &audio_buffer : sound.second)
+        {
+            alDeleteBuffers(1, &audio_buffer.buffer);
+        }
+    }
+    alcDestroyContext(context_);
+    alcCloseDevice(device_);
+}
+
 void audio::AudioManager::LoadSound(Sounds sound, const string path)
 {
     AudioBuffer ab;

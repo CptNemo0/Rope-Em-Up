@@ -768,7 +768,7 @@ int main()
                     player_1->transform_->set_position(player_1_pos);
                     player_2->transform_->set_position(player_2_pos);
                     break;
-                case 2: // wychodzi do³em wychodzi gora
+                case 2: // wychodzi doï¿½em wychodzi gora
                     new_center = room->up_gate_pos + glm::vec3(0.0f, 0.0f, -1.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
                     player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
@@ -1005,6 +1005,8 @@ ImGui::End();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     glfwTerminate();
+    audio::AudioManager::Destroy();
+
     return 0;
 }
  
