@@ -149,10 +149,9 @@ int main()
 
     const float kFov = 90.0f;
     const float kNear = 0.1f;
-    const float kFar = 100.0f;
+    const float kFar = 1000.0f;
     float kpitch = -90.0f;
     float kyaw = 90.0f;
-    glm::vec3 kposition = glm::vec3(0.0f, 25.0f, 0.0f);
 
 
     srand(static_cast <unsigned> (time(0)));
@@ -228,7 +227,7 @@ int main()
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(0.0f, 15.0f, 0.0f));
+    camera->set_position(glm::vec3(0.0f, 10.0f, 0.0f));
     camera->set_pitch(-90.0f);
     camera->set_yaw(-90.0f);
     
@@ -413,6 +412,8 @@ int main()
     //ai::EnemyAIManager::SetPlayers(player_1, player_2);
     ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
     auto gameplayCamera = GameObject::Create(scene_root);
+    gameplayCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+
     gameplayCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
     auto gameplayCameraComponent = gameplayCamera->GetComponent<components::GameplayCameraComponent>();
 
@@ -609,9 +610,8 @@ int main()
         collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         steady_clock::time_point end = steady_clock::now();
 
-        //utility::DebugCameraMovement(window, gameplayCameraComponent->camera_, delta_time); zast¹pione przez CameraComponent
+        //utility::DebugCameraMovement(window, gameplayCameraComponent->camera_, delta_time);
         gameplayCameraComponent->Update();
-        gameplayCameraComponent->updateCameraRotation(kpitch, kyaw);
         input::InputManager::i_->Update();
 
 #pragma region Collisions and Physics
@@ -733,8 +733,13 @@ int main()
         ImGui::End();
 
 ImGui::Begin("Camera");
-    ImGui::SliderFloat("Pitch", &kpitch, -90.0f, 90.0f, "%.2f");
-    ImGui::SliderFloat("Yaw", &kyaw, -180.0f, 180.0f, "%.2f");
+    ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
+    ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
+    ImGui::SliderFloat("Height", &camera->position_.y, 1.0f, 100.0f, "%.2f");
+    ImGui::SliderFloat("Distance", &gameplayCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
+    ImGui::SliderFloat("Yaw Angle", &gameplayCameraComponent->yawAngle_, -1.0f, 1.0f, "%.1f");
+
+
 
 ImGui::End();
 

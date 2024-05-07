@@ -41,73 +41,84 @@ void components::CameraComponent::Update()
 	camera_->set_up(transfrom_->get_up());
 }
 
-//glm::vec3 llr::GameplayCamera::calculateMidPoint()
-//{
-//	glm::vec3 midPoint = glm::vec3(0.0f);
-//	midPoint = (target1_->transform_->get_position() + target2_->transform_->get_position()) / 2.0f;
-//	camera_->set_position(midPoint);
-//	return midPoint;
-//}
-//
-//llr::GameplayCamera::GameplayCamera()
-//{
-//	camera_ = make_shared<Camera>();
-//	camera_->UpdateDirectionVectors();
-//}
-//
-//llr::GameplayCamera::GameplayCamera(s_ptr <GameObject> target1, s_ptr <GameObject> target2, float pitch, float yaw, float fov, float near, float far, float ar)
-//{
-//	target1_ = target1;
-//	target2_ = target2;
-//	camera_ = make_shared<Camera>();
-//	camera_->set_position(calculateMidPoint());
-//	camera_->set_pitch(pitch);
-//	camera_->set_yaw(yaw);
-//	camera_->set_fov(fov);
-//	/*camera_->set_near(near);
-//	camera_->set_far(far);*/
-//	camera_->set_aspect_ratio(ar);
-//	camera_->UpdateDirectionVectors();
-//}
-//
-//
-//void components::GameplayCameraComponent::Start()
-//{
-//	glm::vec3 midPoint = GameplayCamera_->calculateMidPoint();
-//	transfrom_->set_position(midPoint);
-//
-//}
-//
-//void components::GameplayCameraComponent::Update()
-//{
-//	GameplayCamera_->camera_->set_position(transfrom_->get_position());
-//	GameplayCamera_->camera_->set_right(transfrom_->get_right());
-//	GameplayCamera_->camera_->set_up(transfrom_->get_up());
-//}
 
 void components::GameplayCameraComponent::Start()
 {
-	glm::vec3 midPoint = calculateMidPoint();
-	// Ustaw kierunek patrzenia kamery na punkt midPoint
-	//glm::vec3 direction = midPoint - transfrom_->get_position();
-	//glm::mat4 rotationMatrix = glm::lookAt(transfrom_->get_position(), midPoint, glm::vec3(0.0f, 1.0f, 0.0f));
-	//glm::vec3 rotation = glm::eulerAngles(glm::quat_cast(rotationMatrix));
+	transfrom_ = gameObject_.lock()->transform_;
 
-	// Aktualizuj rotacjê kamery
-	//camera_->set_yaw(rotation.y);
-	//camera_->set_pitch(rotation.x);
+	glm::vec3 midPoint = calculateMidPoint();
+
+	glm::vec3 directionToMidpoint = glm::normalize(midPoint - transfrom_->get_position());
+
+	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint;
+	transfrom_->set_position(cameraPosition);
+
+	float pitch = glm::degrees(asin(-directionToMidpoint.y));
+	float yaw = glm::degrees(atan2(-directionToMidpoint.x, -directionToMidpoint.z)); // Odwrócenie znaku kierunku x i z
+	camera_->set_pitch(pitch);
+	camera_->set_yaw(yaw);
+	camera_->set_position(transfrom_->get_position());
+
 	camera_->UpdateDirectionVectors();
 }
 
 void components::GameplayCameraComponent::Update()
 {
-	transfrom_ = gameObject_.lock()->transform_;
+	//glm::vec3 midPoint = calculateMidPoint();
+	//// Aktualizuj wartoœci kamery na podstawie wprowadzonych zmian z ImGui
+	///*camera_->set_right(transfrom_->get_right());
+	//camera_->set_up(transfrom_->get_up());*/
+
+	glm::vec3 midPoint = calculateMidPoint();
+	glm::vec3 directionToMidpoint = glm::normalize(midPoint - transfrom_->get_position());
+	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint;
+
+	glm::vec3 cameraDirectionToMidpoint = glm::normalize(midPoint - camera_->get_position());
+	
+	float pitch = glm::degrees(asin(cameraDirectionToMidpoint.y));
+	//float yaw = glm::degrees(atan2(cameraDirectionToMidpoint.x, cameraDirectionToMidpoint.z));
+
+	camera_->set_pitch(pitch);
+	//camera_->set_yaw(yaw);
+
+	transfrom_->set_position(cameraPosition);
+
+	//camera_->set_position(transfrom_->get_position());
+	camera_->set_right(transfrom_->get_right());
+	camera_->set_up(transfrom_->get_up());
+
+
 	camera_->UpdateDirectionVectors();
+
 }
 
 void components::GameplayCameraComponent::Destroy()
 {
 }
+
+void components::GameplayCameraComponent::RotateCameraAroundMidPoint(float yawAngle)
+{
+	glm::vec3 midPoint = calculateMidPoint();
+
+	glm::vec3 directionToMidpoint = glm::normalize(midPoint - camera_->get_position());
+
+	glm::vec3 nUp = glm::normalize(camera_->get_up());
+	glm::vec3 nRight = glm::normalize(camera_->get_right());
+
+	glm::mat4 yawRotation = glm::rotate(glm::mat4(1.0f), glm::radians(yawAngle), nUp);
+
+	glm::vec3 rotatedDirection = glm::vec3(yawRotation * glm::vec4(directionToMidpoint, 0.0f));
+
+	glm::vec3 cameraPosition = midPoint + distance_ * rotatedDirection;
+
+	camera_->set_position(cameraPosition);
+
+	glm::mat4 lookAtMatrix = glm::lookAt(cameraPosition, midPoint, nUp);
+	glm::quat lookAtQuat = glm::quat_cast(lookAtMatrix);
+	camera_->set_front(glm::rotate(lookAtQuat, llr::kForward));
+
+}
+
 
 
 components::GameplayCameraComponent::GameplayCameraComponent(s_ptr<GameObject> target1, s_ptr<GameObject> target2, s_ptr <llr::Camera> camera)
@@ -130,9 +141,3 @@ void components::GameplayCameraComponent::SetTargets(s_ptr<GameObject> target1, 
 	target2_ = target2;
 }
 
-void components::GameplayCameraComponent::updateCameraRotation(float pitch, float yaw)
-{
-	camera_->set_pitch(pitch);
-	camera_->set_yaw(yaw);
-	camera_->UpdateDirectionVectors();
-}

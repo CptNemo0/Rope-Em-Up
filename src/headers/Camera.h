@@ -163,43 +163,6 @@ namespace llr
 		void UpdateDirectionVectors();
 	};
 
-	/*class GameplayCamera
-	{
-	public:
-			s_ptr <GameObject> target1_;
-			s_ptr <GameObject> target2_;
-			s_ptr <Camera> camera_;
-
-			glm::vec3 calculateMidPoint();
-
-			GameplayCamera();
-			GameplayCamera(s_ptr <GameObject> target1, s_ptr <GameObject> target2, float pitch, float yaw, float fov, float near, float far, float ar);
-			
-			inline void set_target1(s_ptr <GameObject> new_target1)
-				{
-					this->target1_ = new_target1;
-				}
-
-			inline s_ptr <GameObject> get_target1()
-				{
-					return target1_;
-				}
-
-			inline void set_target2(s_ptr <GameObject> new_target2)
-				{
-					this->target2_ = new_target2;
-				}
-
-			inline s_ptr <GameObject> get_target2()
-				{
-					return target2_;
-				}
-
-			~GameplayCamera() = default;
-
-
-	};*/
-
 }
 
 namespace components
@@ -224,6 +187,9 @@ public:
 		s_ptr <llr::Camera> camera_;
 		s_ptr <GameObject> target1_;
 		s_ptr <GameObject> target2_;
+		float distance_ = 10.0f;
+		float yawAngle_= 0.0f;
+		float pitchAngle_ = 0.0f;
 
 		// Inherited via Component
 		void Start() override;
@@ -236,7 +202,8 @@ public:
 
 		glm::vec3 calculateMidPoint();
 
-		void updateCameraRotation(float pitch, float yaw);
+		void RotateCameraAroundMidPoint(float yawAngle);
+
 
 		void SetTargets(s_ptr <GameObject> target1, s_ptr <GameObject> target2);
  
