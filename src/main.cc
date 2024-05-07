@@ -474,21 +474,21 @@ int main()
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
     particle_emitter_component->start_position_displacement_ = 1.0f;
 
-    generation::RoomLayoutGenerationSettings rgs;
-    rgs.angle = 0.5f;
-    rgs.span = 0.5f;
-    rgs.branch_division_count = 4;
-    rgs.branch_division_min_length = 2.0f;
-    rgs.branch_division_max_length = 3.0f;
-    rgs.sub_branch_count = 3;
-    rgs.sub_branch_span = 0.2f;
-    rgs.sub_branch_min_length = 3.0f;
-    rgs.sub_branch_max_length = 4.0f;
+    generation::RoomLayoutGenerationSettings rlgs;
+    rlgs.angle = 0.5f;
+    rlgs.span = 0.5f;
+    rlgs.branch_division_count = 4;
+    rlgs.branch_division_min_length = 2.0f;
+    rlgs.branch_division_max_length = 3.0f;
+    rlgs.sub_branch_count = 3;
+    rlgs.sub_branch_span = 0.2f;
+    rlgs.sub_branch_min_length = 3.0f;
+    rlgs.sub_branch_max_length = 4.0f;
 
-    generation::RoomLayoutGenerator rg;
+    generation::RoomLayoutGenerator rlg;
     std::deque<w_ptr<GameObject>> room_objects;
 
-    for (auto &room : rg.rooms)
+    for (auto &room : rlg.rooms)
     {
         cout << '(' << room.first.x << ", " << room.first.y << ')' << endl;
         auto room_obj = GameObject::Create(scene_root);
@@ -717,24 +717,24 @@ int main()
         ImGui::End();
 
         ImGui::Begin("Generation");
-        ImGui::SliderFloat("Angle", &rgs.angle, 0.0f, 1.0f, "%0.2f");
-        ImGui::SliderFloat("Span", &rgs.span, 0.0f, 2.0f, "%0.2f");
-        ImGui::SliderInt("Branch division count", &rgs.branch_division_count, 1, 10);
-        ImGui::SliderFloat("Branch division min length", &rgs.branch_division_min_length, 1.0f, 10.0f, "%0.2f");
-        ImGui::SliderFloat("Branch division max length", &rgs.branch_division_max_length, 1.0f, 10.0f, "%0.2f");
-        ImGui::SliderInt("Sub branch count", &rgs.sub_branch_count, 0, 20);
-        ImGui::SliderFloat("Sub branch span", &rgs.sub_branch_span, 0.0f, 2.0f, "%0.2f");
-        ImGui::SliderFloat("Sub branch min length", &rgs.sub_branch_min_length, 1.0f, 10.0f, "%0.2f");
-        ImGui::SliderFloat("Sub branch max length", &rgs.sub_branch_max_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderFloat("Angle", &rlgs.angle, 0.0f, 1.0f, "%0.2f");
+        ImGui::SliderFloat("Span", &rlgs.span, 0.0f, 2.0f, "%0.2f");
+        ImGui::SliderInt("Branch division count", &rlgs.branch_division_count, 1, 10);
+        ImGui::SliderFloat("Branch division min length", &rlgs.branch_division_min_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderFloat("Branch division max length", &rlgs.branch_division_max_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderInt("Sub branch count", &rlgs.sub_branch_count, 0, 20);
+        ImGui::SliderFloat("Sub branch span", &rlgs.sub_branch_span, 0.0f, 2.0f, "%0.2f");
+        ImGui::SliderFloat("Sub branch min length", &rlgs.sub_branch_min_length, 1.0f, 10.0f, "%0.2f");
+        ImGui::SliderFloat("Sub branch max length", &rlgs.sub_branch_max_length, 1.0f, 10.0f, "%0.2f");
         if (ImGui::Button("Generate"))
         {
-            rg.GenerateRooms(rgs);
+            rlg.GenerateRooms(rlgs);
             for (auto &room : room_objects)
             {
                 room.lock()->Destroy();
             }
             room_objects.clear();
-            for (auto &room : rg.rooms)
+            for (auto &room : rlg.rooms)
             {
                 auto room_obj = GameObject::Create(scene_root);
                 room_objects.push_back(room_obj);
