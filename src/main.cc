@@ -226,7 +226,12 @@ int main()
     utility::InitImGUI(window);
 
     input::InputManager::Initialize(window);
+
     collisions::CollisionManager::Initialize();
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
+
     physics::PhysicsManager::Initialize();
     pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
@@ -323,24 +328,52 @@ int main()
     auto test_ball_model = make_shared<Model>(kTestBallPath);
     auto gate_model = make_shared<Model>(kGatePath);
 
+    auto scene_root = GameObject::Create();
+
+    generation::RoomLayoutGenerationSettings rlgs;
+    rlgs.angle = 0.5f;
+    rlgs.span = 0.5f;
+    rlgs.branch_division_count = 4;
+    rlgs.branch_division_min_length = 2.0f;
+    rlgs.branch_division_max_length = 3.0f;
+    rlgs.sub_branch_count = 3;
+    rlgs.sub_branch_span = 0.2f;
+    rlgs.sub_branch_min_length = 3.0f;
+    rlgs.sub_branch_max_length = 4.0f;
+
+    generation::RoomLayoutGenerator rlg;
+    std::deque<w_ptr<GameObject>> room_objects;
+    rlg.GenerateRooms(rlgs);
+    rlg.GenerateGates();
+
+    for (auto& room : rlg.rooms)
+    {
+        auto room_obj = GameObject::Create(scene_root);
+        room_objects.push_back(room_obj);
+        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
+        room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
+        room_obj->transform_->set_scale(glm::vec3(3.0f));
+        room_obj->PropagateStart();
+    }
+
     generation::RoomModels models;
     models.walls.push_back(module_2_model);
     models.floors.push_back(simple_floor_model);
     models.gates.push_back(gate_model);
 
     generation::RoomGenerationSettings rg_settings;
-    rg_settings.width = 5;
-    rg_settings.height = 4;
+    rg_settings.width = 2;
+    rg_settings.height = 2;
 
     std::deque<w_ptr<GameObject>> room_parts;
+    generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
 
-    collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
-    collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
-    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
+    generation::GenerateRoom(*room, &rg_settings, &models);
 
-    auto scene_root = GameObject::Create();
+    generation::BuildRoom(*room, &models, room_parts, scene_root, GBufferPassShader);
 
-    generation::GenerateRoom(&rg_settings, &models, room_parts, scene_root, GBufferPassShader);
+    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+    pbd::PBDManager::i_->set_walls(walls);
 
     /*auto gate_1 = GameObject::Create(scene_root);
     gate_1->AddComponent(make_shared<components::MeshRenderer>(gate_model, GBufferPassShader));
@@ -390,29 +423,7 @@ int main()
     floor_4->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
     floor_4->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
     */
-    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-2.0 * generation::kModuleSize, 0.0f, -2.0 * generation::kModuleSize), 1.0f);
-    pbd::PBDManager::i_->set_walls(walls);
-
-    auto enemy_1 = GameObject::Create(scene_root);
-    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
-    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
-    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
-    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
-    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
-    auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
-
-    auto enemy_2 = GameObject::Create(scene_root);
-    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
-    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
-    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
-    auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
-    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
-
+    
     ////test
     /*auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
@@ -434,6 +445,26 @@ int main()
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
+    auto enemy_1 = GameObject::Create(scene_root);
+    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
+    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
+    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
+    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
+    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
+    auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
+
+    auto enemy_2 = GameObject::Create(scene_root);
+    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
+    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
+    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
+    auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
+    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
+
     //ai::EnemyAIManager::SetPlayers(player_1, player_2);
     ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
     auto gameplayCamera = GameObject::Create(scene_root);
@@ -442,31 +473,34 @@ int main()
     gameplayCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
     auto gameplayCameraComponent = gameplayCamera->GetComponent<components::GameplayCameraComponent>();
 
-    //std::vector<s_ptr<GameObject>> rope_segments;
+    std::vector<s_ptr<GameObject>> rope_segments;
+    int rope_lenght = 40;
+    float player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
+    glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
+    float step = player_distance / (float)rope_lenght;
+    for (int i = 0; i < rope_lenght; i++)
+    {
+        auto rope_segment = GameObject::Create(scene_root);
+        rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
+        rope_segment->transform_->set_position(player_1->transform_->get_position() + player_dir * step * (float)i);
+        rope_segment->transform_->set_position(player_1->transform_->get_position() + player_dir * step * (float)i);
+        rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
+        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
+        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
-    //for (int i = 0; i < 40; i++)
-    //{
-    //    auto rope_segment = GameObject::Create(scene_root);
-    //    rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
-    //    rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-    //    rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-    //    rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-    //    rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
-    //    rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
+        if (i == 0)
+        {
+            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), step + 0.01f);
+        }
+        else
+        {
+            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), step + 0.01f);
+        }
 
-    //    if (i == 0)
-    //    {
-    //        pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
-    //    }
-    //    else
-    //    {
-    //        pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
-    //    }
+        rope_segments.push_back(rope_segment);
+    }
 
-    //    rope_segments.push_back(rope_segment);
-    //}
-
-    //pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), step + 0.01f);
 
 
     auto HUD_root = GameObject::Create();
@@ -508,29 +542,7 @@ int main()
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
     particle_emitter_component->start_position_displacement_ = 1.0f;
 
-    generation::RoomLayoutGenerationSettings rlgs;
-    rlgs.angle = 0.5f;
-    rlgs.span = 0.5f;
-    rlgs.branch_division_count = 4;
-    rlgs.branch_division_min_length = 2.0f;
-    rlgs.branch_division_max_length = 3.0f;
-    rlgs.sub_branch_count = 3;
-    rlgs.sub_branch_span = 0.2f;
-    rlgs.sub_branch_min_length = 3.0f;
-    rlgs.sub_branch_max_length = 4.0f;
-
-    generation::RoomLayoutGenerator rlg;
-    std::deque<w_ptr<GameObject>> room_objects;
-
-    for (auto &room : rlg.rooms)
-    {
-        cout << '(' << room.first.x << ", " << room.first.y << ')' << endl;
-        auto room_obj = GameObject::Create(scene_root);
-        room_objects.push_back(room_obj);
-        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-        room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
-        room_obj->transform_->set_scale(glm::vec3(3.0f));
-    }
+    
 
     auto audio_test_obj = GameObject::Create(scene_root);
     audio_test_obj->AddComponent(make_shared<components::AudioSource>());
@@ -598,13 +610,13 @@ int main()
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    //////////////////////////////////////////
-    //////////////////////////////////////////
-    //////////////////////////////////////////
-    // GAME LOOP GAME LOOP GAME LOOP GAME LOOP 
-    //////////////////////////////////////////
-    //////////////////////////////////////////
-    //////////////////////////////////////////
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
+    // GAME LOOP GAME LOOP GAME LOOP GAME LOOP //
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
 
     while (!glfwWindowShouldClose(window))
     {
@@ -636,9 +648,155 @@ int main()
         steady_clock::time_point end = steady_clock::now();
 
         utility::DebugCameraMovement(window, debugCamera, delta_time);
-        gameplayCameraComponent->Update();
+        //gameplayCameraComponent->Update();
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
+
+#pragma region Rooms
+
+        float gate_distance_threshold = 4.0f;
+        glm::ivec2 next_room_pos = room->position;
+        glm::ivec2 current_room_pos = room->position;
+        
+        int input_door = -1;
+
+        if (room->up_gate)
+        {
+            auto p1l = glm::length2(room->up_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->up_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
+            {
+                cout << "GO UP!!!" << endl;
+                next_room_pos += glm::ivec2(0, -1);
+                input_door = 0;
+            }
+            
+        }
+        if (room->right_gate)
+        {
+            auto p1l = glm::length2(room->right_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->right_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
+            {
+                cout << "GO RIGHT!!!" << endl;
+                next_room_pos += glm::ivec2(-1, 0);
+                if (input_door == -1)
+                {
+                    input_door = 1;
+                }
+            }
+        }
+        if (room->down_gate)
+        {
+            auto p1l = glm::length2(room->down_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->down_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
+            {
+                cout << "GO DOWN!!!" << endl;
+                next_room_pos += glm::ivec2(0, 1);
+                if (input_door == -1)
+                {
+                    input_door = 2;
+                }
+            }
+        }
+        if (room->left_gate)
+        {
+            auto p1l = glm::length2(room->left_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->left_gate_pos - player_2->transform_->get_global_position());
+
+            std::cout << p1l << " " << p2l << endl;
+
+            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
+            {
+                cout << "GO LEFT!!!" << endl;
+                next_room_pos += glm::ivec2(1, 0);
+                if (input_door == -1)
+                {
+                    input_door = 3;
+                }
+            }
+        }
+
+        if (current_room_pos != next_room_pos)
+        {
+            // Usun obecny pokoj
+            for (auto& a : room_parts)
+            {
+                a.lock()->Destroy();
+            }
+            room_parts.clear();
+
+            // Stworz nowy pokoj
+            if (rlg.rooms.contains(next_room_pos))
+            {
+                room = &rlg.rooms[next_room_pos];
+
+                if (!room->is_generated)
+                {
+                    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+                    rg_settings.width++;
+                }
+                generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
+
+                pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+                pbd::PBDManager::i_->set_walls(walls);
+            }
+
+            //Przetransportuj gracza i line
+
+            //przesun graczy
+            glm::vec3 new_center = glm::vec3(0.0f);
+            glm::vec3 player_1_pos = glm::vec3(0.0f);
+            glm::vec3 player_2_pos = glm::vec3(0.0f);
+            switch (input_door) 
+            {
+                case 0: // wychodzi gora wychodzi dolem
+                    new_center = room->down_gate_pos +  glm::vec3(0.0f, 0.0f, 1.0f) * gate_distance_threshold * 1.1f;
+                    player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
+                    player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
+                    player_1->transform_->set_position(player_1_pos);
+                    player_2->transform_->set_position(player_2_pos);
+
+                    break;
+                case 1: // wychodzi od prawej wychodzi od lewej
+                    new_center = room->left_gate_pos + glm::vec3(-1.0f, 0.0f, 0.0f) * gate_distance_threshold * 1.1f;
+                    player_1_pos = new_center + glm::vec3(0.0f, 0.0f, 1.0f);
+                    player_2_pos = new_center - glm::vec3(0.0f, 0.0f, 1.0f);
+                    player_1->transform_->set_position(player_1_pos);
+                    player_2->transform_->set_position(player_2_pos);
+                    break;
+                case 2: // wychodzi do³em wychodzi gora
+                    new_center = room->up_gate_pos + glm::vec3(0.0f, 0.0f, -1.0f) * gate_distance_threshold * 1.1f;
+                    player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
+                    player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
+                    player_1->transform_->set_position(player_1_pos);
+                    player_2->transform_->set_position(player_2_pos);
+                    break;
+                case 3: // wychodzi od lewej wchodzi od prawej
+                    new_center = room->right_gate_pos + glm::vec3(1.0f, 0.0f, 0.0f) * gate_distance_threshold * 1.1f;
+                    player_1_pos = new_center + glm::vec3(0.0f, 0.0f, 1.0f);
+                    player_2_pos = new_center - glm::vec3(0.0f, 0.0f, 1.0f);
+                    player_1->transform_->set_position(player_1_pos);
+                    player_2->transform_->set_position(player_2_pos);
+                    break;
+            }
+
+            //przesun line
+            float step = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position()) / rope_segments.size();
+            glm::vec3 direction = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
+            for (auto& ball : rope_segments)
+            {
+                auto np = ball->transform_->get_position() + direction * step;
+                ball->transform_->set_position(np);
+            }
+        }
+        
+
+#pragma endregion
 
 #pragma region Collisions and Physics
         
@@ -690,12 +848,6 @@ int main()
         LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
         LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
         LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
-
-        /*LBufferPassShader->SetVec3("camera_position", gameplayCameraComponent->camera_->get_position());
-        glBindVertexArray(lbuffer.vao_);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);*/
-
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
         lbuffer.Draw();
@@ -782,6 +934,7 @@ ImGui::End();
         if (ImGui::Button("Generate"))
         {
             rlg.GenerateRooms(rlgs);
+            rlg.GenerateGates();
             for (auto &room : room_objects)
             {
                 room.lock()->Destroy();
@@ -828,7 +981,8 @@ ImGui::End();
                 a.lock()->Destroy();
             }
             room_parts.clear();
-            generation::GenerateRoom(&rg_settings, &models, room_parts, scene_root, GBufferPassShader);
+            generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+            generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
 
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-rg_settings.width * generation::kModuleSize, 0.0f, -rg_settings.height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
@@ -854,3 +1008,4 @@ ImGui::End();
     glfwTerminate();
     return 0;
 }
+ 
