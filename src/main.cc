@@ -226,7 +226,12 @@ int main()
     utility::InitImGUI(window);
 
     input::InputManager::Initialize(window);
+
     collisions::CollisionManager::Initialize();
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
+
     physics::PhysicsManager::Initialize();
     pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
@@ -323,6 +328,34 @@ int main()
     auto test_ball_model = make_shared<Model>(kTestBallPath);
     auto gate_model = make_shared<Model>(kGatePath);
 
+    auto scene_root = GameObject::Create();
+
+    generation::RoomLayoutGenerationSettings rlgs;
+    rlgs.angle = 0.5f;
+    rlgs.span = 0.5f;
+    rlgs.branch_division_count = 4;
+    rlgs.branch_division_min_length = 2.0f;
+    rlgs.branch_division_max_length = 3.0f;
+    rlgs.sub_branch_count = 3;
+    rlgs.sub_branch_span = 0.2f;
+    rlgs.sub_branch_min_length = 3.0f;
+    rlgs.sub_branch_max_length = 4.0f;
+
+    generation::RoomLayoutGenerator rlg;
+    std::deque<w_ptr<GameObject>> room_objects;
+    rlg.GenerateRooms(rlgs);
+    rlg.GenerateGates();
+
+    for (auto& room : rlg.rooms)
+    {
+        auto room_obj = GameObject::Create(scene_root);
+        room_objects.push_back(room_obj);
+        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
+        room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
+        room_obj->transform_->set_scale(glm::vec3(3.0f));
+        room_obj->PropagateStart();
+    }
+
     generation::RoomModels models;
     models.walls.push_back(module_2_model);
     models.floors.push_back(simple_floor_model);
@@ -333,14 +366,10 @@ int main()
     rg_settings.height = 4;
 
     std::deque<w_ptr<GameObject>> room_parts;
-
-    collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
-    collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
-    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
-
-    auto scene_root = GameObject::Create();
-
-    generation::GenerateRoom(&rg_settings, &models, room_parts, scene_root, GBufferPassShader);
+    generation::GenerateRoom(rlg.rooms[glm::ivec2(-1, 0)], &rg_settings, &models, room_parts, scene_root, GBufferPassShader);
+    auto room = rlg.rooms[glm::ivec2(0, 0)];
+    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-2.0 * generation::kModuleSize, 0.0f, -2.0 * generation::kModuleSize), 1.0f);
+    pbd::PBDManager::i_->set_walls(walls);
 
     /*auto gate_1 = GameObject::Create(scene_root);
     gate_1->AddComponent(make_shared<components::MeshRenderer>(gate_model, GBufferPassShader));
@@ -390,29 +419,7 @@ int main()
     floor_4->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
     floor_4->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
     */
-    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-2.0 * generation::kModuleSize, 0.0f, -2.0 * generation::kModuleSize), 1.0f);
-    pbd::PBDManager::i_->set_walls(walls);
-
-    auto enemy_1 = GameObject::Create(scene_root);
-    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));    
-    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
-    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
-    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
-    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
-    auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
-
-    auto enemy_2 = GameObject::Create(scene_root);
-    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
-    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
-    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
-    auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
-    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
-
+    
     ////test
     /*auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
@@ -434,6 +441,26 @@ int main()
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
+    auto enemy_1 = GameObject::Create(scene_root);
+    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
+    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
+    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
+    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
+    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
+    auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
+
+    auto enemy_2 = GameObject::Create(scene_root);
+    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
+    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
+    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
+    auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
+    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
+
     //ai::EnemyAIManager::SetPlayers(player_1, player_2);
     ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
     auto gameplayCamera = GameObject::Create(scene_root);
@@ -442,31 +469,34 @@ int main()
     gameplayCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
     auto gameplayCameraComponent = gameplayCamera->GetComponent<components::GameplayCameraComponent>();
 
-    //std::vector<s_ptr<GameObject>> rope_segments;
+    std::vector<s_ptr<GameObject>> rope_segments;
+    int rope_lenght = 40;
+    float player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
+    glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
+    float step = player_distance / (float)rope_lenght;
+    for (int i = 0; i < rope_lenght; i++)
+    {
+        auto rope_segment = GameObject::Create(scene_root);
+        rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
+        rope_segment->transform_->set_position(player_1->transform_->get_position() + player_dir * step * (float)i);
+        rope_segment->transform_->set_position(player_1->transform_->get_position() + player_dir * step * (float)i);
+        rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
+        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
+        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
 
-    //for (int i = 0; i < 40; i++)
-    //{
-    //    auto rope_segment = GameObject::Create(scene_root);
-    //    rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
-    //    rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-    //    rope_segment->transform_->set_position(glm::vec3(((float)i + 1.0f) / 5.0f, 0.0f, 0.0f));
-    //    rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-    //    rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
-    //    rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
+        if (i == 0)
+        {
+            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), step + 0.01f);
+        }
+        else
+        {
+            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), step + 0.01f);
+        }
 
-    //    if (i == 0)
-    //    {
-    //        pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
-    //    }
-    //    else
-    //    {
-    //        pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), 0.31f);
-    //    }
+        rope_segments.push_back(rope_segment);
+    }
 
-    //    rope_segments.push_back(rope_segment);
-    //}
-
-    //pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), 0.21f);
+    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), step + 0.01f);
 
 
     auto HUD_root = GameObject::Create();
@@ -508,29 +538,7 @@ int main()
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
     particle_emitter_component->start_position_displacement_ = 1.0f;
 
-    generation::RoomLayoutGenerationSettings rlgs;
-    rlgs.angle = 0.5f;
-    rlgs.span = 0.5f;
-    rlgs.branch_division_count = 4;
-    rlgs.branch_division_min_length = 2.0f;
-    rlgs.branch_division_max_length = 3.0f;
-    rlgs.sub_branch_count = 3;
-    rlgs.sub_branch_span = 0.2f;
-    rlgs.sub_branch_min_length = 3.0f;
-    rlgs.sub_branch_max_length = 4.0f;
-
-    generation::RoomLayoutGenerator rlg;
-    std::deque<w_ptr<GameObject>> room_objects;
-
-    for (auto &room : rlg.rooms)
-    {
-        cout << '(' << room.first.x << ", " << room.first.y << ')' << endl;
-        auto room_obj = GameObject::Create(scene_root);
-        room_objects.push_back(room_obj);
-        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-        room_obj->transform_->set_position(glm::vec3(room.first.x, 6.0f, room.first.y));
-        room_obj->transform_->set_scale(glm::vec3(3.0f));
-    }
+    
 
     auto audio_test_obj = GameObject::Create(scene_root);
     audio_test_obj->AddComponent(make_shared<components::AudioSource>());
@@ -822,7 +830,7 @@ ImGui::End();
                 a.lock()->Destroy();
             }
             room_parts.clear();
-            generation::GenerateRoom(&rg_settings, &models, room_parts, scene_root, GBufferPassShader);
+            generation::GenerateRoom(rlg.rooms[glm::ivec2(0, 0)], &rg_settings, &models, room_parts, scene_root, GBufferPassShader);
 
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-rg_settings.width * generation::kModuleSize, 0.0f, -rg_settings.height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
@@ -848,3 +856,4 @@ ImGui::End();
     glfwTerminate();
     return 0;
 }
+ 

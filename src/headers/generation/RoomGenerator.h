@@ -37,6 +37,7 @@ namespace generation
 
     struct Room
     {
+        // Values that will be generated during layout generation
         glm::ivec2 position;
 
         bool up_gate;
@@ -46,9 +47,23 @@ namespace generation
 
         bool is_generated = false;
 
-        // Values that will be generated
+        // Values that will be generated during room generation
         int width;
         int height;
+
+        // Indicies to model arrays
+        std::vector<int> up_walls_idx;
+        std::vector<int> left_walls_idx;
+        int up_gate_idx;
+        int right_gate_idx;
+        int down_gate_idx;
+        int left_gate_idx;
+
+        // Positioning of gates
+        int up_gate_wall;
+        int right_gate_wall;
+        int down_gate_wall;
+        int left_gate_wall;
         
         std::unordered_set<glm::ivec2> grid;
         std::vector <glm::ivec2> enemies;
@@ -111,7 +126,7 @@ namespace generation
         void Generate();
     };
 
-    void GenerateRoom(RoomGenerationSettings* rgs, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
+    void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
 
 }; // namespace generation
 
