@@ -46,46 +46,45 @@ void components::GameplayCameraComponent::Start()
 {
 	transfrom_ = gameObject_.lock()->transform_;
 
-	glm::vec3 midPoint = calculateMidPoint();
-
-	glm::vec3 directionToMidpoint = glm::normalize(midPoint - transfrom_->get_position());
-
-	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint;
-	transfrom_->set_position(cameraPosition);
-
-	float pitch = glm::degrees(asin(-directionToMidpoint.y));
-	float yaw = glm::degrees(atan2(-directionToMidpoint.x, -directionToMidpoint.z)); // Odwrócenie znaku kierunku x i z
-	camera_->set_pitch(pitch);
-	camera_->set_yaw(yaw);
 	camera_->set_position(transfrom_->get_position());
+	camera_->set_right(transfrom_->get_right());
+	camera_->set_up(transfrom_->get_up());
 
 	camera_->UpdateDirectionVectors();
 }
 
 void components::GameplayCameraComponent::Update()
 {
+	
 	glm::vec3 midPoint = calculateMidPoint();
 	glm::vec3 directionToMidpoint = glm::normalize(midPoint - transfrom_->get_position());
+
+//// CHANGING POSITION BY HEIGHT AND DISTANCE OF CAMERA
 	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint;
 
 	transfrom_->set_position(glm::vec3(cameraPosition.x ,height_, cameraPosition.z));
 	camera_->set_position(transfrom_->get_position());
-
-	glm::vec3 cameraDirectionToMidpoint = glm::normalize(midPoint - camera_->get_position());
-	
-	float pitch = glm::degrees(asin(cameraDirectionToMidpoint.y));
-	float yaw = glm::degrees(atan2(cameraDirectionToMidpoint.x, cameraDirectionToMidpoint.z));
-
-	camera_->set_pitch(pitch);
-	camera_->set_yaw(yaw);
-
-
-	//camera_->set_position(transfrom_->get_position());
-	camera_->set_right(transfrom_->get_right());
-	camera_->set_up(transfrom_->get_up());
-
+	camera_->set_position(transfrom_->get_position());
 
 	camera_->UpdateDirectionVectors();
+
+//// UNCOMMENT THIS TO CHANGE POSITION BY PITCH AND YAW OF CAMERA
+	/*float pitch = glm::degrees(asin(directionToMidpoint.y));
+	float yaw = glm::degrees(atan2(directionToMidpoint.x, directionToMidpoint.z));
+
+	pitch += pitchAngle_;
+	yaw += yawAngle_;
+
+	directionToMidpoint.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	directionToMidpoint.y = sin(glm::radians(pitch));
+	directionToMidpoint.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint;
+
+	transfrom_->set_position(cameraPosition);
+	camera_->set_position(transfrom_->get_position());
+
+	camera_->UpdateDirectionVectors();*/
 
 }
 

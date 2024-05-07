@@ -244,8 +244,8 @@ int main()
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
     camera->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    camera->set_pitch(-90.0f);
-    camera->set_yaw(-90.0f);
+    camera->set_pitch(-89.0f);
+    camera->set_yaw(-89.0f);
 
     auto debugCamera = make_shared<llr::Camera>();
     debugCamera->set_fov(kFov);
@@ -914,7 +914,9 @@ ImGui::Begin("Camera");
     ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
     ImGui::SliderFloat("Height", &gameplayCameraComponent->height_, 1.0f, 100.0f, "%.2f");
     ImGui::SliderFloat("Distance", &gameplayCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
-    ImGui::SliderFloat("Yaw Angle", &gameplayCameraComponent->yawAngle_, -1.0f, 1.0f, "%.1f");
+    
+    ImGui::SliderFloat("Yaw Angle", &gameplayCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
+    ImGui::SliderFloat("Pitch Angle", &gameplayCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");
 
 
 

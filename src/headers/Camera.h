@@ -191,7 +191,7 @@ public:
 		float yawAngle_= 0.0f;
 		float pitchAngle_ = 0.0f;
 		float height_ = 15.0f;
-		glm::vec3 position_;
+
 
 		// Inherited via Component
 		void Start() override;
