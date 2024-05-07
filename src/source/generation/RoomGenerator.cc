@@ -138,10 +138,10 @@ void generation::RoomLayoutGenerator::GenerateGates()
 {
     for (auto& [position, room] : rooms)
     {
-        room.up_gate = rooms.contains(position - glm::ivec2(0, 1));
-        room.right_gate = rooms.contains(position - glm::ivec2(1, 0));
-        room.down_gate = rooms.contains(position - glm::ivec2(0, -1));
-        room.left_gate = rooms.contains(position - glm::ivec2(0, 1));
+        room.up_gate = rooms.contains(position + glm::ivec2(0, -1));
+        room.right_gate = rooms.contains(position + glm::ivec2(-1, 0));
+        room.down_gate = rooms.contains(position + glm::ivec2(0, 1));
+        room.left_gate = rooms.contains(position + glm::ivec2(1, 0));
     }
 }
 
@@ -243,7 +243,7 @@ void generation::RoomGenerator::Generate()
 
 }
 
-void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
+void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
 {
     //generate upper walls
     room.width = rgs->width;
@@ -254,13 +254,6 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     {
         int model_idx =  random::RandInt(0, rm->walls.size() - 1);
         room.up_walls_idx.push_back(model_idx);
-
-        s_ptr<GameObject> wall_up = GameObject::Create(scene_root);
-        wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
-        wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-        wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[model_idx], shader));
-        room_parts.push_back(wall_up);
-        wall_up->PropagateStart();
     }
 
     //generate left walls
@@ -269,24 +262,75 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     {
         int model_idx = random::RandInt(0, rm->walls.size() - 1);
         room.left_walls_idx.push_back(model_idx);
+    }
 
+    //generate gates
+    //up
+
+    int model_idx = 0;
+    if (room.up_gate)
+    {
+        room.up_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+        room.up_gate_wall = random::RandInt(0, room.width - 1);
+        room.up_gate_pos = glm::vec3(-8.0f - room.up_gate_wall * kModuleSize, 0.0f, 0.0f);
+    }
+    
+    //down
+    if (room.down_gate)
+    {
+        room.down_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+        room.down_gate_wall = random::RandInt(0, room.width - 1);
+        room.down_gate_pos = glm::vec3(-8.0f - room.down_gate_wall * kModuleSize, 0.0f, -room.height * kModuleSize);
+    }
+    
+    //right
+    if (room.right_gate)
+    {
+        room.right_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+        room.right_gate_wall = random::RandInt(0, room.height - 1);
+        room.right_gate_pos = glm::vec3(-room.width * kModuleSize, 0.0f, -8.0f - room.right_gate_wall * kModuleSize);
+    }
+
+    //left
+    if (room.left_gate)
+    {
+        room.left_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+        room.left_gate_wall = random::RandInt(0, room.height - 1);
+        room.left_gate_pos = glm::vec3(0.0f, 0.0f, -8.0 - room.left_gate_wall * kModuleSize);
+    }
+
+    room.is_generated = true;
+}
+
+void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
+{
+    for (int i = 0; i < room.width; i++)
+    {
+        s_ptr<GameObject> wall_up = GameObject::Create(scene_root);
+        wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+        wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+        wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+        room_parts.push_back(wall_up);
+        wall_up->PropagateStart();
+    }
+
+    for (int i = 0; i < room.height; i++)
+    {
         s_ptr<GameObject> wall_left = GameObject::Create(scene_root);
         wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
         wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-        wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[model_idx], shader));
+        wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
         room_parts.push_back(wall_left);
         wall_left->PropagateStart();
     }
 
-    //generate floors
-    int model_idx = random::RandInt(0, rm->floors.size() - 1);
-    for (int i = 0; i < rgs->width; i++)
+    for (int i = 0; i < room.width; i++)
     {
-        for (int j = 0; j < rgs->height; j++)
+        for (int j = 0; j < room.height; j++)
         {
             s_ptr<GameObject> floor = GameObject::Create(scene_root);
             floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-            floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[model_idx], shader));
+            floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
             room_parts.push_back(floor);
             floor->PropagateStart();
         }
@@ -296,42 +340,33 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     //up
     if (room.up_gate)
     {
-        model_idx = random::RandInt(0, rm->gates.size() - 1);
-        room.up_gate_wall = random::RandInt(0, room.width - 1);
-
         s_ptr<GameObject> gate = GameObject::Create(scene_root);
-        gate->transform_->set_position(glm::vec3(-8.0f - room.up_gate_wall * kModuleSize, 0.0f, 0.0f));
+        gate->transform_->set_position(room.up_gate_pos);
         gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[model_idx], shader));
+        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
         gate->PropagateStart();
 
     }
-    
+
     //down
     if (room.down_gate)
     {
-        model_idx = random::RandInt(0, rm->gates.size() - 1);
-        room.down_gate_wall = random::RandInt(0, room.width - 1);
-
         s_ptr<GameObject> gate = GameObject::Create(scene_root);
-        gate->transform_->set_position(glm::vec3(-8.0f - room.down_gate_wall * kModuleSize, 0.0f,- room.height * kModuleSize));
+        gate->transform_->set_position(room.down_gate_pos);
         gate->transform_->set_rotation(glm::vec3(0.0f, 0.0, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[model_idx], shader));
+        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
         gate->PropagateStart();
     }
-    
+
     //right
     if (room.right_gate)
     {
-        model_idx = random::RandInt(0, rm->gates.size() - 1);
-        room.right_gate_wall = random::RandInt(0, room.height - 1);
-
         s_ptr<GameObject> gate = GameObject::Create(scene_root);
-        gate->transform_->set_position(glm::vec3(-room.width * kModuleSize, 0.0f, -8.0f - room.right_gate_wall * kModuleSize));
+        gate->transform_->set_position(room.right_gate_pos);
         gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[model_idx], shader));
+        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
         gate->PropagateStart();
     }
@@ -339,13 +374,10 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     //left
     if (room.left_gate)
     {
-        model_idx = random::RandInt(0, rm->gates.size() - 1);
-        room.left_gate_wall = random::RandInt(0, room.height - 1);
-
         s_ptr<GameObject> gate = GameObject::Create(scene_root);
-        gate->transform_->set_position(glm::vec3(0.0f, 0.0f, -8.0 - room.left_gate_wall * kModuleSize));
+        gate->transform_->set_position(room.left_gate_pos);
         gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[model_idx], shader));
+        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
         gate->PropagateStart();
     }

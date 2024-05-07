@@ -48,6 +48,7 @@ namespace generation
         bool is_generated = false;
 
         // Values that will be generated during room generation
+
         int width;
         int height;
 
@@ -59,17 +60,49 @@ namespace generation
         int down_gate_idx;
         int left_gate_idx;
 
-        // Positioning of gates
+        // Walls of gates
         int up_gate_wall;
         int right_gate_wall;
         int down_gate_wall;
         int left_gate_wall;
         
+        //Positions of gates
+        glm::vec3 up_gate_pos;
+        glm::vec3 right_gate_pos;
+        glm::vec3 down_gate_pos;
+        glm::vec3 left_gate_pos;
+
+        // !Values that will be generated during room generation
+
         std::unordered_set<glm::ivec2> grid;
         std::vector <glm::ivec2> enemies;
         std::vector <glm::ivec2> healing_spots;
        
-        Room(glm::ivec2 position = glm::ivec2(0, 0)) : position(position) {}
+        Room(glm::ivec2 position = glm::ivec2(0, 0)) : position(position) 
+        {
+            up_gate = false;
+            right_gate = false;
+            down_gate = false;
+            left_gate = false;
+
+            width = 2;
+            height = 2;
+
+            up_gate_idx = -1;
+            right_gate_idx = -1;
+            down_gate_idx = -1;
+            left_gate_idx = -1;
+
+            up_gate_wall = -1;
+            right_gate_wall = -1;
+            down_gate_wall = -1;
+            left_gate_wall = -1;
+
+            up_gate_pos = glm::vec3(0.0f);
+            right_gate_pos = glm::vec3(0.0f);
+            down_gate_pos = glm::vec3(0.0f);
+            left_gate_pos = glm::vec3(0.0f);
+        }
     };
 
     class RoomLayoutGenerator
@@ -126,7 +159,9 @@ namespace generation
         void Generate();
     };
 
-    void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
+    void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
+
+    void BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
 
 }; // namespace generation
 

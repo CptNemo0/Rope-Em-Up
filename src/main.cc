@@ -362,13 +362,17 @@ int main()
     models.gates.push_back(gate_model);
 
     generation::RoomGenerationSettings rg_settings;
-    rg_settings.width = 5;
-    rg_settings.height = 4;
+    rg_settings.width = 2;
+    rg_settings.height = 2;
 
     std::deque<w_ptr<GameObject>> room_parts;
-    generation::GenerateRoom(rlg.rooms[glm::ivec2(-1, 0)], &rg_settings, &models, room_parts, scene_root, GBufferPassShader);
-    auto room = rlg.rooms[glm::ivec2(0, 0)];
-    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-2.0 * generation::kModuleSize, 0.0f, -2.0 * generation::kModuleSize), 1.0f);
+    generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
+
+    generation::GenerateRoom(*room, &rg_settings, &models);
+
+    generation::BuildRoom(*room, &models, room_parts, scene_root, GBufferPassShader);
+
+    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
     /*auto gate_1 = GameObject::Create(scene_root);
@@ -606,13 +610,13 @@ int main()
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    //////////////////////////////////////////
-    //////////////////////////////////////////
-    //////////////////////////////////////////
-    // GAME LOOP GAME LOOP GAME LOOP GAME LOOP 
-    //////////////////////////////////////////
-    //////////////////////////////////////////
-    //////////////////////////////////////////
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
+    // GAME LOOP GAME LOOP GAME LOOP GAME LOOP //
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
 
     while (!glfwWindowShouldClose(window))
     {
@@ -646,6 +650,84 @@ int main()
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         gameplayCameraComponent->Update();
         input::InputManager::i_->Update();
+
+#pragma region Rooms
+
+        float gate_distance_threshold = 4.0f;
+        glm::ivec2 next_room_pos = room->position;
+        glm::ivec2 current_room_pos = room->position;
+        
+        if (room->up_gate)
+        {
+            auto p1l = glm::length2(room->up_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->up_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
+            {
+                cout << "GO UP!!!" << endl;
+                next_room_pos += glm::ivec2(0, -1);
+
+            }
+        }
+        else if (room->right_gate)
+        {
+            auto p1l = glm::length2(room->right_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->right_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
+            {
+                cout << "GO RIGHT!!!" << endl;
+                next_room_pos += glm::ivec2(-1, 0);
+            }
+        }
+        else if (room->down_gate)
+        {
+            auto p1l = glm::length2(room->down_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->down_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
+            {
+                cout << "GO DOWN!!!" << endl;
+                next_room_pos += glm::ivec2(0, 1);
+            }
+        }
+        else if (room->left_gate)
+        {
+            auto p1l = glm::length2(room->left_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->left_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
+            {
+                cout << "GO LEFT!!!" << endl;
+                next_room_pos += glm::ivec2(1, 0);
+            }
+        }
+
+        if (current_room_pos != next_room_pos)
+        {
+            for (auto& a : room_parts)
+            {
+                a.lock()->Destroy();
+            }
+            room_parts.clear();
+            room = &rlg.rooms[next_room_pos];
+
+            if (!room->is_generated)
+            {
+                generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+                rg_settings.width++;
+            }
+            generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
+
+            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+            pbd::PBDManager::i_->set_walls(walls);
+
+            cout << room->position.x << " " << room->position.y << endl;
+            cout << room->width << " " << room->height << endl << endl;
+        }
+        
+
+#pragma endregion
 
 #pragma region Collisions and Physics
         
@@ -830,7 +912,8 @@ ImGui::End();
                 a.lock()->Destroy();
             }
             room_parts.clear();
-            generation::GenerateRoom(rlg.rooms[glm::ivec2(0, 0)], &rg_settings, &models, room_parts, scene_root, GBufferPassShader);
+            generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+            generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
 
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-rg_settings.width * generation::kModuleSize, 0.0f, -rg_settings.height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
