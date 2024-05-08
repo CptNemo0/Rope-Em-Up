@@ -380,6 +380,41 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     }
 
     // Clutter in corners
+    std::vector<glm::vec3> clutter_vector;
+    for (int i = 0; i < room.width; i++)
+    {
+        auto top_pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+        auto bot_pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+
+        for (int i = 0; i < 3; i++)
+        {
+            clutter_vector.push_back(top_pos + kCornerTopLeft[i]);
+            clutter_vector.push_back(top_pos + kCornerTopRight[i]);
+            clutter_vector.push_back(bot_pos + kCornerBotLeft[i]);
+            clutter_vector.push_back(bot_pos + kCornerBotRight[i]);
+        }
+    }
+    for (int i = 0; i < room.height; i++)
+    {
+        auto left_pos = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
+        auto right_pos = glm::vec3(-8.0f - (room.width - 1) *kModuleSize, 0.0f, -8.0f - i * kModuleSize);
+
+        for (int i = 0; i < 3; i++)
+        {
+            clutter_vector.push_back(left_pos + kCornerTopLeft[i]);
+            clutter_vector.push_back(right_pos + kCornerTopRight[i]);
+            clutter_vector.push_back(left_pos + kCornerBotLeft[i]);
+            clutter_vector.push_back(right_pos + kCornerBotRight[i]);
+        }
+    }
+
+    std::shuffle(clutter_vector.begin(), clutter_vector.end(), g);
+
+    for (int i = 0; i < rgs->clutter && i < clutter_vector.size(); i++)
+    {
+        room.clutter_positions.push_back(clutter_vector[i]);
+        room.clutter_idx.push_back(random::RandInt(0, rm->clutter.size() - 1));
+    }
 }
     
 
@@ -473,5 +508,17 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->lamps[0]->meshes_[0], lamp->transform_));
         room_parts.push_back(lamp);
         lamp->PropagateStart();
+    }
+
+    // generate clutter
+
+    for (int i = 0; i < room.clutter_idx.size(); i++)
+    {
+        s_ptr<GameObject> clutter = GameObject::Create(scene_root);
+        clutter->transform_->set_position(room.clutter_positions[i]);
+        clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
+        clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
+        room_parts.push_back(clutter);
+        clutter->PropagateStart();
     }
 }

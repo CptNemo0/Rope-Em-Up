@@ -115,6 +115,9 @@ namespace generation
         //Lamp positions
         std::vector<glm::vec3> lamp_positions;
 
+        //Clutter
+        std::vector<glm::vec3> clutter_positions;
+        std::vector<int> clutter_idx;
         // !Values that will be generated during room generation
 
         std::unordered_set<glm::ivec2> grid;
@@ -171,6 +174,7 @@ namespace generation
         int width = 2;
         int height = 2;
         int lamps = 1;
+        int clutter = 10;
         int enemies = 1;
     };
     
@@ -180,6 +184,7 @@ namespace generation
         std::vector<s_ptr<Model>> floors;
         std::vector<s_ptr<Model>> gates;
         std::vector<s_ptr<Model>> lamps;
+        std::vector<s_ptr<Model>> clutter;
     };
 
     class RoomGenerator

@@ -144,6 +144,8 @@ int main()
     const string kSimpleFloodPath = "res/models/enviroment/floor/floor.obj";
     const string kTestBallPath = "res/models/test_ball.obj";
     const string kGatePath = "res/models/gate.obj";
+    const string kBonePath = "res/pierdoly/bone.obj";
+    const string kLeafsPath = "res/pierdoly/leafs.obj";
 
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
@@ -332,6 +334,8 @@ int main()
     auto test_ball_model = make_shared<Model>(kTestBallPath);
     auto gate_model = make_shared<Model>(kGatePath);
     auto lamp_model = make_shared<Model>(kPlaceholderLampPath);
+    auto bone_model = make_shared<Model>(kBonePath);
+    auto leafs_model = make_shared<Model>(kLeafsPath);
 
     auto scene_root = GameObject::Create();
 
@@ -367,6 +371,7 @@ int main()
     models.floors.push_back(simple_floor_model);
     models.gates.push_back(gate_model);
     models.lamps.push_back(lamp_model);
+    models.clutter.push_back(bone_model);
 
     generation::RoomGenerationSettings rg_settings;
     rg_settings.width = 2;
@@ -856,11 +861,11 @@ int main()
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
-        LBufferPassShader->SetFloat("intensity", 1.0f + 0.4f * std::sinf(glfwGetTime() * 0.5f));
+        LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
             LBufferPassShader->SetVec3("light_positions[" + std::to_string(i) + "]", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
-            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", glm::vec3(140.0f, 140.0f, 90.0f));
+            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", glm::vec3(140.0f, 140.0f, 90.0f) * 2.0f);
         }
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
@@ -991,6 +996,7 @@ ImGui::End();
         ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
         ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
         ImGui::SliderInt("Lamps", &rg_settings.lamps, 2, 10);
+        ImGui::SliderInt("Clutter", &rg_settings.clutter, 1, 15);
         //if (ImGui::Button("Generate"))
         //{
         //    /*for (auto& a : room_parts)
