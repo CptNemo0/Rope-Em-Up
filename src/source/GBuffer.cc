@@ -97,7 +97,7 @@ void GBuffer::BindTextures(s_ptr<Shader> shader)
 {
 	glActiveTexture(GL_TEXTURE0);
 	shader->SetInt("position_texture", 0);
-	glBindTexture(GL_TEXTURE_2D, view_position_texture_);
+	glBindTexture(GL_TEXTURE_2D, world_position_texture_);
 
 	glActiveTexture(GL_TEXTURE1);
 	shader->SetInt("albedo_texture", 1);
@@ -105,7 +105,7 @@ void GBuffer::BindTextures(s_ptr<Shader> shader)
 
 	glActiveTexture(GL_TEXTURE2);
 	shader->SetInt("normal_texture", 2);
-	glBindTexture(GL_TEXTURE_2D, view_normal_texture_);
+	glBindTexture(GL_TEXTURE_2D, normal_texture_);
 
 	glActiveTexture(GL_TEXTURE3);
 	shader->SetInt("mra_texture", 3);

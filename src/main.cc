@@ -140,6 +140,7 @@ int main()
     const string kWallPath = "res/models/simple_wall.obj";
     const string kModule1Path = "res/models/module1.obj";
     const string kModule2Path = "res/models/enviroment/modules/module2.obj";
+    const string kPlaceholderLampPath = "res/models/enviroment/lamps/placeholder_kamp.obj";
     const string kSimpleFloodPath = "res/models/enviroment/floor/floor.obj";
     const string kTestBallPath = "res/models/test_ball.obj";
     const string kGatePath = "res/models/gate.obj";
@@ -306,13 +307,13 @@ int main()
     // lights
     // ------
     glm::vec3 light_Positions[] = {
-        glm::vec3(0.0f,  10.0f, 0.0f),
+        glm::vec3(0.0f,  0.0f, 0.0f),
         glm::vec3(10.0f,  10.0f, 10.0f),
         glm::vec3(-10.0f, -10.0f, 10.0f),
         glm::vec3(10.0f, -10.0f, 10.0f),
     };
     glm::vec3 light_Colors[] = {
-        glm::vec3(23.47, 21.31, 20.79),
+        glm::vec3(234.7, 213.1, 207.9),
         glm::vec3(23.47, 21.31, 20.79),
         glm::vec3(23.47, 21.31, 20.79),
         glm::vec3(23.47, 21.31, 20.79)
@@ -330,6 +331,7 @@ int main()
     auto simple_floor_model = make_shared<Model>(kSimpleFloodPath);
     auto test_ball_model = make_shared<Model>(kTestBallPath);
     auto gate_model = make_shared<Model>(kGatePath);
+    auto lamp_model = make_shared<Model>(kPlaceholderLampPath);
 
     auto scene_root = GameObject::Create();
 
@@ -360,9 +362,11 @@ int main()
     }
 
     generation::RoomModels models;
+    models.walls.push_back(module_1_model);
     models.walls.push_back(module_2_model);
     models.floors.push_back(simple_floor_model);
     models.gates.push_back(gate_model);
+    models.lamps.push_back(lamp_model);
 
     generation::RoomGenerationSettings rg_settings;
     rg_settings.width = 2;
@@ -481,7 +485,7 @@ int main()
     for (int i = 0; i < rope_lenght; i++)
     {
         auto rope_segment = GameObject::Create(scene_root);
-        rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
+        rope_segment->transform_->set_scale(glm::vec3(1.3f, 1.3f, 1.3f));
         rope_segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
         rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
         rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
@@ -849,7 +853,7 @@ int main()
         BasicDefferedLightShader->SetVec3("camera_position", camera->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
-        BasicDefferedLightShader->SetVec3("light_positions[0]", glm::mat3(camera->GetViewMatrix()) * light_Positions[0]);
+        BasicDefferedLightShader->SetVec3("light_positions[0]", light_Positions[0]);
         BasicDefferedLightShader->SetVec3("light_colors[0]", light_Colors[0]);
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 

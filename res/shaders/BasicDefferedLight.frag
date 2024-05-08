@@ -19,67 +19,12 @@ uniform samplerCube irradianceMap;
 
 const float PI = 3.14159265359;
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
-{
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-}
 
-float DistributionGGX(vec3 N, vec3 H, float roughness) //funkcja rozk³adu wektorów normalnych Trowbridge-Reitz GGX
-{
-		float a      = roughness * roughness;
-        float a2     = a*a;
-        float NdotH  = max(dot(N, H), 0.0);
-        float NdotH2 = NdotH*NdotH;
-
-        float nom    = a2;
-        float denom  = (NdotH2 * (a2 - 1.0) + 1.0);
-        denom        = PI * denom * denom;
-
-        return nom / denom;
-}
-
-float GeometrySchlickGGX(float NdotV, float roughness)
-{
-        float r = (roughness + 1.0);
-        float k = (r*r) / 8.0;
-
-        float num   = NdotV;
-        float denom = NdotV * (1.0 - k) + k;
-
-        return num / denom;
-}
-
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
-{
-        float NdotV = max(dot(N, V), 0.0);
-        float NdotL = max(dot(N, L), 0.0);
-        float ggx2  = GeometrySchlickGGX(NdotV, roughness);
-        float ggx1  = GeometrySchlickGGX(NdotL, roughness);
-
-        return ggx1 * ggx2;
-}
-
-vec3 getNormalFromMap(vec3 position)
-{
-    vec3 tangentNormal = texture(normal_texture, if_uv).xyz * 2.0 - 1.0;
-
-    vec3 Q1  = dFdx(position);
-    vec3 Q2  = dFdy(position);
-    vec2 st1 = dFdx(if_uv);
-    vec2 st2 = dFdy(if_uv);
-
-    vec3 N   = normalize(tangentNormal * 2.0 - 1.0);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
-}
 
 void main()
 {
     vec3 position = texture(position_texture, if_uv).rgb;
-    vec3 albedo = texture(albedo_texture, if_uv).rgb;
+    vec3 albedo =  texture(albedo_texture, if_uv).rgb;
     vec3 mra = texture(mra_texture, if_uv).rgb;
 	float metallic = mra.r;
 	float roughness = mra.g;
@@ -87,9 +32,9 @@ void main()
     float ssao = texture(ssao_texture, if_uv).r;
 
     vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
-    vec3 V = normalize(-position);  
+    vec3 V = normalize(camera_position - position);  
 
-    vec3 ambient = vec3(0.15 * albedo * ssao);
+    vec3 ambient = vec3(1.0 * albedo * ssao);
     vec3 lighting = vec3(0.0, 0.0, 0.0);
 
     
@@ -111,7 +56,43 @@ void main()
         lighting += diffuse + specular;
     }
 
-    vec3 color = ambient + lighting / light_num;
+
+    ////////////////////////
+
+    /*float dx = (1.0 / 1920.0) * 2;
+    float dy = (1.0 / 1080.0) * 2;
+
+    vec2 uvCenter   = if_uv;
+    vec2 uvRight    = vec2(uvCenter.x + dx, uvCenter.y);
+    vec2 uvTop      = vec2(uvCenter.x,      uvCenter.y - dx);
+    vec2 uvTopRight = vec2(uvCenter.x + dx, uvCenter.y - dx);
+
+    vec3 mCenter   = texture(normal_texture, uvCenter).rgb;
+    vec3 mTop      = texture(normal_texture, uvTop).rgb;
+    vec3 mRight    = texture(normal_texture, uvRight).rgb;
+    vec3 mTopRight = texture(normal_texture, uvTopRight).rgb;
+
+    vec3 dT  = abs(mCenter - mTop);
+    vec3 dR  = abs(mCenter - mRight);
+    vec3 dTR = abs(mCenter - mTopRight);
+
+    float dTmax  = max(dT.x, max(dT.y, dT.z));
+    float dRmax  = max(dR.x, max(dR.y, dR.z));
+    float dTRmax = max(dTR.x, max(dTR.y, dTR.z));
+   
+    float deltaRaw = 0.0;
+    deltaRaw = max(deltaRaw, dTmax);
+    deltaRaw = max(deltaRaw, dRmax);
+    deltaRaw = max(deltaRaw, dTRmax);
+
+    float threshold    = 0.8;
+    float deltaClipped = clamp((deltaRaw * 2.0) - threshold, 0.0, 1.0);
+    float oI = deltaClipped;
+    vec3 outline = vec3(oI, oI, oI);*/
+    ////////////////////////
+
+
+    vec3 color = ambient + lighting / light_num;   
     color = pow(color, vec3(1.0/2.2));
     color_texture = color;
 }

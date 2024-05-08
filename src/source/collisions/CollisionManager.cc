@@ -176,9 +176,17 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
                             pbd::Contact contact(particle_a, particle_b);
                             contacts.push_back(contact);
                         }
-                        else
+                        else if(particle_a == nullptr && particle_b == nullptr)
                         {
                             Separation(a, b, 0.5f, 0.5f);
+                        }
+                        else if (particle_a != nullptr && particle_b == nullptr)
+                        {
+                            Separation(a, b, 1.0f, 0.0f);
+                        }
+                        else if (particle_a == nullptr && particle_b != nullptr)
+                        {
+                            Separation(a, b, 0.0f, 1.0f);
                         }
                     }
                 }

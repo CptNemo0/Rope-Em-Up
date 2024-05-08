@@ -300,6 +300,23 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     }
 
     room.is_generated = true;
+
+    // Lamps
+    // Left top
+    auto left_top = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+    room.lamp_positions.push_back(left_top + kLanternPlacement[0]);
+
+    // Right top
+    auto right_top = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+    room.lamp_positions.push_back(right_top + kLanternPlacement[1]);
+
+    // Left bot
+    auto left_bot = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+    room.lamp_positions.push_back(left_bot + kLanternPlacement[2]);
+
+    // Right bot
+    auto right_bot = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+    room.lamp_positions.push_back(right_bot + kLanternPlacement[3]);
 }
 
 void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
@@ -380,5 +397,17 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
         gate->PropagateStart();
+    }
+
+    // generate lamps
+
+    for (auto pos : room.lamp_positions)
+    {
+        s_ptr<GameObject> lamp = GameObject::Create(scene_root);
+        lamp->transform_->set_position(pos);
+        lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
+        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->lamps[0]->meshes_[0], lamp->transform_));
+        room_parts.push_back(lamp);
+        lamp->PropagateStart();
     }
 }

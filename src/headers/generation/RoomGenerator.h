@@ -18,12 +18,51 @@
 #include "../GameObject.h"
 #include "../components/MeshRenderer.h"
 #include "../components/Component.h"
+#include "../collisions/Collider.h"
+#include "../collisions/collisions.h"
+#include "../collisions/CollisionManager.h"
 #include <memory>
 
 namespace generation
 {
     const float kModuleSize = 16.0f;
     const float kOffset = 0.5f;
+
+    const std::vector<glm::vec3> kLanternPlacement
+    {
+        glm::vec3(4.0f, 0.0f, 4.0f),   // left top
+        glm::vec3(-4.0f, 0.0f, 4.0f),  // right top
+        glm::vec3(4.0f, 0.0f, -4.0f),  // left bot
+        glm::vec3(-4.0f, 0.0f, -4.0f)  // right bot
+    };
+
+    const std::vector<glm::vec3> kCornerTopRight
+    {
+        glm::vec3(-6.0f, 0.0f, 4.0f),
+        glm::vec3(-6.0f, 0.0f, 6.0f),
+        glm::vec3(-4.0f, 0.0f, 6.0f),
+    };
+
+    const std::vector<glm::vec3> kCornerTopLeft
+    {
+        glm::vec3(4.0f, 0.0f, 6.0f),
+        glm::vec3(6.0f, 0.0f, 6.0f),
+        glm::vec3(6.0f, 0.0f, 4.0f),
+    };
+
+    const std::vector<glm::vec3> kCornerBotRight
+    {
+        glm::vec3(-6.0f, 0.0f, -4.0f),
+        glm::vec3(-6.0f, 0.0f, -6.0f),
+        glm::vec3(-4.0f, 0.0f, -6.0f),
+    };
+
+    const std::vector<glm::vec3> kCornerBotLeft
+    {
+        glm::vec3(4.0f, 0.0f, -6.0f),
+        glm::vec3(6.0f, 0.0f, -6.0f),
+        glm::vec3(6.0f, 0.0f, -4.0f),
+    };
 
     struct RoomLayoutGenerationSettings
     {
@@ -71,6 +110,10 @@ namespace generation
         glm::vec3 right_gate_pos;
         glm::vec3 down_gate_pos;
         glm::vec3 left_gate_pos;
+
+
+        //Lamp positions
+        std::vector<glm::vec3> lamp_positions;
 
         // !Values that will be generated during room generation
 
@@ -136,6 +179,7 @@ namespace generation
         std::vector<s_ptr<Model>> walls;
         std::vector<s_ptr<Model>> floors;
         std::vector<s_ptr<Model>> gates;
+        std::vector<s_ptr<Model>> lamps;
     };
 
     class RoomGenerator
