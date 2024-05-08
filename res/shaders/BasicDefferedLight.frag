@@ -9,9 +9,10 @@ uniform sampler2D ssao_texture;
 
 uniform vec3 camera_position;
 
-const int light_num = 1;
-uniform vec3 light_positions[light_num];
-uniform vec3 light_colors[light_num];
+const int MAX_LIGHTS = 16;
+int light_num = 1;
+uniform vec3 light_positions[MAX_LIGHTS];
+uniform vec3 light_colors[MAX_LIGHTS];
 
 in vec2 if_uv;
 
@@ -38,7 +39,7 @@ void main()
     vec3 lighting = vec3(0.0, 0.0, 0.0);
 
     
-    for(int i = 0 ; i < light_num ; i++)
+    for(int i = 0 ; i < light_num && i < MAX_LIGHTS ; i++)
     {
         vec3 light_dir = normalize(light_positions[i] - position);
         vec3 diffuse = max(dot(N, light_dir), 0.0) * albedo * light_colors[i];

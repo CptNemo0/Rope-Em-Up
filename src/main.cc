@@ -845,16 +845,20 @@ int main()
         
         // Bind buffer - Bind textures - Use Shader - Draw 
         lbuffer.Bind();
-        BasicDefferedLightShader->Use();
-        gbuffer.BindTextures(BasicDefferedLightShader);
+        LBufferPassShader->Use();
+        gbuffer.BindTextures(LBufferPassShader);
         glActiveTexture(GL_TEXTURE4);
-        BasicDefferedLightShader->SetInt("ssao_texture", 4);
+        LBufferPassShader->SetInt("ssao_texture", 4);
         glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
-        BasicDefferedLightShader->SetVec3("camera_position", camera->get_position());
+        LBufferPassShader->SetVec3("camera_position", camera->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
-        BasicDefferedLightShader->SetVec3("light_positions[0]", light_Positions[0]);
-        BasicDefferedLightShader->SetVec3("light_colors[0]", light_Colors[0]);
+        LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
+        for (int i = 0; i < room->lamp_positions.size(); i++)
+        {
+            LBufferPassShader->SetVec3("light_positions["+ std::to_string(i) + "]", glm::vec3(room->lamp_positions[i].x, 10.0f, room->lamp_positions[i].z));
+            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", light_Colors[1]);
+        }
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
         lbuffer.Draw();
