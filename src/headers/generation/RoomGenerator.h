@@ -22,7 +22,7 @@
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"
 #include <memory>
-
+#include <random>
 namespace generation
 {
     const float kModuleSize = 16.0f;
@@ -170,7 +170,7 @@ namespace generation
     {
         int width = 2;
         int height = 2;
-        int healing_spots = 1;
+        int lamps = 1;
         int enemies = 1;
     };
     

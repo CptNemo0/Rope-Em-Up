@@ -211,12 +211,12 @@ void generation::RoomGenerator::DecreaseEnemies()
 
 void generation::RoomGenerator::IncreaseHealingSpots()
 {
-    settings_.healing_spots += 1;
+    settings_.lamps += 1;
 }
 
 void generation::RoomGenerator::DecreaseHealingSpots()
 {
-    settings_.healing_spots -= 1;
+    settings_.lamps -= 1;
 }
 
 void generation::RoomGenerator::GenerateGrid(Room& room)
@@ -302,22 +302,84 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     room.is_generated = true;
 
     // Lamps
+     
+    int lamp_num = rgs->lamps;
+    std::unordered_set<glm::vec3> lamp_set;
+
+    for (int i = 0; i < room.width; i++)
+    {
+        for (int j = 0; j < room.height; j++)
+        {
+            auto pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize);
+            for (int k = 0; k < kLanternPlacement.size(); k++)
+            {
+                lamp_set.insert(kLanternPlacement[k] + pos);
+            }
+        }
+    }
+
     // Left top
-    auto left_top = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
-    room.lamp_positions.push_back(left_top + kLanternPlacement[0]);
-
-    // Right top
-    auto right_top = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
-    room.lamp_positions.push_back(right_top + kLanternPlacement[1]);
-
-    // Left bot
-    auto left_bot = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
-    room.lamp_positions.push_back(left_bot + kLanternPlacement[2]);
-
+    if (lamp_num > 0)
+    {
+        auto left_top = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+        left_top += kLanternPlacement[0];
+        room.lamp_positions.push_back(left_top);
+        lamp_set.erase(left_top);
+        lamp_num--;
+        
+    }
+    
     // Right bot
-    auto right_bot = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
-    room.lamp_positions.push_back(right_bot + kLanternPlacement[3]);
-}
+    if (lamp_num > 0)
+    {
+        auto right_bot = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+        right_bot += kLanternPlacement[3];
+        room.lamp_positions.push_back(right_bot);
+        lamp_set.erase(right_bot);
+        lamp_num--;
+    }
+    
+    // Right top
+    if (lamp_num > 0)
+    {
+        auto right_top = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+        right_top += kLanternPlacement[1];
+        room.lamp_positions.push_back(right_top);
+        lamp_set.erase(right_top);
+        lamp_num--;
+    }
+    
+    if (lamp_num > 0)
+    {
+        // Left bot
+        auto left_bot = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+        left_bot += kLanternPlacement[2];
+        room.lamp_positions.push_back(left_bot);
+        lamp_set.erase(left_bot);
+        lamp_num--;
+    }
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+
+    std::vector<glm::vec3> shuffled_set = std::vector<glm::vec3>(lamp_set.begin(), lamp_set.end());
+
+    std::shuffle(shuffled_set.begin(), shuffled_set.end(), g);
+    
+    if (lamp_num > 0)
+    {
+        for (auto& pos : shuffled_set)
+        {
+            room.lamp_positions.push_back(pos);
+            lamp_num--;
+            if (lamp_num == 0)
+            {
+                break;
+            }
+        }
+    }
+    }
+    
 
 void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
 {

@@ -371,6 +371,7 @@ int main()
     generation::RoomGenerationSettings rg_settings;
     rg_settings.width = 2;
     rg_settings.height = 2;
+    rg_settings.lamps = 3;
 
     std::deque<w_ptr<GameObject>> room_parts;
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
@@ -438,7 +439,6 @@ int main()
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    //player_1->transform_->set_position(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
@@ -644,7 +644,7 @@ int main()
 
         previous_time = current_time;
 
-        //physics::LogVec3(player_1->transform_->get_position());
+        
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -797,13 +797,6 @@ int main()
             {
                 rope_segments[i]->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
             }
-            
-
-            if (2 + 2)
-            {
-                cout << "AA" << endl;
-            }
-
         }
         
 
@@ -811,7 +804,13 @@ int main()
 
 #pragma region Collisions and Physics
         
+        physics::LogVec3(player_1->transform_->get_position());
+        physics::LogVec3(player_2->transform_->get_position());
+
         Timer::UpdateTimer(fixed_update_timer, delta_time);
+
+        physics::LogVec3(player_1->transform_->get_position());
+        physics::LogVec3(player_2->transform_->get_position());
 
         FixOrientation(enemy_1);
         FixOrientation(player_1);
@@ -987,19 +986,34 @@ ImGui::End();
         ImGui::Begin("Room Generation");
         ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
         ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
-        if (ImGui::Button("Generate"))
-        {
-            for (auto& a : room_parts)
-            {
-                a.lock()->Destroy();
-            }
-            room_parts.clear();
-            generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
-            generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
+        ImGui::SliderInt("Lamps", &rg_settings.lamps, 2, 10);
+        //if (ImGui::Button("Generate"))
+        //{
+        //    /*for (auto& a : room_parts)
+        //    {
+        //        a.lock()->Destroy();
+        //    }
+        //    room_parts.clear();
+        //    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+        //    generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
 
-            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-rg_settings.width * generation::kModuleSize, 0.0f, -rg_settings.height * generation::kModuleSize), 1.0f);
-            pbd::PBDManager::i_->set_walls(walls);
-        }
+        //    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-rg_settings.width * generation::kModuleSize, 0.0f, -rg_settings.height * generation::kModuleSize), 1.0f);
+        //    pbd::PBDManager::i_->set_walls(walls);
+        //    player_1->transform_->TeleportToPosition(player_1->transform_->get_global_position());
+        //    player_2->transform_->TeleportToPosition(player_2->transform_->get_global_position());*/
+
+        //    // Usun obecny pokoj
+        //    for (auto& a : room_parts)
+        //    {
+        //        a.lock()->Destroy();
+        //    }
+        //    room_parts.clear();
+        //    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+        //    generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
+
+        //    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+        //    pbd::PBDManager::i_->set_walls(walls);
+        //}
         ImGui::End();
 
         ImGui::Render();

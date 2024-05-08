@@ -56,6 +56,7 @@ void components::PBDParticle::UpdateVelocity(float t)
 	ClampElementwise(forces_, 1000.0f, -1000.0f);
 	//velocity_ = velocity_ + t * inverse_mass_ * forces_;
 	velocity_ = (transform_->get_position() - transform_->get_previous_position()) / t + t * inverse_mass_ * forces_;
+	//LogVec3(velocity_);
 }
 
 void components::PBDParticle::PredictPosition(float t)
@@ -286,10 +287,10 @@ void pbd::PBDManager::ProjectConstraints(float t)
 	}
 
 	
-	for (auto& particle : particles_)
+	/*for (auto& particle : particles_)
 	{
 		walls_.Enforce(particle);
-	}
+	}*/
 }
 
 float pbd::PBDManager::GetDistanceToClosestWall(s_ptr<components::PBDParticle> particle)
