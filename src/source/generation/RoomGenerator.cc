@@ -245,6 +245,9 @@ void generation::RoomGenerator::Generate()
 
 void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
 {
+    std::random_device rd;
+    std::mt19937 g(rd());
+
     //generate upper walls
     room.width = rgs->width;
     room.height = rgs->height;
@@ -302,7 +305,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     room.is_generated = true;
 
     // Lamps
-     
+    
     int lamp_num = rgs->lamps;
     std::unordered_set<glm::vec3> lamp_set;
 
@@ -349,9 +352,9 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         lamp_num--;
     }
     
+    // Left bot
     if (lamp_num > 0)
     {
-        // Left bot
         auto left_bot = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
         left_bot += kLanternPlacement[2];
         room.lamp_positions.push_back(left_bot);
@@ -359,11 +362,8 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         lamp_num--;
     }
 
-    std::random_device rd;
-    std::mt19937 g(rd());
-
+    // Above 4 - random
     std::vector<glm::vec3> shuffled_set = std::vector<glm::vec3>(lamp_set.begin(), lamp_set.end());
-
     std::shuffle(shuffled_set.begin(), shuffled_set.end(), g);
     
     if (lamp_num > 0)
@@ -378,7 +378,9 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
             }
         }
     }
-    }
+
+    // Clutter in corners
+}
     
 
 void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)

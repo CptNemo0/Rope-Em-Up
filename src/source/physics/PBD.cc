@@ -287,10 +287,10 @@ void pbd::PBDManager::ProjectConstraints(float t)
 	}
 
 	
-	/*for (auto& particle : particles_)
+	for (auto& particle : particles_)
 	{
 		walls_.Enforce(particle);
-	}*/
+	}
 }
 
 float pbd::PBDManager::GetDistanceToClosestWall(s_ptr<components::PBDParticle> particle)

@@ -10,9 +10,10 @@ uniform sampler2D ssao_texture;
 uniform vec3 camera_position;
 
 const int MAX_LIGHTS = 16;
-int light_num = 1;
+uniform int light_num = 3;
 uniform vec3 light_positions[MAX_LIGHTS];
 uniform vec3 light_colors[MAX_LIGHTS];
+uniform float intensity = 1.0f;
 
 in vec2 if_uv;
 
@@ -85,8 +86,8 @@ void main()
         vec3 H = normalize(V + L);
 
         float distance    = length(light_positions[i] - World_position);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance     = light_colors[i] * attenuation; 
+        float attenuation = 1.0 / ((distance * distance));
+        vec3 radiance     = light_colors[i] * intensity * attenuation; 
 
         //cook-torrance BRDF
         float cosTheta = dot(H, V); //v - kierunek patrzenia
@@ -109,8 +110,8 @@ void main()
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     } 
 
-    vec3 ambient = vec3(0.3) * albedo * ssao;
-    vec3 color   = ambient + Lo;
+    vec3 ambient = vec3(0.03) * albedo * ssao;
+    vec3 color   = ambient + Lo / light_num;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));

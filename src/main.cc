@@ -362,7 +362,7 @@ int main()
     }
 
     generation::RoomModels models;
-    models.walls.push_back(module_1_model);
+    //models.walls.push_back(module_1_model);
     models.walls.push_back(module_2_model);
     models.floors.push_back(simple_floor_model);
     models.gates.push_back(gate_model);
@@ -430,10 +430,10 @@ int main()
     floor_4->transform_->set_position(glm::vec3(-1.5f * generation::kModuleSize, 0.0f, -8.0f));
     floor_4->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
     floor_4->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-    */
+    
     
     ////test
-    /*auto test = GameObject::Create(scene_root);
+    auto test = GameObject::Create(scene_root);
     test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
     test->AddComponent(make_shared<components::MeshRenderer>(test_model, PBRShader));*/
 
@@ -450,32 +450,6 @@ int main()
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
-
-    auto enemy_1 = GameObject::Create(scene_root);
-    enemy_1->transform_->TeleportToPosition(glm::vec3(-10.0f, 0.0f, -10.0f));
-    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
-    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
-    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
-    auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
-
-    auto enemy_2 = GameObject::Create(scene_root);
-    enemy_2->transform_->TeleportToPosition(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
-    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
-    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
-    auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
-    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
-
-    //ai::EnemyAIManager::SetPlayers(player_1, player_2);
-    ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
-    auto gameplayCamera = GameObject::Create(scene_root);
-    gameplayCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-
-    gameplayCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
-    auto gameplayCameraComponent = gameplayCamera->GetComponent<components::GameplayCameraComponent>();
 
     std::vector<s_ptr<GameObject>> rope_segments;
     int rope_lenght = 40;
@@ -504,6 +478,33 @@ int main()
     }
 
     pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), step + 0.01f);
+
+
+    /*auto enemy_1 = GameObject::Create(scene_root);
+    enemy_1->transform_->TeleportToPosition(glm::vec3(-10.0f, 0.0f, -10.0f));
+    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
+    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
+    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
+    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
+    auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
+
+    auto enemy_2 = GameObject::Create(scene_root);
+    enemy_2->transform_->TeleportToPosition(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
+    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
+    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
+    auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
+    pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
+    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);*/
+
+    //ai::EnemyAIManager::SetPlayers(player_1, player_2);
+    ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
+    auto gameplayCamera = GameObject::Create(scene_root);
+    gameplayCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+
+    gameplayCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
+    auto gameplayCameraComponent = gameplayCamera->GetComponent<components::GameplayCameraComponent>();
 
 
     auto HUD_root = GameObject::Create();
@@ -590,6 +591,8 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);
 
+    int enemy_state_machine_1;
+    int enemy_state_machine_2;
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine_1, enemy_state_machine_2, &fixed_update_timer]()
     {
         //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
@@ -648,8 +651,8 @@ int main()
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
-        collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
-        collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        //collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        //collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         steady_clock::time_point end = steady_clock::now();
 
         utility::DebugCameraMovement(window, debugCamera, delta_time);
@@ -804,15 +807,15 @@ int main()
 
 #pragma region Collisions and Physics
         
-        physics::LogVec3(player_1->transform_->get_position());
-        physics::LogVec3(player_2->transform_->get_position());
+        //physics::LogVec3(player_1->transform_->get_position());
+        //physics::LogVec3(player_2->transform_->get_position());
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
 
-        physics::LogVec3(player_1->transform_->get_position());
-        physics::LogVec3(player_2->transform_->get_position());
+        //physics::LogVec3(player_1->transform_->get_position());
+        //physics::LogVec3(player_2->transform_->get_position());
 
-        FixOrientation(enemy_1);
+        //FixOrientation(enemy_1);
         FixOrientation(player_1);
         FixOrientation(player_2);
 
@@ -853,10 +856,11 @@ int main()
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
+        LBufferPassShader->SetFloat("intensity", 1.0f + 0.4f * std::sinf(glfwGetTime() * 0.5f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
-            LBufferPassShader->SetVec3("light_positions["+ std::to_string(i) + "]", glm::vec3(room->lamp_positions[i].x, 10.0f, room->lamp_positions[i].z));
-            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", light_Colors[1]);
+            LBufferPassShader->SetVec3("light_positions[" + std::to_string(i) + "]", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
+            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", glm::vec3(140.0f, 140.0f, 90.0f));
         }
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
