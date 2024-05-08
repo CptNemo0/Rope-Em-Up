@@ -137,6 +137,11 @@ void components::Transform::set_predicted_position(const glm::vec3& position)
     predicted_position_ = position;
 }
 
+void components::Transform::set_previous_position(const glm::vec3& position)
+{
+    previous_position_ = position;
+}
+
 const glm::mat4 components::Transform::get_prediction_matrix() const
 {
     const glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), scale_);
@@ -163,6 +168,14 @@ const glm::vec3 components::Transform::get_forward() const
 const glm::vec3 components::Transform::get_right() const
 {
     return right_;
+}
+
+void components::Transform::TeleportToPosition(glm::vec3 position)
+{
+    previous_position_ = position;
+    position_ = position;
+    predicted_position_ = position;
+    UpdateSelfAndChildren();
 }
 
 void components::Transform::FixOrientation()

@@ -116,6 +116,8 @@ int main()
     const string kLBufferVertexShaderPath = "res/shaders/LBufferPass.vert";
     const string kLBufferFragmentShaderPath = "res/shaders/LBufferPass.frag";
 
+    const string kBasicDefferedLightShaderPath = "res/shaders/BasicDefferedLight.frag";
+
     const string kSSAOVertexShaderPath = "res/shaders/SSAO.vert";
     const string kSSAOFragmentShaderPath = "res/shaders/SSAO.frag";
 
@@ -276,6 +278,7 @@ int main()
     auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
     auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
     auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
+    auto BasicDefferedLightShader = make_shared<Shader>(kLBufferVertexShaderPath, kBasicDefferedLightShaderPath);
     auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
     auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
 
@@ -287,7 +290,7 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::MEDIUM_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
@@ -430,24 +433,22 @@ int main()
     test->AddComponent(make_shared<components::MeshRenderer>(test_model, PBRShader));*/
 
     auto player_1 = GameObject::Create(scene_root);
-    player_1->transform_->set_position(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_1->transform_->set_position(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    //player_1->transform_->set_position(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->set_position(glm::vec3(-1.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_2->transform_->set_position(glm::vec3(-1.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_2->transform_->TeleportToPosition(glm::vec3(-1.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
     auto enemy_1 = GameObject::Create(scene_root);
-    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
-    enemy_1->transform_->set_position(glm::vec3(-10.0f, 0.0f, -10.0f));
+    enemy_1->transform_->TeleportToPosition(glm::vec3(-10.0f, 0.0f, -10.0f));
     enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
@@ -456,8 +457,7 @@ int main()
     auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
 
     auto enemy_2 = GameObject::Create(scene_root);
-    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -10.0f));
+    enemy_2->transform_->TeleportToPosition(glm::vec3(-8.0f, 0.0f, -10.0f));
     enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
     enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
@@ -482,8 +482,7 @@ int main()
     {
         auto rope_segment = GameObject::Create(scene_root);
         rope_segment->transform_->set_scale(glm::vec3(1.1f, 1.1f, 1.1f));
-        rope_segment->transform_->set_position(player_1->transform_->get_position() + player_dir * step * (float)i);
-        rope_segment->transform_->set_position(player_1->transform_->get_position() + player_dir * step * (float)i);
+        rope_segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
         rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
         rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
         rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
@@ -576,8 +575,8 @@ int main()
     SSAOShader->SetInt("height", mode->height);
     SSAOShader->SetInt("width", mode->width);
     SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
-    SSAOShader->SetFloat("radius", 0.5);
-    SSAOShader->SetFloat("bias", 0.0025);
+    SSAOShader->SetFloat("radius", 0.2);
+    SSAOShader->SetFloat("bias", 0.0);
     ssao_buffer.SetKernel(SSAOShader);
 
     cubemap->LoadHDRimg(window, gameplayCameraComponent->camera_);
@@ -603,6 +602,11 @@ int main()
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);
+
+    camera->pitch_ = -90.0f;
+    camera->yaw_ = -90.0f;
+    gameplayCameraComponent->height_ = 25.0f;
+    gameplayCameraComponent->distance_ = 0.0f;
 
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -657,6 +661,7 @@ int main()
         
         int input_door = -1;
 
+
         if (room->up_gate)
         {
             auto p1l = glm::length2(room->up_gate_pos - player_1->transform_->get_global_position());
@@ -704,8 +709,6 @@ int main()
         {
             auto p1l = glm::length2(room->left_gate_pos - player_1->transform_->get_global_position());
             auto p2l = glm::length2(room->left_gate_pos - player_2->transform_->get_global_position());
-
-            std::cout << p1l << " " << p2l << endl;
 
             if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
             {
@@ -755,41 +758,48 @@ int main()
                     new_center = room->down_gate_pos +  glm::vec3(0.0f, 0.0f, 1.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
                     player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
-                    player_1->transform_->set_position(player_1_pos);
-                    player_2->transform_->set_position(player_2_pos);
+                    player_1->transform_->TeleportToPosition(player_1_pos);
+                    player_2->transform_->TeleportToPosition(player_2_pos);
 
                     break;
                 case 1: // wychodzi od prawej wychodzi od lewej
                     new_center = room->left_gate_pos + glm::vec3(-1.0f, 0.0f, 0.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(0.0f, 0.0f, 1.0f);
                     player_2_pos = new_center - glm::vec3(0.0f, 0.0f, 1.0f);
-                    player_1->transform_->set_position(player_1_pos);
-                    player_2->transform_->set_position(player_2_pos);
+                    player_1->transform_->TeleportToPosition(player_1_pos);
+                    player_2->transform_->TeleportToPosition(player_2_pos);
                     break;
                 case 2: // wychodzi do�em wychodzi gora
                     new_center = room->up_gate_pos + glm::vec3(0.0f, 0.0f, -1.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
                     player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
-                    player_1->transform_->set_position(player_1_pos);
-                    player_2->transform_->set_position(player_2_pos);
+                    player_1->transform_->TeleportToPosition(player_1_pos);
+                    player_2->transform_->TeleportToPosition(player_2_pos);
                     break;
                 case 3: // wychodzi od lewej wchodzi od prawej
                     new_center = room->right_gate_pos + glm::vec3(1.0f, 0.0f, 0.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(0.0f, 0.0f, 1.0f);
                     player_2_pos = new_center - glm::vec3(0.0f, 0.0f, 1.0f);
-                    player_1->transform_->set_position(player_1_pos);
-                    player_2->transform_->set_position(player_2_pos);
+                    player_1->transform_->TeleportToPosition(player_1_pos);
+                    player_2->transform_->TeleportToPosition(player_2_pos);
                     break;
             }
 
             //przesun line
-            float step = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position()) / rope_segments.size();
-            glm::vec3 direction = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
-            for (auto& ball : rope_segments)
+            player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
+            glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
+            float step = player_distance / (float)rope_lenght;
+            for (int i = 0; i < rope_segments.size(); i++)
             {
-                auto np = ball->transform_->get_position() + direction * step;
-                ball->transform_->set_position(np);
+                rope_segments[i]->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
             }
+            
+
+            if (2 + 2)
+            {
+                cout << "AA" << endl;
+            }
+
         }
         
 
@@ -831,20 +841,16 @@ int main()
         
         // Bind buffer - Bind textures - Use Shader - Draw 
         lbuffer.Bind();
-        LBufferPassShader->Use();
-        gbuffer.BindTextures(LBufferPassShader);
+        BasicDefferedLightShader->Use();
+        gbuffer.BindTextures(BasicDefferedLightShader);
         glActiveTexture(GL_TEXTURE4);
-        LBufferPassShader->SetInt("ssao_texture", 4);
+        BasicDefferedLightShader->SetInt("ssao_texture", 4);
         glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
-        LBufferPassShader->SetVec3("camera_position", camera->get_position());
+        BasicDefferedLightShader->SetVec3("camera_position", camera->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
-        LBufferPassShader->SetVec3("light_positions[0]", light_Positions[0]);
-        LBufferPassShader->SetVec3("light_colors[0]", light_Colors[0]);
-        LBufferPassShader->SetVec3("light_positions[1]", player_1->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
-        LBufferPassShader->SetVec3("light_colors[1]", light_Colors[1]);
-        LBufferPassShader->SetVec3("light_positions[2]", player_2->transform_->get_position() + glm::vec3(2.0f, 2.0f, 2.0f));
-        LBufferPassShader->SetVec3("light_colors[2]", light_Colors[1]);
+        BasicDefferedLightShader->SetVec3("light_positions[0]", glm::mat3(camera->GetViewMatrix()) * light_Positions[0]);
+        BasicDefferedLightShader->SetVec3("light_colors[0]", light_Colors[0]);
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
         lbuffer.Draw();

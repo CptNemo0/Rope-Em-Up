@@ -171,10 +171,21 @@ void pbd::RopeConstraint::Enforce()
 	{
 		float inv_distance = 1.0f / distance;
 
+		float scale = distance / max_distance_;
+
+		if (scale >= 1.2f)
+		{
+			scale = 1.0f;
+		}
+		else
+		{
+			scale = 0.833f * scale;
+		}
+
 		auto separation_vector = (distance - max_distance_) * inv_distance * (x2 - x1);
 
-		auto dx1 = (w1 / (w1 + w2)) * separation_vector;
-		auto dx2 = -(w2 / (w1 + w2)) * separation_vector;
+		auto dx1 = (w1 / (w1 + w2)) * separation_vector * scale;
+		auto dx2 = -(w2 / (w1 + w2)) * separation_vector * scale;
 
 		p1_->transform_->set_predicted_position(x1 + dx1);
 		p2_->transform_->set_predicted_position(x2 + dx2);

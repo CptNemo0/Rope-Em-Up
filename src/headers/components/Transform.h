@@ -57,6 +57,7 @@ public:
 
     void set_position(const glm::vec3& position);
     void set_predicted_position(const glm::vec3& position);
+    void set_previous_position(const glm::vec3& position);
     void set_rotation(const glm::vec3& rotation);
     void set_scale(const glm::vec3& scale);
 
@@ -69,6 +70,8 @@ public:
     const glm::vec3 get_up() const;
     const glm::vec3 get_forward() const;
     const glm::vec3 get_right() const;
+
+    void TeleportToPosition(glm::vec3 position);
 
     void FixOrientation();
 };
