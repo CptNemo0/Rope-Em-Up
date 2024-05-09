@@ -147,6 +147,15 @@ int main()
     const string kBonePath = "res/pierdoly/bone.obj";
     const string kLeafsPath = "res/pierdoly/leafs.obj";
 
+    //Main modules
+    const string kMod1Path = "res/Modules/mod1.obj";
+    const string kMod2Path = "res/Modules/mod2.obj";
+    const string kMod3Path = "res/Modules/mod3.obj";
+    const string kMod4Path = "res/Modules/mod4.obj";
+    const string kMod5Path = "res/Modules/mod5.obj";
+    const string kMod6Path = "res/Modules/mod6.obj";
+    const string kMod7Path = "res/Modules/mod7.obj";
+
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
     const string kBruhPath = "res/sounds/bruh.wav";
@@ -337,6 +346,15 @@ int main()
     auto bone_model = make_shared<Model>(kBonePath);
     auto leafs_model = make_shared<Model>(kLeafsPath);
 
+    // Main modules
+    auto mod1_model = make_shared<Model>(kMod1Path);
+    auto mod2_model = make_shared<Model>(kMod2Path);
+    auto mod3_model = make_shared<Model>(kMod3Path);
+    auto mod4_model = make_shared<Model>(kMod4Path);
+    auto mod5_model = make_shared<Model>(kMod5Path);
+    auto mod6_model = make_shared<Model>(kMod6Path);
+    auto mod7_model = make_shared<Model>(kMod7Path);
+
     auto scene_root = GameObject::Create();
 
     generation::RoomLayoutGenerationSettings rlgs;
@@ -366,8 +384,13 @@ int main()
     }
 
     generation::RoomModels models;
-    //models.walls.push_back(module_1_model);
-    models.walls.push_back(module_2_model);
+    models.walls.push_back(mod1_model);
+    models.walls.push_back(mod2_model);
+    models.walls.push_back(mod3_model);
+    models.walls.push_back(mod4_model);
+    models.walls.push_back(mod5_model);
+    models.walls.push_back(mod6_model);
+    models.walls.push_back(mod7_model);
     models.floors.push_back(simple_floor_model);
     models.gates.push_back(gate_model);
     models.lamps.push_back(lamp_model);
@@ -983,14 +1006,11 @@ ImGui::End();
         ImGui::End();
 
         ImGui::Begin("Sound");
-
         if (ImGui::Button("Play bruh.wav"))
         {
             audio_test_obj->GetComponent<components::AudioSource>()->PlaySound(audio::Sounds::bruh);
         }
-
         ImGui::End();
-
 
         ImGui::Begin("Room Generation");
         ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
@@ -999,20 +1019,7 @@ ImGui::End();
         ImGui::SliderInt("Clutter", &rg_settings.clutter, 1, 15);
         if (ImGui::Button("Generate"))
         {
-        //    /*for (auto& a : room_parts)
-        //    {
-        //        a.lock()->Destroy();
-        //    }
-        //    room_parts.clear();
-        //    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
-        //    generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
-
-        //    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-rg_settings.width * generation::kModuleSize, 0.0f, -rg_settings.height * generation::kModuleSize), 1.0f);
-        //    pbd::PBDManager::i_->set_walls(walls);
-        //    player_1->transform_->TeleportToPosition(player_1->transform_->get_global_position());
-        //    player_2->transform_->TeleportToPosition(player_2->transform_->get_global_position());*/
-
-        //    // Usun obecny pokoj
+        //  // Usun obecny pokoj
             for (auto& a : room_parts)
             {
                 a.lock()->Destroy();
@@ -1025,9 +1032,7 @@ ImGui::End();
             pbd::PBDManager::i_->set_walls(walls);
         }
         ImGui::End();
-
         ImGui::Render();
-        
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 
 #pragma endregion 
