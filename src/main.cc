@@ -652,7 +652,7 @@ int main()
 
         previous_time = current_time;
 
-        
+        cout << collisions::CollisionManager::i_->colliders_.size() << endl;
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -997,8 +997,8 @@ ImGui::End();
         ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
         ImGui::SliderInt("Lamps", &rg_settings.lamps, 2, 10);
         ImGui::SliderInt("Clutter", &rg_settings.clutter, 1, 15);
-        //if (ImGui::Button("Generate"))
-        //{
+        if (ImGui::Button("Generate"))
+        {
         //    /*for (auto& a : room_parts)
         //    {
         //        a.lock()->Destroy();
@@ -1013,17 +1013,17 @@ ImGui::End();
         //    player_2->transform_->TeleportToPosition(player_2->transform_->get_global_position());*/
 
         //    // Usun obecny pokoj
-        //    for (auto& a : room_parts)
-        //    {
-        //        a.lock()->Destroy();
-        //    }
-        //    room_parts.clear();
-        //    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
-        //    generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
+            for (auto& a : room_parts)
+            {
+                a.lock()->Destroy();
+            }
+            room_parts.clear();
+            generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+            generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
 
-        //    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
-        //    pbd::PBDManager::i_->set_walls(walls);
-        //}
+            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+            pbd::PBDManager::i_->set_walls(walls);
+        }
         ImGui::End();
 
         ImGui::Render();

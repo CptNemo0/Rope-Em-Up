@@ -245,6 +245,15 @@ void generation::RoomGenerator::Generate()
 
 void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
 {
+    room.up_walls_idx.clear();
+    room.left_walls_idx.clear();
+    room.lamp_positions.clear();
+    room.clutter_positions.clear();
+    room.clutter_idx.clear();
+    room.grid.clear();
+    room.enemies.clear();
+    room.healing_spots.clear();
+
     std::random_device rd;
     std::mt19937 g(rd());
 
@@ -510,7 +519,7 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         lamp->PropagateStart();
     }
 
-    // generate clutter
+    //// generate clutter
 
     for (int i = 0; i < room.clutter_idx.size(); i++)
     {
