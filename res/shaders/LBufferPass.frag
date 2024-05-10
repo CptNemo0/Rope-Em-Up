@@ -21,6 +21,34 @@ uniform samplerCube irradianceMap;
 
 const float PI = 3.14159265359;
 
+struct DirLight {
+    vec3 direction;
+    vec3 position;
+    mat4x4 lightSpaceMatrix;
+
+    vec4 color;
+};
+
+struct PointLight {
+    vec3 position;
+
+    float constant;
+    float linear;
+    float quadratic;
+    float pointlessfloat;
+
+    vec4 color;
+};
+
+struct SpotLight {
+    vec3 position;
+    vec3 direction;
+    float cutOff;
+    float outerCutOff;
+
+    vec4 color;
+};
+
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
@@ -61,6 +89,55 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
         return ggx1 * ggx2;
 }
 
+vec3 CalcDirLight(DirLight light, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0)
+{
+    vec3 L = normalize(-light.direction.xyz);
+    vec3 H = normalize(V + L);
+    vec3 radiance = light.color.xyz * light.color.w;
+
+// Cook-Torrance BRDF
+    float NDF = DistributionGGX(N, H, roughness);
+    float G = GeometrySmith(N, V, L, roughness);
+    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0); 
+    
+    vec3 numerator    = NDF * G * F;
+	float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+	vec3 specular     = numerator / max(denominator, 0.001);
+
+	vec3 kS = F;
+	vec3 kD = vec3(1.0) - kS;
+	kD *= 1.0 - metallic;
+        
+    //sum radiations
+	float NdotL = max(dot(N, L), 0.0);
+	return (kD * albedo / PI + specular) * radiance * NdotL;  
+}
+
+vec3 CalcPointLight(PointLight light, vec3 World_position vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
+    vec3 L = normalize (light..xyz - World_position);
+	vec3 H = normalize(V + L);
+	float distance = length(light.position.xyz - World_position);
+	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+	vec3 radiance = light.color.xyz * attenuation * light.color.w;
+
+// Cook-Torrance BRDF
+    float NDF = DistributionGGX(N, H, roughness);
+    float G = GeometrySmith(N, V, L, roughness);
+    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0); 
+    
+    vec3 numerator    = NDF * G * F;
+	float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+	vec3 specular     = numerator / max(denominator, 0.001);
+
+    vec3 kS = F;
+	vec3 kD = vec3(1.0) - kS;
+	kD *= 1.0 - metallic;
+        
+    //sum radiations
+	float NdotL = max(dot(N, L), 0.0);
+	return (kD * albedo / PI + specular) * radiance * NdotL; 
+}
+
 void main()
 {
     vec3 World_position = texture(position_texture, if_uv).rgb;
@@ -92,7 +169,6 @@ void main()
         //cook-torrance BRDF
         float cosTheta = dot(H, V); //v - kierunek patrzenia
 		vec3 F = fresnelSchlick(max(cosTheta,0.0), F0);
-
 		float NDF = DistributionGGX(N, H, roughness);
 		float G   = GeometrySmith(N, V, L, roughness);
 
@@ -102,7 +178,7 @@ void main()
 		vec3 specular     = numerator / max(denominator, 0.001);
 
 		vec3 kS = F;
-		vec3 kD = 1.0 - kS;
+		vec3 kD = vec3(1.0) - kS;
 		kD *= 1.0 - metallic;
             
         //sum radiations
@@ -111,7 +187,7 @@ void main()
     } 
 
     vec3 ambient = vec3(0.03) * albedo * ssao;
-    vec3 color   = ambient + Lo / light_num;
+    vec3 color   = ambient + Lo;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));

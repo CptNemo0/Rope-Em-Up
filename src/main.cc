@@ -173,10 +173,12 @@ int main()
     const float kFar = 1000.0f;
     float kpitch = -90.0f;
     float kyaw = 90.0f;
-#pragma endregion CameraSettings
+#pragma endregion Camera Settings
 
 
     srand(static_cast <unsigned> (time(0)));
+    ///// AI SETTINGS
+#pragma region enemy vehicle settitngs
 
     Vehicle enemy_vehicle_template;
 
@@ -215,6 +217,8 @@ int main()
     enemy_ai_init.attack_damage = 1.0f;
     enemy_ai_init.attack_range = 2.5f;
     enemy_ai_init.sense_range = 7.0f;
+
+#pragma endregion enemy vehicle settings
 
     GLFWwindow* window = nullptr;
     GLFWmonitor* monitor = nullptr;
@@ -286,7 +290,7 @@ int main()
     auto projection_matrix = glm::perspective(glm::radians((*activeCamera)->get_fov()), (*activeCamera)->get_aspect_ratio(), (*activeCamera)->get_near(), (*activeCamera)->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
     
-    
+#pragma region Shaders
     //auto shader = make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
     auto HUDshader = make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
     auto HUDTextShader = make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
@@ -301,7 +305,9 @@ int main()
     auto BasicDefferedLightShader = make_shared<Shader>(kLBufferVertexShaderPath, kBasicDefferedLightShaderPath);
     auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
     auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
+#pragma endregion Shaders
 
+    auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
     auto HUD_texture = make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = make_shared<tmp::Texture>(kHUDTexturePath2);
     auto Smoke_texture = make_shared<tmp::Texture>(kTestSmokeTexturePath);
@@ -314,7 +320,6 @@ int main()
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
-    auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
 
     PointLight point_light;
     point_light.intensity = 200.0f;
@@ -900,12 +905,13 @@ int main()
         LBufferPassShader->SetVec3("camera_position", (*activeCamera)->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
+        glm::vec3 lightcolor = glm::vec3(140.0f, 140.0f, 90.0f) * 2.0f;
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
         LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
             LBufferPassShader->SetVec3("light_positions[" + std::to_string(i) + "]", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
-            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", glm::vec3(140.0f, 140.0f, 90.0f) * 2.0f);
+            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", lightcolor);
         }
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
@@ -969,36 +975,36 @@ int main()
         ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::End();
 
-ImGui::Begin("Camera");
-    //chose the camera
-    const char* items[] = { "Isometric", "Top Down", "Debugging" };
-    static int selectedItem = 0;
-    ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
+        ImGui::Begin("Camera");
+        //chose the camera
+        const char* items[] = { "Isometric", "Top Down", "Debugging" };
+        static int selectedItem = 0;
+        ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
 
-    switch (selectedItem)
-    {
-    case 0:
-        *activeCamera = isometricCameraComponent->camera_;
-        break;
-    case 1:
-        *activeCamera = topDownCameraComponent->camera_;
-        break;
-    case 2:
-        *activeCamera = debugCamera;
-        break;
-    }
+            switch (selectedItem)
+            {
+            case 0:
+                *activeCamera = isometricCameraComponent->camera_;
+                break;
+            case 1:
+                *activeCamera = topDownCameraComponent->camera_;
+                break;
+            case 2:
+                *activeCamera = debugCamera;
+                break;
+            }
 
-    ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
-    ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
-    ImGui::SliderFloat("Height", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
-    ImGui::SliderFloat("Distance", &isometricCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
+        ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
+        ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
+        ImGui::SliderFloat("Height", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
+        ImGui::SliderFloat("Distance", &isometricCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
     
-    /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
-    ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
+        /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
+        ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
+        ImGui::End();
 
-
-
-ImGui::End();
+        ImGui::Begin("Lights");
+            ImGui::ColorEdit3("Light Color", (float*)&lightcolor);
 
         ImGui::Begin("Generation");
         ImGui::SliderFloat("Angle", &rlgs.angle, 0.0f, 1.0f, "%0.2f");
