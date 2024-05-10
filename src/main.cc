@@ -45,6 +45,7 @@
 #include "headers/audio/AudioManager.h"
 #include "headers/audio/Sounds.h"
 #include "headers/components/AudioSource.h"
+#include "headers/CameraManager.h"
 
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -172,9 +173,6 @@ int main()
     const float kFar = 1000.0f;
     float kpitch = -90.0f;
     float kyaw = 90.0f;
-    int chosen_camera = 0;
-    std::vector<llr::Camera> cameras;
-
 #pragma endregion CameraSettings
 
 
@@ -261,6 +259,16 @@ int main()
     camera->set_pitch(-89.0f);
     camera->set_yaw(-89.0f);
 
+    auto topCamera = make_shared<llr::Camera>();
+    topCamera->set_fov(kFov);
+    topCamera->set_near(kNear);
+    topCamera->set_far(kFar);
+    topCamera->set_aspect_ratio(((float)mode->width / (float)mode->height));
+    topCamera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
+    topCamera->set_pitch(-90.0f);
+    topCamera->set_yaw(-90.0f);
+
+
     auto debugCamera = make_shared<llr::Camera>();
     debugCamera->set_fov(kFov);
     debugCamera->set_near(kNear);
@@ -270,12 +278,12 @@ int main()
     debugCamera->set_pitch(-90.0f);
     debugCamera->set_yaw(-90.0f);
 
-    cameras.push_back(*camera);
-    cameras.push_back(*debugCamera);
+    s_ptr<llr::Camera>* activeCamera = &camera;
+
 #pragma endregion CamerasConfiguration
 
     
-    auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
+    auto projection_matrix = glm::perspective(glm::radians((*activeCamera)->get_fov()), (*activeCamera)->get_aspect_ratio(), (*activeCamera)->get_near(), (*activeCamera)->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
     
     
@@ -302,7 +310,7 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::MEDIUM_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
@@ -458,12 +466,7 @@ int main()
     floor_4->transform_->set_position(glm::vec3(-1.5f * generation::kModuleSize, 0.0f, -8.0f));
     floor_4->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
     floor_4->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-    
-    
-    ////test
-    auto test = GameObject::Create(scene_root);
-    test->transform_->set_position(glm::vec3(-3.0f, 2.0f, -3.0f));
-    test->AddComponent(make_shared<components::MeshRenderer>(test_model, PBRShader));*/
+*/
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
@@ -528,11 +531,16 @@ int main()
 
     //ai::EnemyAIManager::SetPlayers(player_1, player_2);
     ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
-    auto gameplayCamera = GameObject::Create(scene_root);
-    gameplayCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    auto isometricCamera = GameObject::Create(scene_root);
+    isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    isometricCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
 
-    gameplayCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
-    auto gameplayCameraComponent = gameplayCamera->GetComponent<components::GameplayCameraComponent>();
+    auto topDownCamera = GameObject::Create(scene_root);
+    topDownCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    topDownCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, topCamera));
+
+    auto isometricCameraComponent = isometricCamera->GetComponent<components::GameplayCameraComponent>();
+    auto topDownCameraComponent = topDownCamera->GetComponent<components::GameplayCameraComponent>();
 
 
     auto HUD_root = GameObject::Create();
@@ -566,7 +574,7 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, gameplayCameraComponent->camera_));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, isometricCameraComponent->camera_));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
@@ -612,7 +620,7 @@ int main()
     SSAOShader->SetFloat("bias", 0.0);
     ssao_buffer.SetKernel(SSAOShader);
 
-    cubemap->LoadHDRimg(window, gameplayCameraComponent->camera_);
+    cubemap->LoadHDRimg(window, isometricCameraComponent->camera_);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     int scrWidth, scrHeight;
@@ -638,10 +646,18 @@ int main()
 
     }, nullptr, true);
 
-    camera->pitch_ = -90.0f;
-    camera->yaw_ = -90.0f;
-    gameplayCameraComponent->height_ = 25.0f;
-    gameplayCameraComponent->distance_ = 0.0f;
+    //////////////////////////
+    // SETUP CAMERA MANAGER
+    //////////////////////////
+
+    //llr::CameraManager::debuggingCamera_ = debugCamera;
+    camera->pitch_ = -45.0f;
+    camera->yaw_ = 55.0f;
+
+    isometricCameraComponent->height_ = 17.0f;
+    isometricCameraComponent->distance_ = 21.0f;
+
+    auto CameraManager = make_shared<llr::CameraManager>();
 
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -684,7 +700,8 @@ int main()
         steady_clock::time_point end = steady_clock::now();
 
         utility::DebugCameraMovement(window, debugCamera, delta_time);
-        gameplayCameraComponent->Update();
+        isometricCameraComponent->Update();
+        topDownCameraComponent->Update();
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
 
@@ -853,7 +870,7 @@ int main()
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
-        GBufferPassShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
+        GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
 
         scene_root->PropagateUpdate();
@@ -880,7 +897,7 @@ int main()
         glActiveTexture(GL_TEXTURE4);
         LBufferPassShader->SetInt("ssao_texture", 4);
         glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
-        LBufferPassShader->SetVec3("camera_position", camera->get_position());
+        LBufferPassShader->SetVec3("camera_position", (*activeCamera)->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
@@ -903,7 +920,7 @@ int main()
         //////////////////////////////////
         
         BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
+        BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         
         cubemap->RenderCube();
 
@@ -911,7 +928,7 @@ int main()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         ParticleShader->Use();
-        ParticleShader->SetMatrix4("view_matrix", gameplayCameraComponent->camera_->GetViewMatrix());
+        ParticleShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
         
@@ -953,13 +970,31 @@ int main()
         ImGui::End();
 
 ImGui::Begin("Camera");
+    //chose the camera
+    const char* items[] = { "Isometric", "Top Down", "Debugging" };
+    static int selectedItem = 0;
+    ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
+
+    switch (selectedItem)
+    {
+    case 0:
+        *activeCamera = isometricCameraComponent->camera_;
+        break;
+    case 1:
+        *activeCamera = topDownCameraComponent->camera_;
+        break;
+    case 2:
+        *activeCamera = debugCamera;
+        break;
+    }
+
     ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
     ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
-    ImGui::SliderFloat("Height", &gameplayCameraComponent->height_, 1.0f, 100.0f, "%.2f");
-    ImGui::SliderFloat("Distance", &gameplayCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
+    ImGui::SliderFloat("Height", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
+    ImGui::SliderFloat("Distance", &isometricCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
     
-    ImGui::SliderFloat("Yaw Angle", &gameplayCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
-    ImGui::SliderFloat("Pitch Angle", &gameplayCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");
+    /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
+    ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
 
 
 

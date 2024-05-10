@@ -67,6 +67,7 @@ void components::GameplayCameraComponent::Update()
 	camera_->set_position(transfrom_->get_position());
 
 	camera_->UpdateDirectionVectors();
+	gameObject_.lock()->transform_ = this->transfrom_;
 
 //// UNCOMMENT THIS TO CHANGE POSITION BY PITCH AND YAW OF CAMERA
 	/*float pitch = glm::degrees(asin(directionToMidpoint.y));
