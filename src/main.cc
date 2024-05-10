@@ -574,7 +574,7 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, isometricCameraComponent->camera_));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader,*activeCamera));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
@@ -620,7 +620,7 @@ int main()
     SSAOShader->SetFloat("bias", 0.0);
     ssao_buffer.SetKernel(SSAOShader);
 
-    cubemap->LoadHDRimg(window, isometricCameraComponent->camera_);
+    cubemap->LoadHDRimg(window, *activeCamera);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     int scrWidth, scrHeight;
