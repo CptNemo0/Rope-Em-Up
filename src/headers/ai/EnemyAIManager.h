@@ -3,7 +3,6 @@
 
 #include <memory>
 
-#include "State.h"
 #include "../GameObject.h"
 #include "../physics/PBD.h"
 #include "EnemyState.h"
