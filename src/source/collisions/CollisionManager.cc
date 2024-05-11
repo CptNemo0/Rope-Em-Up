@@ -99,47 +99,6 @@ void collisions::CollisionManager::PredictColliders()
     }
 }
 
-void collisions::CollisionManager::CollisionCheck(std::vector<physics::Contact>& contacts)
-{
-    static float time = 0;
-    static int idx = 0;
-
-    contacts.clear();
-
-    for (int i = 0; i < colliders_.size() - 1; i++)
-    {
-        for (int j = i + 1; j < colliders_.size(); j++)
-        {
-            s_ptr<components::Collider> a = colliders_[i];
-            s_ptr<components::Collider> b = colliders_[j];
-
-            bool layer_check = LayerCheck(a->layer_, b->layer_);
-            
-            if (layer_check)
-            {
-                bool are_colliding = AABBCollisionCheck(a->bp_collider_, b->bp_collider_);
-                if (are_colliding)
-                {
-                    are_colliding = ConvexHullCheckFaster(a->np_collider_, b->np_collider_);
-                    if (are_colliding)
-                    {
-                        Separation(a, b, 0.5f, 0.5f);
-                        
-                        auto particle_a = a->gameObject_.lock()->GetComponent<components::Particle>();
-                        auto particle_b = b->gameObject_.lock()->GetComponent<components::Particle>();
-
-                        if (particle_a != nullptr && particle_b != nullptr)
-                        {
-                            physics::Contact contact(particle_a, particle_b);
-                            contacts.push_back(contact);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& contacts)
 {
     static float time = 0;

@@ -26,9 +26,7 @@
 #include "headers/GameObject.h"
 #include "headers/Model.h"
 #include "headers/components/MeshRenderer.h"
-#include "headers/physics/Physics.h"
 #include "headers/physics/PBD.h"
-#include "headers/physics/Rope.h"
 #include "headers/Postprocessing.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
@@ -244,7 +242,6 @@ int main()
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
 
-    physics::PhysicsManager::Initialize();
     pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
@@ -418,55 +415,6 @@ int main()
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
-
-    /*auto gate_1 = GameObject::Create(scene_root);
-    gate_1->AddComponent(make_shared<components::MeshRenderer>(gate_model, GBufferPassShader));
-
-    auto gate_2 = GameObject::Create(scene_root);
-    gate_2->AddComponent(make_shared<components::MeshRenderer>(gate_model, GBufferPassShader));
-
-    auto wall_up_1 = GameObject::Create(scene_root);
-    wall_up_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, 0.0f));
-    wall_up_1->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-    wall_up_1->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
-    wall_up_1->transform_->AddChild(gate_1->transform_);
-
-    auto wall_up_2 = GameObject::Create(scene_root);
-    wall_up_2->transform_->set_position(glm::vec3(-8.0f - generation::kModuleSize, 0.0f, 0.0f));
-    wall_up_2->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-    wall_up_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
-    
-    auto wall_right_1 = GameObject::Create(scene_root);
-    wall_right_1->transform_->set_position(glm::vec3(0.0f, 0.0f, -8.0f));
-    wall_right_1->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-    wall_right_1->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
-    wall_right_1->transform_->AddChild(gate_2->transform_);
-
-    auto wall_right_2 = GameObject::Create(scene_root);
-    wall_right_2->transform_->set_position(glm::vec3(0, 0.0f, -8.0f - generation::kModuleSize));
-    wall_right_2->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-    wall_right_2->AddComponent(make_shared<components::MeshRenderer>(module_2_model, GBufferPassShader));
-
-    auto floor_1 = GameObject::Create(scene_root);
-    floor_1->transform_->set_position(glm::vec3(-8.0f, 0.0f, -8.0f));
-    floor_1->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
-    floor_1->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-
-    auto floor_2 = GameObject::Create(scene_root);
-    floor_2->transform_->set_position(glm::vec3(-8.0f, 0.0f, -1.5f * generation::kModuleSize));
-    floor_2->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
-    floor_2->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-
-    auto floor_3 = GameObject::Create(scene_root);
-    floor_3->transform_->set_position(glm::vec3(-1.5f * generation::kModuleSize, 0.0f, -1.5f * generation::kModuleSize));
-    floor_3->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
-    floor_3->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-
-    auto floor_4 = GameObject::Create(scene_root);
-    floor_4->transform_->set_position(glm::vec3(-1.5f * generation::kModuleSize, 0.0f, -8.0f));
-    floor_4->transform_->set_scale(glm::vec3(1.0f, 0.0f, 1.0f));
-    floor_4->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-*/
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
@@ -851,14 +799,9 @@ int main()
 #pragma endregion
 
 #pragma region Collisions and Physics
-        
-        //physics::LogVec3(player_1->transform_->get_position());
-        //physics::LogVec3(player_2->transform_->get_position());
+
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
-
-        //physics::LogVec3(player_1->transform_->get_position());
-        //physics::LogVec3(player_2->transform_->get_position());
 
         //FixOrientation(enemy_1);
         FixOrientation(player_1);
