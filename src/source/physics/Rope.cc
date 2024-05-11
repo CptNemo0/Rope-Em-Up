@@ -13,23 +13,13 @@ Rope::Rope(glm::vec3 start, glm::vec3 end, float segment_mass, float segment_dra
 	CreateSegments(start, end, scene_root, model, shader);
 }
 
-void Rope::HelperConstrainer(std::shared_ptr<components::PBDParticle> p1, std::shared_ptr<components::PBDParticle> p2)
-{
-	pbd::RopeConstraint* constraint = pbd::PBDManager::i_->CreateRopeConstraint(p1, p2, kDistance + 0.001f);
-	constraints_.push_back(constraint);
-}
-
-
-
 void Rope::CreateSegments(glm::vec3 start, glm::vec3 end, std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader)
 {
 	float distance = glm::distance(start, end);
 	glm::vec3 player_dir = glm::normalize(end - start);
 
-
 	int i = 0;
 	
-
 	while (distance > kDistance)
 	{
 		auto rope_segment = GameObject::Create(scene_root);
@@ -43,7 +33,6 @@ void Rope::CreateSegments(glm::vec3 start, glm::vec3 end, std::shared_ptr<GameOb
 		{
 			auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(rope_segments_.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), kDistance + 0.001f);
 			constraints_.push_back(constraint);
-			//HelperConstrainer(rope_segments_.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>());
 		}
 
 		rope_segments_.push_back(rope_segment);
@@ -145,21 +134,24 @@ void Rope::RemoveSegment()
 {
 	int n = constraints_.size();
 	
-	auto plast = constraints_[n - 2];
-	auto last = constraints_[n - 1];
+	if (n > 3)
+	{
+		auto plast = constraints_[n - 2];
+		auto last = constraints_[n - 1];
 
-	auto plast_particle = plast->p1_;
-	auto last_particle = plast->p2_;
-	auto player_particle = last->p2_;
+		auto plast_particle = plast->p1_;
+		auto last_particle = plast->p2_;
+		auto player_particle = last->p2_;
 
-	plast->p2_ = player_particle;
+		plast->p2_ = player_particle;
 
-	auto last_particle_go = last_particle->gameObject_.lock();
+		auto last_particle_go = last_particle->gameObject_.lock();
 
-	last_particle_go->Destroy();
+		last_particle_go->Destroy();
 
-	constraints_.erase(--constraints_.end());
-	rope_segments_.erase(--rope_segments_.end());
+		constraints_.erase(--constraints_.end());
+		rope_segments_.erase(--rope_segments_.end());
+	}
 }
 
 Rope::~Rope()
