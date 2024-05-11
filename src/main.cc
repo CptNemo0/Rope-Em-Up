@@ -987,6 +987,12 @@ ImGui::End();
         }
         ImGui::End();
 
+        ImGui::Begin("Texture Window");
+        ImVec2 textureSize(160 * 3, 90 * 3); // Adjust as per your texture size
+        
+        ImGui::Image((void*)(intptr_t)ssao_buffer.ssao_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::End();
+
         ImGui::Begin("Room Generation");
         ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
         ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
