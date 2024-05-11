@@ -45,6 +45,7 @@ public:
 	void ApplyDrag();
 
 	void AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);
+	void RemoveSegment();
 
 	~Rope();
 };

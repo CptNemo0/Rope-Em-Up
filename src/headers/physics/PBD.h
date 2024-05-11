@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <deque>
 
 #include "glm/glm.hpp"
 
@@ -152,7 +153,7 @@ namespace pbd
 
 		std::vector<s_ptr<components::PBDParticle>> particles_;
 		std::vector<pbd::FGRRecord> generator_registry_;
-		std::vector<pbd::RopeConstraint> constraints_;
+		std::deque<pbd::RopeConstraint> constraints_;
 		std::vector<pbd::Contact> contacts_;
 
 		pbd::WallConstraint walls_;

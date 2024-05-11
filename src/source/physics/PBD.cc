@@ -239,7 +239,7 @@ pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coef
 {
 	particles_ = std::vector<s_ptr<components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
-	constraints_ = std::vector<pbd::RopeConstraint>();
+	constraints_ = std::deque<pbd::RopeConstraint>();
 	contacts_ = std::vector<pbd::Contact>();
 	solver_iterations_ = it;
 	coeffiecent_of_restitution_ = coeffiecent_of_restitution;
@@ -352,7 +352,7 @@ pbd::RopeConstraint* pbd::PBDManager::CreateRopeConstraint(s_ptr<components::PBD
 {
 	RopeConstraint constraint = RopeConstraint(p1, p2, ml);
 	constraints_.push_back(constraint);
-	return &constraints_.back();
+	return &(constraints_[constraints_.size() - 1]);
 }
 
 void pbd::PBDManager::ClearContacts()

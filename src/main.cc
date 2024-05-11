@@ -1026,6 +1026,10 @@ ImGui::End();
         {
             rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
         }
+        if (ImGui::Button("Remove Segment"))
+        {
+            rope.RemoveSegment();
+        }
 
         ImGui::End();
         ImGui::Render();
