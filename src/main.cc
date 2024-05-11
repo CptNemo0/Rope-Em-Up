@@ -27,6 +27,7 @@
 #include "headers/Model.h"
 #include "headers/components/MeshRenderer.h"
 #include "headers/physics/PBD.h"
+#include "headers/physics/Rope.h"
 #include "headers/Postprocessing.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
@@ -424,39 +425,24 @@ int main()
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->TeleportToPosition(glm::vec3(-1.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_2->transform_->TeleportToPosition(glm::vec3(-0.75 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
-    std::vector<s_ptr<GameObject>> rope_segments;
-    int rope_lenght = 40;
-    float player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
-    glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
-    float step = player_distance / (float)rope_lenght;
-    for (int i = 0; i < rope_lenght; i++)
-    {
-        auto rope_segment = GameObject::Create(scene_root);
-        rope_segment->transform_->set_scale(glm::vec3(1.3f, 1.3f, 1.3f));
-        rope_segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
-        rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
-        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
-
-        if (i == 0)
-        {
-            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), step + 0.01f);
-        }
-        else
-        {
-            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), step + 0.01f);
-        }
-
-        rope_segments.push_back(rope_segment);
-    }
-
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), step + 0.01f);
+    Rope rope = Rope
+    (
+        player_1->transform_->get_position(),
+        player_2->transform_->get_position(),
+        0.25f,
+        0.98f,
+        scene_root,
+        test_ball_model,
+        GBufferPassShader
+    );
+    rope.AssignPlayerBegin(player_1);
+    rope.AssignPlayerEnd(player_2);
 
 
     /*auto enemy_1 = GameObject::Create(scene_root);
@@ -639,7 +625,7 @@ int main()
 
         previous_time = current_time;
 
-        cout << collisions::CollisionManager::i_->colliders_.size() << endl;
+        //cout << collisions::CollisionManager::i_->colliders_.size() << endl;
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -786,13 +772,21 @@ int main()
             }
 
             //przesun line
-            player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
+            auto player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
             glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
-            float step = player_distance / (float)rope_lenght;
-            for (int i = 0; i < rope_segments.size(); i++)
+            float step = player_distance / (float)rope.Size();
+
+            int rope_displacement_iterator = 0;
+            for (auto& segment : rope.rope_segments_)
+            {
+                segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)rope_displacement_iterator);
+                rope_displacement_iterator++;
+            }
+
+            /*for (int i = 0; i < rope.Size(); i++)
             {
                 rope_segments[i]->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
-            }
+            }*/
         }
         
 
@@ -800,6 +794,9 @@ int main()
 
 #pragma region Collisions and Physics
 
+
+        FixOrientation(player_1);
+        FixOrientation(player_2);
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
 
@@ -1009,6 +1006,21 @@ ImGui::End();
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
         }
+        ImGui::End();
+
+        ImGui::Begin("Rope Manager");
+        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.1f, 0.999f, "%0.3f");
+        ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
+        if (ImGui::Button("Apply"))
+        {
+            rope.ApplyMass();
+            rope.ApplyDrag();
+        }
+        if (ImGui::Button("Add Segment"))
+        {
+            rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
+        }
+
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 

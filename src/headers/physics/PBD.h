@@ -193,7 +193,7 @@ namespace pbd
 
 		s_ptr<components::PBDParticle> CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform);
 		void CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pbd::BasicGenerator> g);
-		void CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
+		pbd::RopeConstraint* CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
 		void ClearContacts();
 		void ResolveContact(const Contact& contact);
 		void ResolveContacts();
