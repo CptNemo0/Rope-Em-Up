@@ -317,28 +317,21 @@ int main()
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
-
+#pragma region Lights
     PointLight point_light;
-    point_light.intensity = 200.0f;
-    point_light.position = glm::vec3(-3.0f, 3.0f, -3.0f);
-    point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
-    point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
-    point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
 
-    // lights
-    // ------
-    glm::vec3 light_Positions[] = {
-        glm::vec3(0.0f,  0.0f, 0.0f),
-        glm::vec3(10.0f,  10.0f, 10.0f),
-        glm::vec3(-10.0f, -10.0f, 10.0f),
-        glm::vec3(10.0f, -10.0f, 10.0f),
-    };
-    glm::vec3 light_Colors[] = {
-        glm::vec3(234.7, 213.1, 207.9),
-        glm::vec3(23.47, 21.31, 20.79),
-        glm::vec3(23.47, 21.31, 20.79),
-        glm::vec3(23.47, 21.31, 20.79)
-    };
+    glm::vec3 lightcolor = glm::vec3(140.0f, 140.0f, 90.0f) * 2.0f;
+    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    point_light.color = lightcolor;
+
+    DirectionalLight directional_light;
+    directional_light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+    directional_light.color = lightcolor;
+
+
+#pragma endregion Lights
+    
+
 
     auto test_model = make_shared<Model>(kTestPath);
 
@@ -848,14 +841,27 @@ int main()
         LBufferPassShader->SetVec3("camera_position", (*activeCamera)->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
-        glm::vec3 lightcolor = glm::vec3(140.0f, 140.0f, 90.0f) * 2.0f;
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
         LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
-            LBufferPassShader->SetVec3("light_positions[" + std::to_string(i) + "]", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
-            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", lightcolor);
+            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
+            if (i%2 !=0)
+            {
+                LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", lightcolor + glm::vec3(0.0f, 0.0f, 1000.0f));
+            }
+            else 
+                {
+				LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", lightcolor +  glm::vec3(1000.0f, 0.0f, 0.0f));
+			}
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", 1.0f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.07f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.8f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", 1.0f);
+
+
         }
+
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
         lbuffer.Draw();
@@ -941,6 +947,7 @@ int main()
         ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
         ImGui::SliderFloat("Height", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
         ImGui::SliderFloat("Distance", &isometricCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
+        ImGui::DragFloat3("Position", glm::value_ptr((*activeCamera)->position_), 0.1f, -100.0f, 100.0f, "%.2f");
     
         /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
         ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
@@ -948,6 +955,7 @@ int main()
 
         ImGui::Begin("Lights");
             ImGui::ColorEdit3("Light Color", (float*)&lightcolor);
+        ImGui::End();
 
         ImGui::Begin("Generation");
         ImGui::SliderFloat("Angle", &rlgs.angle, 0.0f, 1.0f, "%0.2f");
