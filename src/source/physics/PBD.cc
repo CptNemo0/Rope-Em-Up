@@ -86,25 +86,36 @@ void components::PBDParticle::Start()
 
 void components::PBDParticle::Update()
 {
+	if (transform_ == nullptr)
+	{
+		cout << "AAA" << endl;
+	}
 }
 
 components::PBDParticle::~PBDParticle()
 {
-	transform_ = nullptr;
 	cout << "DELETING PARTICLE!\n";
 }
 
 void components::PBDParticle::Destroy()
 {
-	auto &vec = pbd::PBDManager::i_->constraints_;
 	auto this_shared = shared_from_this();
+	auto &vec = pbd::PBDManager::i_->constraints_;
 	auto it = std::find_if(vec.begin(), vec.end(), [this_shared](const pbd::RopeConstraint &constraint)
 	{
 		return constraint.p1_ == this_shared || constraint.p2_ == this_shared;
+		
 	});
 	if (it != vec.end())
 	{
+		it->~RopeConstraint();
 		vec.erase(it);
+	}
+
+	auto& vec2 = pbd::PBDManager::i_->particles_;
+	if (auto it2 = find(vec2.begin(), vec2.end(), this_shared); it2 != vec2.end())
+	{
+		vec2.erase(it2);
 	}
 }
 
@@ -237,7 +248,7 @@ void pbd::WallConstraint::Enforce(s_ptr<components::PBDParticle> particle)
 
 pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall)
 {
-	particles_ = std::vector<s_ptr<components::PBDParticle>>();
+	particles_ = std::deque<s_ptr<components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
 	constraints_ = std::deque<pbd::RopeConstraint>();
 	contacts_ = std::vector<pbd::Contact>();

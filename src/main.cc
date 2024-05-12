@@ -193,8 +193,6 @@ int main()
     GLFWmonitor* monitor = nullptr;
     GLFWvidmode* mode = nullptr;
 
-
-
     if (int return_value = utility::InitGLFW(window, monitor, mode, kWindowTitle))
     {
         exit(return_value);
@@ -240,7 +238,6 @@ int main()
     topCamera->set_pitch(-90.0f);
     topCamera->set_yaw(-90.0f);
 
-
     auto debugCamera = make_shared<llr::Camera>();
     debugCamera->set_fov(kFov);
     debugCamera->set_near(kNear);
@@ -254,12 +251,9 @@ int main()
 
 #pragma endregion CamerasConfiguration
 
-    
     auto projection_matrix = glm::perspective(glm::radians((*activeCamera)->get_fov()), (*activeCamera)->get_aspect_ratio(), (*activeCamera)->get_near(), (*activeCamera)->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
-    
-    
-    //auto shader = make_shared<Shader>(kVertexShaderPath, kFragmentShaderPath);
+
     auto HUDshader = make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
     auto HUDTextShader = make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
     auto PBRShader = make_shared<Shader>(kPBRVertexShaderPath, kPBRFragmentShaderPath);
@@ -277,8 +271,6 @@ int main()
     auto HUD_texture = make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = make_shared<tmp::Texture>(kHUDTexturePath2);
     auto Smoke_texture = make_shared<tmp::Texture>(kTestSmokeTexturePath);
-
-    auto a = glm::mat3(1.0f) * glm::vec3(0.0f);
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
@@ -517,7 +509,7 @@ int main()
     SSAOShader->SetInt("width", mode->width);
     SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
     SSAOShader->SetFloat("radius", 0.2);
-    SSAOShader->SetFloat("bias", 0.0);
+    SSAOShader->SetFloat("bias", 0.02);
     ssao_buffer.SetKernel(SSAOShader);
 
     cubemap->LoadHDRimg(window, *activeCamera);
@@ -560,7 +552,7 @@ int main()
     auto CameraManager = make_shared<llr::CameraManager>();
 
     // wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     /////////////////////////////////////////////
     /////////////////////////////////////////////
@@ -591,7 +583,7 @@ int main()
 
         previous_time = current_time;
 
-        //cout << collisions::CollisionManager::i_->colliders_.size() << endl;
+        cout << pbd::PBDManager::i_->particles_.size() << endl;
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -764,6 +756,14 @@ int main()
         FixOrientation(player_1);
         FixOrientation(player_2);
 
+        for (auto& p : pbd::PBDManager::i_->particles_)
+        {
+            if (p == nullptr)
+            {
+                cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" <<  endl;
+            }
+        }
+
         Timer::UpdateTimer(fixed_update_timer, delta_time);
 
         //FixOrientation(enemy_1);
@@ -771,6 +771,7 @@ int main()
         FixOrientation(player_2);
 
 #pragma endregion
+
 #pragma region GO Update and Draw
 
         // Bind buffer - Use Shader - Draw 
@@ -841,6 +842,7 @@ int main()
         glDisable(GL_BLEND);
         
 #pragma endregion
+
 #pragma region Interface
 
         glDisable(GL_DEPTH_TEST);
@@ -980,6 +982,8 @@ ImGui::End();
         }
         ImGui::End();
 
+        static int rmd = 0;
+
         ImGui::Begin("Rope Manager");
         ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 1.5f, "%0.3f");
         ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
@@ -994,7 +998,14 @@ ImGui::End();
         }
         if (ImGui::Button("Remove Segment"))
         {
+            if (rmd == 4)
+            {
+                cout << "A" << endl;
+            }
             rope.RemoveSegment();
+            pbd::PBDManager::i_->particles_[0] = player_1->GetComponent<components::PBDParticle>();
+            pbd::PBDManager::i_->particles_[1] = player_2->GetComponent<components::PBDParticle>();
+            rmd++;
         }
 
         ImGui::End();

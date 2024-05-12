@@ -151,7 +151,7 @@ namespace pbd
         ~PBDManager() = default;
     public:
 
-		std::vector<s_ptr<components::PBDParticle>> particles_;
+		std::deque<s_ptr<components::PBDParticle>> particles_;
 		std::vector<pbd::FGRRecord> generator_registry_;
 		std::deque<pbd::RopeConstraint> constraints_;
 		std::vector<pbd::Contact> contacts_;

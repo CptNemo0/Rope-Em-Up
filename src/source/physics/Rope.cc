@@ -147,10 +147,14 @@ void Rope::RemoveSegment()
 
 		auto last_particle_go = last_particle->gameObject_.lock();
 
-		last_particle_go->Destroy();
+		//last_particle_go->Destroy();
+
+		last->~RopeConstraint();
 
 		constraints_.erase(--constraints_.end());
 		rope_segments_.erase(--rope_segments_.end());
+
+		
 	}
 }
 
