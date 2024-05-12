@@ -21,14 +21,16 @@ struct DirectionalLight : public Light
 
 struct PointLight : public Light
 {
-    glm::vec3 position;
 };
 
 struct SpotLight : public Light
 {
     float cut_off;
     float outerCutOff;
-    glm::vec3 position;
     glm::vec3 direction;
+
+    float constant;
+    float linear;
+    float quadratic;
 };
 #endif // LIGHTS_H

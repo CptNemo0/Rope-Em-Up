@@ -293,16 +293,31 @@ int main()
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
 #pragma region Lights
-    PointLight point_light;
+    PointLight point_light{};
 
-    glm::vec3 lightcolor = glm::vec3(140.0f, 140.0f, 90.0f) * 2.0f;
+    glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
+    float point_light_intensity = 1.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    point_light.color = lightcolor;
+    point_light.color = point_light_color;
 
-    DirectionalLight directional_light;
-    directional_light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
-    directional_light.color = lightcolor;
+    DirectionalLight directional_light{};
+    glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
+    glm::vec3 dir_light_direction = glm::vec3(-0.9f, 0.8, -0.9);
+    float dir_light_intensity = 0.3f;
+    directional_light.direction = dir_light_direction;
+    directional_light.color = dir_light_color;
 
+    SpotLight spot_light{};
+    glm::vec3 spot_light_color = glm::vec3(1.0f, 0.0f, 0.0f);
+    glm::vec3 spot_light_position = glm::vec3(-3.0f, 17.0f, -5.0f);
+    glm::vec3 spot_light_direction = glm::vec3(0.0f, 0.0f, 0.0f);
+    float spot_light_cut_off = glm::cos(glm::radians(12.5f));
+    float spot_light_outer_cut_off = glm::cos(glm::radians(17.5f));
+    float spot_light_intensity = 1.0f;
+	spot_light.position = spot_light_position;
+	spot_light.direction = spot_light_direction;
+	spot_light.color = spot_light_color;
+	spot_light.intensity = spot_light_intensity;
 
 #pragma endregion Lights
     
@@ -556,6 +571,8 @@ int main()
     isometricCameraComponent->distance_ = 21.0f;
 
     auto CameraManager = make_shared<llr::CameraManager>();
+    CameraManager->setIsometricCamera(isometricCameraComponent);
+    CameraManager->setTopDownCamera(topDownCameraComponent);
 
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -805,25 +822,33 @@ int main()
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
-        LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
+        //LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
             LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
-            if (i%2 !=0)
-            {
-                LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", lightcolor + glm::vec3(0.0f, 0.0f, 1000.0f));
-            }
-            else 
-                {
-				LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", lightcolor +  glm::vec3(1000.0f, 0.0f, 0.0f));
-			}
+            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", point_light_color);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", 1.0f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.07f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.8f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", 1.0f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.045f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 0.0075f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity /*+ 0.6f * std::sinf(glfwGetTime() * 0.75f)*/);
 
 
         }
+
+        LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
+        LBufferPassShader->SetVec3("dirLight[0].color", dir_light_color);
+        LBufferPassShader->SetFloat("dirLight[0].intensity", dir_light_intensity);
+        ;
+        LBufferPassShader->SetVec3("spotLight[0].position", spot_light_position);
+        LBufferPassShader->SetVec3("spotLight[0].direction", spot_light_direction);
+        LBufferPassShader->SetVec3("spotLight[0].color", spot_light_color);
+        LBufferPassShader->SetFloat("spotLight[0].cutOff", spot_light_cut_off);
+        LBufferPassShader->SetFloat("spotLight[0].outerCutOff", spot_light_outer_cut_off);
+        LBufferPassShader->SetFloat("spotLight[0].intensity", spot_light_intensity);
+        LBufferPassShader->SetFloat("spotLight[0].constant", 1.0f);
+        LBufferPassShader->SetFloat("spotLight[0].linear", 0.045f);
+        LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.0075f);
+
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
@@ -917,7 +942,23 @@ int main()
         ImGui::End();
 
         ImGui::Begin("Lights");
-            ImGui::ColorEdit3("Light Color", (float*)&lightcolor);
+        ImGui::LabelText("Point Light", "Point Light");
+        ImGui::ColorEdit3("Point L Color", (float*)&point_light_color);
+        ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 20.0f);
+
+        ImGui::LabelText("Directional Light", "Directional Light");
+        ImGui::ColorEdit3("Dir L Color", (float*)&dir_light_color);
+        ImGui::DragFloat("Dir Light Intensity", &dir_light_intensity, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat3(" Dir Light Direction", glm::value_ptr(dir_light_direction), 0.05f, -1.0f, 1.0f);
+
+        ImGui::LabelText("Spot Light", "Spot Light");
+        ImGui::ColorEdit3("Spot L Color", (float*)&spot_light_color);
+        ImGui::DragFloat("Spot L Intensity", &spot_light_intensity, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat3("Spot L Position", glm::value_ptr(spot_light_position), 0.05f, -100.0f, 100.0f);
+        ImGui::DragFloat3("Spot L Direction", glm::value_ptr(spot_light_direction), 0.05f, -1.0f, 1.0f);
+        ImGui::DragFloat("Spot L Cut Off", &spot_light_cut_off, 0.01f, 0.0f, 50.0f);
+        ImGui::DragFloat("Spot L Outer Cut Off", &spot_light_outer_cut_off, 0.01f, 0.0f, 50.0f);
+
         ImGui::End();
 
         ImGui::Begin("Generation");

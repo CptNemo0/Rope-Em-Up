@@ -15,7 +15,6 @@ uniform vec3 light_positions[MAX_LIGHTS];
 uniform vec3 light_colors[MAX_LIGHTS];
 
 
-
 in vec2 if_uv;
 
 uniform samplerCube irradianceMap;
@@ -47,11 +46,16 @@ struct SpotLight {
     float cutOff;
     float outerCutOff;
 
+    float constant;
+    float linear;
+    float quadratic;
+
     vec3 color;
 };
 
 uniform PointLight pointLight[MAX_LIGHTS];
-uniform DirLight dirLight[MAX_LIGHTS];
+uniform DirLight dirLight[1];
+uniform SpotLight spotLight[1];
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
@@ -135,12 +139,43 @@ vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float
 
     vec3 kS = F;
 	vec3 kD = vec3(1.0) - kS;
-	kD *= 1.0 - metallic;
+	kD *= vec3(1.0) - metallic;
         
     //sum radiations
 	float NdotL = max(dot(N, L), 0.0);
 	return (kD * albedo / PI + specular) * radiance * NdotL; 
 }
+
+
+vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
+	vec3 L = normalize (light.position - World_position);
+	vec3 H = normalize(V + L);
+	float distance = length(light.position - World_position);
+	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+    float theta = dot(L, normalize(-light.direction));
+	float epsilon = light.cutOff - light.outerCutOff;
+	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+	vec3 radiance = light.color * attenuation  * light.intensity * intensity;
+// Cook-Torrance BRDF
+	float NDF = DistributionGGX(N, H, roughness);
+	float G = GeometrySmith(N, V, L, roughness);
+	vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0); 
+	
+	vec3 numerator = NDF * G * F;
+	float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+	vec3 specular = numerator / max(denominator, 0.001);
+
+	vec3 kS = F;
+	vec3 kD = vec3(1.0) - kS;
+	kD *= vec3(1.0) - metallic;
+		
+	//sum radiations
+	float NdotL = max(dot(N, L), 0.0);\
+	return (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
 
 void main()
 {
@@ -194,7 +229,8 @@ void main()
 		Lo += CalcPointLight(pointLight[i], World_position, V, N, roughness, metallic, albedo, F0);
     }
 
-        //Lo += CalcDirLight(DirLight(2.0, vec3(0.8, -0.6, 0.6), vec3(0.0, 0.0, 0.0), mat4(1.0), vec3(7.0f, 6.0f, 7.0f)), V, N, roughness, metallic, albedo, F0);
+    Lo += CalcDirLight(dirLight[0], V, N, roughness, metallic, albedo, F0);
+    Lo += CalcSpotLight(spotLight[0], World_position, V, N, roughness, metallic, albedo, F0);
     vec3 ambient = vec3(0.03) * albedo ;
     vec3 color   = ambient + Lo;
 
