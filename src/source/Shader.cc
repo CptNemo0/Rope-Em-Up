@@ -275,9 +275,9 @@ void Shader::SetLight(const string& name, Light value)
     string specular_colour_name = name + ".specular_colour";
 
     SetFloat(intensity_name, value.intensity);
-    SetVec3(ambient_colour_name, value.ambient_colour);
+    /*SetVec3(ambient_colour_name, value.ambient_colour);
     SetVec3(diffuse_colour_name, value.diffuse_colour);
-    SetVec3(specular_colour_name, value.specular_colour);
+    SetVec3(specular_colour_name, value.specular_colour);*/
 }
 
 void Shader::SetDirectionalLight(const string& name, DirectionalLight value)

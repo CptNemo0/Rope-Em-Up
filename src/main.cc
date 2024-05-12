@@ -179,15 +179,19 @@ int main()
     const float kFar = 1000.0f;
     float kpitch = -90.0f;
     float kyaw = 90.0f;
-#pragma endregion CameraSettings
+#pragma endregion Camera Settings
 
 
     srand(static_cast <unsigned> (time(0)));
+    ///// AI SETTINGS
+#pragma region enemy vehicle settitngs
 
     Vehicle enemy_vehicle_template;
     LoadVehicleStruct(kVehicleInitPath, enemy_vehicle_template);
     ai::EnemyAIManagerInitStruct enemy_ai_init;
     LoadEnemyAiManagerInitStruct(kEnemyAiInitPath, enemy_ai_init);
+
+#pragma endregion enemy vehicle settings
 
     GLFWwindow* window = nullptr;
     GLFWmonitor* monitor = nullptr;
@@ -267,7 +271,9 @@ int main()
     auto BasicDefferedLightShader = make_shared<Shader>(kLBufferVertexShaderPath, kBasicDefferedLightShaderPath);
     auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
     auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
+#pragma endregion Shaders
 
+    auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
     auto HUD_texture = make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = make_shared<tmp::Texture>(kHUDTexturePath2);
     auto Smoke_texture = make_shared<tmp::Texture>(kTestSmokeTexturePath);
@@ -278,29 +284,36 @@ int main()
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
-    auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
+#pragma region Lights
+    PointLight point_light{};
 
-    PointLight point_light;
-    point_light.intensity = 200.0f;
-    point_light.position = glm::vec3(-3.0f, 3.0f, -3.0f);
-    point_light.ambient_colour = glm::vec3(0.6f, 0.6f, 0.6f);
-    point_light.diffuse_colour = glm::vec3(0.5f, 0.7f, 0.5f);
-    point_light.specular_colour = glm::vec3(0.5f, 0.7f, 0.5f);
+    glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
+    float point_light_intensity = 1.0f;
+    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    point_light.color = point_light_color;
 
-    // lights
-    // ------
-    glm::vec3 light_Positions[] = {
-        glm::vec3(0.0f,  0.0f, 0.0f),
-        glm::vec3(10.0f,  10.0f, 10.0f),
-        glm::vec3(-10.0f, -10.0f, 10.0f),
-        glm::vec3(10.0f, -10.0f, 10.0f),
-    };
-    glm::vec3 light_Colors[] = {
-        glm::vec3(234.7, 213.1, 207.9),
-        glm::vec3(23.47, 21.31, 20.79),
-        glm::vec3(23.47, 21.31, 20.79),
-        glm::vec3(23.47, 21.31, 20.79)
-    };
+    DirectionalLight directional_light{};
+    glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
+    glm::vec3 dir_light_direction = glm::vec3(-0.9f, 0.8, -0.9);
+    float dir_light_intensity = 0.3f;
+    directional_light.direction = dir_light_direction;
+    directional_light.color = dir_light_color;
+
+    SpotLight spot_light{};
+    glm::vec3 spot_light_color = glm::vec3(1.0f, 0.0f, 0.0f);
+    glm::vec3 spot_light_position = glm::vec3(-3.0f, 17.0f, -5.0f);
+    glm::vec3 spot_light_direction = glm::vec3(0.0f, 0.0f, 0.0f);
+    float spot_light_cut_off = glm::cos(glm::radians(12.5f));
+    float spot_light_outer_cut_off = glm::cos(glm::radians(17.5f));
+    float spot_light_intensity = 1.0f;
+	spot_light.position = spot_light_position;
+	spot_light.direction = spot_light_direction;
+	spot_light.color = spot_light_color;
+	spot_light.intensity = spot_light_intensity;
+
+#pragma endregion Lights
+    
+
 
     auto test_model = make_shared<Model>(kTestPath);
 
@@ -550,6 +563,8 @@ int main()
     isometricCameraComponent->distance_ = 21.0f;
 
     auto CameraManager = make_shared<llr::CameraManager>();
+    CameraManager->setIsometricCamera(isometricCameraComponent);
+    CameraManager->setTopDownCamera(topDownCameraComponent);
 
     // wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -808,12 +823,34 @@ int main()
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
-        LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
+        //LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
-            LBufferPassShader->SetVec3("light_positions[" + std::to_string(i) + "]", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
-            LBufferPassShader->SetVec3("light_colors[" + std::to_string(i) + "]", glm::vec3(140.0f, 140.0f, 90.0f) * 2.0f);
+            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
+            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", point_light_color);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", 1.0f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.045f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 0.0075f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity /*+ 0.6f * std::sinf(glfwGetTime() * 0.75f)*/);
+
+
         }
+
+        LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
+        LBufferPassShader->SetVec3("dirLight[0].color", dir_light_color);
+        LBufferPassShader->SetFloat("dirLight[0].intensity", dir_light_intensity);
+        ;
+        LBufferPassShader->SetVec3("spotLight[0].position", spot_light_position);
+        LBufferPassShader->SetVec3("spotLight[0].direction", spot_light_direction);
+        LBufferPassShader->SetVec3("spotLight[0].color", spot_light_color);
+        LBufferPassShader->SetFloat("spotLight[0].cutOff", spot_light_cut_off);
+        LBufferPassShader->SetFloat("spotLight[0].outerCutOff", spot_light_outer_cut_off);
+        LBufferPassShader->SetFloat("spotLight[0].intensity", spot_light_intensity);
+        LBufferPassShader->SetFloat("spotLight[0].constant", 1.0f);
+        LBufferPassShader->SetFloat("spotLight[0].linear", 0.045f);
+        LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.0075f);
+
+
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
 
         lbuffer.Draw();
@@ -877,36 +914,54 @@ int main()
         ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::End();
 
-ImGui::Begin("Camera");
-    //chose the camera
-    const char* items[] = { "Isometric", "Top Down", "Debugging" };
-    static int selectedItem = 0;
-    ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
+        ImGui::Begin("Camera");
+        //chose the camera
+        const char* items[] = { "Isometric", "Top Down", "Debugging" };
+        static int selectedItem = 0;
+        ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
 
-    switch (selectedItem)
-    {
-    case 0:
-        *activeCamera = isometricCameraComponent->camera_;
-        break;
-    case 1:
-        *activeCamera = topDownCameraComponent->camera_;
-        break;
-    case 2:
-        *activeCamera = debugCamera;
-        break;
-    }
+            switch (selectedItem)
+            {
+            case 0:
+                *activeCamera = isometricCameraComponent->camera_;
+                break;
+            case 1:
+                *activeCamera = topDownCameraComponent->camera_;
+                break;
+            case 2:
+                *activeCamera = debugCamera;
+                break;
+            }
 
-    ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
-    ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
-    ImGui::SliderFloat("Height", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
-    ImGui::SliderFloat("Distance", &isometricCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
+        ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
+        ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
+        ImGui::SliderFloat("Height", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
+        ImGui::SliderFloat("Distance", &isometricCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
+        ImGui::DragFloat3("Position", glm::value_ptr((*activeCamera)->position_), 0.1f, -100.0f, 100.0f, "%.2f");
     
-    /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
-    ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
+        /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
+        ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
+        ImGui::End();
 
+        ImGui::Begin("Lights");
+        ImGui::LabelText("Point Light", "Point Light");
+        ImGui::ColorEdit3("Point L Color", (float*)&point_light_color);
+        ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 20.0f);
 
+        ImGui::LabelText("Directional Light", "Directional Light");
+        ImGui::ColorEdit3("Dir L Color", (float*)&dir_light_color);
+        ImGui::DragFloat("Dir Light Intensity", &dir_light_intensity, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat3(" Dir Light Direction", glm::value_ptr(dir_light_direction), 0.05f, -1.0f, 1.0f);
 
-ImGui::End();
+        ImGui::LabelText("Spot Light", "Spot Light");
+        ImGui::ColorEdit3("Spot L Color", (float*)&spot_light_color);
+        ImGui::DragFloat("Spot L Intensity", &spot_light_intensity, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat3("Spot L Position", glm::value_ptr(spot_light_position), 0.05f, -100.0f, 100.0f);
+        ImGui::DragFloat3("Spot L Direction", glm::value_ptr(spot_light_direction), 0.05f, -1.0f, 1.0f);
+        ImGui::DragFloat("Spot L Cut Off", &spot_light_cut_off, 0.01f, 0.0f, 50.0f);
+        ImGui::DragFloat("Spot L Outer Cut Off", &spot_light_outer_cut_off, 0.01f, 0.0f, 50.0f);
+
+        ImGui::End();
 
         ImGui::Begin("Generation");
         ImGui::SliderFloat("Angle", &rlgs.angle, 0.0f, 1.0f, "%0.2f");
