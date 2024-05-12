@@ -59,6 +59,8 @@
 #include "headers/GBuffer.h"
 #include "headers/SSAO.h"
 
+#include "headers/parsing/file_read.h"
+
 void FixOrientation(s_ptr<GameObject> go)
 {
     auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
@@ -159,6 +161,11 @@ int main()
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
     const string kBruhPath = "res/sounds/bruh.wav";
+
+    const string kEnemyAiInitPath = "res/config/EnemyAiInit.ini";
+    const string kVehicleInitPath = "res/config/VehicleInit.ini";
+    const string kRoomLayoutGenerationSettingsInitPath = "res/config/RoomLayoutGenerationSettingsInit.ini";
+
 #pragma endregion Resouces Path
     /////
     
@@ -178,42 +185,9 @@ int main()
     srand(static_cast <unsigned> (time(0)));
 
     Vehicle enemy_vehicle_template;
-
-    enemy_vehicle_template.rest_lenght = 4.0f;
-
-    enemy_vehicle_template.max_speed = 2000.0f;
-
-    enemy_vehicle_template.wander_target = glm::vec3(0.0f);
-    enemy_vehicle_template.wander_distance = 2.0f;
-    enemy_vehicle_template.wander_radius = 2.0f;
-    enemy_vehicle_template.wander_jitter = 0.5f;
-    enemy_vehicle_template.wander_weight = 1.0f;
-    enemy_vehicle_template.wander_speed_ = 1000.f;
-
-    enemy_vehicle_template.wall_avoidance_distance = 2.0f;
-    enemy_vehicle_template.wall_avoidance_weight = 3.0f;
-
-    enemy_vehicle_template.pursuit_distance = 0.5f;
-    enemy_vehicle_template.pursuit_weight = 1.0f;
-    enemy_vehicle_template.pursuit_speed_ = 1500.f;
-
-    enemy_vehicle_template.extrapolation_distance = 5.0f;
-    enemy_vehicle_template.extrapolation_weight = 1.0f;
-    enemy_vehicle_template.extrapolation_speed_ = 1600.f;
-
-    enemy_vehicle_template.evade_distance = 5.0f;
-    enemy_vehicle_template.evade_weight = 1.0f;
-    enemy_vehicle_template.evade_speed_ = 1700.f;
-
+    LoadVehicleStruct(kVehicleInitPath, enemy_vehicle_template);
     ai::EnemyAIManagerInitStruct enemy_ai_init;
-    enemy_ai_init.choked_tentacles = 10;
-    enemy_ai_init.multi_chokes = 0;
-    enemy_ai_init.choke_threshold = 5;
-    enemy_ai_init.multi_threshold = 5;
-    enemy_ai_init.wall_proximity_threshold = 1.0f;
-    enemy_ai_init.attack_damage = 1.0f;
-    enemy_ai_init.attack_range = 2.5f;
-    enemy_ai_init.sense_range = 7.0f;
+    LoadEnemyAiManagerInitStruct(kEnemyAiInitPath, enemy_ai_init);
 
     GLFWwindow* window = nullptr;
     GLFWmonitor* monitor = nullptr;
@@ -364,15 +338,7 @@ int main()
     auto scene_root = GameObject::Create();
 
     generation::RoomLayoutGenerationSettings rlgs;
-    rlgs.angle = 0.5f;
-    rlgs.span = 0.5f;
-    rlgs.branch_division_count = 4;
-    rlgs.branch_division_min_length = 2.0f;
-    rlgs.branch_division_max_length = 3.0f;
-    rlgs.sub_branch_count = 3;
-    rlgs.sub_branch_span = 0.2f;
-    rlgs.sub_branch_min_length = 3.0f;
-    rlgs.sub_branch_max_length = 4.0f;
+    LoadRoomLayoutGenerationSettingsInitStruct(kRoomLayoutGenerationSettingsInitPath, rlgs);
 
     generation::RoomLayoutGenerator rlg;
     std::deque<w_ptr<GameObject>> room_objects;
@@ -1015,7 +981,7 @@ ImGui::End();
         ImGui::End();
 
         ImGui::Begin("Rope Manager");
-        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.1f, 0.999f, "%0.3f");
+        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 1.5f, "%0.3f");
         ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
         if (ImGui::Button("Apply"))
         {
