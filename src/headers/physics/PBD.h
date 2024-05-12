@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <deque>
 
 #include "glm/glm.hpp"
 
@@ -152,7 +153,7 @@ namespace pbd
 
 		std::vector<s_ptr<components::PBDParticle>> particles_;
 		std::vector<pbd::FGRRecord> generator_registry_;
-		std::vector<pbd::RopeConstraint> constraints_;
+		std::deque<pbd::RopeConstraint> constraints_;
 		std::vector<pbd::Contact> contacts_;
 
 		pbd::WallConstraint walls_;
@@ -193,7 +194,7 @@ namespace pbd
 
 		s_ptr<components::PBDParticle> CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform);
 		void CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pbd::BasicGenerator> g);
-		void CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
+		pbd::RopeConstraint* CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
 		void ClearContacts();
 		void ResolveContact(const Contact& contact);
 		void ResolveContacts();

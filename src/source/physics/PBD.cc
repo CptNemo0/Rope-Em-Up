@@ -138,7 +138,11 @@ pbd::Contact::Contact(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDPa
 	contact_normal.x = tmp.x;
 	contact_normal.y = tmp.y;
 	contact_normal.z = tmp.z;
-	contact_normal = glm::normalize(contact_normal);
+	if (contact_normal.x + contact_normal.y + contact_normal.z != 0)
+	{
+		contact_normal = glm::normalize(contact_normal);
+	}
+	
 }
 
 pbd::Contact::~Contact()
@@ -235,7 +239,7 @@ pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coef
 {
 	particles_ = std::vector<s_ptr<components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
-	constraints_ = std::vector<pbd::RopeConstraint>();
+	constraints_ = std::deque<pbd::RopeConstraint>();
 	contacts_ = std::vector<pbd::Contact>();
 	solver_iterations_ = it;
 	coeffiecent_of_restitution_ = coeffiecent_of_restitution;
@@ -344,10 +348,11 @@ void pbd::PBDManager::CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pb
 	generator_registry_.push_back(fgrr);
 }
 
-void pbd::PBDManager::CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml)
+pbd::RopeConstraint* pbd::PBDManager::CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml)
 {
 	RopeConstraint constraint = RopeConstraint(p1, p2, ml);
 	constraints_.push_back(constraint);
+	return &(constraints_[constraints_.size() - 1]);
 }
 
 void pbd::PBDManager::ClearContacts()

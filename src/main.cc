@@ -27,6 +27,7 @@
 #include "headers/Model.h"
 #include "headers/components/MeshRenderer.h"
 #include "headers/physics/PBD.h"
+#include "headers/physics/Rope.h"
 #include "headers/Postprocessing.h"
 #include "headers/Shader.h"
 #include "headers/Texture.h"
@@ -57,6 +58,8 @@
 #include "headers/LBuffer.h"
 #include "headers/GBuffer.h"
 #include "headers/SSAO.h"
+
+#include "headers/parsing/file_read.h"
 
 void FixOrientation(s_ptr<GameObject> go)
 {
@@ -158,6 +161,11 @@ int main()
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
     const string kBruhPath = "res/sounds/bruh.wav";
+
+    const string kEnemyAiInitPath = "res/config/EnemyAiInit.ini";
+    const string kVehicleInitPath = "res/config/VehicleInit.ini";
+    const string kRoomLayoutGenerationSettingsInitPath = "res/config/RoomLayoutGenerationSettingsInit.ini";
+
 #pragma endregion Resouces Path
     /////
     
@@ -179,42 +187,9 @@ int main()
 #pragma region enemy vehicle settitngs
 
     Vehicle enemy_vehicle_template;
-
-    enemy_vehicle_template.rest_lenght = 4.0f;
-
-    enemy_vehicle_template.max_speed = 2000.0f;
-
-    enemy_vehicle_template.wander_target = glm::vec3(0.0f);
-    enemy_vehicle_template.wander_distance = 2.0f;
-    enemy_vehicle_template.wander_radius = 2.0f;
-    enemy_vehicle_template.wander_jitter = 0.5f;
-    enemy_vehicle_template.wander_weight = 1.0f;
-    enemy_vehicle_template.wander_speed_ = 1000.f;
-
-    enemy_vehicle_template.wall_avoidance_distance = 2.0f;
-    enemy_vehicle_template.wall_avoidance_weight = 3.0f;
-
-    enemy_vehicle_template.pursuit_distance = 0.5f;
-    enemy_vehicle_template.pursuit_weight = 1.0f;
-    enemy_vehicle_template.pursuit_speed_ = 1500.f;
-
-    enemy_vehicle_template.extrapolation_distance = 5.0f;
-    enemy_vehicle_template.extrapolation_weight = 1.0f;
-    enemy_vehicle_template.extrapolation_speed_ = 1600.f;
-
-    enemy_vehicle_template.evade_distance = 5.0f;
-    enemy_vehicle_template.evade_weight = 1.0f;
-    enemy_vehicle_template.evade_speed_ = 1700.f;
-
+    LoadVehicleStruct(kVehicleInitPath, enemy_vehicle_template);
     ai::EnemyAIManagerInitStruct enemy_ai_init;
-    enemy_ai_init.choked_tentacles = 10;
-    enemy_ai_init.multi_chokes = 0;
-    enemy_ai_init.choke_threshold = 5;
-    enemy_ai_init.multi_threshold = 5;
-    enemy_ai_init.wall_proximity_threshold = 1.0f;
-    enemy_ai_init.attack_damage = 1.0f;
-    enemy_ai_init.attack_range = 2.5f;
-    enemy_ai_init.sense_range = 7.0f;
+    LoadEnemyAiManagerInitStruct(kEnemyAiInitPath, enemy_ai_init);
 
 #pragma endregion enemy vehicle settings
 
@@ -361,15 +336,7 @@ int main()
     auto scene_root = GameObject::Create();
 
     generation::RoomLayoutGenerationSettings rlgs;
-    rlgs.angle = 0.5f;
-    rlgs.span = 0.5f;
-    rlgs.branch_division_count = 4;
-    rlgs.branch_division_min_length = 2.0f;
-    rlgs.branch_division_max_length = 3.0f;
-    rlgs.sub_branch_count = 3;
-    rlgs.sub_branch_span = 0.2f;
-    rlgs.sub_branch_min_length = 3.0f;
-    rlgs.sub_branch_max_length = 4.0f;
+    LoadRoomLayoutGenerationSettingsInitStruct(kRoomLayoutGenerationSettingsInitPath, rlgs);
 
     generation::RoomLayoutGenerator rlg;
     std::deque<w_ptr<GameObject>> room_objects;
@@ -422,39 +389,24 @@ int main()
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->TeleportToPosition(glm::vec3(-1.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_2->transform_->TeleportToPosition(glm::vec3(-0.75 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
-    std::vector<s_ptr<GameObject>> rope_segments;
-    int rope_lenght = 40;
-    float player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
-    glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
-    float step = player_distance / (float)rope_lenght;
-    for (int i = 0; i < rope_lenght; i++)
-    {
-        auto rope_segment = GameObject::Create(scene_root);
-        rope_segment->transform_->set_scale(glm::vec3(1.3f, 1.3f, 1.3f));
-        rope_segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
-        rope_segment->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-        rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, test_ball_model->meshes_[0], rope_segment->transform_));
-        rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25f, 0.99f, rope_segment->transform_));
-
-        if (i == 0)
-        {
-            pbd::PBDManager::i_->CreateRopeConstraint(player_1->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), step + 0.01f);
-        }
-        else
-        {
-            pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), step + 0.01f);
-        }
-
-        rope_segments.push_back(rope_segment);
-    }
-
-    pbd::PBDManager::i_->CreateRopeConstraint(rope_segments.back()->GetComponent<components::PBDParticle>(), player_2->GetComponent<components::PBDParticle>(), step + 0.01f);
+    Rope rope = Rope
+    (
+        player_1->transform_->get_position(),
+        player_2->transform_->get_position(),
+        0.25f,
+        0.98f,
+        scene_root,
+        test_ball_model,
+        GBufferPassShader
+    );
+    rope.AssignPlayerBegin(player_1);
+    rope.AssignPlayerEnd(player_2);
 
 
     /*auto enemy_1 = GameObject::Create(scene_root);
@@ -637,7 +589,7 @@ int main()
 
         previous_time = current_time;
 
-        cout << collisions::CollisionManager::i_->colliders_.size() << endl;
+        //cout << collisions::CollisionManager::i_->colliders_.size() << endl;
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -784,13 +736,21 @@ int main()
             }
 
             //przesun line
-            player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
+            auto player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
             glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
-            float step = player_distance / (float)rope_lenght;
-            for (int i = 0; i < rope_segments.size(); i++)
+            float step = player_distance / (float)rope.Size();
+
+            int rope_displacement_iterator = 0;
+            for (auto& segment : rope.rope_segments_)
+            {
+                segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)rope_displacement_iterator);
+                rope_displacement_iterator++;
+            }
+
+            /*for (int i = 0; i < rope.Size(); i++)
             {
                 rope_segments[i]->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
-            }
+            }*/
         }
         
 
@@ -798,6 +758,9 @@ int main()
 
 #pragma region Collisions and Physics
 
+
+        FixOrientation(player_1);
+        FixOrientation(player_2);
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
 
@@ -1004,6 +967,12 @@ int main()
         }
         ImGui::End();
 
+        ImGui::Begin("Texture Window");
+        ImVec2 textureSize(160 * 3, 90 * 3); // Adjust as per your texture size
+        
+        ImGui::Image((void*)(intptr_t)ssao_buffer.ssao_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::End();
+
         ImGui::Begin("Room Generation");
         ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
         ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
@@ -1023,6 +992,25 @@ int main()
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
         }
+        ImGui::End();
+
+        ImGui::Begin("Rope Manager");
+        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 1.5f, "%0.3f");
+        ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
+        if (ImGui::Button("Apply"))
+        {
+            rope.ApplyMass();
+            rope.ApplyDrag();
+        }
+        if (ImGui::Button("Add Segment"))
+        {
+            rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
+        }
+        if (ImGui::Button("Remove Segment"))
+        {
+            rope.RemoveSegment();
+        }
+
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
