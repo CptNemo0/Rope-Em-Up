@@ -118,7 +118,6 @@ void Rope::AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Mo
 	rope_segment->AddComponent(make_shared<components::MeshRenderer>(model, shader));
 	rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, model->meshes_[0], rope_segment->transform_));
 	rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(segment_mass_, segment_drag_, rope_segment->transform_));
-	rope_segment->PropagateStart();
 	rope_segments_.push_back(rope_segment);
 
 	auto new_particle = rope_segment->GetComponent<components::PBDParticle>();
@@ -147,14 +146,17 @@ void Rope::RemoveSegment()
 
 		auto last_particle_go = last_particle->gameObject_.lock();
 
-		//last_particle_go->Destroy();
+		// TODO:
+		// Fix particle assigning cus they're still connected to the player
+		// even after deleting a segment
+
+		// last_particle_go->Destroy();
+		// last_particle_go->RemoveComponent<components::MeshRenderer>();
 
 		last->~RopeConstraint();
 
 		constraints_.erase(--constraints_.end());
 		rope_segments_.erase(--rope_segments_.end());
-
-		
 	}
 }
 

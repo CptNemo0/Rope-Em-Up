@@ -357,7 +357,6 @@ int main()
         room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
         room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
         room_obj->transform_->set_scale(glm::vec3(3.0f));
-        room_obj->PropagateStart();
     }
 
     generation::RoomModels models;
@@ -447,7 +446,6 @@ int main()
     auto isometricCameraComponent = isometricCamera->GetComponent<components::GameplayCameraComponent>();
     auto topDownCameraComponent = topDownCamera->GetComponent<components::GameplayCameraComponent>();
 
-
     auto HUD_root = GameObject::Create();
 
     auto HUD_object = GameObject::Create(HUD_root);
@@ -491,11 +489,6 @@ int main()
 
     auto audio_test_obj = GameObject::Create(scene_root);
     audio_test_obj->AddComponent(make_shared<components::AudioSource>());
-
-    scene_root->PropagateStart();
-    HUD_root->PropagateStart();
-    HUDText_root->PropagateStart();
-    particle_root->PropagateStart();
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -607,8 +600,6 @@ int main()
         steady_clock::time_point end = steady_clock::now();
 
         utility::DebugCameraMovement(window, debugCamera, delta_time);
-        isometricCameraComponent->Update();
-        topDownCameraComponent->Update();
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
 
@@ -917,7 +908,7 @@ int main()
         ImGui::Begin("Camera");
         //chose the camera
         const char* items[] = { "Isometric", "Top Down", "Debugging" };
-        static int selectedItem = 0;
+        static int selectedItem = 1;
         ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
 
             switch (selectedItem)
@@ -989,7 +980,6 @@ int main()
                 room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
                 room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
                 room_obj->transform_->set_scale(glm::vec3(3.0f));
-                room_obj->PropagateStart();
             }
         }
         ImGui::SameLine();

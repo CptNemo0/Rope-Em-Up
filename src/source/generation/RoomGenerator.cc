@@ -436,7 +436,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
         wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
         room_parts.push_back(wall_up);
-        wall_up->PropagateStart();
     }
 
     for (int i = 0; i < room.height; i++)
@@ -446,7 +445,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
         wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
         room_parts.push_back(wall_left);
-        wall_left->PropagateStart();
     }
 
     for (int i = 0; i < room.width; i++)
@@ -457,7 +455,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
             floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
             floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
             room_parts.push_back(floor);
-            floor->PropagateStart();
         }
     }
 
@@ -470,8 +467,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
-        gate->PropagateStart();
-
     }
 
     //down
@@ -482,7 +477,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         gate->transform_->set_rotation(glm::vec3(0.0f, 0.0, 0.0f));
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
-        gate->PropagateStart();
     }
 
     //right
@@ -493,7 +487,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
-        gate->PropagateStart();
     }
 
     //left
@@ -504,7 +497,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
         room_parts.push_back(gate);
-        gate->PropagateStart();
     }
 
     // generate lamps
@@ -516,7 +508,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
         lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->lamps[0]->meshes_[0], lamp->transform_));
         room_parts.push_back(lamp);
-        lamp->PropagateStart();
     }
 
     //// generate clutter
@@ -528,6 +519,5 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
         //clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
         room_parts.push_back(clutter);
-        clutter->PropagateStart();
     }
 }

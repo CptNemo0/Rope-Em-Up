@@ -19,6 +19,7 @@ class GameObject : public std::enable_shared_from_this<GameObject>
 {
 private:
 	std::unordered_map<string, s_ptr<Component>> components_;
+	bool dirty_ = true;
 
 public:
 	GameObject();
@@ -30,14 +31,26 @@ public:
 
 	void Update();
 	void PropagateUpdate();
-	void PropagateStart();
+	void StartNewComponents();
 	void Destroy();
 
 	template <typename T>
 	void AddComponent(s_ptr<T> component)
 	{
+		dirty_ = true;
 		components_[typeid(T).name()] = component;
 		component->gameObject_ = shared_from_this();
+	}
+
+	template <typename T>
+	void RemoveComponent()
+	{
+		if (components_.find(typeid(T).name()) == components_.end())
+		{
+			return;
+		}
+		components_[typeid(T).name()]->Destroy();
+		components_.erase(typeid(T).name());
 	}
 
 	template <typename T>

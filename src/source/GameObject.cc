@@ -21,6 +21,11 @@ s_ptr<GameObject> GameObject::Create(s_ptr<GameObject> parent)
 
 void GameObject::Update()
 {
+	if (dirty_)
+	{
+		StartNewComponents();
+		dirty_ = false;
+	}
 	for (auto& component : components_)
 	{
 		component.second->Update();
@@ -36,15 +41,15 @@ void GameObject::PropagateUpdate()
 	}
 }
 
-void GameObject::PropagateStart()
+void GameObject::StartNewComponents()
 {
 	for (auto& component : components_)
 	{
-		component.second->Start();
-	}
-	for (auto& child : transform_->children_)
-	{
-		child->game_object_->PropagateStart();
+		if (component.second->dirty_)
+		{
+			component.second->Start();
+			component.second->dirty_ = false;
+		}
 	}
 }
 
