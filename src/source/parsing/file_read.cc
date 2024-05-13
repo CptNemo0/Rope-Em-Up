@@ -2,7 +2,7 @@
 
 void LoadEnemyAiManagerInitStruct(const string& path, ai::EnemyAIManagerInitStruct& target)
 {
-	mINI::INIFile file("../../" + path);
+	mINI::INIFile file(path);
 	mINI::INIStructure ini;
 
 	file.read(ini);
@@ -23,7 +23,7 @@ void LoadEnemyAiManagerInitStruct(const string& path, ai::EnemyAIManagerInitStru
 
 void LoadVehicleStruct(const string& path, Vehicle& target)
 {
-	mINI::INIFile file("../../" + path);
+	mINI::INIFile file(path);
 	mINI::INIStructure ini;
 
 	file.read(ini);
@@ -61,7 +61,7 @@ void LoadVehicleStruct(const string& path, Vehicle& target)
 
 void LoadRoomLayoutGenerationSettingsInitStruct(const string& path, generation::RoomLayoutGenerationSettings& target)
 {
-	mINI::INIFile file("../../" + path);
+	mINI::INIFile file(path);
 	mINI::INIStructure ini;
 
 	file.read(ini);
