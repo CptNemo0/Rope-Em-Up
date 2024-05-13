@@ -91,7 +91,7 @@ namespace pbd
 		void Generate();
 	};
 
-	class Constraint
+	class Constraint : public std::enable_shared_from_this<Constraint>
 	{
 	public:
 		float k_;
@@ -109,7 +109,7 @@ namespace pbd
 
 		RopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
 		RopeConstraint() = default;
-		~RopeConstraint() = default;
+		~RopeConstraint();
 		s_ptr<components::PBDParticle> p1_;
 		s_ptr<components::PBDParticle> p2_;
 		float max_distance_;
@@ -153,7 +153,7 @@ namespace pbd
 
 		std::deque<s_ptr<components::PBDParticle>> particles_;
 		std::vector<pbd::FGRRecord> generator_registry_;
-		std::deque<pbd::RopeConstraint> constraints_;
+		std::deque<s_ptr<pbd::RopeConstraint>> constraints_;
 		std::vector<pbd::Contact> contacts_;
 
 		pbd::WallConstraint walls_;
@@ -181,6 +181,13 @@ namespace pbd
 		void RemoveRecord(s_ptr<ForceGenerator> g);
 		void RemoveRecord(s_ptr<components::PBDParticle> p);
 
+		void RemoveConstraint(s_ptr<components::PBDParticle> p);
+		void RemoveConstraint(s_ptr<pbd::Constraint> c);
+
+		void RemoveConstraint(pbd::Constraint* c);
+
+		void RemoveParticle(s_ptr<components::PBDParticle> p);
+
 		void Integration(float t);
 		
 		void ProjectConstraints(float t);
@@ -194,7 +201,7 @@ namespace pbd
 
 		s_ptr<components::PBDParticle> CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform);
 		void CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pbd::BasicGenerator> g);
-		pbd::RopeConstraint* CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
+		s_ptr<pbd::RopeConstraint> CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
 		void ClearContacts();
 		void ResolveContact(const Contact& contact);
 		void ResolveContacts();

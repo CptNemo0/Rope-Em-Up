@@ -100,23 +100,9 @@ components::PBDParticle::~PBDParticle()
 void components::PBDParticle::Destroy()
 {
 	auto this_shared = shared_from_this();
-	auto &vec = pbd::PBDManager::i_->constraints_;
-	auto it = std::find_if(vec.begin(), vec.end(), [this_shared](const pbd::RopeConstraint &constraint)
-	{
-		return constraint.p1_ == this_shared || constraint.p2_ == this_shared;
-		
-	});
-	if (it != vec.end())
-	{
-		it->~RopeConstraint();
-		vec.erase(it);
-	}
-
-	auto& vec2 = pbd::PBDManager::i_->particles_;
-	if (auto it2 = find(vec2.begin(), vec2.end(), this_shared); it2 != vec2.end())
-	{
-		vec2.erase(it2);
-	}
+	pbd::PBDManager::i_->RemoveRecord(this_shared);
+	pbd::PBDManager::i_->RemoveParticle(this_shared);
+	pbd::PBDManager::i_->RemoveConstraint(this_shared);
 }
 
 void pbd::BasicGenerator::GenerateForce(s_ptr<components::PBDParticle> particle)
@@ -170,6 +156,12 @@ pbd::RopeConstraint::RopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<com
 	p2_ = p2;
 	max_distance_ = ml;
 	k_ = 1.0f;
+	
+}
+
+pbd::RopeConstraint::~RopeConstraint()
+{
+	//pbd::PBDManager::i_->RemoveConstraint(this);
 }
 
 void pbd::RopeConstraint::Enforce()
@@ -181,7 +173,7 @@ void pbd::RopeConstraint::Enforce()
 	float w2 = p2_->inverse_mass_;
 
 	float distance = glm::distance(x2, x1);
-	
+
 
 	if (distance > max_distance_)
 	{
@@ -250,7 +242,7 @@ pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coef
 {
 	particles_ = std::deque<s_ptr<components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
-	constraints_ = std::deque<pbd::RopeConstraint>();
+	constraints_ = std::deque<s_ptr<pbd::RopeConstraint>>();
 	contacts_ = std::vector<pbd::Contact>();
 	solver_iterations_ = it;
 	coeffiecent_of_restitution_ = coeffiecent_of_restitution;
@@ -283,6 +275,62 @@ void pbd::PBDManager::RemoveRecord(s_ptr<components::PBDParticle> p)
     }
 }
 
+void pbd::PBDManager::RemoveConstraint(s_ptr<components::PBDParticle> p)
+{
+	std::vector<int> idx;
+
+	int n = pbd::PBDManager::i_->constraints_.size();
+
+	for (int i = 0; i < n; i++)
+	{
+		if (&pbd::PBDManager::i_->constraints_[i]->p1_ == &p || &pbd::PBDManager::i_->constraints_[i]->p2_ == &p)
+		{
+			idx.push_back(i);
+		}
+	}
+
+	for (int i = idx.size() - 1; i > -1; i --)
+	{
+		pbd::PBDManager::i_->constraints_.erase(pbd::PBDManager::i_->constraints_.begin() + i);
+	}
+}
+
+void pbd::PBDManager::RemoveConstraint(s_ptr<pbd::Constraint> c)
+{
+	auto it = std::find(constraints_.begin(), constraints_.end(), c);
+	if (it != constraints_.end())
+	{
+		constraints_.erase(it);
+	}
+}
+
+void pbd::PBDManager::RemoveConstraint(pbd::Constraint* c)
+{
+	int pos = -1;
+	for (int i = 0; i < constraints_.size(); i++)
+	{
+		if (constraints_[i].get() == c)
+		{
+			pos = i;
+			break;
+		}
+	}
+
+	if (pos != -1)
+	{
+		constraints_.erase(constraints_.begin() + pos);
+	}
+}
+
+void  pbd::PBDManager::RemoveParticle(s_ptr<components::PBDParticle> p)
+{
+	auto it = std::find(particles_.begin(), particles_.end(), p);
+	if (it != particles_.end())
+	{
+		particles_.erase(it);
+	}
+}
+
 void pbd::PBDManager::Integration(float t)
 {
 	for (auto& p : particles_)
@@ -297,7 +345,7 @@ void pbd::PBDManager::ProjectConstraints(float t)
 	{
 		for (auto& c : constraints_)
 		{
-			c.Enforce();
+			c->Enforce();
 		}
 	}
 
@@ -359,11 +407,11 @@ void pbd::PBDManager::CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pb
 	generator_registry_.push_back(fgrr);
 }
 
-pbd::RopeConstraint* pbd::PBDManager::CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml)
+s_ptr<pbd::RopeConstraint> pbd::PBDManager::CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml)
 {
-	RopeConstraint constraint = RopeConstraint(p1, p2, ml);
+	auto constraint = std::make_shared<RopeConstraint>(p1, p2, ml);
 	constraints_.push_back(constraint);
-	return &(constraints_[constraints_.size() - 1]);
+	return constraint;
 }
 
 void pbd::PBDManager::ClearContacts()

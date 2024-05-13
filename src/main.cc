@@ -280,9 +280,11 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
+
+    
 
 #pragma region Lights
     PointLight point_light{};
@@ -395,7 +397,7 @@ int main()
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->TeleportToPosition(glm::vec3(-0.75 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
@@ -477,7 +479,7 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(20000, Smoke_texture, ParticleShader, activeCamera));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, activeCamera));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.001f;
     particle_emitter_component->life_time_ = 2.0f;
@@ -590,7 +592,7 @@ int main()
 
         previous_time = current_time;
 
-        cout << pbd::PBDManager::i_->particles_.size() << endl;
+        //cout << pbd::PBDManager::i_->particles_.size() << endl;
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -1002,7 +1004,7 @@ int main()
         ImGui::Begin("Texture Window");
         ImVec2 textureSize(160 * 3, 90 * 3); // Adjust as per your texture size
         
-        ImGui::Image((void*)(intptr_t)ssao_buffer.ssao_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((void*)(intptr_t)ssao_blur_buffer.texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
 
         ImGui::Begin("Room Generation");
@@ -1040,9 +1042,9 @@ int main()
         {
             rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
         }
-        if (ImGui::Button("Remove Segment"))
+        /*if (ImGui::Button("Remove Segment"))
         {
-            if (rmd == 4)
+            if (rmd == 1)
             {
                 cout << "A" << endl;
             }
@@ -1050,7 +1052,7 @@ int main()
             pbd::PBDManager::i_->particles_[0] = player_1->GetComponent<components::PBDParticle>();
             pbd::PBDManager::i_->particles_[1] = player_2->GetComponent<components::PBDParticle>();
             rmd++;
-        }
+        }*/
 
         ImGui::End();
         ImGui::Render();

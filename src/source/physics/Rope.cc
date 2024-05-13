@@ -75,7 +75,7 @@ void Rope::AssignPlayerEnd(std::shared_ptr<GameObject> player_end)
 	auto player_particle = player_end->GetComponent<components::PBDParticle>();
 	auto segment_particle = back_segment->GetComponent<components::PBDParticle>();
 
-	pbd::RopeConstraint* constraint = pbd::PBDManager::i_->CreateRopeConstraint(segment_particle, player_particle, kDistance + 0.001f);
+	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(segment_particle, player_particle, kDistance + 0.001f);
 	constraints_.push_back(constraint);
 }
 
@@ -125,40 +125,44 @@ void Rope::AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Mo
 	last_constraint->p1_ = last_segment_particle;
 	last_constraint->p2_ = new_particle;
 
-	pbd::RopeConstraint* constraint = pbd::PBDManager::i_->CreateRopeConstraint(new_particle, player_particle, kDistance + 0.001f);
+	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(new_particle, player_particle, kDistance + 0.001f);
 	constraints_.push_back(constraint);
 }
 
-void Rope::RemoveSegment()
-{
-	int n = constraints_.size();
-	
-	if (n > 3)
-	{
-		auto plast = constraints_[n - 2];
-		auto last = constraints_[n - 1];
-
-		auto plast_particle = plast->p1_;
-		auto last_particle = plast->p2_;
-		auto player_particle = last->p2_;
-
-		plast->p2_ = player_particle;
-
-		auto last_particle_go = last_particle->gameObject_.lock();
-
-		// TODO:
-		// Fix particle assigning cus they're still connected to the player
-		// even after deleting a segment
-
-		// last_particle_go->Destroy();
-		// last_particle_go->RemoveComponent<components::MeshRenderer>();
-
-		last->~RopeConstraint();
-
-		constraints_.erase(--constraints_.end());
-		rope_segments_.erase(--rope_segments_.end());
-	}
-}
+//void Rope::RemoveSegment()
+//{
+//	int n = constraints_.size();
+//	
+//	if (n > 3)
+//	{
+//		auto plast = constraints_[n - 2];
+//		auto last = constraints_[n - 1];
+//
+//		auto plast_particle = plast->p1_;
+//		auto last_particle = plast->p2_;
+//		auto player_particle = last->p2_;
+//
+//		constraints_.erase(constraints_.end() - 1);
+//		constraints_.erase(constraints_.end() - 2);
+//
+//		pbd::PBDManager::i_->RemoveConstraint(plast);
+//		pbd::PBDManager::i_->RemoveConstraint(last);
+//
+//		auto last_particle_go = last_particle->gameObject_.lock();
+//
+//		constraints_.push_back(pbd::PBDManager::i_->CreateRopeConstraint(plast_particle, player_particle, kDistance));
+//
+//		// TODO:
+//		// Fix particle assigning cus they're still connected to the player
+//		// even after deleting a segment
+//
+//		last_particle_go->Destroy();
+//		rope_segments_.erase(--rope_segments_.end());
+//		// last_particle_go->RemoveComponent<components::MeshRenderer>();
+//
+//		//last->~RopeConstraint();
+//	}
+//}
 
 Rope::~Rope()
 {
