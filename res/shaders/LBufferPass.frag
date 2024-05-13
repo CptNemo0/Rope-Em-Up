@@ -185,7 +185,7 @@ void main()
 	float metallic = mra.r;
 	float roughness = mra.g;
 	float ao = mra.b;
-    float ssao = texture(ssao_texture, if_uv).r;
+    float ssao = ((texture(ssao_texture, if_uv).r - 0.5) * 1.5) + 0.5;
 
     vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
     vec3 V = normalize(camera_position - World_position);
@@ -231,10 +231,10 @@ void main()
 
     Lo += CalcDirLight(dirLight[0], V, N, roughness, metallic, albedo, F0);
     Lo += CalcSpotLight(spotLight[0], World_position, V, N, roughness, metallic, albedo, F0);
-    vec3 ambient = vec3(0.03) * albedo * ssao;
+    vec3 ambient = vec3(0.03) * albedo;
     vec3 color   = ambient + Lo;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
-    color_texture = color;
+    color_texture = color * ssao;
 }

@@ -515,7 +515,7 @@ int main()
     SSAOShader->SetInt("height", mode->height);
     SSAOShader->SetInt("width", mode->width);
     SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
-    SSAOShader->SetFloat("radius", 0.2);
+    SSAOShader->SetFloat("radius", 0.4);
     SSAOShader->SetFloat("bias", 0.02);
     ssao_buffer.SetKernel(SSAOShader);
 
@@ -781,6 +781,8 @@ int main()
 
 #pragma region GO Update and Draw
 
+        glViewport(0, 0, 1920, 1080);
+
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
@@ -1004,7 +1006,7 @@ int main()
         ImGui::Begin("Texture Window");
         ImVec2 textureSize(160 * 3, 90 * 3); // Adjust as per your texture size
         
-        ImGui::Image((void*)(intptr_t)ssao_blur_buffer.texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((void*)(intptr_t)ssao_buffer.ssao_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
 
         ImGui::Begin("Room Generation");
@@ -1031,7 +1033,7 @@ int main()
         static int rmd = 0;
 
         ImGui::Begin("Rope Manager");
-        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 1.5f, "%0.3f");
+        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 0.999f, "%0.3f");
         ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
         if (ImGui::Button("Apply"))
         {
