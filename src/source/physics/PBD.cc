@@ -53,7 +53,7 @@ void components::PBDParticle::DampVelocity()
 
 void components::PBDParticle::UpdateVelocity(float t)
 {
-	ClampElementwise(forces_, 1000.0f, -1000.0f);
+	ClampElementwise(forces_, 3000.0f, -3000.0f);
 	//velocity_ = velocity_ + t * inverse_mass_ * forces_;
 	velocity_ = (transform_->get_position() - transform_->get_previous_position()) / t + t * inverse_mass_ * forces_;
 	//LogVec3(velocity_);
