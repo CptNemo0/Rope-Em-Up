@@ -477,15 +477,14 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader,*activeCamera));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(20000, Smoke_texture, ParticleShader, activeCamera));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
-    particle_emitter_component->emission_rate_ = 0.1f;
+    particle_emitter_component->emission_rate_ = 0.001f;
+    particle_emitter_component->life_time_ = 2.0f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
     particle_emitter_component->start_size_ = glm::vec2(0.1f, 0.0f);
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
     particle_emitter_component->start_position_displacement_ = 1.0f;
-
-    
 
     auto audio_test_obj = GameObject::Create(scene_root);
     audio_test_obj->AddComponent(make_shared<components::AudioSource>());
@@ -787,6 +786,16 @@ int main()
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
 
         scene_root->PropagateUpdate();
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+        ParticleShader->Use();
+        ParticleShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+
+        ParticleEmitterManager::i_->Draw();
+        
+        glDisable(GL_BLEND);
         //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
@@ -858,16 +867,6 @@ int main()
         BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         
         cubemap->RenderCube();
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
-        ParticleShader->Use();
-        ParticleShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
-
-        ParticleEmitterManager::i_->Draw();
-        
-        glDisable(GL_BLEND);
         
 #pragma endregion
 
