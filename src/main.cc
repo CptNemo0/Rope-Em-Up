@@ -282,7 +282,7 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
@@ -485,8 +485,8 @@ int main()
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
     particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, activeCamera));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
-    particle_emitter_component->emission_rate_ = 0.001f;
-    particle_emitter_component->life_time_ = 2.0f;
+    particle_emitter_component->emission_rate_ = 0.1f;
+    particle_emitter_component->life_time_ = 1.0f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
     particle_emitter_component->start_size_ = glm::vec2(0.1f, 0.0f);
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
@@ -1048,7 +1048,7 @@ int main()
         {
             rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
         }
-        /*if (ImGui::Button("Remove Segment"))
+        if (ImGui::Button("Remove Segment"))
         {
             if (rmd == 1)
             {
@@ -1058,7 +1058,7 @@ int main()
             pbd::PBDManager::i_->particles_[0] = player_1->GetComponent<components::PBDParticle>();
             pbd::PBDManager::i_->particles_[1] = player_2->GetComponent<components::PBDParticle>();
             rmd++;
-        }*/
+        }
 
         ImGui::End();
         ImGui::Render();
