@@ -382,6 +382,7 @@ int main()
     rg_settings.width = 2;
     rg_settings.height = 2;
     rg_settings.lamps = 3;
+    rg_settings.active_lamps = 2;
     rg_settings.clutter = 5;
     rg_settings.enemies = 1;
 

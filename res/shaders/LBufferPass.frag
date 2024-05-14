@@ -100,7 +100,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 vec3 CalcDirLight(DirLight light, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0)
 {
     vec3 L = normalize(-light.direction);
-    vec3 H = normalize(V);
+    vec3 H = normalize(V + L);
     vec3 radiance = light.color * light.intensity;
 
 // Cook-Torrance BRDF
@@ -123,7 +123,7 @@ vec3 CalcDirLight(DirLight light, vec3 V, vec3 N, float roughness, float metalli
 
 vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
     vec3 L = normalize (light.position - World_position);
-	vec3 H = normalize(V);
+	vec3 H = normalize(V + L);
 	float distance = length(light.position - World_position);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 	vec3 radiance = light.color * attenuation * light.intensity;
@@ -149,7 +149,7 @@ vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float
 
 vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
 	vec3 L = normalize (light.position - World_position);
-	vec3 H = normalize(V);
+	vec3 H = normalize(V + L);
 	float distance = length(light.position - World_position);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
@@ -172,7 +172,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float r
 	kD *= vec3(1.0) - metallic;
 		
 	//sum radiations
-	float NdotL = max(dot(N, L), 0.0);\
+	float NdotL = max(dot(N, L), 0.0);
 	return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 

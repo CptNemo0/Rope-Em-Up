@@ -219,16 +219,6 @@ void generation::RoomGenerator::DecreaseHealingSpots()
     settings_.lamps -= 1;
 }
 
-void generation::RoomGenerator::GenerateGrid(Room& room)
-{
-    for (float i = kOffset; i < room.width - kOffset; i += kOffset)
-    {
-        for (float j = kOffset; j < room.height - kOffset; j += kOffset)
-        {
-            room.grid.insert(glm::ivec2(i, j));
-        }
-    }
-}
 
 void generation::RoomGenerator::GenerateEnemies(Room& room)
 {
@@ -241,7 +231,7 @@ void generation::RoomGenerator::GenerateHealingSpots(Room& room)
 void generation::RoomGenerator::Generate()
 {
 
-}
+}   
 
 void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
 {
@@ -250,9 +240,6 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     room.lamp_positions.clear();
     room.clutter_positions.clear();
     room.clutter_idx.clear();
-    room.grid.clear();
-    room.enemies.clear();
-    room.healing_spots.clear();
 
     std::random_device rd;
     std::mt19937 g(rd());

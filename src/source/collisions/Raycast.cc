@@ -143,15 +143,9 @@ bool collisions::ChokeCheck(s_ptr<GameObject> caster, int precision, int thresho
     assert((360 % precision) == 0);
 
     bool return_value = false;
-
     auto collider = caster->GetComponent<components::Collider>();
-
     auto forward = caster->transform_->get_forward();
-    //auto begining = glm::vec3(forward.x, 0.0, forward.z);
-
     int angle_step = 360 / precision;
-    //int current_step = angle_step;
-
     int hits = 0;
 
     for (int i = 0; i < precision; i++)
@@ -159,10 +153,6 @@ bool collisions::ChokeCheck(s_ptr<GameObject> caster, int precision, int thresho
         auto direction = glm::rotateY(glm::vec3(forward.x, 0.0f, forward.z), (float)glm::radians((float)(angle_step * i)));
         auto raycast_data = Raycast(caster->transform_->get_position(), direction, distance, collider->layer_, caster);
         hits = hits + (int)raycast_data.hit;
-        /*if (raycast_data.hit)
-        {
-            hits++;
-        }*/
     }
 
     return_value = (hits >= threshold);

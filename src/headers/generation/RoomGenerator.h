@@ -114,16 +114,15 @@ namespace generation
 
         //Lamp positions
         std::vector<glm::vec3> lamp_positions;
+        std::vector<bool> lamp_activity;
 
         //Clutter
         std::vector<glm::vec3> clutter_positions;
         std::vector<int> clutter_idx;
+
+
         // !Values that will be generated during room generation
 
-        std::unordered_set<glm::ivec2> grid;
-        std::vector <glm::ivec2> enemies;
-        std::vector <glm::ivec2> healing_spots;
-       
         Room(glm::ivec2 position = glm::ivec2(0, 0)) : position(position) 
         {
             up_gate = false;
@@ -151,6 +150,16 @@ namespace generation
         }
     };
 
+    struct RoomGenerationSettings
+    {
+        int width = 2;
+        int height = 2;
+        int lamps = 1;
+        int active_lamps = 0;
+        int clutter = 10;
+        int enemies = 1;
+    };
+
     class RoomLayoutGenerator
     {
     private:
@@ -169,14 +178,7 @@ namespace generation
         void AddRoom(glm::ivec2 position);
     };
 
-    struct RoomGenerationSettings
-    {
-        int width = 2;
-        int height = 2;
-        int lamps = 1;
-        int clutter = 10;
-        int enemies = 1;
-    };
+    
     
     struct RoomModels
     {
