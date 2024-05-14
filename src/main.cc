@@ -136,6 +136,8 @@ int main()
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
+    const string lFemalePlayerMeshPath = "res/models/Female/kobieta.fbx";
+    const string lMalePlayerMeshPath = "res/models/Male/player_M.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/test2.obj";
@@ -321,6 +323,8 @@ int main()
 
     auto cube_model = make_shared<Model>(kCubeMeshPath);
     auto player_model = make_shared<Model>(kPlayerMeshPath);
+    /*auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
+    auto M_player_model = make_shared<Model>(lMalePlayerMeshPath)*/;
     auto debug_model = make_shared<Model>(kDebugMeshPath);
     auto enemy_model = make_shared<Model>(kEnemyMeshPath);
     auto wall_model = make_shared<Model>(kWallPath);

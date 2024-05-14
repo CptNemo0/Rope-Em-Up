@@ -8,13 +8,17 @@
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
+#include "animation/AssimpGLMHelpers.h"
+#include "animation/AnimData.h"
 #include "glad/glad.h"
 
 #include "global.h"
 #include "Vertex.h"
 #include "Mesh.h"
+#include <map>
 
 unsigned int TextureFromFile(const char* path, const string& directory);
+
 
 class Model
 {
@@ -30,6 +34,17 @@ public:
 		void processNode(aiNode* node, const aiScene* scene);
 		s_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
 		std::vector <Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
+		void SetVertexBoneDataToDefault(Vertex& vertex);
+		//void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
+		//void ExtractBoneWeightForVertices(std::vector& vertices, aiMesh* mesh, const aiScene* scene);
+
+
+		/*skeleton*/
+		std::map<std::string, BoneInfo> m_BoneInfoMap;
+		int m_BoneCounter = 0;
+
+		auto& GetBoneInfoMap() { return m_BoneInfoMap; }
+		int& GetBoneCount() { return m_BoneCounter; }
 };
 
 
