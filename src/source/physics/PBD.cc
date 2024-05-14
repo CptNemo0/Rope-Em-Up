@@ -277,22 +277,26 @@ void pbd::PBDManager::RemoveRecord(s_ptr<components::PBDParticle> p)
 
 void pbd::PBDManager::RemoveConstraint(s_ptr<components::PBDParticle> p)
 {
-	std::vector<int> idx;
+	// std::vector<int> idx;
 
-	int n = pbd::PBDManager::i_->constraints_.size();
+	// int n = pbd::PBDManager::i_->constraints_.size();
 
-	for (int i = 0; i < n; i++)
+	// for (int i = 0; i < n; i++)
+	// {
+	// 	if (&pbd::PBDManager::i_->constraints_[i]->p1_ == &p || &pbd::PBDManager::i_->constraints_[i]->p2_ == &p)
+	// 	{
+	// 		idx.push_back(i);
+	// 	}
+	// }
+
+	// for (int i = idx.size() - 1; i > -1; i --)
+	// {
+	// 	pbd::PBDManager::i_->constraints_.erase(pbd::PBDManager::i_->constraints_.begin() + i);
+	// }
+	std::erase_if(pbd::PBDManager::i_->constraints_, [p](const s_ptr<pbd::RopeConstraint> &A)
 	{
-		if (&pbd::PBDManager::i_->constraints_[i]->p1_ == &p || &pbd::PBDManager::i_->constraints_[i]->p2_ == &p)
-		{
-			idx.push_back(i);
-		}
-	}
-
-	for (int i = idx.size() - 1; i > -1; i --)
-	{
-		pbd::PBDManager::i_->constraints_.erase(pbd::PBDManager::i_->constraints_.begin() + i);
-	}
+		return A->p1_ == p || A->p2_ == p;
+	});
 }
 
 void pbd::PBDManager::RemoveConstraint(s_ptr<pbd::Constraint> c)
