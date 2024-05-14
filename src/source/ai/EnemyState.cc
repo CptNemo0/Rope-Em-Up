@@ -58,7 +58,9 @@ void ai::PatrolState::Execute(EnemyStateMachine* machine)
 		if (!machine->in_sense_range_)
 		{
 			glm::vec3 wander_force = Wander(machine->transfrom_, machine->vehicle_, pbd::kMsPerUpdate);
+			//cout << "wander force x: " << wander_force.x << " y: " << wander_force.y << " z: " << wander_force.z << endl;
 			glm::vec3 wall_avoidance = WallAvoidance(machine->transfrom_, machine->vehicle_, pbd::kMsPerUpdate);
+			//cout << "wall_avoidance x: " << wall_avoidance.x << " y: " << wall_avoidance.y << " z: " << wall_avoidance.z << endl;
 
 			glm::vec3 output_force = wander_force + wall_avoidance;
 			if (output_force != glm::vec3(0.0f))

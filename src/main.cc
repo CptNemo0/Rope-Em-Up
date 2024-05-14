@@ -378,14 +378,15 @@ int main()
     rg_settings.width = 2;
     rg_settings.height = 2;
     rg_settings.lamps = 3;
+    rg_settings.clutter = 5;
+    rg_settings.enemies = 1;
 
     std::deque<w_ptr<GameObject>> room_parts;
+
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
 
     generation::GenerateRoom(*room, &rg_settings, &models);
-
     generation::BuildRoom(*room, &models, room_parts, scene_root, GBufferPassShader);
-
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
@@ -407,8 +408,8 @@ int main()
     (
         player_1->transform_->get_position(),
         player_2->transform_->get_position(),
-        0.25f,
-        0.98f,
+        0.1251f,
+        0.97f,
         scene_root,
         test_ball_model,
         GBufferPassShader
@@ -416,8 +417,7 @@ int main()
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
 
-
-    /*auto enemy_1 = GameObject::Create(scene_root);
+    auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->TeleportToPosition(glm::vec3(-10.0f, 0.0f, -10.0f));
     enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
@@ -433,9 +433,9 @@ int main()
     enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
     auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
-    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);*/
+    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
 
-    //ai::EnemyAIManager::SetPlayers(player_1, player_2);
+    ai::EnemyAIManager::SetPlayers(player_1, player_2);
     ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
     auto isometricCamera = GameObject::Create(scene_root);
     isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -501,7 +501,6 @@ int main()
     BackgroundShader->SetInt("environmentMap", 0);
 
     
-
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
     ParticleShader->Use();
@@ -526,12 +525,12 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);
 
-    int enemy_state_machine_1;
-    int enemy_state_machine_2;
+    //int enemy_state_machine_1;
+    //int enemy_state_machine_2;
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine_1, enemy_state_machine_2, &fixed_update_timer]()
     {
-        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
-        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_2);
+        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
+        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_2);
 
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
@@ -596,8 +595,8 @@ int main()
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
-        //collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
-        //collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         steady_clock::time_point end = steady_clock::now();
 
         utility::DebugCameraMovement(window, debugCamera, delta_time);
@@ -759,23 +758,12 @@ int main()
 
 #pragma region Collisions and Physics
 
-
+        FixOrientation(enemy_1);
+        FixOrientation(enemy_2);
         FixOrientation(player_1);
         FixOrientation(player_2);
-
-        for (auto& p : pbd::PBDManager::i_->particles_)
-        {
-            if (p == nullptr)
-            {
-                cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" <<  endl;
-            }
-        }
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
-
-        //FixOrientation(enemy_1);
-        FixOrientation(player_1);
-        FixOrientation(player_2);
 
 #pragma endregion
 

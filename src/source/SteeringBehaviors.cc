@@ -41,66 +41,66 @@ glm::vec3 WallAvoidance(s_ptr<components::Transform> actor, Vehicle& vehicle, fl
 	float down  = pbd::PBDManager::i_->walls_.down_right_.z;
 	float right	= pbd::PBDManager::i_->walls_.down_right_.x;
 
-	glm::vec3 raycast = actor->get_position() + actor->get_forward() * vehicle.wall_avoidance_distance;
+	glm::vec3 raycast_f = actor->get_position() + actor->get_forward() * vehicle.wall_avoidance_distance;
 
 	glm::vec3 return_value = glm::vec3(0.0f);
 
-	if (up < raycast.z)
+	if (up < raycast_f.z)
 	{
 		return_value += glm::vec3(0.0f, 0.0f, -1.0f);
 	}
-	else if (down > raycast.z)
+	else if (down > raycast_f.z)
 	{
 		return_value += glm::vec3(0.0f, 0.0f, +1.0f);
 	}
 
-	if (right < raycast.x)
-	{
-		return_value += glm::vec3(-1.0f, 0.0f, 0.0f);
-	}
-	else if (left > raycast.x)
+	if (right > raycast_f.x)
 	{
 		return_value += glm::vec3(1.0f, 0.0f, 0.0f);
 	}
+	else if (left < raycast_f.x)
+	{
+		return_value += glm::vec3(-1.0f, 0.0f, 0.0f);
+	}
 
-	raycast = actor->get_position() + actor->get_right() * vehicle.wall_avoidance_distance;
+	glm::vec3 raycast_r = actor->get_position() + actor->get_right() * vehicle.wall_avoidance_distance;
 
-	if (up < raycast.z)
+	if (up < raycast_r.z)
 	{
 		return_value += glm::vec3(0.0f, 0.0f, -1.0f);
 	}
-	else if (down > raycast.z)
+	else if (down > raycast_r.z)
 	{
 		return_value += glm::vec3(0.0f, 0.0f, +1.0f);
 	}
 
-	if (right < raycast.x)
-	{
-		return_value += glm::vec3(-1.0f, 0.0f, 0.0f);
-	}
-	else if (left > raycast.x)
+	if (right > raycast_r.x)
 	{
 		return_value += glm::vec3(1.0f, 0.0f, 0.0f);
 	}
+	else if (left < raycast_r.x)
+	{
+		return_value += glm::vec3(-1.0f, 0.0f, 0.0f);
+	}
 
-	raycast = actor->get_position() + -actor->get_right() * vehicle.wall_avoidance_distance;
+	glm::vec3 raycast_l = actor->get_position() + -actor->get_right() * vehicle.wall_avoidance_distance;
 
-	if (up < raycast.z)
+	if (up < raycast_l.z)
 	{
 		return_value += glm::vec3(0.0f, 0.0f, -1.0f);
 	}
-	else if (down > raycast.z)
+	else if (down > raycast_l.z)
 	{
 		return_value += glm::vec3(0.0f, 0.0f, +1.0f);
 	}
 
-	if (right < raycast.x)
-	{
-		return_value += glm::vec3(-1.0f, 0.0f, 0.0f);
-	}
-	else if (left > raycast.x)
+	if (right > raycast_l.x)
 	{
 		return_value += glm::vec3(1.0f, 0.0f, 0.0f);
+	}
+	else if (left < raycast_l.x)
+	{
+		return_value += glm::vec3(+1.0f, 0.0f, 0.0f);
 	}
 
 
