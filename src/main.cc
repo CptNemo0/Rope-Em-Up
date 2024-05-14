@@ -828,8 +828,6 @@ int main()
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.045f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 0.0075f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity /*+ 0.6f * std::sinf(glfwGetTime() * 0.75f)*/);
-
-
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
