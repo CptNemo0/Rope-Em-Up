@@ -40,7 +40,7 @@ private:
 
     s_ptr<tmp::Texture> texture_;
     s_ptr<Shader> shader_;
-    s_ptr<llr::Camera> camera_;
+    s_ptr<llr::Camera> *camera_;
     s_ptr<Transform> transform_;
 
     std::deque<Particle> particles_;
@@ -65,7 +65,7 @@ public:
     float start_velocity_displacement_ = 0.0f;
     glm::vec3 start_acceleration_ = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, s_ptr<llr::Camera> camera);
+    ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, s_ptr<llr::Camera> *camera);
     void Start() override;
     void Update() override;
     void Destroy() override;

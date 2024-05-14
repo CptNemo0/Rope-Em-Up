@@ -36,6 +36,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 
 }
 
+
 s_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
@@ -141,6 +142,11 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         }
     }
     return textures;
+}
+
+void Model::SetVertexBoneDataToDefault(Vertex& vertex)
+{
+
 }
 
 unsigned int TextureFromFile(const char* path, const string& directory)

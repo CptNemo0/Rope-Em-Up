@@ -136,6 +136,8 @@ int main()
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
+    const string lFemalePlayerMeshPath = "res/models/Female/kobieta.fbx";
+    const string lMalePlayerMeshPath = "res/models/Male/player_M.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/test2.obj";
@@ -284,6 +286,8 @@ int main()
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
+    
+
 #pragma region Lights
     PointLight point_light{};
 
@@ -319,6 +323,8 @@ int main()
 
     auto cube_model = make_shared<Model>(kCubeMeshPath);
     auto player_model = make_shared<Model>(kPlayerMeshPath);
+    /*auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
+    auto M_player_model = make_shared<Model>(lMalePlayerMeshPath)*/;
     auto debug_model = make_shared<Model>(kDebugMeshPath);
     auto enemy_model = make_shared<Model>(kEnemyMeshPath);
     auto wall_model = make_shared<Model>(kWallPath);
@@ -395,7 +401,7 @@ int main()
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
-    player_2->transform_->TeleportToPosition(glm::vec3(-0.75 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
@@ -477,15 +483,14 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader,*activeCamera));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, activeCamera));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.1f;
+    particle_emitter_component->life_time_ = 1.0f;
     particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
     particle_emitter_component->start_size_ = glm::vec2(0.1f, 0.0f);
     particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
     particle_emitter_component->start_position_displacement_ = 1.0f;
-
-    
 
     auto audio_test_obj = GameObject::Create(scene_root);
     audio_test_obj->AddComponent(make_shared<components::AudioSource>());
@@ -514,7 +519,7 @@ int main()
     SSAOShader->SetInt("height", mode->height);
     SSAOShader->SetInt("width", mode->width);
     SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
-    SSAOShader->SetFloat("radius", 0.2);
+    SSAOShader->SetFloat("radius", 0.4);
     SSAOShader->SetFloat("bias", 0.02);
     ssao_buffer.SetKernel(SSAOShader);
 
@@ -591,7 +596,7 @@ int main()
 
         previous_time = current_time;
 
-        cout << pbd::PBDManager::i_->particles_.size() << endl;
+        //cout << pbd::PBDManager::i_->particles_.size() << endl;
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -780,6 +785,8 @@ int main()
 
 #pragma region GO Update and Draw
 
+        glViewport(0, 0, 1920, 1080);
+
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
         GBufferPassShader->Use();
@@ -787,6 +794,16 @@ int main()
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
 
         scene_root->PropagateUpdate();
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+        ParticleShader->Use();
+        ParticleShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+
+        ParticleEmitterManager::i_->Draw();
+        
+        glDisable(GL_BLEND);
         //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
@@ -858,16 +875,6 @@ int main()
         BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         
         cubemap->RenderCube();
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
-        ParticleShader->Use();
-        ParticleShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
-
-        ParticleEmitterManager::i_->Draw();
-        
-        glDisable(GL_BLEND);
         
 #pragma endregion
 
@@ -1030,7 +1037,7 @@ int main()
         static int rmd = 0;
 
         ImGui::Begin("Rope Manager");
-        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 1.5f, "%0.3f");
+        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 0.999f, "%0.3f");
         ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
         if (ImGui::Button("Apply"))
         {
@@ -1043,7 +1050,7 @@ int main()
         }
         if (ImGui::Button("Remove Segment"))
         {
-            if (rmd == 4)
+            if (rmd == 1)
             {
                 cout << "A" << endl;
             }

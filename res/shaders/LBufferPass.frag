@@ -100,7 +100,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 vec3 CalcDirLight(DirLight light, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0)
 {
     vec3 L = normalize(-light.direction);
-    vec3 H = normalize(V + L);
+    vec3 H = normalize(V);
     vec3 radiance = light.color * light.intensity;
 
 // Cook-Torrance BRDF
@@ -123,7 +123,7 @@ vec3 CalcDirLight(DirLight light, vec3 V, vec3 N, float roughness, float metalli
 
 vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
     vec3 L = normalize (light.position - World_position);
-	vec3 H = normalize(V + L);
+	vec3 H = normalize(V);
 	float distance = length(light.position - World_position);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 	vec3 radiance = light.color * attenuation * light.intensity;
@@ -149,7 +149,7 @@ vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float
 
 vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
 	vec3 L = normalize (light.position - World_position);
-	vec3 H = normalize(V + L);
+	vec3 H = normalize(V);
 	float distance = length(light.position - World_position);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
@@ -185,7 +185,7 @@ void main()
 	float metallic = mra.r;
 	float roughness = mra.g;
 	float ao = mra.b;
-    float ssao = texture(ssao_texture, if_uv).r;
+    float ssao = ((texture(ssao_texture, if_uv).r - 0.5) * 1.5) + 0.5;
 
     vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
     vec3 V = normalize(camera_position - World_position);
@@ -231,10 +231,10 @@ void main()
 
     Lo += CalcDirLight(dirLight[0], V, N, roughness, metallic, albedo, F0);
     Lo += CalcSpotLight(spotLight[0], World_position, V, N, roughness, metallic, albedo, F0);
-    vec3 ambient = vec3(0.03) * albedo ;
+    vec3 ambient = vec3(0.03) * albedo;
     vec3 color   = ambient + Lo;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
-    color_texture = color;
+    color_texture = color * ssao;
 }

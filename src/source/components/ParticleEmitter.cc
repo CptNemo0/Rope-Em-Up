@@ -1,6 +1,6 @@
 #include "../../headers/components/ParticleEmitter.h"
 
-components::ParticleEmitter::ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, s_ptr<llr::Camera> camera)
+components::ParticleEmitter::ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, s_ptr<llr::Camera> *camera)
 {
     this->texture_ = texture;
     this->shader_ = shader;
@@ -60,7 +60,7 @@ void components::ParticleEmitter::Destroy()
 
 void components::ParticleEmitter::UpdateParticles(float delta_time)
 {
-    auto view_matrix = camera_->GetViewMatrix();
+    auto view_matrix = (*camera_)->GetViewMatrix();
     float inverse_life_time = 1.0f / static_cast<float>(microseconds(static_cast<int>(life_time_ * 1000000)).count());
     for (auto &particle : particles_)
     {

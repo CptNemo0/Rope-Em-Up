@@ -2,6 +2,8 @@
 layout (location = 0) in vec3 iv_position;
 layout (location = 1) in vec3 iv_normal;
 layout (location = 2) in vec2 iv_texture;
+layout (location = 5) in ivec4 iv_boneIds;
+layout (location = 6) in vec4 iv_weights;
 
 out vec3 world_position;
 out vec3 view_position;

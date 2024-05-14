@@ -32,7 +32,7 @@ void Rope::CreateSegments(glm::vec3 start, glm::vec3 end, std::shared_ptr<GameOb
 		if (i > 0)
 		{
 			auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(rope_segments_.back()->GetComponent<components::PBDParticle>(), rope_segment->GetComponent<components::PBDParticle>(), kDistance + 0.001f);
-			constraints_.push_back(constraint);
+			rope_constraints_.push_back(constraint);
 		}
 
 		rope_segments_.push_back(rope_segment);
@@ -57,7 +57,7 @@ void Rope::AssignPlayerBegin(std::shared_ptr<GameObject> player_begin)
 	auto player_particle = player_begin->GetComponent<components::PBDParticle>();
 	auto segment_particle = front_segment->GetComponent<components::PBDParticle>();
 	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(player_particle, segment_particle, kDistance + 0.001f);
-	constraints_.insert(constraints_.begin(), constraint);
+	rope_constraints_.push_front(constraint);
 }
 
 void Rope::AssignPlayerEnd(std::shared_ptr<GameObject> player_end)
@@ -75,8 +75,8 @@ void Rope::AssignPlayerEnd(std::shared_ptr<GameObject> player_end)
 	auto player_particle = player_end->GetComponent<components::PBDParticle>();
 	auto segment_particle = back_segment->GetComponent<components::PBDParticle>();
 
-	pbd::RopeConstraint* constraint = pbd::PBDManager::i_->CreateRopeConstraint(segment_particle, player_particle, kDistance + 0.001f);
-	constraints_.push_back(constraint);
+	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(segment_particle, player_particle, kDistance + 0.001f);
+	rope_constraints_.push_back(constraint);
 }
 
 int Rope::Size()
@@ -104,8 +104,7 @@ void Rope::ApplyDrag()
 
 void Rope::AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader)
 {
-	
-	auto last_constraint = constraints_.back();
+	auto last_constraint = rope_constraints_.back();
 
 	auto last_segment_particle = last_constraint->p1_;
 	auto player_particle = last_constraint->p2_;
@@ -122,46 +121,45 @@ void Rope::AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Mo
 
 	auto new_particle = rope_segment->GetComponent<components::PBDParticle>();
 
-	last_constraint->p1_ = last_segment_particle;
 	last_constraint->p2_ = new_particle;
 
-	pbd::RopeConstraint* constraint = pbd::PBDManager::i_->CreateRopeConstraint(new_particle, player_particle, kDistance + 0.001f);
-	constraints_.push_back(constraint);
+	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(new_particle, player_particle, kDistance + 0.001f);
+	rope_constraints_.push_back(constraint);
 }
 
 void Rope::RemoveSegment()
 {
-	int n = constraints_.size();
+	int n = rope_constraints_.size();
 	
-	if (n > 3)
+	if (n >= 2)
 	{
-		auto plast = constraints_[n - 2];
-		auto last = constraints_[n - 1];
+		auto player_constraint = rope_constraints_.back();
+		rope_constraints_.pop_back();
+		auto plast_constraint = rope_constraints_.back();
+		rope_constraints_.pop_back();
 
-		auto plast_particle = plast->p1_;
-		auto last_particle = plast->p2_;
-		auto player_particle = last->p2_;
+		auto plast_particle = plast_constraint->p1_;
+		auto last_particle = plast_constraint->p2_;
+		auto player_particle = player_constraint->p2_;
 
-		plast->p2_ = player_particle;
+		auto last_particle_go = rope_segments_.back();
+		rope_segments_.pop_back();
+		last_particle_go->Destroy();
 
-		auto last_particle_go = last_particle->gameObject_.lock();
+		rope_constraints_.push_back(pbd::PBDManager::i_->CreateRopeConstraint(plast_particle, player_particle, kDistance));
 
 		// TODO:
 		// Fix particle assigning cus they're still connected to the player
 		// even after deleting a segment
 
-		// last_particle_go->Destroy();
 		// last_particle_go->RemoveComponent<components::MeshRenderer>();
 
-		last->~RopeConstraint();
-
-		constraints_.erase(--constraints_.end());
-		rope_segments_.erase(--rope_segments_.end());
+		//last->~RopeConstraint();
 	}
 }
 
 Rope::~Rope()
 {
 	rope_segments_.clear();
-	constraints_.clear();
+	rope_constraints_.clear();
 }

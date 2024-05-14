@@ -24,6 +24,7 @@ void components::Collider::Update()
 void components::Collider::Destroy()
 {
 	collisions::CollisionManager::i_->RemoveCollider(shared_from_this());
+	cout << "COLLIDER DESTROY" << endl;
 }
 
 void components::Collider::UpdateColliders()
