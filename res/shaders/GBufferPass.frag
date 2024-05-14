@@ -36,8 +36,8 @@ void main()
 
 	position_texture = world_position;
 	albedo_texture = texture(albedo_map, uv).rgb;
-	normal_texture = normalize(normal_world_matrix * normal) + 1.0 * 0.5;
+	normal_texture = (normalize(normal_world_matrix * normal) + 1.0) * 0.5;
 	mra_texture = vec3(metallic, roughness, ao);
 	view_position_texture = view_position;
-	view_normal_texture = normalize(normal_view_matrix * normal) + 1.0 * 0.5;
+	view_normal_texture = (normalize(normal_view_matrix * normal) + 1.0) * 0.5;
 }
