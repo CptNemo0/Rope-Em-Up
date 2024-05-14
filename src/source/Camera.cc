@@ -61,13 +61,12 @@ void components::GameplayCameraComponent::Update()
 
 //// CHANGING POSITION BY HEIGHT AND DISTANCE OF CAMERA
 	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint;
+	gameObject_.lock()->transform_ = this->transfrom_;
 
-	transfrom_->set_position(glm::vec3(cameraPosition.x ,height_, cameraPosition.z));
-	camera_->set_position(transfrom_->get_position());
-	camera_->set_position(transfrom_->get_position());
+	//transfrom_->set_position(glm::vec3(cameraPosition.x ,height_, cameraPosition.z));
+	camera_->set_position(glm::vec3(cameraPosition.x, height_, cameraPosition.z));
 
 	camera_->UpdateDirectionVectors();
-	gameObject_.lock()->transform_ = this->transfrom_;
 
 //// UNCOMMENT THIS TO CHANGE POSITION BY PITCH AND YAW OF CAMERA
 	/*float pitch = glm::degrees(asin(directionToMidpoint.y));
