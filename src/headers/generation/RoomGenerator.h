@@ -18,6 +18,7 @@
 #include "../GameObject.h"
 #include "../components/MeshRenderer.h"
 #include "../components/Component.h"
+#include "../components/HealthComponent.h"
 #include "../collisions/Collider.h"
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"
@@ -62,6 +63,25 @@ namespace generation
         glm::vec3(4.0f, 0.0f, -6.0f),
         glm::vec3(6.0f, 0.0f, -6.0f),
         glm::vec3(6.0f, 0.0f, -4.0f),
+    };
+
+    const std::vector<glm::vec3> kEnemiesPositions
+    {
+        glm::vec3(-4.0f, 0.0f, 0.0f),
+
+        glm::vec3(-2.0f, 0.0f, -2.0f),
+        glm::vec3(-0.0f, 0.0f, -2.0f),
+        glm::vec3(2.0f, 0.0f, -2.0f),
+
+        glm::vec3(-2.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(2.0f, 0.0f, 0.0f),
+
+        glm::vec3(-2.0f, 0.0f, 2.0f),
+        glm::vec3(-0.0f, 0.0f, 2.0f),
+        glm::vec3(2.0f, 0.0f, 2.0f),
+
+        glm::vec3(4.0f, 0.0f, 0.0f),
     };
 
     struct RoomLayoutGenerationSettings
@@ -120,6 +140,9 @@ namespace generation
         std::vector<glm::vec3> clutter_positions;
         std::vector<int> clutter_idx;
 
+        //Enemies
+        std::vector<glm::vec3> enemies_positions;
+        std::vector<int> enemies_idx;
 
         // !Values that will be generated during room generation
 
@@ -187,6 +210,7 @@ namespace generation
         std::vector<s_ptr<Model>> gates;
         std::vector<s_ptr<Model>> lamps;
         std::vector<s_ptr<Model>> clutter;
+        std::vector<s_ptr<Model>> enemies;
     };
 
     class RoomGenerator

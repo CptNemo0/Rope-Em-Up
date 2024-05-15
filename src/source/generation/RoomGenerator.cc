@@ -411,6 +411,32 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         room.clutter_positions.push_back(clutter_vector[i]);
         room.clutter_idx.push_back(random::RandInt(0, rm->clutter.size() - 1));
     }
+
+    //Enemies
+
+    std::vector<glm::vec3> enemies_positions = std::vector<glm::vec3>(room.width * room.height * kEnemiesPositions.size(), glm::vec3(0.0f));
+
+    int idx = 0;
+    for (int i = 0; i < room.width; i++)
+    {
+        for (int j = 0; j < room.height; j++)
+        {
+            for (int k = 0; k < kEnemiesPositions.size(); k++)
+            {
+                enemies_positions[idx] = kEnemiesPositions[k] + (glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+                idx++;
+            }
+        }
+    }
+
+    std::shuffle(enemies_positions.begin(), enemies_positions.end(), g);
+
+    for (int i = 0; i < rgs->enemies ; i++)
+    {
+        room.enemies_positions.push_back(enemies_positions[i % enemies_positions.size()]);
+        room.enemies_idx.push_back(random::RandInt(0, -1 + rm->enemies.size()));
+    }
+
 }
     
 
@@ -506,5 +532,16 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
         //clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
         room_parts.push_back(clutter);
+    }
+
+    for (int i = 0; i < room.enemies_positions.size(); i++)
+    {
+        auto enemy = GameObject::Create(scene_root);
+        enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
+        enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+        enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->enemies[room.enemies_idx[i]]->meshes_[0], enemy->transform_));
+        enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
+        enemy->AddComponent(make_shared<components::HealthComponent>(10.0f));
+        room_parts.push_back(enemy);
     }
 }

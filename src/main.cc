@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 #include <ratio>
+#include <stdlib.h>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -378,6 +379,7 @@ int main()
     models.gates.push_back(gate_model);
     models.lamps.push_back(lamp_model);
     models.clutter.push_back(bone_model);
+    models.enemies.push_back(enemy_model);
 
     generation::RoomGenerationSettings rg_settings;
     rg_settings.width = 2;
@@ -385,13 +387,14 @@ int main()
     rg_settings.lamps = 3;
     rg_settings.active_lamps = 2;
     rg_settings.clutter = 5;
-    rg_settings.enemies = 1;
+    rg_settings.enemies = 0;
 
     std::deque<w_ptr<GameObject>> room_parts;
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
 
     generation::GenerateRoom(*room, &rg_settings, &models);
+
     generation::BuildRoom(*room, &models, room_parts, scene_root, GBufferPassShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
@@ -423,7 +426,7 @@ int main()
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
 
-    auto enemy_1 = GameObject::Create(scene_root);
+    /*auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->TeleportToPosition(glm::vec3(-10.0f, 0.0f, -10.0f));
     enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
@@ -441,7 +444,7 @@ int main()
     enemy_2->AddComponent(make_shared<components::HealthComponent>(10.0f));
     auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
-    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
+    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);*/
 
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
@@ -535,11 +538,8 @@ int main()
 
     //int enemy_state_machine_1;
     //int enemy_state_machine_2;
-    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine_1, enemy_state_machine_2, &fixed_update_timer]()
+    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer]()
     {
-        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
-        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_2);
-
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
         collisions::CollisionManager::i_->PredictColliders();
@@ -603,8 +603,8 @@ int main()
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
-        collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
-        collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        //collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
+        //collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
         steady_clock::time_point end = steady_clock::now();
 
         utility::DebugCameraMovement(window, debugCamera, delta_time);
@@ -681,6 +681,7 @@ int main()
 
         if (current_room_pos != next_room_pos)
         {
+            system("CLS");
             // Usun obecny pokoj
             for (auto& a : room_parts)
             {
@@ -766,10 +767,10 @@ int main()
 
 #pragma region Collisions and Physics
 
-        FixOrientation(enemy_1);
-        FixOrientation(enemy_2);
-        FixOrientation(player_1);
-        FixOrientation(player_2);
+        //FixOrientation(enemy_1);
+        //FixOrientation(enemy_2);
+        //FixOrientation(player_1);
+        //FixOrientation(player_2);
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
 
@@ -1006,8 +1007,9 @@ int main()
         ImGui::Begin("Room Generation");
         ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
         ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
-        ImGui::SliderInt("Lamps", &rg_settings.lamps, 2, 10);
-        ImGui::SliderInt("Clutter", &rg_settings.clutter, 1, 15);
+        ImGui::SliderInt("Lamps", &rg_settings.lamps, 0, 10);
+        ImGui::SliderInt("Clutter", &rg_settings.clutter, 0, 15);
+        ImGui::SliderInt("Enemies", &rg_settings.enemies, 0, 15);
         if (ImGui::Button("Generate"))
         {
         //  // Usun obecny pokoj

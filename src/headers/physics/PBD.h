@@ -9,6 +9,7 @@
 #include "glm/glm.hpp"
 
 #include "../components/Component.h"
+#include "../GameObject.h"
 #include "../components/Transform.h"
 
 namespace components
