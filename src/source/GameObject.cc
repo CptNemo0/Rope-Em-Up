@@ -28,7 +28,9 @@ void GameObject::Update()
 	}
 	for (auto& component : components_)
 	{
+		
 		component.second->Update();
+		
 	}
 }
 

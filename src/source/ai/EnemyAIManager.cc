@@ -27,6 +27,24 @@ ai::EnemyAIManager::EnemyAIManager(const EnemyAIManagerInitStruct& init_struct, 
 	this->players_set = false;
 }
 
+void ai::EnemyAIManager::UpdateAI()
+{
+	for (auto& a : enemy_ais_)
+	{
+		UpdateEnemyStateMachine(a->state_machine_);
+	}
+}
+
+std::shared_ptr<components::EnemyAIComponent> ai::EnemyAIManager::CreateEnemyAI(std::shared_ptr<GameObject> game_object)
+{
+	auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
+	pbd::PBDManager::i_->CreateFGRRecord(game_object->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
+	auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(game_object, enemy_movement_generator_1, vehicle_template_);
+	auto enemy_ai_component = make_shared<components::EnemyAIComponent>(enemy_state_machine_1);
+	enemy_ais_.push_back(enemy_ai_component);
+	return enemy_ai_component;
+}
+
 void ai::EnemyAIManager::UpdateEnemyStateMachine(s_ptr<EnemyStateMachine> machine)
 {
 	if (!players_set)
@@ -70,4 +88,14 @@ void ai::EnemyAIManager::UpdateEnemyStateMachine(s_ptr<EnemyStateMachine> machin
 
 	//cout << machine->current_state_->Name() << endl;
 	machine->current_state_->Execute(machine.get());
+}
+
+
+void ai::EnemyAIManager::RemoveEnemyAI(std::shared_ptr<components::EnemyAIComponent> a)
+{
+	auto it = std::find(enemy_ais_.begin(), enemy_ais_.end(), a);
+	if (it != enemy_ais_.end())
+	{
+		enemy_ais_.erase(it);
+	}
 }

@@ -542,6 +542,7 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->enemies[room.enemies_idx[i]]->meshes_[0], enemy->transform_));
         enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
         enemy->AddComponent(make_shared<components::HealthComponent>(10.0f));
+        enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
         room_parts.push_back(enemy);
     }
 }

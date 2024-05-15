@@ -109,7 +109,7 @@ namespace ai
 	public:
 
 		EnemyStateMachine(s_ptr<GameObject> game_object, s_ptr<pbd::BasicGenerator> generator, const Vehicle& vehicle);
-		~EnemyStateMachine() = default;
+		~EnemyStateMachine();
 
 		EnemyState* current_state_;
 

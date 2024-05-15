@@ -6,6 +6,11 @@
 #include "../GameObject.h"
 #include "../physics/PBD.h"
 #include "EnemyState.h"
+#include "../components/EnemyAIComponent.h"
+#include "../physics/PBD.h"
+#include "../Vehicle.h"
+
+class components::EnemyAIComponent;
 
 namespace ai
 {
@@ -41,6 +46,8 @@ namespace ai
 	public:
 		Vehicle vehicle_template_;
 
+		std::vector<std::shared_ptr<components::EnemyAIComponent>> enemy_ais_;
+
 		int choked_tentacles_;
 		int multi_chokes_;
 
@@ -54,7 +61,7 @@ namespace ai
 
 		float sense_range_;
 
-
+		void UpdateAI();
 
 		static void Initialize(const EnemyAIManagerInitStruct& init_struct, const Vehicle& vehicle)
 		{
@@ -88,7 +95,10 @@ namespace ai
 			player_2_ = nullptr;
 		}
 	
+		std::shared_ptr<components::EnemyAIComponent> CreateEnemyAI(std::shared_ptr<GameObject> game_object);
+
 		void UpdateEnemyStateMachine(s_ptr<ai::EnemyStateMachine> machine);
+		void RemoveEnemyAI(std::shared_ptr<components::EnemyAIComponent> a);
 	};
 }
 

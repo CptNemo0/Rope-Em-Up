@@ -426,12 +426,13 @@ int main()
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
 
-    /*auto enemy_1 = GameObject::Create(scene_root);
+    /* auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->TeleportToPosition(glm::vec3(-10.0f, 0.0f, -10.0f));
     enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
     enemy_1->AddComponent(make_shared<components::HealthComponent>(10.0f));
+    enemy_1->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy_1));
     auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
     auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
@@ -442,7 +443,8 @@ int main()
     enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
     enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
     enemy_2->AddComponent(make_shared<components::HealthComponent>(10.0f));
-    auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
+    enemy_2->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy_2));
+   auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
     auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);*/
 
@@ -540,6 +542,7 @@ int main()
     //int enemy_state_machine_2;
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer]()
     {
+        ai::EnemyAIManager::i_->UpdateAI();
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
         collisions::CollisionManager::i_->PredictColliders();
@@ -610,6 +613,8 @@ int main()
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
+
+
 
 #pragma region Rooms
 
@@ -682,12 +687,20 @@ int main()
         if (current_room_pos != next_room_pos)
         {
             system("CLS");
+            rg_settings.lamps = random::RandInt(1, 10);
+            rg_settings.enemies = random::RandInt(1, 7);
+            rg_settings.clutter = random::RandInt(1, 10);
+            rg_settings.width = random::RandInt(1, 4);
+            rg_settings.height = random::RandInt(1, 4);
             // Usun obecny pokoj
             for (auto& a : room_parts)
             {
                 a.lock()->Destroy();
+                a.lock() = nullptr;
             }
+
             room_parts.clear();
+            //ai::EnemyAIManager::i_->enemy_ais_.clear();
 
             // Stworz nowy pokoj
             if (rlg.rooms.contains(next_room_pos))
@@ -871,7 +884,7 @@ int main()
 
 #pragma region Interface
 
-        glDisable(GL_DEPTH_TEST);
+       /* glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
@@ -887,7 +900,7 @@ int main()
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);*/
 
 #pragma endregion
 

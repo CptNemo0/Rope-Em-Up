@@ -25,7 +25,7 @@ vec3 adjust_gamma(vec3 color, float value)
 vec3 apply_vignete(vec3 color)
 {
     vec2 uv = if_uv * (1.0 - if_uv);
-    float vig = uv.x * uv.y * 30.0f;
+    float vig = uv.x * uv.y * 50.0f;
     vig = pow(vig, 0.25);
 
     return color * vig;

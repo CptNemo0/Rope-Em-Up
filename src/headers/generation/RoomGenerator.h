@@ -24,6 +24,7 @@
 #include "../collisions/CollisionManager.h"
 #include <memory>
 #include <random>
+#include "../ai/EnemyAIManager.h"
 namespace generation
 {
     const float kModuleSize = 16.0f;

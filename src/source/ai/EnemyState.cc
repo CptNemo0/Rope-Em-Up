@@ -268,6 +268,11 @@ void ai::EvasionState::Execute(EnemyStateMachine* machine)
 	}
 }
 
+ai::EnemyStateMachine::~EnemyStateMachine()
+{
+	cout << "Destroying EnemyStateMachine" << endl;
+}
+
 ai::EnemyStateMachine::EnemyStateMachine(s_ptr<GameObject> game_object, s_ptr<pbd::BasicGenerator> generator, const Vehicle& vehicle)
 {
 	current_state_ = PatrolState::Instance();

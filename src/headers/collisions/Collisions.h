@@ -393,28 +393,13 @@ namespace collisions
 		return_value.sep_a = dir * mag * 0.5f; //zmienic na 0.1f w razie co
 		return_value.sep_b = -return_value.sep_a;
 
+		return_value.sep_a.y = 0.0f;
+		return_value.sep_b.y = 0.0f;
+
 		return return_value;	
 	}
 
 #pragma endregion
-
-#pragma region CollisionLayer
-
-	struct CollisionLayer
-	{
-		int id;
-	};
-
-
-
-#pragma endregion
-
-#pragma region Doubly Linked List
-
-
-
-#pragma endregion
-
 }
 
 #endif // !COLLISIONS_H

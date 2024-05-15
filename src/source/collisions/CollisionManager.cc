@@ -39,7 +39,7 @@ void collisions::CollisionManager::Separation(s_ptr<components::Collider> a, s_p
         a->transform_->get_predicted_position(),
         b->np_collider_,
         b->transform_->get_predicted_position());
-
+   
     a->transform_->set_predicted_position(a->transform_->get_predicted_position() + 2.0f * wa * separation_vector.sep_a);
     b->transform_->set_predicted_position(b->transform_->get_predicted_position() + 2.0f * wb * separation_vector.sep_b);
 
