@@ -36,6 +36,7 @@
 #include "headers/components/HUDRenderer.h"
 #include "headers/components/TextRenderer.h"
 #include "headers/components/PlayerController.h"
+#include "headers/components/HealthComponent.h"
 #include "headers/HDRCubemap.h"
 #include "headers/Font.h"
 #include "headers/components/ParticleEmitter.h"
@@ -427,6 +428,7 @@ int main()
     enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
     enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
+    enemy_1->AddComponent(make_shared<components::HealthComponent>(10.0f));
     auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
     auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
@@ -534,8 +536,8 @@ int main()
     //int enemy_state_machine_2;
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [enemy_state_machine_1, enemy_state_machine_2, &fixed_update_timer]()
     {
-        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
-        ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_2);
+        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_1);
+        //ai::EnemyAIManager::i_->UpdateEnemyStateMachine(enemy_state_machine_2);
 
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
@@ -1046,11 +1048,11 @@ int main()
             pbd::PBDManager::i_->particles_[1] = player_2->GetComponent<components::PBDParticle>();
             rmd++;
         }
+        ImGui::End();
 
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
-
 #pragma endregion 
         glfwSwapBuffers(window);
     }
