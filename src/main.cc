@@ -438,6 +438,7 @@ int main()
     enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
     enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
     enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
+    enemy_2->AddComponent(make_shared<components::HealthComponent>(10.0f));
     auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
     pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
     auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);
