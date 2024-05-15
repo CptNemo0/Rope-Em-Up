@@ -1023,8 +1023,6 @@ int main()
         }
         ImGui::End();
 
-        static int rmd = 0;
-
         ImGui::Begin("Rope Manager");
         ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 0.999f, "%0.3f");
         ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
@@ -1039,18 +1037,10 @@ int main()
         }
         if (ImGui::Button("Remove Segment"))
         {
-            if (rmd == 1)
-            {
-                cout << "A" << endl;
-            }
-            rope.RemoveSegment();
-            pbd::PBDManager::i_->particles_[0] = player_1->GetComponent<components::PBDParticle>();
-            pbd::PBDManager::i_->particles_[1] = player_2->GetComponent<components::PBDParticle>();
-            rmd++;
+            rope.RemoveSegment();   
         }
         ImGui::End();
 
-        ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 #pragma endregion 
