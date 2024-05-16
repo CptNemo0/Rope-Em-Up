@@ -7,9 +7,10 @@
 #include "../physics/PBD.h"
 #include "EnemyState.h"
 #include "../components/EnemyAIComponent.h"
+#include "../components/HealthComponent.h"
 #include "../physics/PBD.h"
 #include "../Vehicle.h"
-
+#include "../collisions/Raycast.h"
 class components::EnemyAIComponent;
 
 namespace ai

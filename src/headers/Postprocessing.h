@@ -25,6 +25,9 @@ namespace ppc
         float gamma_;
         float brightness_;
         float contrast_;
+        float vignete_contrast_;
+        float vignete_amount_;
+        float noise_amount_;
 
         s_ptr<Shader> shader_;
 

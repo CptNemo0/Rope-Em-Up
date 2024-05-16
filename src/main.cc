@@ -863,7 +863,7 @@ int main()
         PostprocessingShader->Use();
         lbuffer.BindTextures(PostprocessingShader);
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
-       
+        
 
         postprocessor.Draw();
         //////////////////////////////////
@@ -903,10 +903,13 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Colors");
+        ImGui::Begin("Postprocessor");
         ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderFloat("Vignete Contrast", &postprocessor.vignete_contrast_, 0.0f, 200.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderFloat("Vignete Amount", &postprocessor.vignete_amount_, 0.0f, 0.5f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderFloat("Noise Amount", &postprocessor.noise_amount_, 0.0f, 0.5f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::End();
 
         ImGui::Begin("Camera");

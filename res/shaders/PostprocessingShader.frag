@@ -9,6 +9,10 @@ uniform vec3 cbg;
 
 uniform float if_time;
 
+uniform float vignete_amount;
+uniform float vignete_contrast;
+uniform float noise_amount;
+
 vec3 adjust_contrast(vec3 color, float value) 
 {
     return ((color - 0.5) * value) + 0.5;
@@ -27,16 +31,16 @@ vec3 adjust_gamma(vec3 color, float value)
 vec3 apply_vignete(vec3 color)
 {
     vec2 uv = if_uv * (1.0 - if_uv);
-    float vig = uv.x * uv.y * 50.0f;
-    vig = pow(vig, 0.25);
+    float vig = uv.x * uv.y * vignete_contrast;
+    vig = pow(vig, vignete_amount);
 
     return color * vig;
 }
 
 vec3 apply_film_grain(vec3 color)
 {
-    float noise_amount = 0.025 * (sin(if_time * 1.25) + 2.0);
-    float noise = (fract(sin(dot(if_uv, vec2(12.9898,78.233)*2.0)) * 43758.5453)) ;
+    vec2 uv = if_uv + (sin(if_time) + 2.0);
+    float noise = (fract(sin(dot(uv, vec2(12.9898,78.233) * 2.0)) * 43758.5453)) ;
     return color - noise * noise_amount;
 }
 

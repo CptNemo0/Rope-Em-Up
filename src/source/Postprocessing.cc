@@ -9,6 +9,9 @@ ppc::Postprocessor::Postprocessor(int height, int width, s_ptr<Shader> shader)
     gamma_ = 1.8f;
     contrast_ = 1.0f;
     brightness_ = 0.0f;
+    noise_amount_ = 0.01f;
+    vignete_amount_ = 0.25f;
+    vignete_contrast_ = 50.0f;
 	Init();
 }
 
@@ -82,4 +85,7 @@ void ppc::Postprocessor::Draw()
 void ppc::Postprocessor::Update()
 {
     shader_->SetVec3("cbg", glm::vec3(contrast_, brightness_, gamma_));
+    shader_->SetFloat("noise_amount", noise_amount_);
+    shader_->SetFloat("vignete_amount", vignete_amount_);
+    shader_->SetFloat("vignete_contrast", vignete_contrast_);
 }

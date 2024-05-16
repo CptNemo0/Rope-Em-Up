@@ -53,8 +53,7 @@ namespace collisions
 
         s_ptr<components::Collider> CreateCollider(int layer, int precision, s_ptr<Mesh> mesh, s_ptr<components::Transform> transform);
         void RemoveCollider(s_ptr<components::Collider> collider);
-       
-        
+    
         void CollisionCheckPBD(std::vector<pbd::Contact>& contacts);
         void Separation(s_ptr<components::Collider> a, s_ptr<components::Collider> b, float wa, float wb);
         void AddCollisionBetweenLayers(int layer_1, int layer_2);

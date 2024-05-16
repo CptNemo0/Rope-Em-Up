@@ -86,6 +86,7 @@ void ai::EnemyAIManager::UpdateEnemyStateMachine(s_ptr<EnemyStateMachine> machin
 	machine->extrapolation_ = (!machine->pursuit_ && ((choked_tentacles_ > choke_threshold_) && !(multi_chokes_ > multi_threshold_)));
 	machine->evasive_manoeuvres_ = ((choked_tentacles_ > choke_threshold_) && (multi_chokes_ > multi_threshold_));
 
+
 	//cout << machine->current_state_->Name() << endl;
 	machine->current_state_->Execute(machine.get());
 }
