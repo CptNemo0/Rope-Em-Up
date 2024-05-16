@@ -768,11 +768,6 @@ int main()
                 segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)rope_displacement_iterator);
                 rope_displacement_iterator++;
             }
-
-            /*for (int i = 0; i < rope.Size(); i++)
-            {
-                rope_segments[i]->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)i);
-            }*/
         }
         
 
@@ -780,18 +775,13 @@ int main()
 
 #pragma region Collisions and Physics
 
-        //FixOrientation(enemy_1);
-        //FixOrientation(enemy_2);
-        //FixOrientation(player_1);
-        //FixOrientation(player_2);
-
         Timer::UpdateTimer(fixed_update_timer, delta_time);
 
 #pragma endregion
 
 #pragma region GO Update and Draw
 
-        glViewport(0, 0, 1920, 1080);
+        //glViewport(0, 0, 1920, 1080);
 
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
@@ -872,6 +862,9 @@ int main()
         BindDefault();
         PostprocessingShader->Use();
         lbuffer.BindTextures(PostprocessingShader);
+        PostprocessingShader->SetFloat("if_time", glfwGetTime());
+       
+
         postprocessor.Draw();
         //////////////////////////////////
         
