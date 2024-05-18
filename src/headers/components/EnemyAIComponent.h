@@ -5,6 +5,7 @@
 #include "../ai/EnemyState.h"
 #include <memory>
 #include "../collisions/Raycast.h"
+#include "../ChokeList.h"
 namespace components
 {
 	class GameObject;

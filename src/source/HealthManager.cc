@@ -26,17 +26,24 @@ void HealthManager::RemoveHealthComponent(std::shared_ptr<components::HealthComp
 	if (it != health_components_.end())
 	{
 		health_components_.erase(it);
+		cout << "ERASING HC" << endl;
 	}
 }
 
 void HealthManager::DeathUpdate()
 {
+	int i = 0;
 	for (auto& h : health_components_)
 	{
+		if (h == nullptr)
+		{
+			continue;
+		}
 		if (h->health_ <= 0.0)
 		{
 			h->gameObject_.lock()->Destroy();
 		}
+		i++;
 	}
 }
 

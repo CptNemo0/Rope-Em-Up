@@ -440,7 +440,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 }
     
 
-void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, std::deque<w_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
+void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, std::vector<w_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
 {
     for (int i = 0; i < room.width; i++)
     {

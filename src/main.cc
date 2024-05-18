@@ -63,20 +63,11 @@
 #include "headers/GBuffer.h"
 #include "headers/SSAO.h"
 
+#include "headers/ChokeList.h"
+
 #include "headers/parsing/file_read.h"
 
-void FixOrientation(s_ptr<GameObject> go)
-{
-    auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
-    if (glm::length(current_forward))
-    {
-        current_forward = glm::normalize(current_forward);
-    }
-    float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
-    go->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
-}
-
-void BindDefault()
+static void BindDefault()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -237,6 +228,7 @@ int main()
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
     HealthManager::Initialize();
+    ChokeList::Initialize();
 
 #pragma region CamerasConfiguration
     auto camera = make_shared<llr::Camera>();
@@ -416,7 +408,7 @@ int main()
     rg_settings.enemies = 0;
 
     std::deque<w_ptr<GameObject>> room_parts;
-    std::deque<w_ptr<GameObject>> enemies_parts;
+    std::vector<w_ptr<GameObject>> enemies_parts;
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
 
@@ -809,6 +801,16 @@ int main()
 #pragma endregion
 
 #pragma region Collisions and Physics
+  
+        //////////////////////////////////////////
+        ///////// CLENUP ENEMIES VECTOR //////////
+        //////////////////////////////////////////
+        
+        if (glfwGetKey(window, GLFW_KEY_SPACE))
+        {
+            ChokeList::i_->Choke(10.0f);
+        }
+
         for (int i = 0; i < enemies_parts.size(); i++)
         {
             auto hc = enemies_parts[i].lock()->GetComponent<components::HealthComponent>();
@@ -818,6 +820,7 @@ int main()
                 i = i - 1;
             }
         }
+
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
 #pragma endregion
@@ -920,14 +923,14 @@ int main()
 
 #pragma region Interface
 
-       /* glDisable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
-        HUDshader->Use();
+        /*HUDshader->Use();
 
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
-        HUD_root->PropagateUpdate();
+        HUD_root->PropagateUpdate();*/
         
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
@@ -936,7 +939,7 @@ int main()
         HUDText_root->PropagateUpdate();
 
         glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);*/
+        glEnable(GL_DEPTH_TEST);
 
 #pragma endregion
 
@@ -1056,28 +1059,6 @@ int main()
         ImGui::Image((void*)(intptr_t)ssao_buffer.ssao_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
 
-        //ImGui::Begin("Room Generation");
-        //ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
-        //ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
-        //ImGui::SliderInt("Lamps", &rg_settings.lamps, 0, 10);
-        //ImGui::SliderInt("Clutter", &rg_settings.clutter, 0, 15);
-        //ImGui::SliderInt("Enemies", &rg_settings.enemies, 0, 15);
-        //if (ImGui::Button("Generate"))
-        //{
-        ////  // Usun obecny pokoj
-        //    for (auto& a : room_parts)
-        //    {
-        //        a.lock()->Destroy();
-        //    }
-        //    room_parts.clear();
-        //    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
-        //    generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
-
-        //    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
-        //    pbd::PBDManager::i_->set_walls(walls);
-        //}
-        //ImGui::End();
-
         ImGui::Begin("Rope Manager");
         ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 0.999f, "%0.3f");
         ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
@@ -1097,20 +1078,20 @@ int main()
         ImGui::End();
 
         ImGui::Begin("Healths");
-
         for (int i = 0; i < HealthManager::i_->health_components_.size(); i++)
         {
             string name = "health " + std::to_string(i);
             ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -1.0f, 20.0f, "%0.3f");
         }
-
         ImGui::End();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 #pragma endregion 
         glfwSwapBuffers(window);
     }
 
+    ChokeList::Destroy();
     HealthManager::Destroy();
     ai::EnemyAIManager::Destroy();
     pbd::PBDManager::Destroy();
