@@ -24,9 +24,12 @@ void main()
 	vec4 totalPosition = vec4(0.0);
     vec3 totalNormal = vec3(0.0);
 
-	 for (int i = 0; i &lt; MAX_BONE_INFLUENCE; i++) {
-        if (iv_boneIds[i] == -1) continue;
-        if (iv_boneIds[i] &gt;= MAX_BONES) {
+	 for (int i = 0; i < MAX_BONE_INFLUENCE; i++) 
+       {
+        if (iv_boneIds[i] == -1) 
+            continue;
+        if (iv_boneIds[i] >= MAX_BONES) 
+        {
             totalPosition = vec4(iv_position, 1.0);
             totalNormal = iv_normal;
             break;

@@ -80,7 +80,7 @@ int Bone::GetScaleIndex(float animationTime)
     assert(0);
 }
 
-glm::vec3 Bone::InterpolatePosition(float animationTime)
+glm::mat4  Bone::InterpolatePosition(float animationTime)
 {
     if (1 == m_NumPositions)
         return glm::translate(glm::mat4(1.0f), m_Positions[0].position);
@@ -94,7 +94,7 @@ glm::vec3 Bone::InterpolatePosition(float animationTime)
     return glm::translate(glm::mat4(1.0f), finalPosition);
 }
 
-glm::quat Bone::InterpolateRotation(float animationTime)
+glm::mat4  Bone::InterpolateRotation(float animationTime)
 {
     if (1 == m_NumRotations)
     {
@@ -112,7 +112,7 @@ glm::quat Bone::InterpolateRotation(float animationTime)
     return glm::toMat4(finalRotation);
 }
 
-glm::vec3 Bone::InterpolateScaling(float animationTime)
+glm::mat4  Bone::InterpolateScaling(float animationTime)
 {
     if (1 == m_NumScalings)
         return glm::scale(glm::mat4(1.0f), m_Scales[0].scale);

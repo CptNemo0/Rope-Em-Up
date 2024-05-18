@@ -3,11 +3,10 @@
 
 #include <vector>
 #include <assimp/scene.h>
-#include <list>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "AssimpGLMHelpers.h"
 
 struct KeyPosition
@@ -56,9 +55,9 @@ public:
     int GetScaleIndex(float animationTime);
 
 private:
-    glm::vec3 InterpolatePosition(float animationTime);
-	glm::quat InterpolateRotation(float animationTime);
-	glm::vec3 InterpolateScaling(float animationTime);
+    glm::mat4  InterpolatePosition(float animationTime);
+	glm::mat4  InterpolateRotation(float animationTime);
+	glm::mat4  InterpolateScaling(float animationTime);
     float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);
 };
 #endif // !BONE_H
