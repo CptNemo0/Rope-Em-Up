@@ -237,6 +237,8 @@ namespace generation
         void Generate();
     };
 
+    bool CheckGateProximity(glm::vec3 pos, Room& room, float proximity);
+
     void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 
     void BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, std::vector<w_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);

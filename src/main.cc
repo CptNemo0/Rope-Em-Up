@@ -404,7 +404,7 @@ int main()
     rg_settings.height = 2;
     rg_settings.lamps = 3;
     rg_settings.active_lamps = 2;
-    rg_settings.clutter = 5;
+    rg_settings.clutter = 0;
     rg_settings.enemies = 0;
 
     std::deque<w_ptr<GameObject>> room_parts;
@@ -808,7 +808,7 @@ int main()
         
         if (glfwGetKey(window, GLFW_KEY_SPACE))
         {
-            ChokeList::i_->Choke(10.0f);
+            ChokeList::i_->Choke(5.0f);
         }
 
         for (int i = 0; i < enemies_parts.size(); i++)
@@ -1077,11 +1077,19 @@ int main()
         }
         ImGui::End();
 
-        ImGui::Begin("Healths");
+        ImGui::Begin("Enemies");
         for (int i = 0; i < HealthManager::i_->health_components_.size(); i++)
         {
-            string name = "health " + std::to_string(i);
-            ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -1.0f, 20.0f, "%0.3f");
+            string name = "Enemy " + std::to_string(i) = "health" ;
+            ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -0.0f, 10.0f, "%0.1f");
+        }
+        ImGui::End();
+
+        ImGui::Begin("Choke List");
+        for (int i = 0; i < ChokeList::i_->health_components_.size(); i++)
+        {
+            string name = "Enemy " + std::to_string(i) = "health";
+            ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -0.0f, 10.0f, "%0.1f");
         }
         ImGui::End();
 

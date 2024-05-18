@@ -233,6 +233,55 @@ void generation::RoomGenerator::Generate()
 
 }   
 
+bool generation::CheckGateProximity(glm::vec3 pos, Room& room, float proximity)
+{
+    bool up = !room.up_gate;
+    bool down = !room.down_gate;
+    bool right = !room.right_gate;
+    bool left = !room.left_gate;
+
+    float p2 = proximity * proximity;
+
+    //up
+    if (room.up_gate)
+    {
+        float len = glm::length2(pos - room.up_gate_pos);
+        if (len < p2)
+        {
+            return false;
+        }
+    }
+    //down
+    if (room.down_gate)
+    {
+        float len = glm::length2(pos - room.down_gate_pos);
+        if (len < p2)
+        {
+            return false;
+        }
+    }
+    //right
+    if (room.right_gate)
+    {
+        float len = glm::length2(pos - room.right_gate_pos);
+        if (len < p2)
+        {
+            return false;
+        }
+    }
+    //left
+    if (room.left_gate)
+    {
+        float len = glm::length2(pos - room.left_gate_pos);
+        if (len < p2)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
 {
     room.up_walls_idx.clear();
@@ -384,10 +433,25 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 
         for (int i = 0; i < 3; i++)
         {
-            clutter_vector.push_back(top_pos + kCornerTopLeft[i]);
-            clutter_vector.push_back(top_pos + kCornerTopRight[i]);
-            clutter_vector.push_back(bot_pos + kCornerBotLeft[i]);
-            clutter_vector.push_back(bot_pos + kCornerBotRight[i]);
+            if (CheckGateProximity(top_pos + kCornerTopLeft[i], room, 2.5f))
+            {
+                clutter_vector.push_back(top_pos + kCornerTopLeft[i]);
+            }
+            
+            if (CheckGateProximity(top_pos + kCornerTopRight[i], room, 2.5f))
+            {
+                clutter_vector.push_back(top_pos + kCornerTopRight[i]);
+            }
+
+            if (CheckGateProximity(bot_pos + kCornerBotLeft[i], room, 2.5f))
+            {
+                clutter_vector.push_back(bot_pos + kCornerBotLeft[i]);
+            }
+
+            if (CheckGateProximity(bot_pos + kCornerBotRight[i], room, 2.5f))
+            {
+                clutter_vector.push_back(bot_pos + kCornerBotRight[i]);
+            }   
         }
     }
     for (int i = 0; i < room.height; i++)
@@ -397,10 +461,25 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 
         for (int i = 0; i < 3; i++)
         {
-            clutter_vector.push_back(left_pos + kCornerTopLeft[i]);
-            clutter_vector.push_back(right_pos + kCornerTopRight[i]);
-            clutter_vector.push_back(left_pos + kCornerBotLeft[i]);
-            clutter_vector.push_back(right_pos + kCornerBotRight[i]);
+            if (CheckGateProximity(left_pos + kCornerTopLeft[i], room, 2.5f))
+            {
+                clutter_vector.push_back(left_pos + kCornerTopLeft[i]);
+            }
+
+            if (CheckGateProximity(left_pos + kCornerTopLeft[i], room, 2.5f))
+            {
+                clutter_vector.push_back(left_pos + kCornerTopLeft[i]);
+            }
+
+            if (CheckGateProximity(left_pos + kCornerBotLeft[i], room, 2.5f))
+            {
+                clutter_vector.push_back(left_pos + kCornerBotLeft[i]);
+            }
+
+            if (CheckGateProximity(right_pos + kCornerBotRight[i], room, 2.5f))
+            {
+                clutter_vector.push_back(right_pos + kCornerBotRight[i]);
+            }
         }
     }
 
