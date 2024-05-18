@@ -824,7 +824,7 @@ int main()
 
 #pragma region GO Update and Draw
 
-        //glViewport(0, 0, 1920, 1080);
+        glViewport(0, 0, 1920, 1080);
 
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
