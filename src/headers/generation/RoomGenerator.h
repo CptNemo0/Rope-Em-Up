@@ -239,7 +239,7 @@ namespace generation
 
     void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 
-    void BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
+    void BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, std::deque<w_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
 
 }; // namespace generation
 

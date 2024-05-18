@@ -386,8 +386,6 @@ int main()
         room_obj->transform_->set_scale(glm::vec3(3.0f));
     }
 
-    
-
     generation::RoomModels models;
     models.walls.push_back(mod1_model);
     models.walls.push_back(mod2_model);
@@ -407,7 +405,6 @@ int main()
     models.clutter_c.push_back(boxes_1_c_model);
     models.clutter.push_back(boxes_3_model);
     models.clutter_c.push_back(boxes_3_c_model);
-
     models.enemies.push_back(enemy_model);
 
     generation::RoomGenerationSettings rg_settings;
@@ -419,12 +416,14 @@ int main()
     rg_settings.enemies = 0;
 
     std::deque<w_ptr<GameObject>> room_parts;
+    std::deque<w_ptr<GameObject>> enemies_parts;
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
 
     generation::GenerateRoom(*room, &rg_settings, &models);
 
-    generation::BuildRoom(*room, &models, room_parts, scene_root, GBufferPassShader);
+    //generation::BuildRoom(*room, &models, room_parts, scene_root, enemies_parts, GBufferPassShader);
+    generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
@@ -454,6 +453,11 @@ int main()
     );
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
+
+    for (int i = 0; i < 20; i++)
+    {
+        rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
+    }
 
     /* auto enemy_1 = GameObject::Create(scene_root);
     enemy_1->transform_->TeleportToPosition(glm::vec3(-10.0f, 0.0f, -10.0f));
@@ -631,19 +635,14 @@ int main()
 
         previous_time = current_time;
 
-        cout << HealthManager::i_->health_components_.size() << endl;
+        //cout << HealthManager::i_->health_components_.size() << endl;
     
         Timer::Update(delta_time);
-        steady_clock::time_point begin = steady_clock::now();
-        //collisions::ChokeCheck(enemy_1, gPRECISION, gPRECISION * 0.75f, 2.0f);
-        //collisions::ChokeCheck(enemy_2, gPRECISION, gPRECISION * 0.75f, 2.0f);
-        steady_clock::time_point end = steady_clock::now();
-
+       
+        
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
-
-
 
 #pragma region Rooms
 
@@ -728,7 +727,14 @@ int main()
                 a.lock() = nullptr;
             }
 
+            for (auto& e : enemies_parts)
+            {
+                e.lock()->Destroy();
+                e.lock() = nullptr;
+            }
+
             room_parts.clear();
+            enemies_parts.clear();
             //ai::EnemyAIManager::i_->enemy_ais_.clear();
 
             // Stworz nowy pokoj
@@ -741,7 +747,7 @@ int main()
                     generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
                     rg_settings.width++;
                 }
-                generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
+                generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
 
                 pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
                 pbd::PBDManager::i_->set_walls(walls);
@@ -803,7 +809,15 @@ int main()
 #pragma endregion
 
 #pragma region Collisions and Physics
-
+        for (int i = 0; i < enemies_parts.size(); i++)
+        {
+            auto hc = enemies_parts[i].lock()->GetComponent<components::HealthComponent>();
+            if (hc->health_ <= 0.0f)
+            {
+                enemies_parts.erase(enemies_parts.begin() + i);
+                i = i - 1;
+            }
+        }
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
 #pragma endregion
@@ -1042,27 +1056,27 @@ int main()
         ImGui::Image((void*)(intptr_t)ssao_buffer.ssao_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
 
-        ImGui::Begin("Room Generation");
-        ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
-        ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
-        ImGui::SliderInt("Lamps", &rg_settings.lamps, 0, 10);
-        ImGui::SliderInt("Clutter", &rg_settings.clutter, 0, 15);
-        ImGui::SliderInt("Enemies", &rg_settings.enemies, 0, 15);
-        if (ImGui::Button("Generate"))
-        {
-        //  // Usun obecny pokoj
-            for (auto& a : room_parts)
-            {
-                a.lock()->Destroy();
-            }
-            room_parts.clear();
-            generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
-            generation::BuildRoom(rlg.rooms[room->position], &models, room_parts, scene_root, GBufferPassShader);
+        //ImGui::Begin("Room Generation");
+        //ImGui::SliderInt("Width", &rg_settings.width, 2, 10);
+        //ImGui::SliderInt("Height", &rg_settings.height, 2, 10);
+        //ImGui::SliderInt("Lamps", &rg_settings.lamps, 0, 10);
+        //ImGui::SliderInt("Clutter", &rg_settings.clutter, 0, 15);
+        //ImGui::SliderInt("Enemies", &rg_settings.enemies, 0, 15);
+        //if (ImGui::Button("Generate"))
+        //{
+        ////  // Usun obecny pokoj
+        //    for (auto& a : room_parts)
+        //    {
+        //        a.lock()->Destroy();
+        //    }
+        //    room_parts.clear();
+        //    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+        //    generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
 
-            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
-            pbd::PBDManager::i_->set_walls(walls);
-        }
-        ImGui::End();
+        //    pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+        //    pbd::PBDManager::i_->set_walls(walls);
+        //}
+        //ImGui::End();
 
         ImGui::Begin("Rope Manager");
         ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 0.999f, "%0.3f");
@@ -1082,6 +1096,15 @@ int main()
         }
         ImGui::End();
 
+        ImGui::Begin("Healths");
+
+        for (int i = 0; i < HealthManager::i_->health_components_.size(); i++)
+        {
+            string name = "health " + std::to_string(i);
+            ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -1.0f, 20.0f, "%0.3f");
+        }
+
+        ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 #pragma endregion 

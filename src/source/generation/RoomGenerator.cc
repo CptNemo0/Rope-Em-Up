@@ -440,7 +440,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 }
     
 
-void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
+void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, std::deque<w_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
 {
     for (int i = 0; i < room.width; i++)
     {
@@ -544,6 +544,6 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
         enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
         enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
-        room_parts.push_back(enemy);
+        enemies.push_back(enemy);
     }
 }
