@@ -54,6 +54,8 @@
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
 
+#include "headers/HealthManager.h"
+
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
 
@@ -234,6 +236,7 @@ int main()
     pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
+    HealthManager::Initialize();
 
 #pragma region CamerasConfiguration
     auto camera = make_shared<llr::Camera>();
@@ -628,7 +631,7 @@ int main()
 
         previous_time = current_time;
 
-        //cout << pbd::PBDManager::i_->particles_.size() << endl;
+        cout << HealthManager::i_->health_components_.size() << endl;
     
         Timer::Update(delta_time);
         steady_clock::time_point begin = steady_clock::now();
@@ -802,7 +805,7 @@ int main()
 #pragma region Collisions and Physics
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
-
+        HealthManager::i_->DeathUpdate();
 #pragma endregion
 
 #pragma region GO Update and Draw
@@ -1085,6 +1088,7 @@ int main()
         glfwSwapBuffers(window);
     }
 
+    HealthManager::Destroy();
     ai::EnemyAIManager::Destroy();
     pbd::PBDManager::Destroy();
     collisions::CollisionManager::Destroy();

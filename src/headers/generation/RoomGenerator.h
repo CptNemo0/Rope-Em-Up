@@ -25,6 +25,7 @@
 #include <memory>
 #include <random>
 #include "../ai/EnemyAIManager.h"
+#include "../HealthManager.h"
 namespace generation
 {
     const float kModuleSize = 16.0f;

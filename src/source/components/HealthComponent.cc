@@ -1,5 +1,5 @@
 #include "../../headers/components/HealthComponent.h"
-
+#include "../../headers/HealthManager.h"
 namespace components
 {
 	//fraction should be from 0.0 do 1.0
@@ -23,10 +23,7 @@ namespace components
 	void HealthComponent::FroceDamage(float damage)
 	{
 		health_ -= damage;
-		if (health_ <= 0)
-		{
-			Die();
-		}
+		
 	}
 
 	void HealthComponent::ForceHeal(float heal)
@@ -44,11 +41,6 @@ namespace components
 
 	}
 
-	void HealthComponent::Die()
-	{
-		gameObject_.lock()->Destroy();
-	}
-
 	void HealthComponent::Start()
 	{
 	}
@@ -59,6 +51,7 @@ namespace components
 
 	void HealthComponent::Destroy()
 	{
+		HealthManager::i_->RemoveHealthComponent(shared_from_this());
 		std::cout << "Destroying HealthCompoent" << std::endl;
 	}
 
