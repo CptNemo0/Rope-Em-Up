@@ -31,6 +31,7 @@ void ai::EnemyAIManager::UpdateAI()
 {
 	for (auto& a : enemy_ais_)
 	{
+		a->CheckChoke();
 		UpdateEnemyStateMachine(a->state_machine_);
 	}
 }

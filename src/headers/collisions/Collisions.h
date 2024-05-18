@@ -15,6 +15,8 @@
 namespace collisions
 {
 	const float kCollisionSoftnes = 0.25f;
+	const float kChokeDistance = 1.5f;
+	const float kChokePrecision = 0.75;
 
 	struct AABB;
 	struct ConvexHull;

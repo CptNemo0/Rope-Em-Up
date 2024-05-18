@@ -23,7 +23,13 @@ void ai::IdleState::Execute(EnemyStateMachine* machine)
 {
 	if (machine->rest_timer_ < machine->vehicle_.rest_lenght)
 	{
-		machine->rest_timer_ += pbd::kMsPerUpdate;
+		if (!machine->is_choked_)
+		{
+			machine->rest_timer_ += pbd::kMsPerUpdate;
+		}
+		
+		machine->generator_->direction_ = glm::vec3(0.0f);
+		machine->generator_->magnitude_ = 0.0f;
 	}
 	else
 	{
@@ -37,7 +43,6 @@ void ai::IdleState::Execute(EnemyStateMachine* machine)
 	}
 }
 
-
 ai::PatrolState* ai::PatrolState::Instance()
 {
 	if (i_ == nullptr)
@@ -49,6 +54,10 @@ ai::PatrolState* ai::PatrolState::Instance()
 
 void ai::PatrolState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->is_choked_)
+	{
+		machine->current_state_ = IdleState::Instance();
+	}
 	if (machine->in_attack_range_)
 	{
 
@@ -89,6 +98,10 @@ ai::OnAlertState* ai::OnAlertState::Instance()
 
 void ai::OnAlertState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->is_choked_)
+	{
+		machine->current_state_ = IdleState::Instance();
+	}
 	if (machine->another_tentacle_is_choked_)
 	{
 		assert(machine->current_state_ && ArrayState::Instance());
@@ -122,6 +135,10 @@ ai::AttackState* ai::AttackState::Instance()
 
 void ai::AttackState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->is_choked_)
+	{
+		machine->current_state_ = IdleState::Instance();
+	}
 	cout << "ATTACK!!\n";
 	assert(machine->current_state_ && PatrolState::Instance());
 	machine->current_state_ = PatrolState::Instance();
@@ -138,6 +155,10 @@ ai::PursuitState* ai::PursuitState::Instance()
 
 void ai::PursuitState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->is_choked_)
+	{
+		machine->current_state_ = IdleState::Instance();
+	}
 	if (machine->in_attack_range_)
 	{
 		assert(machine->current_state_ && AttackState::Instance());
@@ -194,6 +215,10 @@ ai::ExtrapolationState* ai::ExtrapolationState::Instance()
 
 void ai::ExtrapolationState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->is_choked_)
+	{
+		machine->current_state_ = IdleState::Instance();
+	}
 	if (machine->in_attack_range_)
 	{
 		assert(machine->current_state_ && AttackState::Instance());
@@ -236,6 +261,10 @@ ai::EvasionState* ai::EvasionState::Instance()
 
 void ai::EvasionState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->is_choked_)
+	{
+		machine->current_state_ = IdleState::Instance();
+	}
 	if (machine->in_attack_range_)
 	{
 		assert(machine->current_state_ && AttackState::Instance());

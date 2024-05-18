@@ -4,7 +4,7 @@
 #include "Component.h"
 #include "../ai/EnemyState.h"
 #include <memory>
-
+#include "../collisions/Raycast.h"
 namespace components
 {
 	class GameObject;
@@ -15,6 +15,8 @@ namespace components
 		std::shared_ptr<ai::EnemyStateMachine> state_machine_;
 
 		EnemyAIComponent(std::shared_ptr<ai::EnemyStateMachine> state_machine) : state_machine_(state_machine) {};
+
+		void CheckChoke();
 
 		// Inherited via Component
 		void Start() override;
