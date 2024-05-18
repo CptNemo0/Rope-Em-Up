@@ -60,7 +60,7 @@ void components::GameplayCameraComponent::Update()
 	glm::vec3 directionToMidpoint = glm::normalize(midPoint - transfrom_->get_position());
 
 //// CHANGING POSITION BY HEIGHT AND DISTANCE OF CAMERA
-	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint;
+	glm::vec3 cameraPosition = midPoint + distance_ * directionToMidpoint * 0.5f;
 	gameObject_.lock()->transform_ = this->transfrom_;
 
 	//transfrom_->set_position(glm::vec3(cameraPosition.x ,height_, cameraPosition.z));

@@ -141,11 +141,11 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
                         }
                         else if (particle_a != nullptr && particle_b == nullptr)
                         {
-                            Separation(a, b, 1.0f, 0.0f);
+                            Separation(a, b, 1.0f * b->softness_, 0.0f);
                         }
                         else if (particle_a == nullptr && particle_b != nullptr)
                         {
-                            Separation(a, b, 0.0f, 1.0f);
+                            Separation(a, b, 0.0f, 1.0f * a->softness_);
                         }
                     }
                 }

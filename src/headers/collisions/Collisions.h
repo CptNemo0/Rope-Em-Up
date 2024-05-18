@@ -14,6 +14,8 @@
 
 namespace collisions
 {
+	const float kCollisionSoftnes = 0.25f;
+
 	struct AABB;
 	struct ConvexHull;
 	struct SeparationVectors;

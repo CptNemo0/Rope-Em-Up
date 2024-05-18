@@ -87,14 +87,17 @@ void components::PBDParticle::Start()
 
 void components::PBDParticle::Update()
 {
-	auto go = gameObject_.lock();
-	auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
-	if (glm::length(current_forward))
+	if (controllable_)
 	{
-		current_forward = glm::normalize(current_forward);
+		auto go = gameObject_.lock();
+		auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
+		if (glm::length(current_forward))
+		{
+			current_forward = glm::normalize(current_forward);
+		}
+		float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+		go->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
 	}
-	float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
-	go->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
 }
 
 components::PBDParticle::~PBDParticle()

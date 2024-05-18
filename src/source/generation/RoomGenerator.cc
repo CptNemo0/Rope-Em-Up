@@ -530,7 +530,8 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<Ga
         s_ptr<GameObject> clutter = GameObject::Create(scene_root);
         clutter->transform_->set_position(room.clutter_positions[i]);
         clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
-        //clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
+        clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter_c[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
+        clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
         room_parts.push_back(clutter);
     }
 

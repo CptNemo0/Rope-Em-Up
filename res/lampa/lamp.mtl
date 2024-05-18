@@ -1,0 +1,36 @@
+# Blender 4.1.1 MTL File: 'enviro.blend'
+# www.blender.org
+
+newmtl Material.001
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl lmap
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd lamp/lamp_albedo.png
+map_Ns lamp/lamp_roughness.png
+map_Pm lamp/lamp_metallic.png
+map_Bump -bm 20.000000 lamp/lamp_normal.png
+
+newmtl mtal
+Ns 410.764435
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3

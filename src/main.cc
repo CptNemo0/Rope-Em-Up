@@ -146,12 +146,20 @@ int main()
     const string kWallPath = "res/models/simple_wall.obj";
     const string kModule1Path = "res/models/module1.obj";
     const string kModule2Path = "res/models/enviroment/modules/module2.obj";
-    const string kPlaceholderLampPath = "res/models/enviroment/lamps/placeholder_kamp.obj";
     const string kSimpleFloodPath = "res/models/enviroment/floor/floor.obj";
     const string kTestBallPath = "res/models/test_ball.obj";
     const string kGatePath = "res/models/gate.obj";
     const string kBonePath = "res/pierdoly/bone.obj";
     const string kLeafsPath = "res/pierdoly/leafs.obj";
+    const string kLampPath = "res/lampa/lamp.obj";
+
+    const string kBoxPath = "res/boxes/box.obj";
+    const string kBoxCPath = "res/boxes/box_c.obj";
+    const string kBoxes1Path = "res/boxes/boxes1.obj";
+    const string kBoxes1CPath = "res/boxes/boxes_1_c.obj";
+    const string kBoxes2Path = "res/boxes/boxes2.obj";
+    const string kBoxes3Path = "res/boxes/boxes3.obj";
+    const string kBoxes3CPath = "res/boxes/boxes_3_c.obj";
 
     //Main modules
     const string kMod1Path = "res/Modules/mod1.obj";
@@ -335,9 +343,17 @@ int main()
     auto simple_floor_model = make_shared<Model>(kSimpleFloodPath);
     auto test_ball_model = make_shared<Model>(kTestBallPath);
     auto gate_model = make_shared<Model>(kGatePath);
-    auto lamp_model = make_shared<Model>(kPlaceholderLampPath);
+    auto lamp_model = make_shared<Model>(kLampPath);
+
     auto bone_model = make_shared<Model>(kBonePath);
     auto leafs_model = make_shared<Model>(kLeafsPath);
+    auto box_model = make_shared<Model>(kBoxPath);
+    auto box_c_model = make_shared<Model>(kBoxCPath);
+    auto boxes_1_model = make_shared<Model>(kBoxes1Path);
+    auto boxes_1_c_model = make_shared<Model>(kBoxes1CPath);
+    auto boxes_2_model = make_shared<Model>(kBoxes2Path);
+    auto boxes_3_model = make_shared<Model>(kBoxes3Path);
+    auto boxes_3_c_model = make_shared<Model>(kBoxes3CPath);
 
     // Main modules
     auto mod1_model = make_shared<Model>(kMod1Path);
@@ -367,6 +383,8 @@ int main()
         room_obj->transform_->set_scale(glm::vec3(3.0f));
     }
 
+    
+
     generation::RoomModels models;
     models.walls.push_back(mod1_model);
     models.walls.push_back(mod2_model);
@@ -379,6 +397,14 @@ int main()
     models.gates.push_back(gate_model);
     models.lamps.push_back(lamp_model);
     models.clutter.push_back(bone_model);
+    models.clutter_c.push_back(bone_model);
+    models.clutter.push_back(box_model);
+    models.clutter_c.push_back(box_c_model);
+    models.clutter.push_back(boxes_1_model);
+    models.clutter_c.push_back(boxes_1_c_model);
+    models.clutter.push_back(boxes_3_model);
+    models.clutter_c.push_back(boxes_3_c_model);
+
     models.enemies.push_back(enemy_model);
 
     generation::RoomGenerationSettings rg_settings;

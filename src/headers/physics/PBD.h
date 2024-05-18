@@ -24,6 +24,8 @@ namespace components
 		glm::vec3 velocity_;
 		glm::vec3 forces_;
 
+		bool controllable_ = true;
+
 		PBDParticle(float mass, float damping_factor, s_ptr<components::Transform> transform) : 
 		mass_(mass), 
 		damping_factor_(damping_factor), 

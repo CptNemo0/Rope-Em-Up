@@ -22,6 +22,7 @@ namespace components
 		s_ptr<collisions::AABB> bp_collider_;
 		s_ptr<collisions::ConvexHull> np_collider_;
 		int layer_;
+		float softness_ = 1.0f;
 
 		Collider(int layer, int precision, const s_ptr<Mesh> mesh, s_ptr<Transform> transform_);
 		~Collider() = default;
