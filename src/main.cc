@@ -325,8 +325,8 @@ int main()
 
     auto cube_model = make_shared<Model>(kCubeMeshPath);
     auto player_model = make_shared<Model>(kPlayerMeshPath);
-    /*auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
-    auto M_player_model = make_shared<Model>(lMalePlayerMeshPath)*/;
+    //auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
+    auto M_player_model = make_shared<Model>(lMalePlayerMeshPath);
     auto debug_model = make_shared<Model>(kDebugMeshPath);
     auto enemy_model = make_shared<Model>(kEnemyMeshPath);
     auto wall_model = make_shared<Model>(kWallPath);
@@ -401,8 +401,8 @@ int main()
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
-    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
+    player_1->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, M_player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
@@ -781,7 +781,7 @@ int main()
 
 #pragma region GO Update and Draw
 
-        //glViewport(0, 0, 1920, 1080);
+        glViewport(0, 0, 1920, 1080);
 
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
