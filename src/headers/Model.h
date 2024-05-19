@@ -34,9 +34,6 @@ public:
 		void processNode(aiNode* node, const aiScene* scene);
 		s_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
 		std::vector <Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
-		void SetVertexBoneDataToDefault(Vertex& vertex);
-		//void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
-		//void ExtractBoneWeightForVertices(std::vector& vertices, aiMesh* mesh, const aiScene* scene);
 
 
 		/*skeleton*/
@@ -45,6 +42,11 @@ public:
 
 		auto& GetBoneInfoMap() { return m_BoneInfoMap; }
 		int& GetBoneCount() { return m_BoneCounter; }
+
+		void SetVertexBoneDataToDefault(Vertex& vertex);
+		void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
+		void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
+		
 };
 
 

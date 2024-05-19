@@ -328,8 +328,8 @@ int main()
 
     auto cube_model = make_shared<Model>(kCubeMeshPath);
     auto player_model = make_shared<Model>(kPlayerMeshPath);
-    /*auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
-    auto M_player_model = make_shared<Model>(lMalePlayerMeshPath)*/;
+    //auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
+    auto M_player_model = make_shared<Model>(lMalePlayerMeshPath);
     auto debug_model = make_shared<Model>(kDebugMeshPath);
     auto enemy_model = make_shared<Model>(kEnemyMeshPath);
     auto wall_model = make_shared<Model>(kWallPath);
