@@ -1,24 +1,21 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define GLM_ENABLE_EXPERIMENTAL
 
+#include "ft2build.h"
+#include FT_FREETYPE_H
 #include <chrono>
 #include <ctime>
 #include <iostream>
 #include <memory>
 #include <ratio>
 #include <stdlib.h>
-
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/vector_angle.hpp"
 #include "stb_easy_font.h"
-#include "ft2build.h"
-#include FT_FREETYPE_H
-
 #include "headers/global.h"
-
 #include "headers/Camera.h"
 #include "headers/collisions/Collider.h"
 #include "headers/collisions/Collisions.h"
@@ -47,31 +44,19 @@
 #include "headers/audio/Sounds.h"
 #include "headers/components/AudioSource.h"
 #include "headers/CameraManager.h"
-
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
 #include "headers/ai/EnemyAIManager.h"
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
-
 #include "headers/HealthManager.h"
-
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
-
 #include "headers/LBuffer.h"
 #include "headers/GBuffer.h"
 #include "headers/SSAO.h"
-
 #include "headers/ChokeList.h"
-
 #include "headers/parsing/file_read.h"
-
-static void BindDefault()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
 
 int main()
 {
@@ -598,7 +583,6 @@ int main()
         //cout << HealthManager::i_->health_components_.size() << endl;
     
         Timer::Update(delta_time);
-       
         
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         input::InputManager::i_->Update();
@@ -813,7 +797,13 @@ int main()
 
         ParticleEmitterManager::i_->Draw();
         
+        BackgroundShader->Use();
+        BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+
+        cubemap->RenderCube();
+
         glDisable(GL_BLEND);
+
         //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
@@ -865,27 +855,17 @@ int main()
         LBufferPassShader->SetFloat("spotLight[0].constant", 1.0f);
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.045f);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.0075f);
-
-
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
-
         lbuffer.Draw();
         //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
-        BindDefault();
+        postprocessor.Bind();
         PostprocessingShader->Use();
         lbuffer.BindTextures(PostprocessingShader);
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
-        
-
         postprocessor.Draw();
         //////////////////////////////////
-        
-        BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
-        
-        cubemap->RenderCube();
         
 #pragma endregion
 

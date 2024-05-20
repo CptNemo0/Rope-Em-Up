@@ -17,10 +17,6 @@ namespace ppc
 
         unsigned int vao_;
         unsigned int vbo_;
-        unsigned int framebuffer_;
-        unsigned int texture_color_buffer_;
-        unsigned int texture_depth_buffer_;
-        unsigned int rbo_;
 
         float gamma_;
         float brightness_;
