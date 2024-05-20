@@ -35,6 +35,9 @@ void collisions::CollisionManager::RemoveCollider(s_ptr<components::Collider> c)
 
 void collisions::CollisionManager::Separation(s_ptr<components::Collider> a, s_ptr<components::Collider> b, float wa, float wb)
 {
+    auto atmp = a->transform_->get_predicted_position();
+    auto btmp = b->transform_->get_predicted_position();
+
     auto separation_vector = GetSeparatingVector(a->np_collider_,
         a->transform_->get_predicted_position(),
         b->np_collider_,
@@ -42,6 +45,18 @@ void collisions::CollisionManager::Separation(s_ptr<components::Collider> a, s_p
    
     a->transform_->set_predicted_position(a->transform_->get_predicted_position() + 2.0f * wa * separation_vector.sep_a);
     b->transform_->set_predicted_position(b->transform_->get_predicted_position() + 2.0f * wb * separation_vector.sep_b);
+
+    bool p1x = !isnormal(a->transform_->get_predicted_position().x);
+    bool p1z = !isnormal(a->transform_->get_predicted_position().z);
+    bool p2x = !isnormal(b->transform_->get_predicted_position().x);
+    bool p2z = !isnormal(b->transform_->get_predicted_position().z);
+
+    if (p1x || p1z || p2x || p2z)
+    {
+        cout << atmp.x << " " << atmp.z << endl;
+        cout << btmp.x << " " << btmp.z << endl;
+        cout << "UPS!" << endl;
+    }
 
     a->PredictColliders();
     b->PredictColliders();

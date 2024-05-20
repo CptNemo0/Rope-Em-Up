@@ -372,6 +372,14 @@ namespace collisions
 	{
 		SeparationVectors return_value;
 
+		if (a == b)
+		{
+			return_value.sep_a = glm::vec3(0.0f);
+			return_value.sep_b = glm::vec3(0.0f);
+			cout << "TUBRO ROZWIAZANIE\n";
+			return return_value;
+		}
+
 		glm::vec3 center_diff = a - b;
 
 		auto fp = Find2FarthestPoints(hull_a, hull_b, center_diff);

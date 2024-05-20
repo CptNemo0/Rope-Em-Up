@@ -53,19 +53,21 @@ void components::PBDParticle::DampVelocity()
 
 void components::PBDParticle::UpdateVelocity(float t)
 {
+	//auto b = forces_;
 	ClampElementwise(forces_, 3000.0f, -3000.0f);
-	bool p1x = isnan(forces_.x);
+	/*bool p1x = isnan(forces_.x);
 	bool p1z = isnan(forces_.z);
 	if (p1x || p1z)
 	{
 		cout << "TERAZ CIE MAM" << endl;
+		LogVec3(b);
 		LogVec3(forces_);
 		LogVec3(velocity_);
 		LogVec3(transform_->get_position());
 		LogVec3(transform_->get_previous_position());
 		LogVec3(transform_->get_predicted_position());
 		exit(-124);
-	}
+	}*/
 
 	velocity_ = (transform_->get_position() - transform_->get_previous_position()) / t + t * inverse_mass_ * forces_;
 	

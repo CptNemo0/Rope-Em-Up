@@ -518,97 +518,14 @@ int main()
 
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, player_1, player_2]()
     {
-        bool p1x = !isnormal(-player_1->transform_->get_position().x);
-        bool p1z = !isnormal(-player_1->transform_->get_position().z);
-        bool p2x = !isnormal(-player_2->transform_->get_position().x);
-        bool p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 1" << endl;
-        }
         ai::EnemyAIManager::i_->UpdateAI();
-
-        p1x = !isnormal(-player_1->transform_->get_position().x);
-        p1z = !isnormal(-player_1->transform_->get_position().z);
-        p2x = !isnormal(-player_2->transform_->get_position().x);
-        p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 2" << endl;
-        }
-
         pbd::PBDManager::i_->GeneratorUpdate();
-
-        p1x = !isnormal(-player_1->transform_->get_position().x);
-        p1z = !isnormal(-player_1->transform_->get_position().z);
-        p2x = !isnormal(-player_2->transform_->get_position().x);
-        p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 3" << endl;
-        }
-
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
-
-        p1x = !isnormal(-player_1->transform_->get_position().x);
-        p1z = !isnormal(-player_1->transform_->get_position().z);
-        p2x = !isnormal(-player_2->transform_->get_position().x);
-        p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 4" << endl;
-        }
         collisions::CollisionManager::i_->PredictColliders();
-
-        p1x = !isnormal(-player_1->transform_->get_position().x);
-        p1z = !isnormal(-player_1->transform_->get_position().z);
-        p2x = !isnormal(-player_2->transform_->get_position().x);
-        p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 5" << endl;
-        }
         collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
-
-        p1x = !isnormal(-player_1->transform_->get_position().x);
-        p1z = !isnormal(-player_1->transform_->get_position().z);
-        p2x = !isnormal(-player_2->transform_->get_position().x);
-        p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 6" << endl;
-        }
         pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
-
-        p1x = !isnormal(-player_1->transform_->get_position().x);
-        p1z = !isnormal(-player_1->transform_->get_position().z);
-        p2x = !isnormal(-player_2->transform_->get_position().x);
-        p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 7" << endl;
-        }
         pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
-
-        p1x = !isnormal(-player_1->transform_->get_position().x);
-        p1z = !isnormal(-player_1->transform_->get_position().z);
-        p2x = !isnormal(-player_2->transform_->get_position().x);
-        p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 8" << endl;
-        }
-        pbd::PBDManager::i_->ClearContacts();
-
-        p1x = !isnormal(-player_1->transform_->get_position().x);
-        p1z = !isnormal(-player_1->transform_->get_position().z);
-        p2x = !isnormal(-player_2->transform_->get_position().x);
-        p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN W TIMERZE 9" << endl;
-        }
-        
+        pbd::PBDManager::i_->ClearContacts(); 
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);
@@ -767,15 +684,6 @@ int main()
             glm::vec3 player_2_pos = glm::vec3(0.0f);
             int input_door = 10 * move_direction.x + move_direction.y;
 
-            bool p1x = !isnormal(-player_1->transform_->get_position().x);
-            bool p1z = !isnormal(-player_1->transform_->get_position().z);
-            bool p2x = !isnormal(-player_2->transform_->get_position().x);
-            bool p2z = !isnormal(-player_2->transform_->get_position().z);
-            if (p1x || p1z || p2x || p2z)
-            {
-                cout << "NAN PRZED TELEPORTACJA NA POZYCJACH" << endl;
-            }
-
             switch (input_door) 
             {
                 case -1: // wychodzi gora wychodzi dolem
@@ -809,15 +717,6 @@ int main()
                     break;
             }
 
-            p1x = !isnormal(-player_1->transform_->get_position().x);
-            p1z = !isnormal(-player_1->transform_->get_position().z);
-            p2x = !isnormal(-player_2->transform_->get_position().x);
-            p2z = !isnormal(-player_2->transform_->get_position().z);
-            if (p1x || p1z || p2x || p2z)
-            {
-                cout << "NAN PO TELEPORTACJA NA POZYCJACH" << endl;
-            }
-
             //przesun line
             auto player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
             glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
@@ -828,15 +727,6 @@ int main()
             {
                 segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)rope_displacement_iterator);
                 rope_displacement_iterator++;
-            }
-
-            p1x = !isnormal(-player_1->transform_->get_position().x);
-            p1z = !isnormal(-player_1->transform_->get_position().z);
-            p2x = !isnormal(-player_2->transform_->get_position().x);
-            p2z = !isnormal(-player_2->transform_->get_position().z);
-            if (p1x || p1z || p2x || p2z)
-            {
-                cout << "NAN PO TELEPORTACJI LINY" << endl;
             }
         }
         
@@ -849,20 +739,9 @@ int main()
         ///////// CLENUP ENEMIES VECTOR //////////
         //////////////////////////////////////////
    
+        if (glfwGetKey(window, GLFW_KEY_SPACE))
         {
-            bool p1x = !isnormal(-player_1->transform_->get_position().x);
-            bool p1z = !isnormal(-player_1->transform_->get_position().z);
-            bool p2x = !isnormal(-player_2->transform_->get_position().x);
-            bool p2z = !isnormal(-player_2->transform_->get_position().z);
-            if (p1x || p1z || p2x || p2z)
-            {
-                cout << "NAN PRZED DUSZENIU NA POZYCJACH" << endl;
-            }
-            if (glfwGetKey(window, GLFW_KEY_SPACE))
-            {
-                ChokeList::i_->Choke(5.0f);
-
-            }
+            ChokeList::i_->Choke(5.0f);
 
             for (int i = 0; i < enemies_parts.size(); i++)
             {
@@ -873,24 +752,6 @@ int main()
                     i = i - 1;
                 }
             }
-            p1x = !isnormal(-player_1->transform_->get_position().x);
-            p1z = !isnormal(-player_1->transform_->get_position().z);
-            p2x = !isnormal(-player_2->transform_->get_position().x);
-            p2z = !isnormal(-player_2->transform_->get_position().z);
-            if (p1x || p1z || p2x || p2z)
-            {
-                cout << "NAN PO DUSZENIU NA POZYCJACH" << endl;
-            }
-            
-        }   
-
-        bool p1x = !isnormal(-player_1->transform_->get_position().x);
-        bool p1z = !isnormal(-player_1->transform_->get_position().z);
-        bool p2x = !isnormal(-player_2->transform_->get_position().x);
-        bool p2z = !isnormal(-player_2->transform_->get_position().z);
-        if (p1x || p1z || p2x || p2z)
-        {
-            cout << "NAN PRZED UPDATEM NA POZYCJACH" << endl;
         }
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
