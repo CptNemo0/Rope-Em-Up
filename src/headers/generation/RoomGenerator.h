@@ -10,6 +10,9 @@
 #include <array>
 #include <limits>
 #include <random>
+#include <memory>
+#include <random>
+#include <vector>
 
 #include "../global.h"
 #include "../Random.h"
@@ -22,10 +25,10 @@
 #include "../collisions/Collider.h"
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"
-#include <memory>
-#include <random>
 #include "../ai/EnemyAIManager.h"
 #include "../HealthManager.h"
+#include "../GameObject.h"
+
 namespace generation
 {
     const float kModuleSize = 16.0f;
@@ -179,35 +182,35 @@ namespace generation
         }
     };
 
-    static inline void CleanUpEnemiesVecotr(Room* room)
+    static inline void CleanUpEnemiesVecotr(Room& room)
     {
-        for (int i = 0; i < room->enemies.size(); i++)
+        for (int i = 0; i < Room::enemies.size(); i++)
         {
-            auto hc = room->enemies[i].lock()->GetComponent<components::HealthComponent>();
+            auto hc = Room::enemies[i].lock()->GetComponent<components::HealthComponent>();
             if (hc->health_ <= 0.0f)
             {
-                room->enemies.erase(room->enemies.begin() + i);
+                Room::enemies.erase(Room::enemies.begin() + i);
                 i = i - 1;
             }
         }
     }
 
-    static inline void DeleteCurrentRoom(Room* room)
+    static inline void DeleteCurrentRoom(Room& room)
     {
-        for (auto& a : room->room_parts)
+        for (auto& a : Room::room_parts)
         {
             a.lock()->Destroy();
             a.lock() = nullptr;
         }
 
-        for (auto& e : room->enemies)
+        for (auto& e : Room::enemies)
         {
             e.lock()->Destroy();
             e.lock() = nullptr;
         }
 
-        room->room_parts.clear();
-        room->enemies.clear();
+        Room::room_parts.clear();
+        Room::enemies.clear();
     }
 
     static inline glm::ivec2 GetMoveDirection(Room* room, std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2)
@@ -328,6 +331,8 @@ namespace generation
     void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 
     void BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, std::vector<w_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
+
+    void BuildRoom(const Room& room, RoomModels* rm, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
 
 }; // namespace generation
 

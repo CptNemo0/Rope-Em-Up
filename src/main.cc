@@ -389,7 +389,7 @@ int main()
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     generation::GenerateRoom(*room, &rg_settings, &models);
-    generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
+    generation::BuildRoom(*room, &models, scene_root, GBufferPassShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
@@ -576,8 +576,6 @@ int main()
         #endif
 
         previous_time = current_time;
-
-        //cout << HealthManager::i_->health_components_.size() << endl;
     
         Timer::Update(delta_time);
         
@@ -591,77 +589,19 @@ int main()
         glm::ivec2 current_room_pos = room->position;
         glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
         glm::ivec2 next_room_pos = current_room_pos + move_direction;
-        
-
-       /* if (room->up_gate)
-        {
-            auto p1l = glm::length2(room->up_gate_pos - player_1->transform_->get_global_position());
-            auto p2l = glm::length2(room->up_gate_pos - player_2->transform_->get_global_position());
-
-            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
-            {
-                cout << "GO UP!!!" << endl;
-                move_direction = glm::ivec2(0, -1);
-            }
-            
-        }
-        if (room->right_gate)
-        {
-            auto p1l = glm::length2(room->right_gate_pos - player_1->transform_->get_global_position());
-            auto p2l = glm::length2(room->right_gate_pos - player_2->transform_->get_global_position());
-
-            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
-            {
-                cout << "GO RIGHT!!!" << endl;
-                move_direction = glm::ivec2(-1, 0);
-            }
-        }
-        if (room->down_gate)
-        {
-            auto p1l = glm::length2(room->down_gate_pos - player_1->transform_->get_global_position());
-            auto p2l = glm::length2(room->down_gate_pos - player_2->transform_->get_global_position());
-
-            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
-            {
-                cout << "GO DOWN!!!" << endl;
-                move_direction = glm::ivec2(0, 1);
-            }
-        }
-        if (room->left_gate)
-        {
-            auto p1l = glm::length2(room->left_gate_pos - player_1->transform_->get_global_position());
-            auto p2l = glm::length2(room->left_gate_pos - player_2->transform_->get_global_position());
-
-            if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
-            {
-                cout << "GO LEFT!!!" << endl;
-                move_direction = glm::ivec2(1, 0);
-            }
-        }*/
 
         if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
         {
             system("CLS");
-            rg_settings.lamps = random::RandInt(1, 10);
-            rg_settings.enemies = random::RandInt(1, 7);
-            rg_settings.clutter = random::RandInt(1, 10);
-            rg_settings.width = random::RandInt(1, 4);
-            rg_settings.height = random::RandInt(1, 4);
+
+            rg_settings.clutter = random::RandInt(0, 10);
+            rg_settings.width = random::RandInt(0, 10);
+            rg_settings.height = random::RandInt(0, 10);
+            rg_settings.enemies = random::RandInt(0, 10);
+            rg_settings.lamps = random::RandInt(4, 10);
+
             // Usun obecny pokoj
-            for (auto& a : room_parts)
-            {
-                a.lock()->Destroy();
-                a.lock() = nullptr;
-            }
-
-            for (auto& e : enemies_parts)
-            {
-                e.lock()->Destroy();
-                e.lock() = nullptr;
-            }
-
-            room_parts.clear();
-            enemies_parts.clear();
+            generation::DeleteCurrentRoom(*room);
 
             // Stworz nowy pokoj
             room = &rlg.rooms[next_room_pos];
@@ -671,7 +611,8 @@ int main()
                 generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
                 rg_settings.width++;
             }
-            generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
+
+            generation::BuildRoom(*room, &models, scene_root, GBufferPassShader);
 
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
@@ -719,7 +660,12 @@ int main()
 
             //przesun line
             auto player_distance = glm::distance(player_1->transform_->get_position(), player_2->transform_->get_position());
-            glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
+            
+            glm::vec3 player_dir = glm::vec3(0.0f);
+            if (player_distance != 0.0f)
+            {
+                glm::vec3 player_dir = glm::normalize(player_2->transform_->get_position() - player_1->transform_->get_position());
+            }
             float step = player_distance / (float)rope.Size();
 
             int rope_displacement_iterator = 0;
@@ -735,23 +681,11 @@ int main()
 
 #pragma region Collisions and Physics
   
-        //////////////////////////////////////////
-        ///////// CLENUP ENEMIES VECTOR //////////
-        //////////////////////////////////////////
-   
         if (glfwGetKey(window, GLFW_KEY_SPACE))
         {
             ChokeList::i_->Choke(5.0f);
 
-            for (int i = 0; i < enemies_parts.size(); i++)
-            {
-                auto hc = enemies_parts[i].lock()->GetComponent<components::HealthComponent>();
-                if (hc->health_ <= 0.0f)
-                {
-                    enemies_parts.erase(enemies_parts.begin() + i);
-                    i = i - 1;
-                }
-            }
+            generation::CleanUpEnemiesVecotr(*room);
         }
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
