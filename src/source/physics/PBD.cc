@@ -246,15 +246,15 @@ void pbd::WallConstraint::Enforce(s_ptr<components::PBDParticle> particle)
 }
 
 
-pbd::PBDManager::PBDManager(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall)
+pbd::PBDManager::PBDManager(PBDManagerInitStruct& init)
 {
 	particles_ = std::deque<s_ptr<components::PBDParticle>>();
 	generator_registry_ = std::vector<pbd::FGRRecord>();
 	constraints_ = std::deque<s_ptr<pbd::RopeConstraint>>();
 	contacts_ = std::vector<pbd::Contact>();
-	solver_iterations_ = it;
-	coeffiecent_of_restitution_ = coeffiecent_of_restitution;
-	coeffiecent_of_restitution_wall_ = coeffiecent_of_restitution_wall;
+	solver_iterations_ = init.it;
+	coeffiecent_of_restitution_ = init.coeffiecent_of_restitution;
+	coeffiecent_of_restitution_wall_ = init.coeffiecent_of_restitution_wall;
 }
 
 void pbd::PBDManager::RemoveRecord(s_ptr<ForceGenerator> g)

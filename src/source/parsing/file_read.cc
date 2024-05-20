@@ -79,3 +79,36 @@ void LoadRoomLayoutGenerationSettingsInitStruct(const string& path, generation::
 	ini.clear();
 	file.~INIFile();
 }
+
+void LoadRoomGenerationSettingsInitStruct(const string& path, generation::RoomGenerationSettings& target)
+{
+	mINI::INIFile file(path);
+	mINI::INIStructure ini;
+
+	file.read(ini);
+
+	target.width = std::stoi(ini["RoomGenerationSettings"]["width"]);
+	target.height = std::stoi(ini["RoomGenerationSettings"]["height"]);
+	target.lamps = std::stoi(ini["RoomGenerationSettings"]["lamps"]);
+	target.active_lamps = std::stoi(ini["RoomGenerationSettings"]["active_lamps"]);
+	target.clutter = std::stoi(ini["RoomGenerationSettings"]["clutter"]);
+	target.enemies = std::stoi(ini["RoomGenerationSettings"]["enemies"]);
+
+	ini.clear();
+	file.~INIFile();
+}
+
+void LoadPBDManagerInitStruct(const string& path, pbd::PBDManagerInitStruct& target)
+{
+	mINI::INIFile file(path);
+	mINI::INIStructure ini;
+
+	file.read(ini);
+
+	target.it = std::stoi(ini["PBDManagerInitStruct"]["it"]);
+	target.coeffiecent_of_restitution = std::stof(ini["PBDManagerInitStruct"]["coeffiecent_of_restitution"]);
+	target.coeffiecent_of_restitution_wall = std::stof(ini["PBDManagerInitStruct"]["coeffiecent_of_restitution_wall"]);
+
+	ini.clear();
+	file.~INIFile();
+}

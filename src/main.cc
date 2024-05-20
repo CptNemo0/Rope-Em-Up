@@ -170,8 +170,9 @@ int main()
     const string kEnemyAiInitPath = "res/config/EnemyAiInit.ini";
     const string kVehicleInitPath = "res/config/VehicleInit.ini";
     const string kRoomLayoutGenerationSettingsInitPath = "res/config/RoomLayoutGenerationSettingsInit.ini";
-
-#pragma endregion Resouces Path
+    const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
+    const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
+#pragma endregion 
     /////
     
     audio::AudioManager::Initialize();
@@ -189,14 +190,20 @@ int main()
 
     srand(static_cast <unsigned> (time(0)));
     ///// AI SETTINGS
-#pragma region enemy vehicle settitngs
+#pragma region Loading Settings
 
     Vehicle enemy_vehicle_template;
-    LoadVehicleStruct(kVehicleInitPath, enemy_vehicle_template);
     ai::EnemyAIManagerInitStruct enemy_ai_init;
+    generation::RoomLayoutGenerationSettings rlgs;
+    generation::RoomGenerationSettings rg_settings;
+    pbd::PBDManagerInitStruct pbd_settings;
+    LoadVehicleStruct(kVehicleInitPath, enemy_vehicle_template);
     LoadEnemyAiManagerInitStruct(kEnemyAiInitPath, enemy_ai_init);
+    LoadRoomLayoutGenerationSettingsInitStruct(kRoomLayoutGenerationSettingsInitPath, rlgs);
+    LoadRoomGenerationSettingsInitStruct(kRoomGenerationSettingsInitPath, rg_settings);
+    LoadPBDManagerInitStruct(kPBDManagerInitSettingsPath, pbd_settings);
 
-#pragma endregion enemy vehicle settings
+#pragma endregion
 
     GLFWwindow* window = nullptr;
     GLFWmonitor* monitor = nullptr;
@@ -224,7 +231,7 @@ int main()
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(2, 2);
 
-    pbd::PBDManager::Initialize(3, 0.5f, 0.8f);
+    pbd::PBDManager::Initialize(pbd_settings);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
     HealthManager::Initialize();
@@ -260,11 +267,12 @@ int main()
 
     s_ptr<llr::Camera>* activeCamera = &camera;
 
-#pragma endregion CamerasConfiguration
-
     auto projection_matrix = glm::perspective(glm::radians((*activeCamera)->get_fov()), (*activeCamera)->get_aspect_ratio(), (*activeCamera)->get_near(), (*activeCamera)->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
 
+#pragma endregion CamerasConfiguration
+
+#pragma region Shaders
     auto HUDshader = make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
     auto HUDTextShader = make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
     auto PBRShader = make_shared<Shader>(kPBRVertexShaderPath, kPBRFragmentShaderPath);
@@ -322,14 +330,12 @@ int main()
 
 #pragma endregion Lights
     
-
-
     auto test_model = make_shared<Model>(kTestPath);
 
     auto cube_model = make_shared<Model>(kCubeMeshPath);
     auto player_model = make_shared<Model>(kPlayerMeshPath);
     //auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
-    auto M_player_model = make_shared<Model>(lMalePlayerMeshPath);
+    //auto M_player_model = make_shared<Model>(lMalePlayerMeshPath);
     auto debug_model = make_shared<Model>(kDebugMeshPath);
     auto enemy_model = make_shared<Model>(kEnemyMeshPath);
     auto wall_model = make_shared<Model>(kWallPath);
@@ -361,8 +367,7 @@ int main()
 
     auto scene_root = GameObject::Create();
 
-    generation::RoomLayoutGenerationSettings rlgs;
-    LoadRoomLayoutGenerationSettingsInitStruct(kRoomLayoutGenerationSettingsInitPath, rlgs);
+    
 
     generation::RoomLayoutGenerator rlg;
     std::deque<w_ptr<GameObject>> room_objects;
@@ -399,13 +404,7 @@ int main()
     models.clutter_c.push_back(boxes_3_c_model);
     models.enemies.push_back(enemy_model);
 
-    generation::RoomGenerationSettings rg_settings;
-    rg_settings.width = 2;
-    rg_settings.height = 2;
-    rg_settings.lamps = 3;
-    rg_settings.active_lamps = 2;
-    rg_settings.clutter = 0;
-    rg_settings.enemies = 0;
+    
 
     std::deque<w_ptr<GameObject>> room_parts;
     std::vector<w_ptr<GameObject>> enemies_parts;
@@ -451,30 +450,8 @@ int main()
         rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
     }
 
-    /* auto enemy_1 = GameObject::Create(scene_root);
-    enemy_1->transform_->TeleportToPosition(glm::vec3(-10.0f, 0.0f, -10.0f));
-    enemy_1->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
-    enemy_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_1->transform_));
-    enemy_1->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_1->transform_));
-    enemy_1->AddComponent(make_shared<components::HealthComponent>(10.0f));
-    enemy_1->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy_1));
-    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_1->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
-    auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(enemy_1, enemy_movement_generator_1, enemy_vehicle_template);
-
-    auto enemy_2 = GameObject::Create(scene_root);
-    enemy_2->transform_->TeleportToPosition(glm::vec3(-8.0f, 0.0f, -10.0f));
-    enemy_2->AddComponent(make_shared<components::MeshRenderer>(enemy_model, GBufferPassShader));
-    enemy_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, enemy_model->meshes_[0], enemy_2->transform_));
-    enemy_2->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy_2->transform_));
-    enemy_2->AddComponent(make_shared<components::HealthComponent>(10.0f));
-    enemy_2->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy_2));
-   auto enemy_movement_generator_2 = make_shared<pbd::BasicGenerator>();
-    pbd::PBDManager::i_->CreateFGRRecord(enemy_2->GetComponent<components::PBDParticle>(), enemy_movement_generator_2);
-    auto enemy_state_machine_2 = make_shared<ai::EnemyStateMachine>(enemy_2, enemy_movement_generator_2, enemy_vehicle_template);*/
-
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
-    ////ai::EnemyAIManager::SetEnemies(enemies) //jakis vector i potem metoda ktora go zmienia na cos innego moze zadziala
+
     auto isometricCamera = GameObject::Create(scene_root);
     isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     isometricCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
@@ -563,8 +540,6 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);
 
-    //int enemy_state_machine_1;
-    //int enemy_state_machine_2;
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer]()
     {
         ai::EnemyAIManager::i_->UpdateAI();
@@ -809,7 +784,6 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_SPACE))
         {
             ChokeList::i_->Choke(5.0f);
-            flag = true;
         }
         
         for (int i = 0; i < enemies_parts.size(); i++)

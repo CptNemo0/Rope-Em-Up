@@ -145,12 +145,20 @@ namespace pbd
 		glm::vec3 contact_normal;
 	};
 
+	struct PBDManagerInitStruct
+	{
+		int it;
+		float coeffiecent_of_restitution;
+		float coeffiecent_of_restitution_wall;
+	};
+
 	class PBDManager
 	{
     public:
         static PBDManager* i_;
     private:
 		PBDManager(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall);
+		PBDManager(PBDManagerInitStruct& init);
         ~PBDManager() = default;
     public:
 
@@ -164,11 +172,11 @@ namespace pbd
 		float coeffiecent_of_restitution_;
 		float coeffiecent_of_restitution_wall_;
 
-        static void Initialize(int it, float coeffiecent_of_restitution, float coeffiecent_of_restitution_wall)
+        static void Initialize(PBDManagerInitStruct& init)
         {
             if (i_ == nullptr)
             {
-                i_ = new PBDManager(it, coeffiecent_of_restitution, coeffiecent_of_restitution_wall);
+                i_ = new PBDManager(init);
             }
         }
 
