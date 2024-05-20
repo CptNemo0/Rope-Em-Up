@@ -30,6 +30,7 @@ namespace generation
 {
     const float kModuleSize = 16.0f;
     const float kOffset = 0.5f;
+    const float kGateThreshold = 4.0f;
 
     const std::vector<glm::vec3> kLanternPlacement
     {
@@ -133,7 +134,6 @@ namespace generation
         glm::vec3 down_gate_pos;
         glm::vec3 left_gate_pos;
 
-
         //Lamp positions
         std::vector<glm::vec3> lamp_positions;
         std::vector<bool> lamp_activity;
@@ -147,6 +147,10 @@ namespace generation
         std::vector<int> enemies_idx;
 
         // !Values that will be generated during room generation
+
+        //Static values
+        static std::deque<w_ptr<GameObject>> room_parts;
+        static std::vector<w_ptr<GameObject>> enemies;
 
         Room(glm::ivec2 position = glm::ivec2(0, 0)) : position(position) 
         {
@@ -174,6 +178,88 @@ namespace generation
             left_gate_pos = glm::vec3(0.0f);
         }
     };
+
+    static inline void CleanUpEnemiesVecotr(Room* room)
+    {
+        for (int i = 0; i < room->enemies.size(); i++)
+        {
+            auto hc = room->enemies[i].lock()->GetComponent<components::HealthComponent>();
+            if (hc->health_ <= 0.0f)
+            {
+                room->enemies.erase(room->enemies.begin() + i);
+                i = i - 1;
+            }
+        }
+    }
+
+    static inline void DeleteCurrentRoom(Room* room)
+    {
+        for (auto& a : room->room_parts)
+        {
+            a.lock()->Destroy();
+            a.lock() = nullptr;
+        }
+
+        for (auto& e : room->enemies)
+        {
+            e.lock()->Destroy();
+            e.lock() = nullptr;
+        }
+
+        room->room_parts.clear();
+        room->enemies.clear();
+    }
+
+    static inline glm::ivec2 GetMoveDirection(Room* room, std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2)
+    {
+        glm::ivec2 move_direction = glm::ivec2(0);
+        if (room->up_gate)
+        {
+            auto p1l = glm::length2(room->up_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->up_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < kGateThreshold || p2l < kGateThreshold)
+            {
+                cout << "GO UP!!!" << endl;
+                move_direction = glm::ivec2(0, -1);
+            }
+
+        }
+        if (room->right_gate)
+        {
+            auto p1l = glm::length2(room->right_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->right_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < kGateThreshold || p2l < kGateThreshold)
+            {
+                cout << "GO RIGHT!!!" << endl;
+                move_direction = glm::ivec2(-1, 0);
+            }
+        }
+        if (room->down_gate)
+        {
+            auto p1l = glm::length2(room->down_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->down_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < kGateThreshold || p2l < kGateThreshold)
+            {
+                cout << "GO DOWN!!!" << endl;
+                move_direction = glm::ivec2(0, 1);
+            }
+        }
+        if (room->left_gate)
+        {
+            auto p1l = glm::length2(room->left_gate_pos - player_1->transform_->get_global_position());
+            auto p2l = glm::length2(room->left_gate_pos - player_2->transform_->get_global_position());
+
+            if (p1l < kGateThreshold || p2l < kGateThreshold)
+            {
+                cout << "GO LEFT!!!" << endl;
+                move_direction = glm::ivec2(1, 0);
+            }
+        }
+        return move_direction;
+    }
 
     struct RoomGenerationSettings
     {

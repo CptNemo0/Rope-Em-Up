@@ -389,8 +389,6 @@ int main()
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     generation::GenerateRoom(*room, &rg_settings, &models);
-
-    //generation::BuildRoom(*room, &models, room_parts, scene_root, enemies_parts, GBufferPassShader);
     generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
@@ -518,16 +516,98 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);*/
 
-    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer]()
+    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, player_1, player_2]()
     {
+        bool p1x = !isnormal(-player_1->transform_->get_position().x);
+        bool p1z = !isnormal(-player_1->transform_->get_position().z);
+        bool p2x = !isnormal(-player_2->transform_->get_position().x);
+        bool p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 1" << endl;
+        }
         ai::EnemyAIManager::i_->UpdateAI();
+
+        p1x = !isnormal(-player_1->transform_->get_position().x);
+        p1z = !isnormal(-player_1->transform_->get_position().z);
+        p2x = !isnormal(-player_2->transform_->get_position().x);
+        p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 2" << endl;
+        }
+
         pbd::PBDManager::i_->GeneratorUpdate();
+
+        p1x = !isnormal(-player_1->transform_->get_position().x);
+        p1z = !isnormal(-player_1->transform_->get_position().z);
+        p2x = !isnormal(-player_2->transform_->get_position().x);
+        p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 3" << endl;
+        }
+
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
+
+        p1x = !isnormal(-player_1->transform_->get_position().x);
+        p1z = !isnormal(-player_1->transform_->get_position().z);
+        p2x = !isnormal(-player_2->transform_->get_position().x);
+        p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 4" << endl;
+        }
         collisions::CollisionManager::i_->PredictColliders();
+
+        p1x = !isnormal(-player_1->transform_->get_position().x);
+        p1z = !isnormal(-player_1->transform_->get_position().z);
+        p2x = !isnormal(-player_2->transform_->get_position().x);
+        p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 5" << endl;
+        }
         collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
+
+        p1x = !isnormal(-player_1->transform_->get_position().x);
+        p1z = !isnormal(-player_1->transform_->get_position().z);
+        p2x = !isnormal(-player_2->transform_->get_position().x);
+        p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 6" << endl;
+        }
         pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
+
+        p1x = !isnormal(-player_1->transform_->get_position().x);
+        p1z = !isnormal(-player_1->transform_->get_position().z);
+        p2x = !isnormal(-player_2->transform_->get_position().x);
+        p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 7" << endl;
+        }
         pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
+
+        p1x = !isnormal(-player_1->transform_->get_position().x);
+        p1z = !isnormal(-player_1->transform_->get_position().z);
+        p2x = !isnormal(-player_2->transform_->get_position().x);
+        p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 8" << endl;
+        }
         pbd::PBDManager::i_->ClearContacts();
+
+        p1x = !isnormal(-player_1->transform_->get_position().x);
+        p1z = !isnormal(-player_1->transform_->get_position().z);
+        p2x = !isnormal(-player_2->transform_->get_position().x);
+        p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN W TIMERZE 9" << endl;
+        }
         
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
@@ -591,13 +671,12 @@ int main()
 #pragma region Rooms
 
         float gate_distance_threshold = 4.0f;
-        glm::ivec2 next_room_pos = room->position;
         glm::ivec2 current_room_pos = room->position;
+        glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
+        glm::ivec2 next_room_pos = current_room_pos + move_direction;
         
-        int input_door = -1;
 
-
-        if (room->up_gate)
+       /* if (room->up_gate)
         {
             auto p1l = glm::length2(room->up_gate_pos - player_1->transform_->get_global_position());
             auto p2l = glm::length2(room->up_gate_pos - player_2->transform_->get_global_position());
@@ -605,8 +684,7 @@ int main()
             if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
             {
                 cout << "GO UP!!!" << endl;
-                next_room_pos += glm::ivec2(0, -1);
-                input_door = 0;
+                move_direction = glm::ivec2(0, -1);
             }
             
         }
@@ -618,11 +696,7 @@ int main()
             if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
             {
                 cout << "GO RIGHT!!!" << endl;
-                next_room_pos += glm::ivec2(-1, 0);
-                if (input_door == -1)
-                {
-                    input_door = 1;
-                }
+                move_direction = glm::ivec2(-1, 0);
             }
         }
         if (room->down_gate)
@@ -633,11 +707,7 @@ int main()
             if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
             {
                 cout << "GO DOWN!!!" << endl;
-                next_room_pos += glm::ivec2(0, 1);
-                if (input_door == -1)
-                {
-                    input_door = 2;
-                }
+                move_direction = glm::ivec2(0, 1);
             }
         }
         if (room->left_gate)
@@ -648,15 +718,11 @@ int main()
             if (p1l < gate_distance_threshold || p2l < gate_distance_threshold)
             {
                 cout << "GO LEFT!!!" << endl;
-                next_room_pos += glm::ivec2(1, 0);
-                if (input_door == -1)
-                {
-                    input_door = 3;
-                }
+                move_direction = glm::ivec2(1, 0);
             }
-        }
+        }*/
 
-        if (current_room_pos != next_room_pos)
+        if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
         {
             system("CLS");
             rg_settings.lamps = random::RandInt(1, 10);
@@ -679,23 +745,19 @@ int main()
 
             room_parts.clear();
             enemies_parts.clear();
-            //ai::EnemyAIManager::i_->enemy_ais_.clear();
 
             // Stworz nowy pokoj
-            if (rlg.rooms.contains(next_room_pos))
+            room = &rlg.rooms[next_room_pos];
+
+            if (!room->is_generated)
             {
-                room = &rlg.rooms[next_room_pos];
-
-                if (!room->is_generated)
-                {
-                    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
-                    rg_settings.width++;
-                }
-                generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
-
-                pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
-                pbd::PBDManager::i_->set_walls(walls);
+                generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+                rg_settings.width++;
             }
+            generation::BuildRoom(*room, &models, room_parts, enemies_parts, scene_root, GBufferPassShader);
+
+            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+            pbd::PBDManager::i_->set_walls(walls);
 
             //Przetransportuj gracza i line
 
@@ -703,9 +765,20 @@ int main()
             glm::vec3 new_center = glm::vec3(0.0f);
             glm::vec3 player_1_pos = glm::vec3(0.0f);
             glm::vec3 player_2_pos = glm::vec3(0.0f);
+            int input_door = 10 * move_direction.x + move_direction.y;
+
+            bool p1x = !isnormal(-player_1->transform_->get_position().x);
+            bool p1z = !isnormal(-player_1->transform_->get_position().z);
+            bool p2x = !isnormal(-player_2->transform_->get_position().x);
+            bool p2z = !isnormal(-player_2->transform_->get_position().z);
+            if (p1x || p1z || p2x || p2z)
+            {
+                cout << "NAN PRZED TELEPORTACJA NA POZYCJACH" << endl;
+            }
+
             switch (input_door) 
             {
-                case 0: // wychodzi gora wychodzi dolem
+                case -1: // wychodzi gora wychodzi dolem
                     new_center = room->down_gate_pos +  glm::vec3(0.0f, 0.0f, 1.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
                     player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
@@ -713,27 +786,36 @@ int main()
                     player_2->transform_->TeleportToPosition(player_2_pos);
 
                     break;
-                case 1: // wychodzi od prawej wychodzi od lewej
+                case -10: // wychodzi od prawej wychodzi od lewej
                     new_center = room->left_gate_pos + glm::vec3(-1.0f, 0.0f, 0.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(0.0f, 0.0f, 1.0f);
                     player_2_pos = new_center - glm::vec3(0.0f, 0.0f, 1.0f);
                     player_1->transform_->TeleportToPosition(player_1_pos);
                     player_2->transform_->TeleportToPosition(player_2_pos);
                     break;
-                case 2: // wychodzi do�em wychodzi gora
+                case 1: // wychodzi do�em wychodzi gora
                     new_center = room->up_gate_pos + glm::vec3(0.0f, 0.0f, -1.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(1.0f, 0.0f, 0.0f);
                     player_2_pos = new_center - glm::vec3(1.0f, 0.0f, 0.0f);
                     player_1->transform_->TeleportToPosition(player_1_pos);
                     player_2->transform_->TeleportToPosition(player_2_pos);
                     break;
-                case 3: // wychodzi od lewej wchodzi od prawej
+                case 10: // wychodzi od lewej wchodzi od prawej
                     new_center = room->right_gate_pos + glm::vec3(1.0f, 0.0f, 0.0f) * gate_distance_threshold * 1.1f;
                     player_1_pos = new_center + glm::vec3(0.0f, 0.0f, 1.0f);
                     player_2_pos = new_center - glm::vec3(0.0f, 0.0f, 1.0f);
                     player_1->transform_->TeleportToPosition(player_1_pos);
                     player_2->transform_->TeleportToPosition(player_2_pos);
                     break;
+            }
+
+            p1x = !isnormal(-player_1->transform_->get_position().x);
+            p1z = !isnormal(-player_1->transform_->get_position().z);
+            p2x = !isnormal(-player_2->transform_->get_position().x);
+            p2z = !isnormal(-player_2->transform_->get_position().z);
+            if (p1x || p1z || p2x || p2z)
+            {
+                cout << "NAN PO TELEPORTACJA NA POZYCJACH" << endl;
             }
 
             //przesun line
@@ -747,6 +829,15 @@ int main()
                 segment->transform_->TeleportToPosition(player_1->transform_->get_position() + player_dir * step * (float)rope_displacement_iterator);
                 rope_displacement_iterator++;
             }
+
+            p1x = !isnormal(-player_1->transform_->get_position().x);
+            p1z = !isnormal(-player_1->transform_->get_position().z);
+            p2x = !isnormal(-player_2->transform_->get_position().x);
+            p2z = !isnormal(-player_2->transform_->get_position().z);
+            if (p1x || p1z || p2x || p2z)
+            {
+                cout << "NAN PO TELEPORTACJI LINY" << endl;
+            }
         }
         
 
@@ -758,19 +849,48 @@ int main()
         ///////// CLENUP ENEMIES VECTOR //////////
         //////////////////////////////////////////
    
-        if (glfwGetKey(window, GLFW_KEY_SPACE))
         {
-            ChokeList::i_->Choke(5.0f);
-        }
-        
-        for (int i = 0; i < enemies_parts.size(); i++)
-        {
-            auto hc = enemies_parts[i].lock()->GetComponent<components::HealthComponent>();
-            if (hc->health_ <= 0.0f)
+            bool p1x = !isnormal(-player_1->transform_->get_position().x);
+            bool p1z = !isnormal(-player_1->transform_->get_position().z);
+            bool p2x = !isnormal(-player_2->transform_->get_position().x);
+            bool p2z = !isnormal(-player_2->transform_->get_position().z);
+            if (p1x || p1z || p2x || p2z)
             {
-                enemies_parts.erase(enemies_parts.begin() + i);
-                i = i - 1;
+                cout << "NAN PRZED DUSZENIU NA POZYCJACH" << endl;
             }
+            if (glfwGetKey(window, GLFW_KEY_SPACE))
+            {
+                ChokeList::i_->Choke(5.0f);
+
+            }
+
+            for (int i = 0; i < enemies_parts.size(); i++)
+            {
+                auto hc = enemies_parts[i].lock()->GetComponent<components::HealthComponent>();
+                if (hc->health_ <= 0.0f)
+                {
+                    enemies_parts.erase(enemies_parts.begin() + i);
+                    i = i - 1;
+                }
+            }
+            p1x = !isnormal(-player_1->transform_->get_position().x);
+            p1z = !isnormal(-player_1->transform_->get_position().z);
+            p2x = !isnormal(-player_2->transform_->get_position().x);
+            p2z = !isnormal(-player_2->transform_->get_position().z);
+            if (p1x || p1z || p2x || p2z)
+            {
+                cout << "NAN PO DUSZENIU NA POZYCJACH" << endl;
+            }
+            
+        }   
+
+        bool p1x = !isnormal(-player_1->transform_->get_position().x);
+        bool p1z = !isnormal(-player_1->transform_->get_position().z);
+        bool p2x = !isnormal(-player_2->transform_->get_position().x);
+        bool p2z = !isnormal(-player_2->transform_->get_position().z);
+        if (p1x || p1z || p2x || p2z)
+        {
+            cout << "NAN PRZED UPDATEM NA POZYCJACH" << endl;
         }
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
@@ -1043,8 +1163,6 @@ int main()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     glfwTerminate();
-
-    
 
     return 0;
 }

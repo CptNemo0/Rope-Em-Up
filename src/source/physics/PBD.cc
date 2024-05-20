@@ -54,10 +54,22 @@ void components::PBDParticle::DampVelocity()
 void components::PBDParticle::UpdateVelocity(float t)
 {
 	ClampElementwise(forces_, 3000.0f, -3000.0f);
-	//velocity_ = velocity_ + t * inverse_mass_ * forces_;
+	bool p1x = isnan(forces_.x);
+	bool p1z = isnan(forces_.z);
+	if (p1x || p1z)
+	{
+		cout << "TERAZ CIE MAM" << endl;
+		LogVec3(forces_);
+		LogVec3(velocity_);
+		LogVec3(transform_->get_position());
+		LogVec3(transform_->get_previous_position());
+		LogVec3(transform_->get_predicted_position());
+		exit(-124);
+	}
+
 	velocity_ = (transform_->get_position() - transform_->get_previous_position()) / t + t * inverse_mass_ * forces_;
+	
 	velocity_.y = 0.0;
-	//LogVec3(velocity_);
 }
 
 void components::PBDParticle::PredictPosition(float t)
@@ -67,18 +79,22 @@ void components::PBDParticle::PredictPosition(float t)
 
 void components::PBDParticle::UpdatePosition(float t)
 {
-	if (glm::length(velocity_) != 0.0f && transform_->get_position() == transform_->get_predicted_position())
-	{
-		transform_->set_position(transform_->get_predicted_position());
-	}
-	else
-	{
-		auto pp = transform_->get_predicted_position();
-		auto p = transform_->get_position();
-		//velocity_ = (pp - p) / t;
-		transform_->set_position(transform_->get_predicted_position());
-	}
-	
+	//if (glm::length(velocity_) != 0.0f && transform_->get_position() == transform_->get_predicted_position())
+	//{
+	//	transform_->set_position(transform_->get_predicted_position());
+	//}
+	//else
+	//{
+	//	/*bool p1x = isnormal(transform_->get_predicted_position().x);
+	//	bool p1z = isnormal(transform_->get_predicted_position().z);
+	//	if (!p1x || !p1z)
+	//	{
+	//		cout << "TERAZ CIE MAM!" << endl;
+	//	}*/
+
+	//	transform_->set_position(transform_->get_predicted_position());
+	//}
+	transform_->set_position(transform_->get_predicted_position());
 }
 
 void components::PBDParticle::Start()
