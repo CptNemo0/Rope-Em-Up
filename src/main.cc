@@ -75,10 +75,9 @@ static void BindDefault()
 
 int main()
 {
-    char zaza;
-    cout << "Byc czy nie byc oto jest pytanie.\n";
-    ///// PATH TO RESOURCES
-#pragma region Res Path
+    srand(static_cast <unsigned> (time(0)));
+
+#pragma region Resources Paths
     const string kWindowTitle = "Rope'em Up!";
 
     const string kVertexShaderPath = "res/shaders/Basic.vert";
@@ -172,13 +171,8 @@ int main()
     const string kRoomLayoutGenerationSettingsInitPath = "res/config/RoomLayoutGenerationSettingsInit.ini";
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
-#pragma endregion 
-    /////
+#pragma endregion Resources Paths
     
-    audio::AudioManager::Initialize();
-    audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
-
-    ///// CAMERA SETTINGS
 #pragma region CameraSettings
     const float kFov = 90.0f;
     const float kNear = 0.1f;
@@ -187,9 +181,6 @@ int main()
     float kyaw = 90.0f;
 #pragma endregion Camera Settings
 
-
-    srand(static_cast <unsigned> (time(0)));
-    ///// AI SETTINGS
 #pragma region Loading Settings
 
     Vehicle enemy_vehicle_template;
@@ -203,7 +194,7 @@ int main()
     LoadRoomGenerationSettingsInitStruct(kRoomGenerationSettingsInitPath, rg_settings);
     LoadPBDManagerInitStruct(kPBDManagerInitSettingsPath, pbd_settings);
 
-#pragma endregion
+#pragma endregion Loading Settings
 
     GLFWwindow* window = nullptr;
     GLFWmonitor* monitor = nullptr;
@@ -235,6 +226,9 @@ int main()
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
     HealthManager::Initialize();
+    audio::AudioManager::Initialize();
+    audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
+
     ChokeList::Initialize();
 
 #pragma region CamerasConfiguration
@@ -329,7 +323,8 @@ int main()
 	spot_light.intensity = spot_light_intensity;
 
 #pragma endregion Lights
-    
+
+#pragma region Models
     auto test_model = make_shared<Model>(kTestPath);
 
     auto cube_model = make_shared<Model>(kCubeMeshPath);
@@ -365,24 +360,6 @@ int main()
     auto mod6_model = make_shared<Model>(kMod6Path);
     auto mod7_model = make_shared<Model>(kMod7Path);
 
-    auto scene_root = GameObject::Create();
-
-    
-
-    generation::RoomLayoutGenerator rlg;
-    std::deque<w_ptr<GameObject>> room_objects;
-    rlg.GenerateRooms(rlgs);
-    rlg.GenerateGates();
-
-    for (auto& room : rlg.rooms)
-    {
-        auto room_obj = GameObject::Create(scene_root);
-        room_objects.push_back(room_obj);
-        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-        room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
-        room_obj->transform_->set_scale(glm::vec3(3.0f));
-    }
-
     generation::RoomModels models;
     models.walls.push_back(mod1_model);
     models.walls.push_back(mod2_model);
@@ -404,13 +381,28 @@ int main()
     models.clutter_c.push_back(boxes_3_c_model);
     models.enemies.push_back(enemy_model);
 
+#pragma endregion Models
     
+    auto scene_root = GameObject::Create();
 
+    generation::RoomLayoutGenerator rlg;
+    std::deque<w_ptr<GameObject>> room_objects;
     std::deque<w_ptr<GameObject>> room_parts;
     std::vector<w_ptr<GameObject>> enemies_parts;
 
-    generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
+    rlg.GenerateRooms(rlgs);
+    rlg.GenerateGates();
 
+    /*for (auto& room : rlg.rooms)
+    {
+        auto room_obj = GameObject::Create(scene_root);
+        room_objects.push_back(room_obj);
+        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
+        room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
+        room_obj->transform_->set_scale(glm::vec3(3.0f));
+    }*/
+
+    generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     generation::GenerateRoom(*room, &rg_settings, &models);
 
     //generation::BuildRoom(*room, &models, room_parts, scene_root, enemies_parts, GBufferPassShader);
@@ -442,6 +434,7 @@ int main()
         test_ball_model,
         GBufferPassShader
     );
+
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
 
@@ -536,9 +529,9 @@ int main()
     cubemap->LoadHDRimg(window, *activeCamera);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
-    int scrWidth, scrHeight;
+    /*int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
-    glViewport(0, 0, scrWidth, scrHeight);
+    glViewport(0, 0, scrWidth, scrHeight);*/
 
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer]()
     {
@@ -862,7 +855,7 @@ int main()
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
         LBufferPassShader->SetVec3("dirLight[0].color", dir_light_color);
         LBufferPassShader->SetFloat("dirLight[0].intensity", dir_light_intensity);
-        ;
+        
         LBufferPassShader->SetVec3("spotLight[0].position", spot_light_position);
         LBufferPassShader->SetVec3("spotLight[0].direction", spot_light_direction);
         LBufferPassShader->SetVec3("spotLight[0].color", spot_light_color);
@@ -1052,28 +1045,6 @@ int main()
         }
         ImGui::End();
 
-        /*ImGui::Begin("Enemies");
-        if (HealthManager::i_->health_components_.size())
-        {
-            for (int i = 0; i < HealthManager::i_->health_components_.size(); i++)
-            {
-                string name = "Enemy " + std::to_string(i) = "health";
-                ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -0.0f, 10.0f, "%0.1f");
-            }   
-        }
-        ImGui::End();
-
-        ImGui::Begin("Choke List");
-        if (ChokeList::i_->health_components_.size())
-        {
-            for (int i = 0; i < ChokeList::i_->health_components_.size(); i++)
-            {
-                string name = "Enemy " + std::to_string(i) = "health";
-                ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -0.0f, 10.0f, "%0.1f");
-            }
-        }
-        ImGui::End();*/
-
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 #pragma endregion 
@@ -1081,6 +1052,7 @@ int main()
     }
 
     ChokeList::Destroy();
+    audio::AudioManager::Destroy();
     HealthManager::Destroy();
     ai::EnemyAIManager::Destroy();
     pbd::PBDManager::Destroy();
@@ -1092,7 +1064,7 @@ int main()
     ImGui::DestroyContext();
     glfwTerminate();
 
-    audio::AudioManager::Destroy();
+    
 
     return 0;
 }
