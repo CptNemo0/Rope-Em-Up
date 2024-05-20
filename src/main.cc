@@ -805,12 +805,13 @@ int main()
         //////////////////////////////////////////
         ///////// CLENUP ENEMIES VECTOR //////////
         //////////////////////////////////////////
-        
+   
         if (glfwGetKey(window, GLFW_KEY_SPACE))
         {
             ChokeList::i_->Choke(5.0f);
+            flag = true;
         }
-
+        
         for (int i = 0; i < enemies_parts.size(); i++)
         {
             auto hc = enemies_parts[i].lock()->GetComponent<components::HealthComponent>();
@@ -1077,21 +1078,27 @@ int main()
         }
         ImGui::End();
 
-        ImGui::Begin("Enemies");
-        for (int i = 0; i < HealthManager::i_->health_components_.size(); i++)
+        /*ImGui::Begin("Enemies");
+        if (HealthManager::i_->health_components_.size())
         {
-            string name = "Enemy " + std::to_string(i) = "health" ;
-            ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -0.0f, 10.0f, "%0.1f");
+            for (int i = 0; i < HealthManager::i_->health_components_.size(); i++)
+            {
+                string name = "Enemy " + std::to_string(i) = "health";
+                ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -0.0f, 10.0f, "%0.1f");
+            }   
         }
         ImGui::End();
 
         ImGui::Begin("Choke List");
-        for (int i = 0; i < ChokeList::i_->health_components_.size(); i++)
+        if (ChokeList::i_->health_components_.size())
         {
-            string name = "Enemy " + std::to_string(i) = "health";
-            ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -0.0f, 10.0f, "%0.1f");
+            for (int i = 0; i < ChokeList::i_->health_components_.size(); i++)
+            {
+                string name = "Enemy " + std::to_string(i) = "health";
+                ImGui::SliderFloat(name.c_str(), &(HealthManager::i_->health_components_[i]->health_), -0.0f, 10.0f, "%0.1f");
+            }
         }
-        ImGui::End();
+        ImGui::End();*/
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
