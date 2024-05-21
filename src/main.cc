@@ -594,11 +594,11 @@ int main()
         {
             system("CLS");
 
-            rg_settings.clutter = random::RandInt(0, 10);
-            rg_settings.width = random::RandInt(0, 10);
-            rg_settings.height = random::RandInt(0, 10);
-            rg_settings.enemies = random::RandInt(0, 10);
-            rg_settings.lamps = random::RandInt(4, 10);
+            rg_settings.clutter = random::RandInt(1, 10);
+            rg_settings.width = random::RandInt(1, 5);
+            rg_settings.height = random::RandInt(1, 5);
+            rg_settings.enemies = random::RandInt(1, 5);
+            rg_settings.lamps = random::RandInt(4, 8);
 
             // Usun obecny pokoj
             generation::DeleteCurrentRoom(*room);
@@ -682,7 +682,7 @@ int main()
 #pragma region Collisions and Physics
   
         rope.ChokeCheck(room);
-
+        generation::CleanUpEnemiesVecotr(*room);
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
 #pragma endregion

@@ -20,6 +20,7 @@ float random::RandFloatExcl(float min, float max)
 
 int random::RandInt(int min, int max)
 {
+
     return min + g() % (max - min + 1);
 }
 

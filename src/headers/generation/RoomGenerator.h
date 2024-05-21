@@ -13,6 +13,7 @@
 #include <memory>
 #include <random>
 #include <vector>
+#include <set>
 
 #include "../global.h"
 #include "../Random.h"
