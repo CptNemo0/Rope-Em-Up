@@ -2,7 +2,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "ft2build.h"
-#include FT_FREETYPE_H
+//#include FT_FREETYPE_H
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -60,7 +60,7 @@
 
 int main()
 {
-    srand(static_cast <unsigned> (time(0)));
+    srand(static_cast<unsigned>(time(0)));
 
 #pragma region Resources Paths
     const string kWindowTitle = "Rope'em Up!";
@@ -261,7 +261,7 @@ int main()
     auto ParticleShader = make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
     auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
     auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
-    auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
+    auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kFragmentShaderPath);
     auto BasicDefferedLightShader = make_shared<Shader>(kLBufferVertexShaderPath, kBasicDefferedLightShaderPath);
     auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
     auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
@@ -278,13 +278,11 @@ int main()
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
-    
-
 #pragma region Lights
     PointLight point_light{};
 
     glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
-    float point_light_intensity = 1.0f;
+    float point_light_intensity = 1000.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     point_light.color = point_light_color;
 
@@ -853,7 +851,7 @@ int main()
         ImGui::Begin("Lights");
         ImGui::LabelText("Point Light", "Point Light");
         ImGui::ColorEdit3("Point L Color", (float*)&point_light_color);
-        ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 20.0f);
+        ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 1000.0f);
 
         ImGui::LabelText("Directional Light", "Directional Light");
         ImGui::ColorEdit3("Dir L Color", (float*)&dir_light_color);

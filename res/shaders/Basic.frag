@@ -1,56 +1,109 @@
-#version 330 core
+﻿#version 330 core
+layout (location = 0) out vec3 color_texture;
 
-struct PointLight
-{
-    float intensity;
-    vec3 position;
-	vec3 ambient_colour;
-	vec3 diffuse_colour;
-	vec3 specular_colour;
-};
-
-in vec3 if_fragment_position;
-in vec3 if_normal;
-in vec2 if_texture;
+uniform sampler2D position_texture;
+uniform sampler2D albedo_texture;
+uniform sampler2D normal_texture;
+uniform sampler2D mra_texture;
+uniform sampler2D ssao_texture;
+uniform sampler2D tangent_texture;
+uniform sampler2D bitangent_texture;
 
 uniform vec3 camera_position;
-uniform sampler2D this_texture;
-uniform PointLight light;
-uniform float shininess;
 
-float GetDistanceFactor(float distance, float intensity)
-{
-    return (intensity / (distance + 1));
-}
+const int MAX_LIGHTS = 16;
+uniform int light_num = 3;
+uniform vec3 light_positions[MAX_LIGHTS];
+uniform vec3 light_colors[MAX_LIGHTS];
 
-vec3 PointLightColour(PointLight light, vec3 view_direction)
-{
-    vec3 light_direction = light.position - if_fragment_position;
-    vec3 light_direction_normalized = normalize(light_direction);
+in vec2 if_uv;
 
-    float distance = length(light_direction);
-    distance = distance * distance;
-    float distance_factor = GetDistanceFactor(distance, light.intensity);
+uniform samplerCube irradianceMap;
 
-    float diffuse = max(dot(light_direction_normalized, if_normal), 0.0);
+const float PI = 3.14159265359;
 
-    float specular = 0.0f;
-    if(diffuse != 0)
-    {
-        
-        vec3 half_direction = normalize(light_direction + view_direction);
-        float cosine = max(dot(half_direction, if_normal), 0.0);
-        specular = pow(cosine, shininess);
-    }
-    
-    return light.ambient_colour + light.diffuse_colour * diffuse * distance_factor + light.specular_colour * specular * distance_factor;
-}
+struct DirLight {
+    float intensity;
+    vec3 direction;
 
-out vec4 FragColour;
+    vec3 color;
+};
+
+struct PointLight {
+    float intensity;
+    vec3 position;
+
+    float constant;
+    float linear;
+    float quadratic;
+
+    vec3 color;
+};
+
+struct SpotLight {
+	float intensity;
+    vec3 position;
+    vec3 direction;
+    float cutOff;
+    float outerCutOff;
+
+    float constant;
+    float linear;
+    float quadratic;
+
+    vec3 color;
+};
+
+uniform PointLight pointLight[MAX_LIGHTS];
+uniform DirLight dirLight[1];
+uniform SpotLight spotLight[1];
 
 void main()
 {
-   vec3 view_direction = normalize(if_fragment_position - camera_position);
-   vec3 result = PointLightColour(light, view_direction);
-   FragColour = texture(this_texture, if_texture) * vec4(result, 1.0f); 
+    vec3 position = texture(position_texture, if_uv).rgb;
+    vec3 albedo = texture(albedo_texture, if_uv).rgb;
+    vec3 mra = texture(mra_texture, if_uv).rgb;
+	float metallic = mra.r;
+	float roughness = mra.g;
+	float ao = mra.b;
+    float ssao = ((texture(ssao_texture, if_uv).r - 0.5) * 1.5) + 0.5;
+    
+    vec3 normal = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
+    /*vec3 T = normalize(texture(tangent_texture, if_uv).rgb * 2.0 - 1.0);
+    vec3 B = normalize(texture(bitangent_texture, if_uv).rgb * 2.0 - 1.0);
+
+    mat3 TBN = mat3(T, B, normal);*/
+
+    vec3 view_dir = normalize(camera_position - position);
+
+    vec3 ambient = vec3(0.1);
+    vec3 diffuse = vec3(0.0);
+    vec3 specular = vec3(0.0);
+    vec3 color = vec3(0.0);
+
+    float num_inverse = 1.0 / light_num;
+
+    vec3 light_dir;
+
+    for(int i = 0; i < light_num && i < MAX_LIGHTS ; i++)
+    {
+        light_dir = normalize(pointLight[i].position - position);
+        float diff = max(dot(normal, light_dir), 0.0);
+        float r_diffuse = distance(position, pointLight[i].position);
+        float fall_of_diffuse = 1.0 / ( r_diffuse * r_diffuse);
+        diff = diff * pointLight[i].intensity * fall_of_diffuse;
+
+        diffuse += pointLight[i].color * diff;
+
+        vec3 reflectDir = reflect(-light_dir, normal);  
+        float spec = pow(max(dot(view_dir, reflectDir), 0.0), 32);
+        specular += 0.5 * spec * pointLight[i].color;  
+    }
+
+    diffuse *= num_inverse;
+    specular *= num_inverse;
+
+    color = (ambient + diffuse + specular) * albedo;
+    color_texture = color * ssao;
+    
 }

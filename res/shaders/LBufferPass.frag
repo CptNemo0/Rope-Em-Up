@@ -14,7 +14,6 @@ uniform int light_num = 3;
 uniform vec3 light_positions[MAX_LIGHTS];
 uniform vec3 light_colors[MAX_LIGHTS];
 
-
 in vec2 if_uv;
 
 uniform samplerCube irradianceMap;

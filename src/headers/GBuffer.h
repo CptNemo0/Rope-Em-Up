@@ -19,6 +19,8 @@ public:
 	unsigned int mra_texture_;
 	unsigned int view_position_texture_;
 	unsigned int view_normal_texture_;
+	unsigned int tangent_texture_;
+	unsigned int bitangent_texture_;
 
 	unsigned int rbo_;
 
