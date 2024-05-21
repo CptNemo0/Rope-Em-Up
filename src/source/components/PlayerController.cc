@@ -37,6 +37,10 @@ void components::PlayerController::Destroy()
 
 void components::PlayerController::OnAction(Action action, input::State state)
 {
+    if (!active_)
+    {
+        return;
+    }
     switch (action)
     {
         case Action::MOVE:

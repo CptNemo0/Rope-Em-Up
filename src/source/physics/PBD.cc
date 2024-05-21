@@ -365,7 +365,10 @@ void pbd::PBDManager::Integration(float t)
 {
 	for (auto& p : particles_)
 	{
-		p->SympleticEulerIntegration(t);
+		if (p->active_)
+		{
+			p->SympleticEulerIntegration(t);
+		}
 	}
 }
 
@@ -375,7 +378,10 @@ void pbd::PBDManager::ProjectConstraints(float t)
 	{
 		for (auto& c : constraints_)
 		{
-			c->Enforce();
+			if (c->p1_->active_ && c->p2_->active_)
+			{
+				c->Enforce();
+			}
 		}
 	}
 
@@ -493,7 +499,10 @@ void pbd::PBDManager::UpdatePositions(float t)
 {
 	for (auto& p : particles_)
 	{
-		p->UpdatePosition(t);
+		if (p->active_)
+		{
+			p->UpdatePosition(t);
+		}
 	}
 }
 
@@ -501,6 +510,9 @@ void pbd::PBDManager::GeneratorUpdate()
 {
 	for (auto& record : generator_registry_)
 	{
-		record.Generate();
+		if (record.particle->active_)
+		{
+			record.Generate();
+		}
 	}
 }

@@ -28,9 +28,10 @@ void GameObject::Update()
 	}
 	for (auto& component : components_)
 	{
-		
-		component.second->Update();
-		
+		if (component.second->active_)
+		{
+			component.second->Update();
+		}
 	}
 }
 
@@ -63,4 +64,28 @@ void GameObject::Destroy()
 	}
 	transform_->game_object_ = nullptr;
 	transform_->parent_->RemoveChild(transform_);
+}
+
+void GameObject::Enable()
+{
+	for (auto& component : components_)
+	{
+		component.second->active_ = true;
+	}
+	for (auto& child : transform_->children_)
+	{
+		child->game_object_->Enable();
+	}
+}
+
+void GameObject::Disable()
+{
+	for (auto& component : components_)
+	{
+		component.second->active_ = false;
+	}
+	for (auto& child : transform_->children_)
+	{
+		child->game_object_->Disable();
+	}
 }

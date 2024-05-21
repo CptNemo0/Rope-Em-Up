@@ -11,6 +11,7 @@ protected:
     Component() = default;
 public:
     bool dirty_ = true;
+    bool active_ = true;
     std::weak_ptr<GameObject> gameObject_;
     virtual ~Component() {};
     virtual void Start() = 0;

@@ -31,13 +31,12 @@ void components::ParticleEmitter::Start()
 {
     transform_ = gameObject_.lock()->transform_;
 
-    this->emitter_timer_ = make_shared<Timer::Timer>(Timer::CreateTimer(pbd::kMsPerUpdate,
+    emitter_timer_ = make_shared<Timer::Timer>(Timer::CreateTimer(pbd::kMsPerUpdate,
     [this]()
     {
         this->UpdateParticles(pbd::kMsPerUpdate);
     },
     nullptr, true));
-    ParticleEmitterManager::i_->emitter_timers_.push_back(emitter_timer_);
     ParticleEmitterManager::i_->emitters_.push_back(shared_from_this());
 
     Timer::AddTimer(emission_rate_, [this]()

@@ -102,7 +102,10 @@ void collisions::CollisionManager::UpdateColliders()
 {
     for (auto& c : colliders_)
     {
-        c->UpdateColliders();
+        if (c->active_)
+        {
+            c->UpdateColliders();
+        }
     }
 }
 
@@ -110,7 +113,10 @@ void collisions::CollisionManager::PredictColliders()
 {
     for (auto& c : colliders_)
     {
-        c->PredictColliders();
+        if (c->active_)
+        {
+            c->PredictColliders();
+        }
     }
 }
 
@@ -123,10 +129,18 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
 
     for (int i = 0; i < colliders_.size() - 1; i++)
     {
+        s_ptr<components::Collider> a = colliders_[i];
+        if (!a->active_)
+        {
+            continue;
+        }
         for (int j = i + 1; j < colliders_.size(); j++)
         {
-            s_ptr<components::Collider> a = colliders_[i];
             s_ptr<components::Collider> b = colliders_[j];
+            if (!a->active_)
+            {
+                continue;
+            }
 
             bool layer_check = LayerCheck(a->layer_, b->layer_);
 

@@ -934,6 +934,20 @@ int main()
             rope.RemoveSegment();   
         }
         ImGui::End();
+        ImGui::Begin("Disable test");
+        static bool cb = true;
+        if (ImGui::Checkbox("Enabled", &cb))
+        {
+            if (cb)
+            {
+                player_1->Enable();
+            }
+            else
+            {
+                player_1->Disable();
+            }
+        }
+        ImGui::End();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 

@@ -48,11 +48,8 @@ private:
 
     unsigned int VAO_, VBO_;
 
-    s_ptr<Timer::Timer> emitter_timer_;
-
     unsigned int current_id_ = 0;
 public:
-    bool active_ = true;
     float emission_rate_ = 0.05f;
     glm::ivec2 spawns_per_emission_ = glm::ivec2(1, 1);
     float life_time_ = 1.0f;
@@ -64,6 +61,8 @@ public:
     glm::vec3 start_velocity_ = glm::vec3(0.0f, 0.0f, 0.0f);
     float start_velocity_displacement_ = 0.0f;
     glm::vec3 start_acceleration_ = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    s_ptr<Timer::Timer> emitter_timer_;
 
     ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, s_ptr<llr::Camera> *camera);
     void Start() override;

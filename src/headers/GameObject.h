@@ -33,6 +33,8 @@ public:
 	void PropagateUpdate();
 	void StartNewComponents();
 	void Destroy();
+	void Enable();
+	void Disable();
 
 	template <typename T>
 	void AddComponent(s_ptr<T> component)

@@ -4,9 +4,12 @@ ParticleEmitterManager *ParticleEmitterManager::i_ = nullptr;
 
 void ParticleEmitterManager::Update(float delta_time)
 {
-    for (auto &timer : emitter_timers_)
+    for (auto &emitter : emitters_)
     {
-        Timer::UpdateTimer(*timer, delta_time);
+        if (emitter->active_)
+        {
+            Timer::UpdateTimer(*(emitter->emitter_timer_), delta_time);
+        }
     }
 }
 
@@ -14,6 +17,9 @@ void ParticleEmitterManager::Draw()
 {
     for (auto &emitter : emitters_)
     {
-        emitter->DrawParticles();
+        if (emitter->active_)
+        {
+            emitter->DrawParticles();
+        }
     }
 }

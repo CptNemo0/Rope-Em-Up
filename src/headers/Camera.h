@@ -177,6 +177,7 @@ namespace components
 		void Start() override;
 
 		void Update() override;
+		void Destroy() override {}
 
 	};
 

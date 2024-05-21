@@ -39,7 +39,6 @@ public:
     }
 public:
     s_ptr<llr::Camera> camera;
-    std::vector<s_ptr<Timer::Timer>> emitter_timers_;
     std::vector<s_ptr<components::ParticleEmitter>> emitters_;
 
     void Update(float delta_time);
