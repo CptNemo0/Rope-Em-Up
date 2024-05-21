@@ -57,7 +57,7 @@ void components::PlayerController::OnAction(Action action, input::State state)
                 pull_generator_->direction_ = move_generator_->direction_;
                 pull_generator_->magnitude_ = pull_power_;
                 is_pulling_ = true;
-                Timer::AddTimer(0.25f, [this]()
+                Timer::AddTimer(0.1f, [this]()
                 {
                     pull_generator_->magnitude_ = 0;
                     is_pulling_ = false;

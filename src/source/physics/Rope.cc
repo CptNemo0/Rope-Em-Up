@@ -58,6 +58,8 @@ void Rope::AssignPlayerBegin(std::shared_ptr<GameObject> player_begin)
 	auto segment_particle = front_segment->GetComponent<components::PBDParticle>();
 	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(player_particle, segment_particle, kDistance + 0.001f);
 	rope_constraints_.push_front(constraint);
+	player_begin_ = player_begin;
+	player_begin_controller_ = player_begin->GetComponent<components::PlayerController>();
 }
 
 void Rope::AssignPlayerEnd(std::shared_ptr<GameObject> player_end)
@@ -77,6 +79,8 @@ void Rope::AssignPlayerEnd(std::shared_ptr<GameObject> player_end)
 
 	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(segment_particle, player_particle, kDistance + 0.001f);
 	rope_constraints_.push_back(constraint);
+	player_end_ = player_end;
+	player_end_controller_ = player_end->GetComponent<components::PlayerController>();
 }
 
 int Rope::Size()
@@ -155,6 +159,21 @@ void Rope::RemoveSegment()
 		// last_particle_go->RemoveComponent<components::MeshRenderer>();
 
 		//last->~RopeConstraint();
+	}
+}
+
+void Rope::ChokeCheck(generation::Room *room)
+{
+	if (!pull_cooldown_ && player_begin_controller_->is_pulling_ && player_end_controller_->is_pulling_)
+	{
+		ChokeList::i_->Choke(10.0f);
+		generation::CleanUpEnemiesVecotr(*room);
+		pull_cooldown_ = true;
+		cout << "CHOKE'EM MOTHAFUCKA!!!!";
+	}
+	if (!player_begin_controller_->is_pulling_ && !player_end_controller_->is_pulling_)
+	{
+		pull_cooldown_ = false;
 	}
 }
 

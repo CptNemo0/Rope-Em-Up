@@ -19,9 +19,9 @@ private:
     s_ptr<pbd::BasicGenerator> pull_generator_;
     int speed_ = 1000;
     int pull_power_ = 1000;
-    bool is_pulling_ = false, pulling_cooldown_ = false;
     glm::vec3 direction_ = glm::vec3(0.0f);
 public:
+    bool is_pulling_ = false, pulling_cooldown_ = false;
     PlayerController(int gamepadID);
 
     void Start() override;

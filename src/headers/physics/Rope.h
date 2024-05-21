@@ -8,11 +8,14 @@
 #include "../GameObject.h"
 #include "../Model.h"
 #include "../components/MeshRenderer.h"
+#include "../components/PlayerController.h"
 
 #include "../collisions/Collisions.h"
 #include "../collisions/CollisionManager.h"
 #include "../collisions/Collider.h"
 #include "../collisions/Raycast.h"
+#include "../generation/RoomGenerator.h"
+#include "../ChokeList.h"
 
 class Rope
 {
@@ -29,6 +32,9 @@ public:
 
 	s_ptr<GameObject> player_begin_;
 	s_ptr<GameObject> player_end_;
+	s_ptr<components::PlayerController> player_begin_controller_;
+	s_ptr<components::PlayerController> player_end_controller_;
+	bool pull_cooldown_ = false;
 
 	Rope(glm::vec3 start, glm::vec3 dir, int rope_length, float segment_mass, float segment_drag);
 	Rope(glm::vec3 start, glm::vec3 end, float segment_mass, float segment_drag, std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);
@@ -44,6 +50,8 @@ public:
 
 	void AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);
 	void RemoveSegment();
+
+	void ChokeCheck(generation::Room *room);
 
 	~Rope();
 };

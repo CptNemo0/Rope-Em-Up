@@ -681,12 +681,7 @@ int main()
 
 #pragma region Collisions and Physics
   
-        if (glfwGetKey(window, GLFW_KEY_SPACE))
-        {
-            ChokeList::i_->Choke(5.0f);
-
-            generation::CleanUpEnemiesVecotr(*room);
-        }
+        rope.ChokeCheck(room);
 
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
