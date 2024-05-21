@@ -284,14 +284,14 @@ int main()
     PointLight point_light{};
 
     glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
-    float point_light_intensity = 1.0f;
+    float point_light_intensity = 10.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     point_light.color = point_light_color;
 
     DirectionalLight directional_light{};
     glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
     glm::vec3 dir_light_direction = glm::vec3(-0.9f, 0.8, -0.9);
-    float dir_light_intensity = 0.3f;
+    float dir_light_intensity = 0.0f;
     directional_light.direction = dir_light_direction;
     directional_light.color = dir_light_color;
 

@@ -2,6 +2,8 @@
 layout (location = 0) in vec3 iv_position;
 layout (location = 1) in vec3 iv_normal;
 layout (location = 2) in vec2 iv_texture;
+layout (location = 3) in vec3 iv_tangent;
+layout (location = 4) in vec3 iv_bitangent;
 layout (location = 5) in ivec4 iv_boneIds;
 layout (location = 6) in vec4 iv_weights;
 
@@ -10,6 +12,9 @@ out vec3 view_position;
 out vec2 uv;
 out mat3 normal_world_matrix;
 out mat3 normal_view_matrix;
+out vec3 T;
+out vec3 B;
+out vec3 N;
 
 uniform mat4 model_matrix;
 uniform mat4 view_matrix;
@@ -64,4 +69,8 @@ void main()
 	normal_view_matrix = transpose(inverse(mat3(view_matrix * model_matrix)));
 	
 	gl_Position = projection_matrix * internal_view_position;
+
+    T = normalize(vec3(model_matrix * vec4(iv_tangent,   0.0)));
+    B = normalize(vec3(model_matrix * vec4(iv_bitangent, 0.0)));
+    N = normalize(vec3(model_matrix * vec4(iv_normal,    0.0)));
 }

@@ -6,6 +6,8 @@ uniform sampler2D albedo_texture;
 uniform sampler2D normal_texture;
 uniform sampler2D mra_texture;
 uniform sampler2D ssao_texture;
+uniform sampler2D tangent_texture;
+uniform sampler2D bitangent_texture;
 
 uniform vec3 camera_position;
 
