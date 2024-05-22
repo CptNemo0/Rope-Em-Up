@@ -50,7 +50,7 @@ void components::PlayerController::OnAction(Action action, input::State state)
         }
         case Action::PULL_ROPE:
         {
-            if (state.button && !pulling_cooldown_)
+            if (state.button && !pulling_cooldown_ && glm::length(move_generator_->direction_) >= 0.01f)
             {
                 pulling_cooldown_ = true;
                 Timer::AddTimer(1.0f, [this]()
@@ -61,7 +61,7 @@ void components::PlayerController::OnAction(Action action, input::State state)
                 pull_generator_->direction_ = move_generator_->direction_;
                 pull_generator_->magnitude_ = pull_power_;
                 is_pulling_ = true;
-                Timer::AddTimer(0.1f, [this]()
+                Timer::AddTimer(0.25f, [this]()
                 {
                     pull_generator_->magnitude_ = 0;
                     is_pulling_ = false;
