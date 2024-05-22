@@ -48,7 +48,7 @@ void components::PBDParticle::SympleticEulerIntegration(float t)
 
 void components::PBDParticle::DampVelocity()
 {
-	velocity_ *= damping_factor_;
+	velocity_ *= (damping_factor_ - (int(friction_) * pbd::kFriction * damping_factor_));
 }
 
 void components::PBDParticle::UpdateVelocity(float t)
@@ -457,6 +457,11 @@ void pbd::PBDManager::ClearContacts()
 		c.~Contact();
 	}
 	contacts_.clear();
+
+	for (auto& p : particles_)
+	{
+		p->friction_ = false;
+	}
 }
 
 void pbd::PBDManager::ResolveContact(const Contact& contact)

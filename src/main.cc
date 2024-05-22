@@ -525,11 +525,11 @@ int main()
         ai::EnemyAIManager::i_->UpdateAI();
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
+        pbd::PBDManager::i_->ClearContacts();
         collisions::CollisionManager::i_->PredictColliders();
         collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
         pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
         pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
-        pbd::PBDManager::i_->ClearContacts(); 
         ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
 
     }, nullptr, true);

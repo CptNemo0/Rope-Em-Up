@@ -14,6 +14,8 @@
 
 namespace components
 {
+
+
 	class PBDParticle : public Component, public std::enable_shared_from_this<PBDParticle>
 	{
 	public:
@@ -24,6 +26,7 @@ namespace components
 		glm::vec3 velocity_;
 		glm::vec3 forces_;
 
+		bool friction_ = false;
 		bool controllable_ = true;
 
 		PBDParticle(float mass, float damping_factor, s_ptr<components::Transform> transform) : 
@@ -57,6 +60,7 @@ namespace pbd
 	// Right now it's half of actual fixed delta time
 	// so that the game doesn't run too fast
 	const float kMsPerUpdate = 1.0f / 240.0f;
+	const float kFriction = 0.35f;
 
 	class ForceGenerator
 	{

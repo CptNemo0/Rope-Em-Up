@@ -160,6 +160,16 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
                             auto wa = particle_b->mass_ / (particle_a->mass_ + particle_b->mass_);
                             auto wb = particle_a->mass_ / (particle_a->mass_ + particle_b->mass_);
                            
+                            if (!particle_a->friction_)
+                            {
+                                particle_a->friction_ = true;
+                            }
+
+                            if (!particle_b->friction_)
+                            {
+                                particle_a->friction_ = true;
+                            }
+
                             Separation(a, b, wa, wb);
                             pbd::Contact contact(particle_a, particle_b);
                             contacts.push_back(contact);
