@@ -38,8 +38,8 @@ void main()
 	float roughness = texture(roughness_map, uv).r;
 	float ao = texture(ao_map, uv).r;
 	vec3 normal = texture(normal_map, uv).rgb;
-	normal = normal * 2.0 - 1.0;
-	normal = normalize(TBN * normal);
+	//normal = normal * 2.0 - 1.0;
+	//normal = normalize(TBN * normal);
 
 	tangent_texture = normalize(T - dot(T, normal) * normal);
 	bitangent_texture = normalize(cross(normal, T));
@@ -47,7 +47,7 @@ void main()
 
 	position_texture = world_position;
 	albedo_texture = texture(albedo_map, uv).rgb;
-	normal_texture = (normal + 1.0) * 0.5;
+	normal_texture = (N + 1.0) * 0.5;
 	mra_texture = vec3(metallic, roughness, ao);
 	
 	view_position_texture = view_position;
