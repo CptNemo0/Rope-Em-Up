@@ -13,6 +13,7 @@
 #include "InputObserver.h"
 #include "GamepadAxisType.h"
 #include "ActionMappingType.h"
+#include "../Camera.h"
 
 namespace input
 {
@@ -24,19 +25,20 @@ class InputManager
 
 // Singleton stuff
 private:
-    InputManager(GLFWwindow *window);
+    InputManager(GLFWwindow *window, s_ptr<llr::Camera> *camera);
     ~InputManager() = default;
 
     GLFWwindow *window_;
+    s_ptr<llr::Camera> *camera_;
 
 public:
     static InputManager *i_;
 
-    static void Initialize(GLFWwindow *window)
+    static void Initialize(GLFWwindow *window, s_ptr<llr::Camera> *camera)
     {
         if (i_ == nullptr)
         {
-            i_ = new InputManager(window);
+            i_ = new InputManager(window, camera);
         }
     }
 

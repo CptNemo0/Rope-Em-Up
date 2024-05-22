@@ -2,8 +2,8 @@
 
 input::InputManager *input::InputManager::i_ = nullptr;
 
-input::InputManager::InputManager(GLFWwindow *window)
-    : window_(window)
+input::InputManager::InputManager(GLFWwindow *window, s_ptr<llr::Camera> *camera)
+    : window_(window), camera_(camera)
 {
     glfwSetJoystickCallback(JoystickStateCallback);
     old_gamepad_states_.emplace(GLFW_JOYSTICK_1, GLFWgamepadstate());
@@ -77,7 +77,8 @@ void input::InputManager::UpdateGamepadState(int gamepadID)
 
         if (new_axis_state != old_axis_state)
         {
-            NotifyAction(gamepadID, Action::MOVE, State(-1.0f * new_axis_state));
+            auto axis = -1.0f * glm::rotate(new_axis_state, glm::radians((*camera_)->yaw_ - 90.0f));
+            NotifyAction(gamepadID, Action::MOVE, State(axis));
         }
 
         auto pull_rope_button = gamepad_mappings[gamepadID][Action::PULL_ROPE].buttonID;
@@ -111,7 +112,8 @@ void input::InputManager::UpdateKeyboardState(int gamepadID)
     if (key_state_changed)
     {
         axis_state = SafeNormalize(axis_state);
-        NotifyAction(gamepadID, Action::MOVE, State(axis_state));
+        auto axis = glm::rotate(axis_state, glm::radians((*camera_)->yaw_ - 90.0f));
+        NotifyAction(gamepadID, Action::MOVE, State(axis));
     }
 
     auto &pull_rope_button = keyboard_mappings[gamepadID][Action::PULL_ROPE].buttonID;

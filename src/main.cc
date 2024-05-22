@@ -200,8 +200,6 @@ int main()
     
     utility::InitImGUI(window);
 
-    input::InputManager::Initialize(window);
-
     collisions::CollisionManager::Initialize();
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 1);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(0, 2);
@@ -232,8 +230,8 @@ int main()
     topCamera->set_far(kFar);
     topCamera->set_aspect_ratio(((float)mode->width / (float)mode->height));
     topCamera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
-    topCamera->set_pitch(-90.0f);
-    topCamera->set_yaw(-90.0f);
+    topCamera->set_pitch(-89.0f);
+    topCamera->set_yaw(90.0f);
 
     auto debugCamera = make_shared<llr::Camera>();
     debugCamera->set_fov(kFov);
@@ -245,6 +243,8 @@ int main()
     debugCamera->set_yaw(-90.0f);
 
     s_ptr<llr::Camera>* activeCamera = &camera;
+
+    input::InputManager::Initialize(window, activeCamera);
 
     auto projection_matrix = glm::perspective(glm::radians((*activeCamera)->get_fov()), (*activeCamera)->get_aspect_ratio(), (*activeCamera)->get_near(), (*activeCamera)->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
