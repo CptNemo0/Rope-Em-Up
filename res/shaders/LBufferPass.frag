@@ -212,18 +212,19 @@ void main()
 
     /// ambient lighting IBL ///
     //vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
-    //vec3 kD = 1.0 - kS;
-    //kD *= 1.0 - metallic;	  
-    //vec3 irradiance = texture(irradianceMap, N).rgb;
-    //vec3 diffuse = irradiance * albedo;
-    //vec3 ambient = (kD * diffuse) * ao;
-    ///
+    vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	  
+    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 diffuse = irradiance * albedo;
+    vec3 ambient = (kD * diffuse) * ao;
+    /////////
     /// typical ambient lighting ///
-    vec3 ambient = vec3(0.03) * albedo;
+    //vec3 ambient = vec3(0.03) * albedo;
     ////
     vec3 color   = ambient + Lo;
 
-    color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0/2.2));
+    //color = color / (color + vec3(1.0));
+    //color = pow(color, vec3(1.0/2.2));
     color_texture = color * ssao;
 }
