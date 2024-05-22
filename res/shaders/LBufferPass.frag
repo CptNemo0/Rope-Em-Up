@@ -64,6 +64,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}   
+
 float DistributionGGX(vec3 N, vec3 H, float roughness) //funkcja rozk�adu wektor�w normalnych Trowbridge-Reitz GGX
 {
 		float a      = roughness * roughness;
@@ -84,15 +89,15 @@ float GeometrySchlickGGX(float NdotV, float roughness)
         float k = (r*r) / 8.0;
 
         float num   = NdotV;
-        float denom = max(NdotV * (1.0 - k) + k, 0.00001);
+        float denom = NdotV * (1.0 - k) + k;
 
         return num / denom;
 }
 
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
-        float NdotV = max(dot(N, V), 0.00001);
-        float NdotL = max(dot(N, L), 0.00001);
+        float NdotV = max(dot(N, V), 0.0);
+        float NdotL = max(dot(N, L), 0.0);
         float ggx2  = GeometrySchlickGGX(NdotV, roughness);
         float ggx1  = GeometrySchlickGGX(NdotL, roughness);
 
@@ -128,7 +133,7 @@ vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float
 	vec3 H = normalize(V + L);
 	float distance = length(light.position - World_position);
 	float attenuation = 1.0 / max(light.constant + light.linear * distance + light.quadratic * (distance * distance), 0.00001);
-	vec3 radiance = light.color * attenuation * light.intensity;
+	vec3  radiance = light.color * attenuation * light.intensity;
 
 // Cook-Torrance BRDF
     float NDF = DistributionGGX(N, H, roughness);
@@ -137,7 +142,7 @@ vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float
     
     vec3 numerator    = NDF * G * F;
 	float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-	vec3 specular     = numerator / max(denominator, 0.00001);
+	vec3 specular = numerator / max(denominator, 0.00001);
 
     vec3 kS = F;
 	vec3 kD = vec3(1.0) - kS;
@@ -204,7 +209,18 @@ void main()
 
     Lo += CalcDirLight(dirLight[0], V, N, roughness, metallic, albedo, F0);
     Lo += CalcSpotLight(spotLight[0], World_position, V, N, roughness, metallic, albedo, F0);
+
+    /// ambient lighting IBL ///
+    //vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    //vec3 kD = 1.0 - kS;
+    //kD *= 1.0 - metallic;	  
+    //vec3 irradiance = texture(irradianceMap, N).rgb;
+    //vec3 diffuse = irradiance * albedo;
+    //vec3 ambient = (kD * diffuse) * ao;
+    ///
+    /// typical ambient lighting ///
     vec3 ambient = vec3(0.03) * albedo;
+    ////
     vec3 color   = ambient + Lo;
 
     color = color / (color + vec3(1.0));

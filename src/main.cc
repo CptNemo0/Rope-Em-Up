@@ -407,6 +407,10 @@ int main()
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
+    auto test_ball = GameObject::Create(scene_root);
+    test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(2, 2, 2));
+    test_ball->AddComponent(make_shared<components::MeshRenderer>(test_model, GBufferPassShader));
+
     Rope rope = Rope
     (
         player_1->transform_->get_position(),
@@ -485,13 +489,13 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    PBRShader->Use();
-    PBRShader->SetInt("irradiance_map", 5);
+    LBufferPassShader->Use();
+    LBufferPassShader->SetInt("irradianceMap", 7);
 
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
 
-    
+
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
     ParticleShader->Use();
@@ -709,7 +713,6 @@ int main()
         
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
-
         cubemap->RenderCube();
 
         glDisable(GL_BLEND);
@@ -734,11 +737,12 @@ int main()
         lbuffer.Bind();
         LBufferPassShader->Use();
         gbuffer.BindTextures(LBufferPassShader);
+        cubemap->BindIrradianceMap(LBufferPassShader);
+
         glActiveTexture(GL_TEXTURE4);
         LBufferPassShader->SetInt("ssao_texture", 4);
         glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
         LBufferPassShader->SetVec3("camera_position", (*activeCamera)->get_position());
-
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
         //LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
@@ -747,8 +751,8 @@ int main()
             LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
             LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", point_light_color);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", 1.0f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.045f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 0.0075f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.09f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 0.032f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity /*+ 0.6f * std::sinf(glfwGetTime() * 0.75f)*/);
         }
 
@@ -763,11 +767,14 @@ int main()
         LBufferPassShader->SetFloat("spotLight[0].outerCutOff", spot_light_outer_cut_off);
         LBufferPassShader->SetFloat("spotLight[0].intensity", spot_light_intensity);
         LBufferPassShader->SetFloat("spotLight[0].constant", 1.0f);
-        LBufferPassShader->SetFloat("spotLight[0].linear", 0.045f);
-        LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.0075f);
+        LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
+        LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
+
+
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
         //////////////////////////////////
+
         
         // Bind buffer - Bind textures - Use Shader - Draw 
         postprocessor.Bind();
@@ -776,7 +783,10 @@ int main()
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
         postprocessor.Draw();
         //////////////////////////////////
-        
+        BackgroundShader->Use();
+        BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+        cubemap->BindEnvCubemap(BackgroundShader);
+        cubemap->RenderCube();
 #pragma endregion
 
 #pragma region Interface
@@ -795,9 +805,11 @@ int main()
         
         HUDText_object->GetComponent<components::TextRenderer>()->text_ = "fps: " + std::to_string(1.0f / delta_time);
         HUDText_root->PropagateUpdate();
-
+        
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
+
+        
 
 #pragma endregion
 
@@ -951,6 +963,8 @@ int main()
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
+
+        
 #pragma endregion 
         glfwSwapBuffers(window);
     }

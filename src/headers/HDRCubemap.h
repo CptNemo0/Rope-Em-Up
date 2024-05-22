@@ -30,6 +30,8 @@ public:
 
 	void LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera);
 	void RenderCube();
+	void BindIrradianceMap(s_ptr<Shader> shader);
+	void BindEnvCubemap(s_ptr<Shader> shader);
 
 };
 

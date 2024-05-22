@@ -103,7 +103,6 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera)
 
     // pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
    // --------------------------------------------------------------------------------
-    unsigned int irradianceMap;
     glGenTextures(1, &irradianceMap);
     glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
     for (unsigned int i = 0; i < 6; ++i)
@@ -211,4 +210,20 @@ void HDRCubemap::RenderCube()
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
+}
+
+void HDRCubemap::BindIrradianceMap(s_ptr<Shader> shader)
+{
+    // bind pre-computed IBL data
+    glActiveTexture(GL_TEXTURE7);
+    shader->SetInt("irradianceMap", 7);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+}
+
+void HDRCubemap::BindEnvCubemap(s_ptr<Shader> shader)
+{
+    // bind pre-computed IBL data
+	glActiveTexture(GL_TEXTURE0);
+    shader->SetInt("environmentMap", 0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
 }
