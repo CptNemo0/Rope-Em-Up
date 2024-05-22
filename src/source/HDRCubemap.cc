@@ -107,7 +107,7 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera)
     glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
     for (unsigned int i = 0; i < 6; ++i)
     {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 16, 16, 0, GL_RGB, GL_FLOAT, nullptr);
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -127,7 +127,7 @@ void HDRCubemap::LoadHDRimg(GLFWwindow* window, s_ptr<llr::Camera> camera)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
 
-    glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
+    glViewport(0, 0, 16, 16); // don't forget to configure the viewport to the capture dimensions.
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     for (unsigned int i = 0; i < 6; ++i)
     {
@@ -225,5 +225,5 @@ void HDRCubemap::BindEnvCubemap(s_ptr<Shader> shader)
     // bind pre-computed IBL data
 	glActiveTexture(GL_TEXTURE0);
     shader->SetInt("environmentMap", 0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
 }

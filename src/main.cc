@@ -111,7 +111,7 @@ int main()
     const string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
     const string kTestSmokeTexturePath = "res/textures/test_smoke.png";
 
-    const string kHDREquirectangularPath = "res/cubemaps/HDR_placeholder.hdr";
+    const string kHDREquirectangularPath = "res/cubemaps/puresky_2k.hdr";
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
@@ -713,6 +713,7 @@ int main()
         
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+        cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
 
         glDisable(GL_BLEND);
