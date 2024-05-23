@@ -111,7 +111,7 @@ int main()
     const string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
     const string kTestSmokeTexturePath = "res/textures/test_smoke.png";
 
-    const string kHDREquirectangularPath = "res/cubemaps/puresky_2k.hdr";
+    const string kHDREquirectangularPath = "res/cubemaps/HDR_placeholder.hdr";
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
@@ -119,7 +119,7 @@ int main()
     const string lMalePlayerMeshPath = "res/models/Male/player_M.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
-    const string kTestPath = "res/models/test2.obj";
+    const string kTestPath = "res/models/Cerberus/Cerberus_LP.FBX";
     const string kWallPath = "res/models/simple_wall.obj";
     const string kModule1Path = "res/models/module1.obj";
     const string kModule2Path = "res/models/enviroment/modules/module2.obj";
@@ -408,8 +408,10 @@ int main()
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
     auto test_ball = GameObject::Create(scene_root);
-    test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(2, 2, 2));
+    test_ball->transform_->set_scale(glm::vec3(0.1f));
+    test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(0, 7, -8));
     test_ball->AddComponent(make_shared<components::MeshRenderer>(test_model, GBufferPassShader));
+    test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 
     Rope rope = Rope
     (

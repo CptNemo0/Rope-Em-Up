@@ -79,9 +79,9 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd sub1/sub1_albedo.png
-map_Ns sub1/sub1_albedo.png
-map_Pm sub1/sub1_albedo.png
-map_Bump -bm 20.000000 sub1/sub1_albedo.png
+map_Ns sub1/sub1_roughness.png
+map_Pm sub1/sub1_metallic.png
+map_Bump -bm 20.000000 sub1/sub1_normal.png
 
 newmtl sub5
 Ns 360.000000
@@ -93,6 +93,6 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd sub5/sub5_albedo.png
-map_Ns sub5/sub5_albedo.png
-map_Pm sub5/sub5_albedo.png
-map_Bump -bm 20.000000 sub5/sub5_albedo.png
+map_Ns sub5/sub5_roughness.png
+map_Pm sub5/sub5_metallic.png
+map_Bump -bm 20.000000 sub5/sub5_normal.png

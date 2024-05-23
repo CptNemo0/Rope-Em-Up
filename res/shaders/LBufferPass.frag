@@ -8,6 +8,7 @@ uniform sampler2D mra_texture;
 uniform sampler2D ssao_texture;
 uniform sampler2D tangent_texture;
 uniform sampler2D bitangent_texture;
+uniform sampler2D view_position_texture;
 
 uniform vec3 camera_position;
 
@@ -125,7 +126,7 @@ vec3 CalcDirLight(DirLight light, vec3 V, vec3 N, float roughness, float metalli
         
     //sum radiations
 	float NdotL = max(dot(N, L), 0.0);
-	return (kD * albedo / (2.0*PI) + specular) * radiance * NdotL;  
+	return (kD * albedo / PI + specular) * radiance * NdotL;  
 }
 
 vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
@@ -150,7 +151,7 @@ vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float
         
     //sum radiations
 	float NdotL = max(dot(N, L), 0.0);
-	return (kD * albedo / (2.0*PI) + specular) * radiance * NdotL; 
+	return (kD * albedo / PI + specular) * radiance * NdotL; 
 }
 
 
@@ -180,7 +181,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float r
 		
 	//sum radiations
 	float NdotL = max(dot(N, L), 0.0);
-	return (kD * albedo / (2.0*PI) + specular) * radiance * NdotL;
+	return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
 
@@ -196,7 +197,7 @@ void main()
 
     vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
     vec3 V = normalize(camera_position - World_position);
-    
+
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
 
@@ -212,15 +213,15 @@ void main()
 
     /// ambient lighting IBL ///
     //vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
-    vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-    vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;	  
-    vec3 irradiance = texture(irradianceMap, N).rgb;
-    vec3 diffuse = irradiance * albedo;
-    vec3 ambient = (kD * diffuse) * ao;
+    //vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    //vec3 kD = 1.0 - kS;
+    //kD *= 1.0 - metallic;	  
+    //vec3 irradiance = texture(irradianceMap, N).rgb;
+    //vec3 diffuse = irradiance * albedo;
+    //vec3 ambient = (kD * diffuse) * ao;
     /////////
     /// typical ambient lighting ///
-    //vec3 ambient = vec3(0.03) * albedo;
+    vec3 ambient = vec3(0.03) * albedo;
     ////
     vec3 color   = ambient + Lo;
 

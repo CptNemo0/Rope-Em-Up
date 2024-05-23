@@ -136,4 +136,8 @@ void GBuffer::BindTextures(s_ptr<Shader> shader)
 	glActiveTexture(GL_TEXTURE6);
 	shader->SetInt("bitangent_texture", 6);
 	glBindTexture(GL_TEXTURE_2D, bitangent_texture_);
+
+	glActiveTexture(GL_TEXTURE7);
+	shader->SetInt("view_position_texture", 7);
+	glBindTexture(GL_TEXTURE_2D, view_position_texture_);
 }
