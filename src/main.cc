@@ -220,7 +220,7 @@ int main()
     camera->set_near(kNear);
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
-    camera->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    camera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
     camera->set_pitch(-89.0f);
     camera->set_yaw(-89.0f);
 

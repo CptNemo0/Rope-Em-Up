@@ -33,6 +33,7 @@ namespace llr
 		float near_;
 		float far_;
 		float aspect_ratio_;
+		glm::mat4 view_matrix_;
 
 
 
@@ -47,7 +48,10 @@ namespace llr
 		fov_(fov),
 		near_(near),
 		far_(far),
-		aspect_ratio_(ar){}
+		aspect_ratio_(ar)
+		{
+		view_matrix_ = glm::lookAt(position_, position_ + front_, up_);
+		}
 
 		~Camera() = default;
 
@@ -158,6 +162,11 @@ namespace llr
 		inline glm::mat4 GetViewMatrix()
 		{
 			return glm::lookAt(position_, position_ + front_, up_);
+		}
+
+		inline void SetViewMatrix(glm::mat4 new_view_matrix)
+		{
+			this->view_matrix_ = new_view_matrix;
 		}
 	
 		void UpdateDirectionVectors();
