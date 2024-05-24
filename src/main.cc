@@ -116,7 +116,7 @@ int main()
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
     const string lFemalePlayerMeshPath = "res/models/Female/kobieta.fbx";
-    const string lMalePlayerMeshPath = "res/models/Male/player_M.fbx";
+    const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/Cerberus/Cerberus_LP.FBX";
@@ -315,7 +315,7 @@ int main()
     auto cube_model = make_shared<Model>(kCubeMeshPath);
     auto player_model = make_shared<Model>(kPlayerMeshPath);
     //auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
-    //auto M_player_model = make_shared<Model>(lMalePlayerMeshPath);
+    auto M_player_model = make_shared<Model>(kMalePlayerMeshPath);
     auto debug_model = make_shared<Model>(kDebugMeshPath);
     auto enemy_model = make_shared<Model>(kEnemyMeshPath);
     auto wall_model = make_shared<Model>(kWallPath);
@@ -395,23 +395,24 @@ int main()
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
-    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
+    player_1->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    player_1->transform_->set_rotation(glm::vec3(-90.0f, 90.0f, 180.0f));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, M_player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
-    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
+    player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, M_player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
-    auto test_ball = GameObject::Create(scene_root);
+    /*auto test_ball = GameObject::Create(scene_root);
     test_ball->transform_->set_scale(glm::vec3(0.1f));
     test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(0, 7, -8));
     test_ball->AddComponent(make_shared<components::MeshRenderer>(test_model, GBufferPassShader));
-    test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+    test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));*/
 
     Rope rope = Rope
     (
