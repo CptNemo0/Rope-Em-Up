@@ -1,5 +1,6 @@
 #pragma once
-#include "Animation.h"
+#include "./headers/animation/Animation.h"
+#include "./headers/global.h"
 
 class Animator
 {

@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "AssimpGLMHelpers.h"
 
+
 struct KeyPosition
 {
     glm::vec3 position;

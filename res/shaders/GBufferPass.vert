@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 layout (location = 0) in vec3 iv_position;
 layout (location = 1) in vec3 iv_normal;
 layout (location = 2) in vec2 iv_texture;
@@ -21,9 +21,13 @@ uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
 
 uniform bool useBones;
-const int MAX_BONES = 100;
+uniform int numBones;
+
 const int MAX_BONE_INFLUENCE = 4;
-uniform mat4 finalBonesMatrices[MAX_BONES];
+
+layout(std430, binding = 0) buffer Bones {
+    mat4 finalBonesMatrices[];
+};
 
 
 void main()
@@ -38,7 +42,7 @@ void main()
 		{
 			if (iv_boneIds[i] == -1) 
 				continue;
-			if (iv_boneIds[i] >= MAX_BONES) 
+			if (iv_boneIds[i] >= numBones) 
 			{
 				totalPosition = vec4(iv_position, 1.0);
 				totalNormal = iv_normal;

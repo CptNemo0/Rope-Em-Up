@@ -37,4 +37,6 @@ const float kQuadVertices[] =
      1.0f,  1.0f,  1.0f, 1.0f
 };
 
+#define MAX_BONES 500
+
 #endif // !GLOBAL_H

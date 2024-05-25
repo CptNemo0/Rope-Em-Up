@@ -146,6 +146,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
     return textures;
 }
 
+
 void Model::SetVertexBoneDataToDefault(Vertex& vertex)
 {
     for (int i = 0; i < MAX_BONE_WEIGHTS; i++)

@@ -57,7 +57,7 @@
 #include "headers/SSAO.h"
 #include "headers/ChokeList.h"
 #include "headers/parsing/file_read.h"
-#include "headers/animation/Animator.h"
+#include "headers/components/Animator.h"
 
 int main()
 {
@@ -117,7 +117,7 @@ int main()
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
     const string lFemalePlayerMeshPath = "res/models/Female/kobieta.fbx";
-    const string kMalePlayerMeshPath = "res/Players/untitled.fbx";
+    const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/Cerberus/Cerberus_LP.FBX";
@@ -496,6 +496,15 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
+    
+    GBufferPassShader->Use();
+    unsigned int maxBones = MAX_BONES;
+    unsigned int ssbo;
+    glGenBuffers(1, &ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, maxBones * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+
     LBufferPassShader->Use();
     LBufferPassShader->SetInt("irradianceMap", 7);
 
@@ -709,10 +718,10 @@ int main()
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
-        //GBufferPassShader->UsesBones("useBones", false);
+        GBufferPassShader->SetInt("numBones", maxBones);
         auto transforms = animator.GetFinalBoneMatrices();
-        for (int i = 0; i < transforms.size(); ++i)
-            GBufferPassShader->SetMatrix4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());
 
         scene_root->PropagateUpdate();
 
