@@ -16,10 +16,12 @@ void Animator::UpdateAnimation(float dt)
 {
 	m_CurrentTime += dt;
 
-	if (m_CurrentTime > m_CurrentAnimation->GetDuration())
+	if (m_CurrentAnimation)
+	{
+		m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt;
 		m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
-
-	CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
+		CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
+	}
 }
 
 void Animator::PlayAnimation(Animation* animation)

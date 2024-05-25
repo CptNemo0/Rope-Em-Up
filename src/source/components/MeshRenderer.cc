@@ -14,6 +14,14 @@ void components::MeshRenderer::Start()
 void components::MeshRenderer::Update()
 {
     shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
+	if (model_->m_BoneCounter > 0)
+	{
+		shader_->SetBool("useBones", true);
+	}
+	else
+	{
+		shader_->SetBool("useBones", false);
+	}
 	model_->Draw(shader_);
 }
 

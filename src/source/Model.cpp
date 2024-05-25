@@ -3,9 +3,6 @@
 Model::Model(string path, bool gamma) : gammaCorrection(gamma)
 {
     Assimp::Importer importer;
-    /*importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS, true);
-    importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_MATERIALS, true);
-    importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_TEXTURES, true);*/
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {

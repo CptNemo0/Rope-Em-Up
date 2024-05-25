@@ -57,6 +57,7 @@
 #include "headers/SSAO.h"
 #include "headers/ChokeList.h"
 #include "headers/parsing/file_read.h"
+#include "headers/animation/Animator.h"
 
 int main()
 {
@@ -116,7 +117,7 @@ int main()
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
     const string lFemalePlayerMeshPath = "res/models/Female/kobieta.fbx";
-    const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test.fbx";
+    const string kMalePlayerMeshPath = "res/Players/untitled.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/Cerberus/Cerberus_LP.FBX";
@@ -395,24 +396,27 @@ int main()
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_1->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-    player_1->transform_->set_rotation(glm::vec3(-90.0f, 90.0f, 180.0f));
-    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, M_player_model->meshes_[0], player_1->transform_));
+    player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, M_player_model->meshes_[0], player_2->transform_));
+    player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
+    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(1, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
 
-    /*auto test_ball = GameObject::Create(scene_root);
-    test_ball->transform_->set_scale(glm::vec3(0.1f));
-    test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(0, 7, -8));
-    test_ball->AddComponent(make_shared<components::MeshRenderer>(test_model, GBufferPassShader));
-    test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));*/
+    auto test_ball = GameObject::Create(scene_root);
+    test_ball->transform_->set_scale(glm::vec3(0.01f));
+    test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(1, 0, -1));
+    test_ball->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    //test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+
+    Animation test_animation = Animation(kMalePlayerMeshPath, M_player_model);
+    Animator animator = &test_animation;
+    animator.PlayAnimation(&test_animation);
 
     Rope rope = Rope
     (
@@ -577,6 +581,7 @@ int main()
         static float previous_time = glfwGetTime();
         float current_time = glfwGetTime();
         float delta_time = current_time - previous_time;
+
         lag += delta_time;
         #ifdef _DEBUG
             delta_time = glm::clamp(delta_time, 0.0f, (1.0f / 30.0f));
@@ -585,7 +590,8 @@ int main()
         previous_time = current_time;
     
         Timer::Update(delta_time);
-        
+        animator.UpdateAnimation(delta_time);
+
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
@@ -703,6 +709,10 @@ int main()
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
+        //GBufferPassShader->UsesBones("useBones", false);
+        auto transforms = animator.GetFinalBoneMatrices();
+        for (int i = 0; i < transforms.size(); ++i)
+            GBufferPassShader->SetMatrix4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 
         scene_root->PropagateUpdate();
 

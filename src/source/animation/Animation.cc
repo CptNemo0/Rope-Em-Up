@@ -1,6 +1,6 @@
 #include "./headers/animation/Animation.h"
 
-Animation::Animation(const std::string& animationPath, Model* model)
+Animation::Animation(const std::string& animationPath, s_ptr<Model> model)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);

@@ -8,6 +8,7 @@
 #include "Bone.h"
 #include "AnimData.h"
 #include <headers/Model.h>
+#include <headers/global.h>
 
 struct AssimpNodeData
 {
@@ -29,7 +30,7 @@ public:
 	Animation() = default;
 	~Animation() = default;
 
-	Animation(const std::string& animationPath, Model* model);
+	Animation(const std::string& animationPath, s_ptr<Model> model);
 	Bone* FindBone(const std::string& name);
 
 	inline float GetTicksPerSecond() { return m_TicksPerSecond; }
