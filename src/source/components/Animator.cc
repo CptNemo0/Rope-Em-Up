@@ -1,6 +1,6 @@
 #include "./headers/components/Animator.h"
 
-Animator::Animator(Animation* currentAnimation)
+components::Animator::Animator(anim::Animation* currentAnimation)
 {
     m_CurrentTime = 0.0;
     m_CurrentAnimation = currentAnimation;
@@ -12,7 +12,7 @@ Animator::Animator(Animation* currentAnimation)
 }
 
 
-void Animator::UpdateAnimation(float dt)
+void components::Animator::UpdateAnimation(float dt)
 {
 	m_CurrentTime += dt;
 
@@ -24,13 +24,13 @@ void Animator::UpdateAnimation(float dt)
 	}
 }
 
-void Animator::PlayAnimation(Animation* animation)
+void components::Animator::PlayAnimation(anim::Animation* animation)
 {
 	m_CurrentAnimation = animation;
 	m_CurrentTime = 0.0f;
 }
 
-void Animator::CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform)
+void components::Animator::CalculateBoneTransform(const anim::AssimpNodeData* node, glm::mat4 parentTransform)
 {
 	std::string nodeName = node->name;
 	glm::mat4 nodeTransform = node->transformation;

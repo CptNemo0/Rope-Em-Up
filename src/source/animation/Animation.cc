@@ -1,6 +1,6 @@
 #include "./headers/animation/Animation.h"
 
-Animation::Animation(const std::string& animationPath, s_ptr<Model> model)
+anim::Animation::Animation(const std::string& animationPath, s_ptr<Model> model)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
@@ -14,7 +14,7 @@ Animation::Animation(const std::string& animationPath, s_ptr<Model> model)
 	ReadMissingBones(animation, *model);
 }
 
-Bone* Animation::FindBone(const std::string& name)
+Bone* anim::Animation::FindBone(const std::string& name)
 {
 	auto iter = std::find_if(m_Bones.begin(), m_Bones.end(),
 		[&](const Bone& Bone)
@@ -26,7 +26,7 @@ Bone* Animation::FindBone(const std::string& name)
 	else return &(*iter);
 }
 
-void Animation::ReadMissingBones(const aiAnimation* animation, Model& model)
+void anim::Animation::ReadMissingBones(const aiAnimation* animation, Model& model)
 {
 	int size = animation->mNumChannels;
 
@@ -51,7 +51,7 @@ void Animation::ReadMissingBones(const aiAnimation* animation, Model& model)
 	m_BoneInfoMap = boneInfoMap;
 }
 
-void Animation::ReadHierarchyData(AssimpNodeData& dest, const aiNode* src)
+void anim::Animation::ReadHierarchyData(AssimpNodeData& dest, const aiNode* src)
 {
 	assert(src);
 

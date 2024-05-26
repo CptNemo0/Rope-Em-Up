@@ -10,6 +10,9 @@
 #include <headers/Model.h>
 #include <headers/global.h>
 
+
+namespace anim {
+
 struct AssimpNodeData
 {
     glm::mat4 transformation;
@@ -21,11 +24,11 @@ struct AssimpNodeData
 class Animation
 {
 private:
-		float m_Duration;
-		int m_TicksPerSecond;
-		std::vector<Bone> m_Bones;
-		AssimpNodeData m_RootNode;
-		std::map<std::string, BoneInfo> m_BoneInfoMap;
+	float m_Duration;
+	int m_TicksPerSecond;
+	std::vector<Bone> m_Bones;
+	AssimpNodeData m_RootNode;
+	std::map<std::string, BoneInfo> m_BoneInfoMap;
 public:
 	Animation() = default;
 	~Animation() = default;
@@ -45,6 +48,9 @@ private:
 	void ReadMissingBones(const aiAnimation* animation, Model& model);
 	void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src);
 };
+
+}
+
 
 #endif // !ANIMATION_H
 

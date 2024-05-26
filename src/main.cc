@@ -116,7 +116,7 @@ int main()
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
-    const string lFemalePlayerMeshPath = "res/models/Female/kobieta.fbx";
+    const string lFemalePlayerMeshPath = "res/Players/Female/kobieta_test.fbx";
     const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
@@ -315,7 +315,7 @@ int main()
 
     auto cube_model = make_shared<Model>(kCubeMeshPath);
     auto player_model = make_shared<Model>(kPlayerMeshPath);
-    //auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
+    auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
     auto M_player_model = make_shared<Model>(kMalePlayerMeshPath);
     auto debug_model = make_shared<Model>(kDebugMeshPath);
     auto enemy_model = make_shared<Model>(kEnemyMeshPath);
@@ -414,9 +414,10 @@ int main()
     test_ball->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
     //test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 
-    Animation test_animation = Animation(kMalePlayerMeshPath, M_player_model);
-    Animator animator = &test_animation;
-    animator.PlayAnimation(&test_animation);
+    anim::Animation test_animation = anim::Animation(kMalePlayerMeshPath, M_player_model);
+    auto animator = GameObject::Create(scene_root);
+    animator->AddComponent(make_shared<components::Animator>(&test_animation));
+    /*components::Animator animator = &test_animation;*/
 
     Rope rope = Rope
     (
@@ -599,8 +600,8 @@ int main()
         previous_time = current_time;
     
         Timer::Update(delta_time);
-        animator.UpdateAnimation(delta_time);
 
+        animator->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
@@ -719,7 +720,7 @@ int main()
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
         GBufferPassShader->SetInt("numBones", maxBones);
-        auto transforms = animator.GetFinalBoneMatrices();
+        auto transforms = animator->GetComponent<components::Animator>()->GetFinalBoneMatrices();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
         glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());
 
