@@ -43,7 +43,6 @@
 #include "headers/audio/AudioManager.h"
 #include "headers/audio/Sounds.h"
 #include "headers/components/AudioSource.h"
-#include "headers/CameraManager.h"
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
 #include "headers/ai/EnemyAIManager.h"
@@ -417,7 +416,6 @@ int main()
     anim::Animation test_animation = anim::Animation(kMalePlayerMeshPath, M_player_model);
     auto animator = GameObject::Create(scene_root);
     animator->AddComponent(make_shared<components::Animator>(&test_animation));
-    /*components::Animator animator = &test_animation;*/
 
     Rope rope = Rope
     (
@@ -562,9 +560,6 @@ int main()
     isometricCameraComponent->height_ = 17.0f;
     isometricCameraComponent->distance_ = 21.0f;
 
-    auto CameraManager = make_shared<llr::CameraManager>();
-    CameraManager->setIsometricCamera(isometricCameraComponent);
-    CameraManager->setTopDownCamera(topDownCameraComponent);
 
     // wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

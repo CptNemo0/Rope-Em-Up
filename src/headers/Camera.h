@@ -12,6 +12,13 @@
 
 namespace llr
 {
+	enum class CameraMode
+	{
+		TopDown,
+		Isometric,
+		Debug
+	};
+
 	const glm::vec3 kRight   = glm::vec3(1.0f, 0.0f, 0.0f);
 	const glm::vec3 kUp      = glm::vec3(0.0f, 1.0f, 0.0f);
 	const glm::vec3 kForward = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -168,59 +175,12 @@ namespace llr
 		{
 			this->view_matrix_ = new_view_matrix;
 		}
+		void ConfigureTopDown();
+		void ConfigureIsometric();
+		void ConfigureDebug();
 	
 		void UpdateDirectionVectors();
 	};
-
-}
-
-namespace components
-{
-	class CameraComponent : public Component
-	{
-	public:
-		s_ptr<components::Transform> transfrom_;
-		s_ptr<llr::Camera> camera_;
-
-		// Inherited via Component
-		void Start() override;
-
-		void Update() override;
-		void Destroy() override {}
-
-	};
-
-	class GameplayCameraComponent : public Component
-	{
-public:
-		s_ptr<components::Transform> transfrom_;
-		s_ptr <llr::Camera> camera_;
-		s_ptr <GameObject> target1_;
-		s_ptr <GameObject> target2_;
-		float distance_ = 0;
-		float yawAngle_= 0.0f;
-		float pitchAngle_ = 0.0f;
-		float height_ = 12.0f;
-
-
-		// Inherited via Component
-		void Start() override;
-
-		void Update() override;
-
-		void Destroy() override;
-
-		GameplayCameraComponent(s_ptr <GameObject> target1, s_ptr <GameObject> target2, s_ptr <llr::Camera> camera);
-
-		glm::vec3 calculateMidPoint();
-
-		void RotateCameraAroundMidPoint(float yawAngle);
-
-
-		void SetTargets(s_ptr <GameObject> target1, s_ptr <GameObject> target2);
- 
-	};
-
 
 }
 
