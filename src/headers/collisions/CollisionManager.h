@@ -18,6 +18,15 @@ class components::Collider;
 
 namespace collisions
 {
+    enum LAYERS
+    {
+        TENTACLE,
+        PLAYER,
+        ROPE,
+        CLUTTER,
+        LAMPS
+    };
+
 	class CollisionManager
 	{
     public:
