@@ -743,7 +743,7 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, s_ptr<GameObject> s
         Room::room_parts.push_back(lamp);
     }
 
-    //// generate clutter
+    // generate clutter
 
     for (int i = 0; i < room.clutter_idx.size(); i++)
     {
@@ -755,6 +755,7 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, s_ptr<GameObject> s
         Room::room_parts.push_back(clutter);
     }
 
+    // generate enemies
     for (int i = 0; i < room.enemies_positions.size(); i++)
     {
         auto enemy = GameObject::Create(scene_root);

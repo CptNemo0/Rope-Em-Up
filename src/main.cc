@@ -414,9 +414,9 @@ int main()
     test_ball->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
     //test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 
-    anim::Animation test_animation = anim::Animation(kMalePlayerMeshPath, M_player_model);
-    auto animator = GameObject::Create(scene_root);
-    animator->AddComponent(make_shared<components::Animator>(&test_animation));
+    //anim::Animation test_animation = anim::Animation(kMalePlayerMeshPath, M_player_model);
+    //auto animator = GameObject::Create(scene_root);
+    //animator->AddComponent(make_shared<components::Animator>(&test_animation));
     /*components::Animator animator = &test_animation;*/
 
     Rope rope = Rope
@@ -601,7 +601,7 @@ int main()
     
         Timer::Update(delta_time);
 
-        animator->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
+        //animator->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
@@ -720,9 +720,9 @@ int main()
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
         GBufferPassShader->SetInt("numBones", maxBones);
-        auto transforms = animator->GetComponent<components::Animator>()->GetFinalBoneMatrices();
+        /*auto transforms = animator->GetComponent<components::Animator>()->GetFinalBoneMatrices();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());*/
 
         scene_root->PropagateUpdate();
 

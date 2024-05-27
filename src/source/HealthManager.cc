@@ -39,9 +39,13 @@ void HealthManager::DeathUpdate()
 		{
 			continue;
 		}
-		if (h->health_ <= 0.0)
+
+		if (h->active_)
 		{
-			h->gameObject_.lock()->Destroy();
+			if (h->health_ <= 0.0)
+			{
+				h->gameObject_.lock()->Destroy();
+			}
 		}
 		i++;
 	}

@@ -53,24 +53,8 @@ void components::PBDParticle::DampVelocity()
 
 void components::PBDParticle::UpdateVelocity(float t)
 {
-	//auto b = forces_;
 	ClampElementwise(forces_, 3000.0f, -3000.0f);
-	/*bool p1x = isnan(forces_.x);
-	bool p1z = isnan(forces_.z);
-	if (p1x || p1z)
-	{
-		cout << "TERAZ CIE MAM" << endl;
-		LogVec3(b);
-		LogVec3(forces_);
-		LogVec3(velocity_);
-		LogVec3(transform_->get_position());
-		LogVec3(transform_->get_previous_position());
-		LogVec3(transform_->get_predicted_position());
-		exit(-124);
-	}*/
-
 	velocity_ = (transform_->get_position() - transform_->get_previous_position()) / t + t * inverse_mass_ * forces_;
-	
 	velocity_.y = 0.0;
 }
 
@@ -81,21 +65,6 @@ void components::PBDParticle::PredictPosition(float t)
 
 void components::PBDParticle::UpdatePosition(float t)
 {
-	//if (glm::length(velocity_) != 0.0f && transform_->get_position() == transform_->get_predicted_position())
-	//{
-	//	transform_->set_position(transform_->get_predicted_position());
-	//}
-	//else
-	//{
-	//	/*bool p1x = isnormal(transform_->get_predicted_position().x);
-	//	bool p1z = isnormal(transform_->get_predicted_position().z);
-	//	if (!p1x || !p1z)
-	//	{
-	//		cout << "TERAZ CIE MAM!" << endl;
-	//	}*/
-
-	//	transform_->set_position(transform_->get_predicted_position());
-	//}
 	transform_->set_position(transform_->get_predicted_position());
 }
 
@@ -187,7 +156,7 @@ pbd::RopeConstraint::RopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<com
 
 pbd::RopeConstraint::~RopeConstraint()
 {
-	//pbd::PBDManager::i_->RemoveConstraint(this);
+	
 }
 
 void pbd::RopeConstraint::Enforce()
@@ -303,22 +272,6 @@ void pbd::PBDManager::RemoveRecord(s_ptr<components::PBDParticle> p)
 
 void pbd::PBDManager::RemoveConstraint(s_ptr<components::PBDParticle> p)
 {
-	// std::vector<int> idx;
-
-	// int n = pbd::PBDManager::i_->constraints_.size();
-
-	// for (int i = 0; i < n; i++)
-	// {
-	// 	if (&pbd::PBDManager::i_->constraints_[i]->p1_ == &p || &pbd::PBDManager::i_->constraints_[i]->p2_ == &p)
-	// 	{
-	// 		idx.push_back(i);
-	// 	}
-	// }
-
-	// for (int i = idx.size() - 1; i > -1; i --)
-	// {
-	// 	pbd::PBDManager::i_->constraints_.erase(pbd::PBDManager::i_->constraints_.begin() + i);
-	// }
 	std::erase_if(pbd::PBDManager::i_->constraints_, [p](const s_ptr<pbd::RopeConstraint> &A)
 	{
 		return A->p1_ == p || A->p2_ == p;
@@ -388,7 +341,10 @@ void pbd::PBDManager::ProjectConstraints(float t)
 	
 	for (auto& particle : particles_)
 	{
-		walls_.Enforce(particle);
+		if (particle->active_)
+		{
+			walls_.Enforce(particle);
+		}
 	}
 }
 

@@ -20,7 +20,7 @@
 class Rope
 {
 public:
-	float kDistance = 0.1f;
+	float kDistance = 0.25f;
 
 	std::deque<s_ptr<GameObject>> rope_segments_;
 	std::deque<s_ptr<pbd::RopeConstraint>> rope_constraints_;

@@ -16,28 +16,11 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
     glm::vec3 end = start + distance * dir;
     glm::vec3 center = start + distance * 0.5f * dir;
 
-    //glm::vec3 normal = glm::normalize(glm::cross(dir, glm::vec3(0.0f, 1.0f, 0.0f)));
-
     float half_lenght = distance * 0.5f;
 
     s_ptr<AABB> aabb = make_shared<AABB>();
     aabb->centre = center;
     aabb->extremes = glm::vec3(half_lenght, 0.0f, half_lenght);
-
-    /*glm::vec3 a = start + normal * kRaycastDX;
-    glm::vec3 b = start - normal * kRaycastDX;
-    glm::vec3 c = end + normal * kRaycastDX;
-    glm::vec3 d = end - normal * kRaycastDX;
-
-    std::vector<glm::vec3> vertices{a, b, c, d};
-
-    glm::mat4 model_matrix = glm::mat4(1.0f);
-
-    s_ptr<ConvexHull> hull = make_shared<ConvexHull>();
-    hull->local_vertices = vertices;
-    hull->vertices = vertices;
-
-    CollisionManager::i_->colliders_;*/
 
     s_ptr<GameObject> rv_object = nullptr;
     glm::vec3 rv_point = glm::vec3(0.0f);
@@ -47,6 +30,11 @@ collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float
     for (int i = 0; i < CollisionManager::i_->colliders_.size(); i++)
     {
         auto collider = CollisionManager::i_->colliders_[i];
+
+        if (!collider->active_)
+        {
+            continue;
+        }
 
         if (!(collider->gameObject_.lock() == caster))
         {
@@ -102,11 +90,6 @@ bool collisions::ChokeCheck(s_ptr<GameObject> caster, int precision, int thresho
     }
 
     return_value = (hits >= threshold);
-
-    /*if (return_value)
-    {
-        cout << "CHOKED!!!\n";;
-    }*/
 
     return return_value;
 }

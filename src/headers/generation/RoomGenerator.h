@@ -103,6 +103,8 @@ namespace generation
 
     struct Room
     {
+        std::shared_ptr<GameObject> room_object;
+
         // Values that will be generated during layout generation
         glm::ivec2 position;
 

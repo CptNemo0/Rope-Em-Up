@@ -137,7 +137,7 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
         for (int j = i + 1; j < colliders_.size(); j++)
         {
             s_ptr<components::Collider> b = colliders_[j];
-            if (!a->active_)
+            if (!b->active_)
             {
                 continue;
             }
