@@ -370,27 +370,28 @@ int main()
 #pragma endregion Models
     
     auto scene_root = GameObject::Create();
+    auto room_root = GameObject::Create(scene_root);
 
     generation::RoomLayoutGenerator rlg;
     std::deque<w_ptr<GameObject>> room_objects;
     std::deque<w_ptr<GameObject>> room_parts;
     std::vector<w_ptr<GameObject>> enemies_parts;
 
-    rlg.GenerateRooms(rlgs);
+    rlg.GenerateRooms(rlgs, room_root);
     rlg.GenerateGates();
 
-    /*for (auto& room : rlg.rooms)
+    for (auto& room : rlg.rooms)
     {
         auto room_obj = GameObject::Create(scene_root);
         room_objects.push_back(room_obj);
         room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
         room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
         room_obj->transform_->set_scale(glm::vec3(3.0f));
-    }*/
+    }
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     generation::GenerateRoom(*room, &rg_settings, &models);
-    generation::BuildRoom(*room, &models, scene_root, GBufferPassShader);
+    generation::BuildRoom(*room, &models, GBufferPassShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
@@ -450,7 +451,7 @@ int main()
 
     auto isometricCameraComponent = isometricCamera->GetComponent<components::GameplayCameraComponent>();
     auto topDownCameraComponent = topDownCamera->GetComponent<components::GameplayCameraComponent>();
-
+    
     auto HUD_root = GameObject::Create();
 
     auto HUD_object = GameObject::Create(HUD_root);
@@ -576,7 +577,7 @@ int main()
     /////////////////////////////////////////////
     /////////////////////////////////////////////
     /////////////////////////////////////////////
-
+    
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -623,19 +624,26 @@ int main()
             rg_settings.enemies = random::RandInt(1, 5);
             rg_settings.lamps = random::RandInt(4, 8);
 
-            // Usun obecny pokoj
-            generation::DeleteCurrentRoom(*room);
+            // Wyłącz obecny pokoj
+            //generation::DeleteCurrentRoom(*room);
+            room->room_object->Disable();
 
             // Stworz nowy pokoj
             room = &rlg.rooms[next_room_pos];
 
-            if (!room->is_generated)
+            if (room->is_built)
             {
-                generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
-                rg_settings.width++;
+                room->room_object->Enable();
             }
+            else
+            {
+                if (!room->is_generated)
+                {
+                    generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+                }
 
-            generation::BuildRoom(*room, &models, scene_root, GBufferPassShader);
+                generation::BuildRoom(*room, &models, GBufferPassShader);
+            }
 
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
@@ -705,7 +713,6 @@ int main()
 #pragma region Collisions and Physics
   
         rope.ChokeCheck(room);
-        generation::CleanUpEnemiesVecotr(*room);
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
 #pragma endregion
@@ -855,7 +862,7 @@ int main()
         ImGui::Begin("Camera");
         //chose the camera
         const char* items[] = { "Isometric", "Top Down", "Debugging" };
-        static int selectedItem = 1;
+        static int selectedItem = 0;
         ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
 
             switch (selectedItem)
@@ -913,7 +920,7 @@ int main()
         ImGui::SliderFloat("Sub branch max length", &rlgs.sub_branch_max_length, 1.0f, 10.0f, "%0.2f");
         if (ImGui::Button("Generate"))
         {
-            rlg.GenerateRooms(rlgs);
+            rlg.GenerateRooms(rlgs, scene_root);
             rlg.GenerateGates();
             for (auto &room : room_objects)
             {
@@ -985,6 +992,8 @@ int main()
         }
         ImGui::End();
 
+        
+        
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 

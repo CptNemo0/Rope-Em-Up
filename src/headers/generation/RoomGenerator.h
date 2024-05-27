@@ -104,6 +104,12 @@ namespace generation
     struct Room
     {
         std::shared_ptr<GameObject> room_object;
+        std::shared_ptr<GameObject> enemies;
+        std::shared_ptr<GameObject> clutter;
+        std::shared_ptr<GameObject> lamps;
+        std::shared_ptr<GameObject> walls;
+        std::shared_ptr<GameObject> gates;
+        std::shared_ptr<GameObject> floors;
 
         // Values that will be generated during layout generation
         glm::ivec2 position;
@@ -114,6 +120,7 @@ namespace generation
         bool left_gate;
 
         bool is_generated = false;
+        bool is_built = false;
 
         // Values that will be generated during room generation
 
@@ -155,37 +162,16 @@ namespace generation
         // !Values that will be generated during room generation
 
         //Static values
-        static std::deque<w_ptr<GameObject>> room_parts;
-        static std::vector<w_ptr<GameObject>> enemies;
+        //static std::deque<w_ptr<GameObject>> room_parts;
+        //static std::vector<w_ptr<GameObject>> enemies;
 
-        Room(glm::ivec2 position = glm::ivec2(0, 0)) : position(position) 
-        {
-            up_gate = false;
-            right_gate = false;
-            down_gate = false;
-            left_gate = false;
-
-            width = 2;
-            height = 2;
-
-            up_gate_idx = -1;
-            right_gate_idx = -1;
-            down_gate_idx = -1;
-            left_gate_idx = -1;
-
-            up_gate_wall = -1;
-            right_gate_wall = -1;
-            down_gate_wall = -1;
-            left_gate_wall = -1;
-
-            up_gate_pos = glm::vec3(0.0f);
-            right_gate_pos = glm::vec3(0.0f);
-            down_gate_pos = glm::vec3(0.0f);
-            left_gate_pos = glm::vec3(0.0f);
-        }
+        Room() = default;
+        Room(glm::ivec2 position);
+        Room(glm::ivec2 position, std::shared_ptr<GameObject> root);
+        
     };
 
-    static inline void CleanUpEnemiesVecotr(Room& room)
+    /*static inline void CleanUpEnemiesVecotr(Room& room)
     {
         for (int i = 0; i < Room::enemies.size(); i++)
         {
@@ -196,9 +182,9 @@ namespace generation
                 i = i - 1;
             }
         }
-    }
+    }*/
 
-    static inline void DeleteCurrentRoom(Room& room)
+    /*static inline void DeleteCurrentRoom(Room& room)
     {
         for (auto& a : Room::room_parts)
         {
@@ -214,7 +200,7 @@ namespace generation
 
         Room::room_parts.clear();
         Room::enemies.clear();
-    }
+    }*/
 
     static inline glm::ivec2 GetMoveDirection(Room* room, std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2)
     {
@@ -283,16 +269,16 @@ namespace generation
         static inline const glm::ivec2 direction[4] = {glm::ivec2(1, 0), glm::ivec2(-1, 0), glm::ivec2(0, 1), glm::ivec2(0, -1)};
         static inline const int reverse_direction[4] = {1, 0, 3, 2};
         std::pair<int, glm::ivec2> FindNextClosestPoint(const glm::ivec2 &A, const glm::ivec2 &B, const glm::ivec2 &point, int prev_direction);
-        void GenerateRoomsBetweenPoints(const glm::ivec2 &A, const glm::ivec2 &B, const RoomLayoutGenerationSettings &settings);
+        void GenerateRoomsBetweenPoints(const glm::ivec2& A, const glm::ivec2& B, const RoomLayoutGenerationSettings& settings, std::shared_ptr<GameObject> root);
 
     public:
         std::unordered_map<glm::ivec2, Room> rooms;
         std::deque<Room> rooms_ordered;
 
         RoomLayoutGenerator() = default;
-        void GenerateRooms(const RoomLayoutGenerationSettings &settings);
+        void GenerateRooms(const RoomLayoutGenerationSettings& settings, std::shared_ptr<GameObject> root);
         void GenerateGates();
-        void AddRoom(glm::ivec2 position);
+        void AddRoom(glm::ivec2 position, std::shared_ptr<GameObject> root);
     };
 
     
@@ -333,9 +319,11 @@ namespace generation
 
     void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 
-    void BuildRoom(const Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, std::vector<w_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
+    //void BuildRoom(Room& room, RoomModels* rm, std::deque<w_ptr<GameObject>>& room_parts, std::vector<w_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
 
-    void BuildRoom(const Room& room, RoomModels* rm, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
+    //void BuildRoom(Room& room, RoomModels* rm, s_ptr<GameObject> scene_root, s_ptr<Shader> shader);
+
+    void BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader);
 
 }; // namespace generation
 

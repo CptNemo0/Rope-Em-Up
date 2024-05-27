@@ -1,6 +1,70 @@
 #include "../../headers/generation/RoomGenerator.h"
-std::deque<w_ptr<GameObject>> generation::Room::room_parts = std::deque<w_ptr<GameObject>>();
-std::vector<w_ptr<GameObject>> generation::Room::enemies = std::vector<w_ptr<GameObject>>();
+//std::deque<w_ptr<GameObject>> generation::Room::room_parts = std::deque<w_ptr<GameObject>>();
+//std::vector<w_ptr<GameObject>> generation::Room::enemies = std::vector<w_ptr<GameObject>>();
+
+generation::Room::Room(glm::ivec2 position)
+{
+    this->position = position;
+    room_object = nullptr;
+    up_gate = false;
+    right_gate = false;
+    down_gate = false;
+    left_gate = false;
+
+    width = 2;
+    height = 2;
+
+    up_gate_idx = -1;
+    right_gate_idx = -1;
+    down_gate_idx = -1;
+    left_gate_idx = -1;
+
+    up_gate_wall = -1;
+    right_gate_wall = -1;
+    down_gate_wall = -1;
+    left_gate_wall = -1;
+
+    up_gate_pos = glm::vec3(0.0f);
+    right_gate_pos = glm::vec3(0.0f);
+    down_gate_pos = glm::vec3(0.0f);
+    left_gate_pos = glm::vec3(0.0f);
+}
+
+generation::Room::Room(glm::ivec2 position, std::shared_ptr<GameObject> root)
+{
+    this->position = position;
+    room_object = GameObject::Create(root);
+    enemies = GameObject::Create(room_object);
+    lamps = GameObject::Create(room_object);
+    clutter = GameObject::Create(room_object);
+    gates = GameObject::Create(room_object);
+    walls = GameObject::Create(room_object);
+    floors = GameObject::Create(room_object);
+
+    up_gate = false;
+    right_gate = false;
+    down_gate = false;
+    left_gate = false;
+
+    width = 2;
+    height = 2;
+
+    up_gate_idx = -1;
+    right_gate_idx = -1;
+    down_gate_idx = -1;
+    left_gate_idx = -1;
+
+    up_gate_wall = -1;
+    right_gate_wall = -1;
+    down_gate_wall = -1;
+    left_gate_wall = -1;
+
+    up_gate_pos = glm::vec3(0.0f);
+    right_gate_pos = glm::vec3(0.0f);
+    down_gate_pos = glm::vec3(0.0f);
+    left_gate_pos = glm::vec3(0.0f);
+}
+
 
 std::pair<int, glm::ivec2> generation::RoomLayoutGenerator::FindNextClosestPoint(const glm::ivec2 &A, const glm::ivec2 &B, const glm::ivec2 &point, int prev_direction)
 {
@@ -51,20 +115,20 @@ std::pair<int, glm::ivec2> generation::RoomLayoutGenerator::FindNextClosestPoint
     return {final_direction, final_point};
 }
 
-void generation::RoomLayoutGenerator::GenerateRoomsBetweenPoints(const glm::ivec2 &A, const glm::ivec2 &B, const RoomLayoutGenerationSettings &settings)
+void generation::RoomLayoutGenerator::GenerateRoomsBetweenPoints(const glm::ivec2 &A, const glm::ivec2 &B, const RoomLayoutGenerationSettings &settings, std::shared_ptr<GameObject> root)
 {
 
     glm::ivec2 current_point = A;
     int prev_direction = -1;
 
-    AddRoom(current_point);
+    AddRoom(current_point, root);
     int cap = 1000;
     do
     {
         auto result = FindNextClosestPoint(A, B, current_point, prev_direction);
         current_point = result.second;
         prev_direction = result.first;
-        AddRoom(current_point);
+        AddRoom(current_point, root);
         // cout << "start point: " << start_point.x << ", " << start_point.y << '\n';
         // cout << "end point: " << end_point.x << ", " << end_point.y << '\n';
         // cout << "current point: " << current_point.x << ", " << current_point.y << "\n\n";
@@ -77,7 +141,7 @@ void generation::RoomLayoutGenerator::GenerateRoomsBetweenPoints(const glm::ivec
     while (current_point != B);
 }
 
-void generation::RoomLayoutGenerator::GenerateRooms(const RoomLayoutGenerationSettings &settings)
+void generation::RoomLayoutGenerator::GenerateRooms(const RoomLayoutGenerationSettings &settings, std::shared_ptr<GameObject> root)
 {
     rooms.clear();
     rooms_ordered.clear();
@@ -89,7 +153,7 @@ void generation::RoomLayoutGenerator::GenerateRooms(const RoomLayoutGenerationSe
         random_direction *= random::RandFloat(settings.branch_division_min_length, settings.branch_division_max_length);
         glm::ivec2 end_point = start_point + glm::ivec2(glm::round(random_direction));
 
-        GenerateRoomsBetweenPoints(start_point, end_point, settings);
+        GenerateRoomsBetweenPoints(start_point, end_point, settings, root);
 
         start_point = end_point;
     }
@@ -132,7 +196,7 @@ void generation::RoomLayoutGenerator::GenerateRooms(const RoomLayoutGenerationSe
         random_direction *= random::RandFloat(settings.sub_branch_min_length, settings.sub_branch_max_length);
         glm::ivec2 end_point = room.position + glm::ivec2(glm::round(random_direction));
 
-        GenerateRoomsBetweenPoints(room.position, end_point, settings);
+        GenerateRoomsBetweenPoints(room.position, end_point, settings, root);
     }
 }
 
@@ -147,13 +211,14 @@ void generation::RoomLayoutGenerator::GenerateGates()
     }
 }
 
-void generation::RoomLayoutGenerator::AddRoom(glm::ivec2 position)
+void generation::RoomLayoutGenerator::AddRoom(glm::ivec2 position, std::shared_ptr<GameObject> root)
 {
     int rooms_size_before = rooms.size();
-    rooms.insert(std::make_pair(position, Room(position)));
+    rooms.insert(std::make_pair(position, Room(position, root)));
     int rooms_size_after = rooms.size();
     if (rooms_size_before != rooms_size_after)
     {
+        cout << "position.x: " << position.x << " position.y: " << position.y << endl;
         rooms_ordered.push_back(Room(position));
     }
 }
@@ -286,6 +351,8 @@ bool generation::CheckGateProximity(glm::vec3 pos, Room& room, float proximity)
 
 void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
 {
+    room.is_generated = true;
+
     room.up_walls_idx.clear();
     room.left_walls_idx.clear();
     room.lamp_positions.clear();
@@ -376,7 +443,6 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         room.left_gate_pos = glm::vec3(0.0f, 0.0f, -8.0 - room.left_gate_wall * kModuleSize);
     }
 
-    room.is_generated = true;
 
     // Lamps
     
@@ -552,34 +618,254 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 }
     
 
-void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<std::weak_ptr<GameObject>>& room_parts, std::vector<std::weak_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
+//void generation::BuildRoom(Room& room, RoomModels* rm, std::deque<std::weak_ptr<GameObject>>& room_parts, std::vector<std::weak_ptr<GameObject>>& enemies, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
+//{
+//    room.is_built = true;
+//
+//    for (int i = 0; i < room.width; i++)
+//    {
+//        s_ptr<GameObject> wall_up = GameObject::Create(scene_root);
+//        wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+//        wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+//        wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+//        room_parts.push_back(wall_up);
+//    }
+//
+//    for (int i = 0; i < room.height; i++)
+//    {
+//        s_ptr<GameObject> wall_left = GameObject::Create(scene_root);
+//        wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+//        wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+//        wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
+//        room_parts.push_back(wall_left);
+//    }
+//
+//    for (int i = 0; i < room.width; i++)
+//    {
+//        for (int j = 0; j < room.height; j++)
+//        {
+//            s_ptr<GameObject> floor = GameObject::Create(scene_root);
+//            floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+//            floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
+//            room_parts.push_back(floor);
+//        }
+//    }
+//
+//    //generate gates
+//    //up
+//    if (room.up_gate)
+//    {
+//        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+//        gate->transform_->set_position(room.up_gate_pos);
+//        gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+//        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+//        room_parts.push_back(gate);
+//    }
+//
+//    //down
+//    if (room.down_gate)
+//    {
+//        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+//        gate->transform_->set_position(room.down_gate_pos);
+//        gate->transform_->set_rotation(glm::vec3(0.0f, 0.0, 0.0f));
+//        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+//        room_parts.push_back(gate);
+//    }
+//
+//    //right
+//    if (room.right_gate)
+//    {
+//        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+//        gate->transform_->set_position(room.right_gate_pos);
+//        gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+//        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+//        room_parts.push_back(gate);
+//    }
+//
+//    //left
+//    if (room.left_gate)
+//    {
+//        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+//        gate->transform_->set_position(room.left_gate_pos);
+//        gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+//        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+//        room_parts.push_back(gate);
+//    }
+//
+//    // generate lamps
+//
+//    for (auto pos : room.lamp_positions)
+//    {
+//        s_ptr<GameObject> lamp = GameObject::Create(scene_root);
+//        lamp->transform_->set_position(pos);
+//        lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
+//        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->lamps[0]->meshes_[0], lamp->transform_));
+//        room_parts.push_back(lamp);
+//    }
+//
+//    //// generate clutter
+//
+//    for (int i = 0; i < room.clutter_idx.size(); i++)
+//    {
+//        s_ptr<GameObject> clutter = GameObject::Create(scene_root);
+//        clutter->transform_->set_position(room.clutter_positions[i]);
+//        clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
+//        clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter_c[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
+//        clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
+//        room_parts.push_back(clutter);
+//    }
+//
+//    for (int i = 0; i < room.enemies_positions.size(); i++)
+//    {
+//        auto enemy = GameObject::Create(scene_root);
+//        enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
+//        enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+//        enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->enemies[room.enemies_idx[i]]->meshes_[0], enemy->transform_));
+//        enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
+//        enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
+//        enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
+//        enemies.push_back(enemy);
+//    }
+//}
+//
+//void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
+//{
+//    room.is_built = true;
+//
+//    for (int i = 0; i < room.width; i++)
+//    {
+//        s_ptr<GameObject> wall_up = GameObject::Create(scene_root);
+//        wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+//        wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+//        wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+//        Room::room_parts.push_back(wall_up);
+//    }
+//
+//    for (int i = 0; i < room.height; i++)
+//    {
+//        s_ptr<GameObject> wall_left = GameObject::Create(scene_root);
+//        wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+//        wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+//        wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
+//        Room::room_parts.push_back(wall_left);
+//    }
+//
+//    for (int i = 0; i < room.width; i++)
+//    {
+//        for (int j = 0; j < room.height; j++)
+//        {
+//            s_ptr<GameObject> floor = GameObject::Create(scene_root);
+//            floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+//            floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
+//            Room::room_parts.push_back(floor);
+//        }
+//    }
+//
+//    //generate gates
+//    //up
+//    if (room.up_gate)
+//    {
+//        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+//        gate->transform_->set_position(room.up_gate_pos);
+//        gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+//        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+//        Room::room_parts.push_back(gate);
+//    }
+//
+//    //down
+//    if (room.down_gate)
+//    {
+//        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+//        gate->transform_->set_position(room.down_gate_pos);
+//        gate->transform_->set_rotation(glm::vec3(0.0f, 0.0, 0.0f));
+//        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+//        Room::room_parts.push_back(gate);
+//    }
+//
+//    //right
+//    if (room.right_gate)
+//    {
+//        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+//        gate->transform_->set_position(room.right_gate_pos);
+//        gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+//        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+//        Room::room_parts.push_back(gate);
+//    }
+//
+//    //left
+//    if (room.left_gate)
+//    {
+//        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+//        gate->transform_->set_position(room.left_gate_pos);
+//        gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+//        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+//        Room::room_parts.push_back(gate);
+//    }
+//
+//    // generate lamps
+//
+//    for (auto pos : room.lamp_positions)
+//    {
+//        s_ptr<GameObject> lamp = GameObject::Create(scene_root);
+//        lamp->transform_->set_position(pos);
+//        lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
+//        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->lamps[0]->meshes_[0], lamp->transform_));
+//        Room::room_parts.push_back(lamp);
+//    }
+//
+//    // generate clutter
+//
+//    for (int i = 0; i < room.clutter_idx.size(); i++)
+//    {
+//        s_ptr<GameObject> clutter = GameObject::Create(scene_root);
+//        clutter->transform_->set_position(room.clutter_positions[i]);
+//        clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
+//        clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter_c[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
+//        clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
+//        Room::room_parts.push_back(clutter);
+//    }
+//
+//    // generate enemies
+//    for (int i = 0; i < room.enemies_positions.size(); i++)
+//    {
+//        auto enemy = GameObject::Create(scene_root);
+//        enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
+//        enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+//        enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->enemies[room.enemies_idx[i]]->meshes_[0], enemy->transform_));
+//        enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
+//        enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
+//        enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
+//        Room::enemies.push_back(enemy);
+//    }
+//}
+
+void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
 {
+    room.is_built = true;
+
     for (int i = 0; i < room.width; i++)
     {
-        s_ptr<GameObject> wall_up = GameObject::Create(scene_root);
+        s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
         wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
         wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
         wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
-        room_parts.push_back(wall_up);
     }
 
     for (int i = 0; i < room.height; i++)
     {
-        s_ptr<GameObject> wall_left = GameObject::Create(scene_root);
+        s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
         wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
         wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
         wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
-        room_parts.push_back(wall_left);
     }
 
     for (int i = 0; i < room.width; i++)
     {
         for (int j = 0; j < room.height; j++)
         {
-            s_ptr<GameObject> floor = GameObject::Create(scene_root);
+            s_ptr<GameObject> floor = GameObject::Create(room.floors);
             floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
             floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
-            room_parts.push_back(floor);
         }
     }
 
@@ -587,184 +873,69 @@ void generation::BuildRoom(const Room& room, RoomModels* rm, std::deque<std::wea
     //up
     if (room.up_gate)
     {
-        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+        s_ptr<GameObject> gate = GameObject::Create(room.gates);
         gate->transform_->set_position(room.up_gate_pos);
         gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        room_parts.push_back(gate);
     }
 
     //down
     if (room.down_gate)
     {
-        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+        s_ptr<GameObject> gate = GameObject::Create(room.gates);
         gate->transform_->set_position(room.down_gate_pos);
         gate->transform_->set_rotation(glm::vec3(0.0f, 0.0, 0.0f));
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        room_parts.push_back(gate);
     }
 
     //right
     if (room.right_gate)
     {
-        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+        s_ptr<GameObject> gate = GameObject::Create(room.gates);
         gate->transform_->set_position(room.right_gate_pos);
         gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        room_parts.push_back(gate);
     }
 
     //left
     if (room.left_gate)
     {
-        s_ptr<GameObject> gate = GameObject::Create(scene_root);
+        s_ptr<GameObject> gate = GameObject::Create(room.gates);
         gate->transform_->set_position(room.left_gate_pos);
         gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
         gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        room_parts.push_back(gate);
     }
 
     // generate lamps
 
     for (auto pos : room.lamp_positions)
     {
-        s_ptr<GameObject> lamp = GameObject::Create(scene_root);
+        s_ptr<GameObject> lamp = GameObject::Create(room.lamps);
         lamp->transform_->set_position(pos);
         lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
         lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->lamps[0]->meshes_[0], lamp->transform_));
-        room_parts.push_back(lamp);
-    }
-
-    //// generate clutter
-
-    for (int i = 0; i < room.clutter_idx.size(); i++)
-    {
-        s_ptr<GameObject> clutter = GameObject::Create(scene_root);
-        clutter->transform_->set_position(room.clutter_positions[i]);
-        clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
-        clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter_c[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
-        clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
-        room_parts.push_back(clutter);
-    }
-
-    for (int i = 0; i < room.enemies_positions.size(); i++)
-    {
-        auto enemy = GameObject::Create(scene_root);
-        enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
-        enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
-        enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->enemies[room.enemies_idx[i]]->meshes_[0], enemy->transform_));
-        enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
-        enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
-        enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
-        enemies.push_back(enemy);
-    }
-}
-
-void generation::BuildRoom(const Room& room, RoomModels* rm, s_ptr<GameObject> scene_root, s_ptr<Shader> shader)
-{
-    for (int i = 0; i < room.width; i++)
-    {
-        s_ptr<GameObject> wall_up = GameObject::Create(scene_root);
-        wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
-        wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-        wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
-        Room::room_parts.push_back(wall_up);
-    }
-
-    for (int i = 0; i < room.height; i++)
-    {
-        s_ptr<GameObject> wall_left = GameObject::Create(scene_root);
-        wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
-        wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-        wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
-        Room::room_parts.push_back(wall_left);
-    }
-
-    for (int i = 0; i < room.width; i++)
-    {
-        for (int j = 0; j < room.height; j++)
-        {
-            s_ptr<GameObject> floor = GameObject::Create(scene_root);
-            floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-            floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
-            Room::room_parts.push_back(floor);
-        }
-    }
-
-    //generate gates
-    //up
-    if (room.up_gate)
-    {
-        s_ptr<GameObject> gate = GameObject::Create(scene_root);
-        gate->transform_->set_position(room.up_gate_pos);
-        gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        Room::room_parts.push_back(gate);
-    }
-
-    //down
-    if (room.down_gate)
-    {
-        s_ptr<GameObject> gate = GameObject::Create(scene_root);
-        gate->transform_->set_position(room.down_gate_pos);
-        gate->transform_->set_rotation(glm::vec3(0.0f, 0.0, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        Room::room_parts.push_back(gate);
-    }
-
-    //right
-    if (room.right_gate)
-    {
-        s_ptr<GameObject> gate = GameObject::Create(scene_root);
-        gate->transform_->set_position(room.right_gate_pos);
-        gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        Room::room_parts.push_back(gate);
-    }
-
-    //left
-    if (room.left_gate)
-    {
-        s_ptr<GameObject> gate = GameObject::Create(scene_root);
-        gate->transform_->set_position(room.left_gate_pos);
-        gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        Room::room_parts.push_back(gate);
-    }
-
-    // generate lamps
-
-    for (auto pos : room.lamp_positions)
-    {
-        s_ptr<GameObject> lamp = GameObject::Create(scene_root);
-        lamp->transform_->set_position(pos);
-        lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
-        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->lamps[0]->meshes_[0], lamp->transform_));
-        Room::room_parts.push_back(lamp);
     }
 
     // generate clutter
 
     for (int i = 0; i < room.clutter_idx.size(); i++)
     {
-        s_ptr<GameObject> clutter = GameObject::Create(scene_root);
+        s_ptr<GameObject> clutter = GameObject::Create(room.clutter);
         clutter->transform_->set_position(room.clutter_positions[i]);
         clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
         clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->clutter_c[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
         clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
-        Room::room_parts.push_back(clutter);
     }
 
     // generate enemies
     for (int i = 0; i < room.enemies_positions.size(); i++)
     {
-        auto enemy = GameObject::Create(scene_root);
+        auto enemy = GameObject::Create(room.enemies);
         enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
         enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
         enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(0, gPRECISION, rm->enemies[room.enemies_idx[i]]->meshes_[0], enemy->transform_));
         enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
         enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
         enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
-        Room::enemies.push_back(enemy);
     }
 }

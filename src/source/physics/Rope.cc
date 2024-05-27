@@ -167,7 +167,6 @@ void Rope::ChokeCheck(generation::Room *room)
 	if (!pull_cooldown_ && player_begin_controller_->is_pulling_ && player_end_controller_->is_pulling_)
 	{
 		ChokeList::i_->Choke(10.0f);
-		generation::CleanUpEnemiesVecotr(*room);
 		pull_cooldown_ = true;
 		cout << "CHOKE'EM MOTHAFUCKA!!!!\n";
 	}
