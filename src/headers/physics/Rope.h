@@ -14,7 +14,7 @@
 #include "../collisions/CollisionManager.h"
 #include "../collisions/Collider.h"
 #include "../collisions/Raycast.h"
-#include "../generation/RoomGenerator.h"
+#include "../generation/Room.h"
 #include "../ChokeList.h"
 
 class Rope
