@@ -663,11 +663,6 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
-        ParticleShader->Use();
-        ParticleShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
-
-        ParticleEmitterManager::i_->Draw();
-        
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
@@ -732,6 +727,22 @@ int main()
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
         //////////////////////////////////
+
+        // FORWARD PASS - FORWARD PASS - FORWARD PASS - FORWARD PASS
+    
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.g_buffer_);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lbuffer.l_buffer_);
+        glBlitFramebuffer(0, 0, mode->width, mode->height, 0, 0, mode->width, mode->height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+        ParticleShader->Use();
+        ParticleShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+
+        ParticleEmitterManager::i_->Draw();
+
+        glDisable(GL_BLEND);
 
         
         // Bind buffer - Bind textures - Use Shader - Draw 

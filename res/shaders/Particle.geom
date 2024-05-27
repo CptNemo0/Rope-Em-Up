@@ -18,7 +18,7 @@ out vec4 og_color;
 const vec4 right = vec4(-1.0, 0.0, 0.0, 0.0);
 const vec4 up = vec4(0.0, 1.0, 0.0, 0.0);
 
-vec4 pos = gl_in[0].gl_Position;
+vec4 view_pos = gl_in[0].gl_Position;
 vec4 color = ig[0].color;
 float size = ig[0].size;
 vec4 rightSize = right * size;
@@ -42,22 +42,22 @@ void main()
 {
     mat4 rotationMatrix = createRotationMatrix(ig[0].rotation);
 
-    gl_Position = projection_matrix * (pos + rotationMatrix * sumRightUpSize);
+    gl_Position = projection_matrix * (view_pos + rotationMatrix * sumRightUpSize);
     og_texcoord = vec2(0.0, 0.0);
     og_color = color;
     EmitVertex();
 
-    gl_Position = projection_matrix * (pos + rotationMatrix * diffRightUpSize);
+    gl_Position = projection_matrix * (view_pos + rotationMatrix * diffRightUpSize);
     og_texcoord = vec2(0.0, 1.0);
     og_color = color;
     EmitVertex();
 
-    gl_Position = projection_matrix * (pos - rotationMatrix * diffRightUpSize);
+    gl_Position = projection_matrix * (view_pos - rotationMatrix * diffRightUpSize);
     og_texcoord = vec2(1.0, 0.0);
     og_color = color;
     EmitVertex();
 
-    gl_Position = projection_matrix * (pos - rotationMatrix * sumRightUpSize);
+    gl_Position = projection_matrix * (view_pos - rotationMatrix * sumRightUpSize);
     og_texcoord = vec2(1.0, 1.0);
     og_color = color;
     EmitVertex();

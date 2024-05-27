@@ -11,6 +11,7 @@ public:
 
 	unsigned int l_buffer_;
 	unsigned int color_texture_;
+	unsigned int rbo_;
 
 	unsigned int vao_;
 	unsigned int vbo_;
