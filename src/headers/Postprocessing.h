@@ -24,6 +24,8 @@ namespace ppc
         float vignete_contrast_;
         float vignete_amount_;
         float noise_amount_;
+        float transition_vignette_time_;
+        float transition_vignette_current_time_;
 
         s_ptr<Shader> shader_;
 

@@ -670,7 +670,7 @@ glm::ivec2 generation::GetMoveDirection(Room* room, std::shared_ptr<GameObject> 
 
         if (p1l < kGateThreshold || p2l < kGateThreshold)
         {
-            cout << "GO UP!!!" << endl;
+            // cout << "GO UP!!!" << endl;
             move_direction = glm::ivec2(0, -1);
         }
 

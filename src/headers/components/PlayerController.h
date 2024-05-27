@@ -15,13 +15,13 @@ class PlayerController : public Component, public input::InputObserver, public s
 {
 private:
     int gamepadID_;
-    s_ptr<pbd::BasicGenerator> move_generator_;
-    s_ptr<pbd::BasicGenerator> pull_generator_;
     int speed_ = 1000;
     int pull_power_ = 1000;
-    glm::vec3 direction_ = glm::vec3(0.0f);
 public:
+    s_ptr<pbd::BasicGenerator> move_generator_;
+    s_ptr<pbd::BasicGenerator> pull_generator_;
     bool is_pulling_ = false, pulling_cooldown_ = false;
+    glm::vec3 direction_ = glm::vec3(0.0f);
     PlayerController(int gamepadID);
 
     void Start() override;

@@ -12,6 +12,8 @@ uniform float if_time;
 uniform float vignete_amount;
 uniform float vignete_contrast;
 uniform float noise_amount;
+uniform float transition_vignette_amount;
+uniform vec2 resolution;
 
 vec3 adjust_contrast(vec3 color, float value) 
 {
@@ -44,6 +46,20 @@ vec3 apply_film_grain(vec3 color)
     return color - noise * noise_amount;
 }
 
+vec3 apply_vignette(vec3 color, float value)
+{
+    vec2 position = if_uv - 0.5;
+    float dist = length(position * vec2(resolution.y / resolution.x, 1.0));
+
+    float radius = value;
+    float softness = 0.1;
+    float vignette = smoothstep(radius, radius - softness, dist);
+
+    color.rgb = color.rgb - (1.0 - vignette);
+
+    return color;
+}
+
 void main()
 {
     vec3 color = vec3(texture(color_texture, if_uv));
@@ -52,5 +68,6 @@ void main()
     color = adjust_gamma(color, cbg.z);
     color = apply_film_grain(color);
     color = apply_vignete(color);
+    color = apply_vignette(color, transition_vignette_amount);
     FragColor = vec4(color, 1.0);
 } 
