@@ -3,7 +3,7 @@
 namespace Timer
 {
 
-std::vector<Timer> timers;
+std::deque<Timer> timers;
 std::vector<unsigned int> ids_to_remove;
 unsigned int next_id = 0;
 
@@ -37,7 +37,10 @@ bool UpdateTimer(Timer &timer, float delta_time)
         {
             while ((timer.expiration_time += microseconds(static_cast<int>(timer.delay * 1000000))) <= microseconds(0))
             {
-                timer.finish_callback();
+                if (timer.finish_callback)
+                {
+                    timer.finish_callback();
+                }
             }
         }
         else
