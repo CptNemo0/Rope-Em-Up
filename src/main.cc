@@ -183,6 +183,8 @@ int main()
 
 #pragma endregion Loading Settings
 
+#pragma region Initialization
+
     GLFWwindow* window = nullptr;
     GLFWmonitor* monitor = nullptr;
     GLFWvidmode* mode = nullptr;
@@ -192,14 +194,14 @@ int main()
         exit(return_value);
     }
     cout << "GLFW Initialized.\n";
-    
+
 
     if (int return_value = utility::InitGlad())
-    {   
+    {
         exit(return_value);
     }
     cout << "GLAD Initialized.\n";
-    
+
     utility::InitImGUI(window);
 
     collisions::CollisionManager::Initialize();
@@ -212,7 +214,7 @@ int main()
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::LAMPS);
-    
+
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::LAMPS);
@@ -220,7 +222,6 @@ int main()
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::LAMPS);
 
-   
     pbd::PBDManager::Initialize(pbd_settings);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
     ParticleEmitterManager::Initialize();
@@ -230,6 +231,8 @@ int main()
 
     ChokeList::Initialize();
 
+#pragma endregion Initialization
+    
 #pragma region CamerasConfiguration
     auto camera = make_shared<llr::Camera>();
     camera->set_fov(kFov);
@@ -293,8 +296,6 @@ int main()
     SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
-
-    
 
 #pragma region Lights
     PointLight point_light{};
@@ -439,12 +440,13 @@ int main()
     (
         player_1->transform_->get_position(),
         player_2->transform_->get_position(),
-        0.1251f,
+        0.125f,
         0.97f,
         scene_root,
         test_ball_model,
         GBufferPassShader
     );
+
 
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
@@ -513,7 +515,6 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    
     GBufferPassShader->Use();
     unsigned int maxBones = MAX_BONES;
     unsigned int ssbo;
@@ -633,8 +634,7 @@ int main()
             generation::ChangeRooms(room, rlg, rg_settings, models, next_room_pos, GBufferPassShader);
             generation::DisplacePlayersAndRope(room, move_direction, player_1, player_2, rope);
         }
-        
-
+       
 #pragma endregion
 
 #pragma region Collisions and Physics
