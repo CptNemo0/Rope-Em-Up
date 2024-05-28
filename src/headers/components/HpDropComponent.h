@@ -6,19 +6,24 @@
 #include "../drop/Drop.h"
 #include "../drop/DropArgs.h"
 
-class HpDropComponent : public Component
+namespace components
 {
-public:
-	float value_;
+	class HpDropComponent : public Component
+	{
+	public:
+		float value_;
 
-	HpDropComponent(float value) : value_(value) {}
-	
-	void Start() override;
+		HpDropComponent(float value) : value_(value) {}
 
-	void Update() override;
+		void Start() override;
 
-	void Destroy() override;
+		void Update() override;
 
-};
+		void Destroy() override;
+
+	};
+}
+
+
 
 #endif // !HP_DROP_COMPONENT_H

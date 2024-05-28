@@ -23,7 +23,11 @@ void drop::DropManager::AddSpellDrop(SpellDrop& drop)
 
 void drop::DropManager::DropExp()
 {
-
+	while (!(exp_stack_.empty()))
+	{
+		exp_stack_.top().Consume();
+		exp_stack_.pop();
+	}
 }
 
 void drop::DropManager::DropHp(std::vector<std::shared_ptr<GameObject>>& to_be_healed)

@@ -21,3 +21,8 @@ void drop::SpellDrop::Consume(generation::Room& room)
 		drop->AddComponent(std::make_shared<components::MeshRenderer>(args_.mesh, args_.shader));
 	}
 }
+
+void drop::ExpDrop::Consume()
+{
+	PlayerStatsManager::i_->AddExp(args_.value_);
+}

@@ -716,6 +716,7 @@ int main()
         HealthManager::i_->DeathUpdate();
         drop::DropManager::i_->DropHp(players_vector);
         drop::DropManager::i_->DropSpells(*room);
+        drop::DropManager::i_->DropExp();
 
 #pragma endregion
 

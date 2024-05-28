@@ -7,6 +7,8 @@
 #include "../components/HealthComponent.h"
 #include "../components/MeshRenderer.h"
 #include "../generation/Room.h"
+#include "../PlayerStatsManager.h"
+
 namespace drop
 {
 	class ExpDrop
