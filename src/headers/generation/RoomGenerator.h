@@ -23,6 +23,7 @@
 #include "../components/MeshRenderer.h"
 #include "../components/Component.h"
 #include "../components/HealthComponent.h"
+#include "../components/HpDropComponent.h"
 #include "../collisions/Collider.h"
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"
@@ -31,6 +32,7 @@
 #include "../GameObject.h"
 #include "../physics/Rope.h"
 #include "Room.h"
+
 
 namespace generation
 {

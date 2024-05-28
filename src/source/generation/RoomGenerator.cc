@@ -657,6 +657,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
         enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
         enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
         enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
+        enemy->AddComponent(std::make_shared<HpDropComponent>(10.0f));
     }
 }
 

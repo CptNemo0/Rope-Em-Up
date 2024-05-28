@@ -59,6 +59,7 @@
 #include "headers/parsing/file_read.h"
 #include "headers/components/Animator.h"
 #include "headers/generation/Room.h"
+#include "headers/drop/DropManager.h"
 
 int main()
 {
@@ -228,6 +229,7 @@ int main()
     HealthManager::Initialize();
     audio::AudioManager::Initialize();
     audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
+    drop::DropManager::Initialize();
 
     ChokeList::Initialize();
 
@@ -417,6 +419,7 @@ int main()
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model->meshes_[0], player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
+    player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
@@ -424,6 +427,9 @@ int main()
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model->meshes_[0], player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
+    player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
+
+    std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
     auto test_ball = GameObject::Create(scene_root);
     test_ball->transform_->set_scale(glm::vec3(0.01f));
@@ -629,6 +635,11 @@ int main()
 
         if (!moving_through_room)
         {
+
+            rg_settings.enemies = random::RandInt(1, 5);
+            rg_settings.lamps = random::RandInt(1, 5);
+            rg_settings.clutter = random::RandInt(1, 5);
+
             glm::ivec2 current_room_pos = room->position;
             glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
             glm::ivec2 next_room_pos = current_room_pos + move_direction;
@@ -679,6 +690,7 @@ int main()
         rope.ChokeCheck(room);
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
+        drop::DropManager::i_->DropHp(players_vector);
 #pragma endregion
 
 #pragma region GO Update and Draw
@@ -978,6 +990,7 @@ int main()
     }
 
     ChokeList::Destroy();
+    drop::DropManager::Destroy();
     audio::AudioManager::Destroy();
     HealthManager::Destroy();
     ai::EnemyAIManager::Destroy();
