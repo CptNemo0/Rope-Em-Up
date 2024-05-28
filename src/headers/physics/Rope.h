@@ -40,6 +40,7 @@ public:
 
 	std::shared_ptr<Model> model_;
 	std::shared_ptr<Shader> shader_;
+	std::shared_ptr<GameObject> root_;
 
 	Rope(glm::vec3 start, glm::vec3 dir, int rope_length, float segment_mass, float segment_drag);
 	Rope(glm::vec3 start, glm::vec3 end, float segment_mass, float segment_drag, std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);

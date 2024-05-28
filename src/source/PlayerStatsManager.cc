@@ -36,15 +36,21 @@ void PlayerStatsManager::Apply()
 
 	int segment_diff = (int)(rope_->rope_segments_.size()) - segments_num_;
 
-	/*auto parent = rope_->rope_segments_[0]->transform_->parent_->game_object_;
-
 	if (-segment_diff > 0)
 	{
-		for (int i = 0; i < segment_diff; i++)
+		for (int i = 0; i < -segment_diff; i++)
 		{
-			rope_->AddSegment(parent);
+			rope_->AddSegment(rope_->root_);
 		}
-	}*/
+	}
+
+	else if (-segment_diff < 0)
+	{
+		for (int i = 0; i < -segment_diff; i++)
+		{
+			rope_->RemoveSegment();
+		}
+	}
 
 	player_1_->GetComponent<components::PlayerController>()->speed_ = speed_;
 	player_1_->GetComponent<components::PlayerController>()->pull_power_ = pull_power_;

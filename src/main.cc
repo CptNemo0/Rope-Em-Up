@@ -1038,17 +1038,54 @@ int main()
             PlayerStatsManager::i_->LevelDownPull();
         }
 
-        ImGui::SliderFloat("Drag", &(PlayerStatsManager::i_->rope_drag_), 0.0f, 1.0f, "%0.5f");
+        ImGui::SliderFloat("Intertia", &(PlayerStatsManager::i_->rope_drag_), 0.0f, 1.0f, "%0.5f");
         ImGui::SameLine();
-        if (ImGui::Button("LevelUp Drag"))
+        if (ImGui::Button("LevelUp Intertia"))
         {
             PlayerStatsManager::i_->LevelUpDrag();
         }
         ImGui::SameLine();
-        if (ImGui::Button("LevelDown Drag"))
+        if (ImGui::Button("LevelDown Intertia"))
         {
             PlayerStatsManager::i_->LevelDownDrag();
         }
+
+        ImGui::SliderFloat("Rope weight", &(PlayerStatsManager::i_->rope_weight_), 0.0f, 1.0f, "%0.5f");
+        ImGui::SameLine();
+        if (ImGui::Button("LevelUp Weight"))
+        {
+            PlayerStatsManager::i_->LevelUpWeight();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("LevelDown Weight"))
+        {
+            PlayerStatsManager::i_->LevelDownWeight();
+        }
+
+        ImGui::SliderFloat("Max Health", &(PlayerStatsManager::i_->max_health_), 0.0f, 1000.0f, "%0.1f");
+        ImGui::SameLine();
+        if (ImGui::Button("LevelUp Health"))
+        {
+            PlayerStatsManager::i_->LevelUpHealth();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("LevelDown Health"))
+        {
+            PlayerStatsManager::i_->LevelDownHealth();
+        }
+
+        ImGui::SliderInt("Segment number", &(PlayerStatsManager::i_->segments_num_), 0, 100);
+        ImGui::SameLine();
+        if (ImGui::Button("LevelUp Segment number"))
+        {
+            PlayerStatsManager::i_->LevelUpSegments();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("LevelDown Segment number"))
+        {
+            PlayerStatsManager::i_->LevelDownSegments();
+        }
+
         if (ImGui::Button("Apply Level"))
         {
             PlayerStatsManager::i_->Apply();

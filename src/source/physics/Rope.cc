@@ -20,7 +20,7 @@ void Rope::CreateSegments(glm::vec3 start, glm::vec3 end, std::shared_ptr<GameOb
 
 	shader_ = shader;
 	model_ = model;
-
+	root_ = scene_root;
 	int i = 0;
 	
 	while (distance > kDistance)
