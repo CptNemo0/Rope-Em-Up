@@ -61,6 +61,7 @@
 #include "headers/generation/Room.h"
 #include "headers/drop/DropManager.h"
 #include "headers/drop/SpellDropQueue.h"
+#include "headers/PlayerStatsManager.h"
 
 int main()
 {
@@ -233,6 +234,7 @@ int main()
     drop::DropManager::Initialize();
     drop::SpellDropQueue::Initialize();
     ChokeList::Initialize();
+    
 
 #pragma endregion Initialization
     
@@ -456,6 +458,13 @@ int main()
     //animator->AddComponent(make_shared<components::Animator>(&test_animation));
     /*components::Animator animator = &test_animation;*/
 
+    auto male = GameObject::Create(scene_root);
+    //male->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    male->transform_->set_scale(glm::vec3(1.0f));
+    male->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+
+
+
     Rope rope = Rope
     (
         player_1->transform_->get_position(),
@@ -473,10 +482,11 @@ int main()
 
     for (int i = 0; i < 20; i++)
     {
-        rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
+        rope.AddSegment(scene_root);
     }
 
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
+    PlayerStatsManager::Initialize(&rope, player_1, player_2);
 
     auto isometricCamera = GameObject::Create(scene_root);
     isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -706,6 +716,7 @@ int main()
         HealthManager::i_->DeathUpdate();
         drop::DropManager::i_->DropHp(players_vector);
         drop::DropManager::i_->DropSpells(*room);
+
 #pragma endregion
 
 #pragma region GO Update and Draw
@@ -972,7 +983,7 @@ int main()
         }
         if (ImGui::Button("Add Segment"))
         {
-            rope.AddSegment(scene_root, test_ball_model, GBufferPassShader);
+            rope.AddSegment(scene_root);
         }
         if (ImGui::Button("Remove Segment"))
         {
@@ -994,8 +1005,56 @@ int main()
         }
         ImGui::End();
 
-        
-        
+        ImGui::Begin("Player Stats Manager");
+        ImGui::SliderFloat("Exp", &(PlayerStatsManager::i_->exp_), 0.0f, 1000.0f, "%0.0f");
+        ImGui::SameLine();
+        if (ImGui::Button("Add Exp"))
+        {
+            PlayerStatsManager::i_->AddExp(100.0f);
+        }
+        ImGui::SliderInt("Unspent Levels", &(PlayerStatsManager::i_->unspent_levels_), 0, 20);
+
+        ImGui::SliderFloat("Speed", &(PlayerStatsManager::i_->speed_), 0.0f, 2000.0f, "%0.0f");
+        ImGui::SameLine();
+        if (ImGui::Button("LevelUp Speed"))
+        {
+            PlayerStatsManager::i_->LevelUpSpeed();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("LevelDown Speed"))
+        {
+            PlayerStatsManager::i_->LevelDownSpeed();
+        }
+
+        ImGui::SliderFloat("Pull", &(PlayerStatsManager::i_->pull_power_), 0.0f, 3000.0f, "%0.0f");
+        ImGui::SameLine();
+        if (ImGui::Button("LevelUp Pull"))
+        {
+            PlayerStatsManager::i_->LevelUpPull();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("LevelDown Pull"))
+        {
+            PlayerStatsManager::i_->LevelDownPull();
+        }
+
+        ImGui::SliderFloat("Drag", &(PlayerStatsManager::i_->rope_drag_), 0.0f, 1.0f, "%0.5f");
+        ImGui::SameLine();
+        if (ImGui::Button("LevelUp Drag"))
+        {
+            PlayerStatsManager::i_->LevelUpDrag();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("LevelDown Drag"))
+        {
+            PlayerStatsManager::i_->LevelDownDrag();
+        }
+        if (ImGui::Button("Apply Level"))
+        {
+            PlayerStatsManager::i_->Apply();
+        }
+        ImGui::End();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 
@@ -1004,6 +1063,7 @@ int main()
         glfwSwapBuffers(window);
     }
 
+    PlayerStatsManager::Destroy();
     ChokeList::Destroy();
     drop::SpellDropQueue::Destroy();
     drop::DropManager::Destroy();

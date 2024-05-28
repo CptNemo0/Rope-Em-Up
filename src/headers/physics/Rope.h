@@ -16,6 +16,8 @@
 #include "../collisions/Raycast.h"
 #include "../generation/Room.h"
 #include "../ChokeList.h"
+#include "../Model.h"
+#include "../Shader.h"
 
 class Rope
 {
@@ -36,6 +38,9 @@ public:
 	s_ptr<components::PlayerController> player_end_controller_;
 	bool pull_cooldown_ = false;
 
+	std::shared_ptr<Model> model_;
+	std::shared_ptr<Shader> shader_;
+
 	Rope(glm::vec3 start, glm::vec3 dir, int rope_length, float segment_mass, float segment_drag);
 	Rope(glm::vec3 start, glm::vec3 end, float segment_mass, float segment_drag, std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);
 
@@ -48,7 +53,7 @@ public:
 	void ApplyMass();
 	void ApplyDrag();
 
-	void AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);
+	void AddSegment(std::shared_ptr<GameObject> scene_root);
 	void RemoveSegment();
 
 	void ChokeCheck(generation::Room *room);

@@ -18,6 +18,9 @@ void Rope::CreateSegments(glm::vec3 start, glm::vec3 end, std::shared_ptr<GameOb
 	float distance = glm::distance(start, end);
 	glm::vec3 player_dir = glm::normalize(end - start);
 
+	shader_ = shader;
+	model_ = model;
+
 	int i = 0;
 	
 	while (distance > kDistance)
@@ -106,7 +109,7 @@ void Rope::ApplyDrag()
 	}
 }
 
-void Rope::AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader)
+void Rope::AddSegment(std::shared_ptr<GameObject> scene_root)
 {
 	auto last_constraint = rope_constraints_.back();
 
@@ -118,8 +121,8 @@ void Rope::AddSegment(std::shared_ptr<GameObject> scene_root, std::shared_ptr<Mo
 	auto rope_segment = GameObject::Create(scene_root);
 	rope_segment->transform_->set_scale(glm::vec3(1.3f, 1.3f, 1.3f));
 	rope_segment->transform_->TeleportToPosition(new_position);
-	rope_segment->AddComponent(make_shared<components::MeshRenderer>(model, shader));
-	rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, model->meshes_[0], rope_segment->transform_));
+	rope_segment->AddComponent(make_shared<components::MeshRenderer>(model_, shader_));
+	rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, model_->meshes_[0], rope_segment->transform_));
 	rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(segment_mass_, segment_drag_, rope_segment->transform_));
 	rope_segments_.push_back(rope_segment);
 

@@ -13,11 +13,11 @@ namespace components
 
 class PlayerController : public Component, public input::InputObserver, public std::enable_shared_from_this<PlayerController>
 {
-private:
+public:
     int gamepadID_;
     int speed_ = 1000;
     int pull_power_ = 1000;
-public:
+
     s_ptr<pbd::BasicGenerator> move_generator_;
     s_ptr<pbd::BasicGenerator> pull_generator_;
     bool is_pulling_ = false, pulling_cooldown_ = false;

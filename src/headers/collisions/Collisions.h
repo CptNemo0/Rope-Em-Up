@@ -376,7 +376,6 @@ namespace collisions
 		{
 			return_value.sep_a = glm::vec3(0.0f);
 			return_value.sep_b = glm::vec3(0.0f);
-			cout << "TUBRO ROZWIAZANIE\n";
 			return return_value;
 		}
 
@@ -398,8 +397,18 @@ namespace collisions
 			return_value.sep_b = glm::vec3(0.0f);
 			return return_value;
 		}
-
-		glm::vec3 dir = glm::normalize(center_diff);
+		
+		glm::vec3 dir = glm::vec3(0.0f);
+		if (glm::length(center_diff))
+		{
+			dir = glm::normalize(center_diff);
+		}
+		else
+		{
+			return_value.sep_a = glm::vec3(0.0f);
+			return_value.sep_b = glm::vec3(0.0f);
+			return return_value;
+		}
 		
 		
 		return_value.sep_a = dir * mag * 0.5f; //zmienic na 0.1f w razie co
