@@ -37,4 +37,12 @@ void drop::DropManager::DropHp(std::vector<std::shared_ptr<GameObject>>& to_be_h
 
 void drop::DropManager::DropSpells(generation::Room& room)
 {
+	while (!(spell_stack_.empty()))
+	{
+		auto spell = spell_stack_.top();
+
+		spell.Consume(room);
+
+		spell_stack_.pop();
+	}
 }

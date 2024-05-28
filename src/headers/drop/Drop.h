@@ -5,7 +5,8 @@
 #include "DropArgs.h"
 #include "../GameObject.h"
 #include "../components/HealthComponent.h"
-
+#include "../components/MeshRenderer.h"
+#include "../generation/Room.h"
 namespace drop
 {
 	class ExpDrop
@@ -35,7 +36,7 @@ namespace drop
 
 		SpellDrop(SpellDropArgs  args) : args_(args) {}
 
-		void Consume();
+		void Consume(generation::Room& room);
 	};
 }
 

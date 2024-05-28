@@ -24,6 +24,7 @@
 #include "../components/Component.h"
 #include "../components/HealthComponent.h"
 #include "../components/HpDropComponent.h"
+#include "../components/SpellSlotComponent.h"
 #include "../collisions/Collider.h"
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"

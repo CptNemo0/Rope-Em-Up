@@ -60,6 +60,7 @@
 #include "headers/components/Animator.h"
 #include "headers/generation/Room.h"
 #include "headers/drop/DropManager.h"
+#include "headers/drop/SpellDropQueue.h"
 
 int main()
 {
@@ -230,7 +231,7 @@ int main()
     audio::AudioManager::Initialize();
     audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
     drop::DropManager::Initialize();
-
+    drop::SpellDropQueue::Initialize();
     ChokeList::Initialize();
 
 #pragma endregion Initialization
@@ -333,7 +334,7 @@ int main()
 
     auto cube_model = make_shared<Model>(kCubeMeshPath);
     auto player_model = make_shared<Model>(kPlayerMeshPath);
-    auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
+    //auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
     auto M_player_model = make_shared<Model>(kMalePlayerMeshPath);
     auto debug_model = make_shared<Model>(kDebugMeshPath);
     auto enemy_model = make_shared<Model>(kEnemyMeshPath);
@@ -384,6 +385,19 @@ int main()
     models.clutter.push_back(boxes_3_model);
     models.clutter_c.push_back(boxes_3_c_model);
     models.enemies.push_back(enemy_model);
+
+    // Spell Drops
+    auto place_holder_drop_model = make_shared<Model>(kDebugMeshPath);
+
+    drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
+    drop::SpellDropQueue::i_->shader = GBufferPassShader;
+    
+    for (int i = 0; i < 1000; i++)
+    {
+        drop::SpellDropQueue::i_->queue_.push(SPELLS::SKULL_MINION);
+    }
+    
+
 
 #pragma endregion Models
     
@@ -691,6 +705,7 @@ int main()
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
         drop::DropManager::i_->DropHp(players_vector);
+        drop::DropManager::i_->DropSpells(*room);
 #pragma endregion
 
 #pragma region GO Update and Draw
@@ -990,6 +1005,7 @@ int main()
     }
 
     ChokeList::Destroy();
+    drop::SpellDropQueue::Destroy();
     drop::DropManager::Destroy();
     audio::AudioManager::Destroy();
     HealthManager::Destroy();

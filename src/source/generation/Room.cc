@@ -38,6 +38,7 @@ generation::Room::Room(glm::ivec2 position, std::shared_ptr<GameObject> root)
     gates = GameObject::Create(room_object);
     walls = GameObject::Create(room_object);
     floors = GameObject::Create(room_object);
+    drops = GameObject::Create(room_object);
 
     up_gate = false;
     right_gate = false;

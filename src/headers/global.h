@@ -46,6 +46,7 @@ enum DROP_TYPE
 
 enum SPELLS
 {
+    NOT_A_SPELL,
     SKULL_MINION
 };
 

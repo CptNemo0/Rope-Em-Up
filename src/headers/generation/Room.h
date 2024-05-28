@@ -16,6 +16,7 @@ namespace generation
         std::shared_ptr<GameObject> walls;
         std::shared_ptr<GameObject> gates;
         std::shared_ptr<GameObject> floors;
+        std::shared_ptr<GameObject> drops;
 
         // Values that will be generated during layout generation
         glm::ivec2 position;
