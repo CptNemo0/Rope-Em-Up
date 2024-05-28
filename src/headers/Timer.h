@@ -4,6 +4,7 @@
 #include <chrono>
 #include <functional>
 #include <vector>
+#include <deque>
 
 #include "global.h"
 

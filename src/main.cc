@@ -625,14 +625,51 @@ int main()
 
 #pragma region Rooms
 
-        glm::ivec2 current_room_pos = room->position;
-        glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
-        glm::ivec2 next_room_pos = current_room_pos + move_direction;
+        static bool moving_through_room = false;
 
-        if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
+        if (!moving_through_room)
         {
-            generation::ChangeRooms(room, rlg, rg_settings, models, next_room_pos, GBufferPassShader);
-            generation::DisplacePlayersAndRope(room, move_direction, player_1, player_2, rope);
+            glm::ivec2 current_room_pos = room->position;
+            glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
+            glm::ivec2 next_room_pos = current_room_pos + move_direction;
+
+            if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
+            {
+                cout << "GOING THROUGH ROOM";
+                // Temporarily stop players and player inputs
+                moving_through_room = true;
+                auto pc1 = player_1->GetComponent<components::PlayerController>();
+                pc1->active_ = false;
+                pc1->direction_ = glm::vec3(0.0f);
+                pc1->move_generator_->direction_ = glm::vec3(0.0f);
+                auto pc2 = player_2->GetComponent<components::PlayerController>();
+                pc2->active_ = false;
+                pc2->direction_ = glm::vec3(0.0f);
+                pc2->move_generator_->direction_ = glm::vec3(0.0f);
+
+                Timer::AddTimer(postprocessor.transition_vignette_time_, [&room, &rlg, &rg_settings, &models, &next_room_pos, &GBufferPassShader, &move_direction, &player_1, &player_2, &rope, &pc1, &pc2, &postprocessor]()
+                {
+                    generation::ChangeRooms(room, rlg, rg_settings, models, next_room_pos, GBufferPassShader);
+                    generation::DisplacePlayersAndRope(room, move_direction, player_1, player_2, rope);
+                    pc1->active_ = true;
+                    pc2->active_ = true;
+                    postprocessor.transition_vignette_current_time_ = postprocessor.transition_vignette_time_;
+
+                    Timer::AddTimer(postprocessor.transition_vignette_time_, [&postprocessor]()
+                    {
+                        postprocessor.transition_vignette_current_time_ = 0.0f;
+                        moving_through_room = false;
+                    },
+                    [&postprocessor](float delta_time)
+                    {
+                        postprocessor.transition_vignette_current_time_ -= delta_time;
+                    }, false);
+                },
+                [&postprocessor](float delta_time)
+                {
+                    postprocessor.transition_vignette_current_time_ += delta_time;
+                }, false);
+            }
         }
        
 #pragma endregion
