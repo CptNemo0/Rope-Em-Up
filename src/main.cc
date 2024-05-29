@@ -741,15 +741,10 @@ int main()
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
 
-        //glEnable(GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
-
-        //glDisable(GL_BLEND);
 
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
@@ -792,6 +787,7 @@ int main()
         LBufferPassShader->SetInt("mask_texture", 8);
         glBindTexture(GL_TEXTURE_2D, gbuffer.mask_texture_);
         LBufferPassShader->SetVec3("camera_position", (*activeCamera)->get_position());
+
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
         //LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
