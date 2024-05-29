@@ -16,7 +16,7 @@ uniform vec3 light_colors[MAX_LIGHTS];
 
 in vec2 if_uv;
 
-uniform samplerCube irradianceMap;
+uniform samplerCube irradanceMap;
 
 const float PI = 3.14159265359;
 

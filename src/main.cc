@@ -85,6 +85,10 @@ int main()
     const string kHDRCubemapVertexShaderPath = "res/shaders/HDRCubemap.vert";
     const string kHDREquirectangularToCubemapFragmentShaderPath = "res/shaders/HDREquirectangularToCubemap.frag";
     const string kIrradianceFragmentShaderPath = "res/shaders/IrradianceConvolution.frag";
+    const string kPrefilterFragmentShaderPath = "res/shaders/Prefilter.frag";
+
+    const string kBRDVertexShaderPath = "res/shaders/BRDF.vert";
+    const string kBRDFragmentShaderPath = "res/shaders/BRDF.frag";
 
     const string kBackgroundVertexShaderPath = "res/shaders/Background.vert";
     const string kBackgroundFragmentShaderPath = "res/shaders/Background.frag";
@@ -116,7 +120,7 @@ int main()
     const string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
     const string kTestSmokeTexturePath = "res/textures/test_smoke.png";
 
-    const string kHDREquirectangularPath = "res/cubemaps/HDR_placeholder.hdr";
+    const string kHDREquirectangularPath = "res/cubemaps/puresky_2k.hdr";
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
@@ -124,7 +128,7 @@ int main()
     const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
-    const string kTestPath = "res/models/Cerberus/Cerberus_LP.FBX";
+    const string kTestPath = "res/models/ball.obj";
     const string kWallPath = "res/models/simple_wall.obj";
     const string kModule1Path = "res/models/module1.obj";
     const string kModule2Path = "res/models/enviroment/modules/module2.obj";
@@ -282,6 +286,8 @@ int main()
     auto EquirectangularToCubemapShader = make_shared<Shader>(kHDRCubemapVertexShaderPath, kHDREquirectangularToCubemapFragmentShaderPath);
     auto BackgroundShader = make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
     auto IrradianceShader = make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
+    auto PrefilterShader = make_shared<Shader>(kHDRCubemapVertexShaderPath, kPrefilterFragmentShaderPath);
+    auto BRDFShader = make_shared<Shader>(kBRDVertexShaderPath, kBRDFragmentShaderPath);
     auto ParticleShader = make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
     auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
     auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
@@ -291,7 +297,7 @@ int main()
     auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
 #pragma endregion Shaders
 
-    auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader);
+    auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
     auto HUD_texture = make_shared<tmp::Texture>(kHUDTexturePath);
     auto HUD_texture2 = make_shared<tmp::Texture>(kHUDTexturePath2);
     auto Smoke_texture = make_shared<tmp::Texture>(kTestSmokeTexturePath);
@@ -448,20 +454,20 @@ int main()
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
     auto test_ball = GameObject::Create(scene_root);
-    test_ball->transform_->set_scale(glm::vec3(0.01f));
-    test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(1, 0, -1));
-    test_ball->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-    //test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+    test_ball->transform_->set_scale(glm::vec3(0.2f));
+    test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(1, 3, -2));
+    test_ball->AddComponent(make_shared<components::MeshRenderer>(test_model, GBufferPassShader));
+    test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 
     //anim::Animation test_animation = anim::Animation(kMalePlayerMeshPath, M_player_model);
     //auto animator = GameObject::Create(scene_root);
     //animator->AddComponent(make_shared<components::Animator>(&test_animation));
     /*components::Animator animator = &test_animation;*/
 
-    auto male = GameObject::Create(scene_root);
-    //male->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    male->transform_->set_scale(glm::vec3(1.0f));
-    male->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    //auto male = GameObject::Create(scene_root);
+    ////male->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    //male->transform_->set_scale(glm::vec3(1.0f));
+    //male->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
 
 
 
@@ -544,6 +550,8 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
 
     GBufferPassShader->Use();
     unsigned int maxBones = MAX_BONES;
@@ -554,7 +562,9 @@ int main()
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
     LBufferPassShader->Use();
-    LBufferPassShader->SetInt("irradianceMap", 7);
+    LBufferPassShader->SetInt("irradianceMap", 8);
+    LBufferPassShader->SetInt("prefilterMap", 9);
+    LBufferPassShader->SetInt("brdfLUT", 10);
 
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
@@ -766,7 +776,8 @@ int main()
         lbuffer.Bind();
         LBufferPassShader->Use();
         gbuffer.BindTextures(LBufferPassShader);
-        cubemap->BindIrradianceMap(LBufferPassShader);
+        //cubemap->BindIrradianceMap(LBufferPassShader);
+        cubemap->BindIBLmaps(LBufferPassShader);
 
         glActiveTexture(GL_TEXTURE4);
         LBufferPassShader->SetInt("ssao_texture", 4);
@@ -828,10 +839,10 @@ int main()
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
         postprocessor.Draw();
         //////////////////////////////////
-        BackgroundShader->Use();
+        /*BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
-        cubemap->RenderCube();
+        cubemap->RenderCube();*/
 #pragma endregion
 
 #pragma region Interface

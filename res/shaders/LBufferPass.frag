@@ -8,7 +8,10 @@ uniform sampler2D mra_texture;
 uniform sampler2D ssao_texture;
 uniform sampler2D tangent_texture;
 uniform sampler2D bitangent_texture;
-uniform sampler2D view_position_texture;
+
+uniform samplerCube irradanceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
 uniform vec3 camera_position;
 
@@ -20,7 +23,6 @@ uniform vec3 light_colors[MAX_LIGHTS];
 
 in vec2 if_uv;
 
-uniform samplerCube irradianceMap;
 
 const float PI = 3.14159265359;
 
@@ -197,6 +199,7 @@ void main()
 
     vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
     vec3 V = normalize(camera_position - World_position);
+    vec3 R = reflect(-V, N);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
@@ -212,20 +215,26 @@ void main()
     Lo += CalcSpotLight(spotLight[0], World_position, V, N, roughness, metallic, albedo, F0);
 
     /// ambient lighting IBL ///
-    //vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
-    //vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-    //vec3 kD = 1.0 - kS;
-    //kD *= 1.0 - metallic;	  
-    //vec3 irradiance = texture(irradianceMap, N).rgb;
-    //vec3 diffuse = irradiance * albedo;
-    //vec3 ambient = (kD * diffuse) * ao;
-    /////////
+    vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	
+  
+    vec3 irradiance = texture(irradanceMap, N).rgb;
+    vec3 diffuse = irradiance * albedo;
+
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (kS * brdf.x + brdf.y);
+
+    vec3 ambient = (kD * diffuse + specular) * ao;
+    ///////
     /// typical ambient lighting ///
-    vec3 ambient = vec3(0.03) * albedo;
+    //vec3 ambient = vec3(0.03) * albedo;
     ////
-    vec3 color   = ambient + Lo;
+    vec3 color = ambient + Lo;
 
     //color = color / (color + vec3(1.0));
     //color = pow(color, vec3(1.0/2.2));
-    color_texture = color * ssao;
+    color_texture = color;
 }
