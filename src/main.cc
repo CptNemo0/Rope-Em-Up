@@ -313,9 +313,9 @@ int main()
     point_light.color = point_light_color;
 
     DirectionalLight directional_light{};
-    glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
-    glm::vec3 dir_light_direction = glm::vec3(-0.9f, 0.8, -0.9);
-    float dir_light_intensity = 0.0f;
+    glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 1.f);
+    glm::vec3 dir_light_direction = glm::vec3(-1.0f, -0.3f, -1.0f);
+    float dir_light_intensity = 0.34f;
     directional_light.direction = dir_light_direction;
     directional_light.color = dir_light_color;
 
@@ -936,7 +936,7 @@ int main()
         ImGui::DragFloat("Spot L Outer Cut Off", &spot_light_outer_cut_off, 0.01f, 0.0f, 50.0f);
 
         ImGui::Checkbox("Bloom", &lbuffer.bloom_);
-        ImGui::SliderFloat3("Bloom Color", &lbuffer.bloom_color_.x, 0.0f, 1.0f,"%0.3f");
+        ImGui::ColorEdit3("Bloom Color", (float*)&lbuffer.bloom_color_);
         ImGui::SliderFloat("Bloom Threshold", &lbuffer.bloom_threshold_, 0.0f, 1.0f, "%0.2f");
 
         ImGui::End();

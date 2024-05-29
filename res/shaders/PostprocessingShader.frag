@@ -67,15 +67,15 @@ vec3 bloor_bloom()
 
     vec2 texel_size = 1.0 / vec2(textureSize(bloom_texture, 0));
     vec3 result = vec3(0.0f);
-    for (int x = -2; x < 2; ++x) 
+    for (int x = -4; x < 4; ++x) 
     {
-        for (int y = -2; y < 2; ++y) 
+        for (int y = -4; y < 4; ++y) 
         {
             vec2 offset = vec2(float(x), float(y)) * texel_size;
             result += texture(bloom_texture, if_uv + offset).rgb;
         }
     }
-    result *= 0.0625;
+    result *= 0.00390265;
     return result;
 }
 

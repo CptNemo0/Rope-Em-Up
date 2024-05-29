@@ -233,14 +233,20 @@ void main()
     //color = pow(color, vec3(1.0/2.2));
     color_texture = color;
 
-    float brightness = dot(color.rgb, bloom_color.rgb);
-    if(brightness > bloom_threshold)
+    if(bloom)
     {
-        bloom_texture = vec4(color.rgb, 1.0f);
+        float brightness = dot(color.rgb, bloom_color.rgb);
+        if(brightness > bloom_threshold)
+        {
+            bloom_texture = vec4(color.rgb, 1.0f);
+        }
+        else
+        {
+            bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        }
     }
     else
     {
         bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
-
 }

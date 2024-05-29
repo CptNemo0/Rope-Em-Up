@@ -50,8 +50,8 @@ void LBuffer::Initialize(int height, int width)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	bloom_ = true;
-	bloom_color_ = glm::vec3(0.5f);
-	bloom_threshold_ = 0.15f;
+	bloom_color_ = glm::vec3(1.0f, 1.0f, 0.5f);
+	bloom_threshold_ = 0.28f;
 }
 
 void LBuffer::Bind()
