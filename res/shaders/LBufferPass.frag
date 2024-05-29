@@ -236,5 +236,5 @@ void main()
 
     //color = color / (color + vec3(1.0));
     //color = pow(color, vec3(1.0/2.2));
-    color_texture = color;
+    color_texture = color * ssao;
 }
