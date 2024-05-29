@@ -1,5 +1,6 @@
 #version 330 core
 layout (location = 0) out vec3 color_texture;
+layout (location = 1) out vec4 bloom_texture;
 
 uniform sampler2D position_texture;
 uniform sampler2D albedo_texture;
@@ -20,6 +21,9 @@ uniform int light_num = 3;
 uniform vec3 light_positions[MAX_LIGHTS];
 uniform vec3 light_colors[MAX_LIGHTS];
 
+uniform bool bloom;
+uniform vec3 bloom_color;
+uniform float bloom_threshold;
 
 in vec2 if_uv;
 
@@ -232,9 +236,27 @@ void main()
     /// typical ambient lighting ///
     //vec3 ambient = vec3(0.03) * albedo;
     ////
-    vec3 color = ambient + Lo;
 
+    vec3 color   = ambient + Lo;
+    color = color * ssao;
     //color = color / (color + vec3(1.0));
     //color = pow(color, vec3(1.0/2.2));
-    color_texture = color * ssao;
+    color_texture = color;
+
+    if(bloom)
+    {
+        float brightness = dot(color.rgb, bloom_color.rgb);
+        if(brightness > bloom_threshold)
+        {
+            bloom_texture = vec4(color.rgb, 1.0f);
+        }
+        else
+        {
+            bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        }
+    }
+    else
+    {
+        bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    }
 }

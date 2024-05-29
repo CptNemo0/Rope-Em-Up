@@ -4,6 +4,8 @@ in vec2 if_uv;
 out vec4 FragColor;
 
 uniform sampler2D color_texture;
+uniform sampler2D bloom_texture;
+uniform bool bloom;
 
 uniform vec3 cbg;
 
@@ -60,6 +62,23 @@ vec3 apply_vignette(vec3 color, float value)
     return color;
 }
 
+vec3 bloor_bloom()
+{
+
+    vec2 texel_size = 1.0 / vec2(textureSize(bloom_texture, 0));
+    vec3 result = vec3(0.0f);
+    for (int x = -4; x < 4; ++x) 
+    {
+        for (int y = -4; y < 4; ++y) 
+        {
+            vec2 offset = vec2(float(x), float(y)) * texel_size;
+            result += texture(bloom_texture, if_uv + offset).rgb;
+        }
+    }
+    result *= 0.00390265;
+    return result;
+}
+
 void main()
 {
     vec3 color = vec3(texture(color_texture, if_uv));
@@ -69,5 +88,15 @@ void main()
     color = apply_film_grain(color);
     color = apply_vignete(color);
     color = apply_vignette(color, transition_vignette_amount);
-    FragColor = vec4(color, 1.0);
+
+    if(bloom)
+    {
+        vec3 bloom = bloor_bloom();
+        FragColor = vec4(color, 1.0) + vec4(bloom.rgb, 1.0f);
+    }
+    else
+    {
+        FragColor = vec4(color, 1.0);
+    }
+    
 } 

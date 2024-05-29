@@ -26,7 +26,7 @@ namespace ppc
         float noise_amount_;
         float transition_vignette_time_;
         float transition_vignette_current_time_;
-
+        
         s_ptr<Shader> shader_;
 
         Postprocessor(int height, int width, s_ptr<Shader> shader);
