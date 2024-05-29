@@ -144,6 +144,7 @@ namespace generation
         std::vector<s_ptr<Model>> floors;
         std::vector<s_ptr<Model>> gates;
         std::vector<s_ptr<Model>> lamps;
+        std::vector<s_ptr<Model>> lamps_c;
         std::vector<s_ptr<Model>> clutter;
         std::vector<s_ptr<Model>> clutter_c;
         std::vector<s_ptr<Model>> enemies;

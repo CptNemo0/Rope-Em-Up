@@ -632,7 +632,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
         s_ptr<GameObject> lamp = GameObject::Create(room.lamps);
         lamp->transform_->set_position(pos);
         lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
-        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps[0]->meshes_[0], lamp->transform_));
+        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps_c[0]->meshes_[0], lamp->transform_));
     }
 
     // generate clutter

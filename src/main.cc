@@ -134,6 +134,7 @@ int main()
     const string kBonePath = "res/pierdoly/bone.obj";
     const string kLeafsPath = "res/pierdoly/leafs.obj";
     const string kLampPath = "res/lampa/lamp.obj";
+    const string kLampCPath = "res/lampa/lamp_c.obj";
 
     const string kBoxPath = "res/boxes/box.obj";
     const string kBoxCPath = "res/boxes/box_c.obj";
@@ -305,8 +306,9 @@ int main()
 #pragma region Lights
     PointLight point_light{};
 
+    float lamp_h = 8.0f;
     glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
-    float point_light_intensity = 10.0f;
+    float point_light_intensity = 500.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     point_light.color = point_light_color;
 
@@ -347,6 +349,7 @@ int main()
     auto test_ball_model = make_shared<Model>(kTestBallPath);
     auto gate_model = make_shared<Model>(kGatePath);
     auto lamp_model = make_shared<Model>(kLampPath);
+    auto lamp_c_model = make_shared<Model>(kLampCPath);
 
     auto bone_model = make_shared<Model>(kBonePath);
     auto leafs_model = make_shared<Model>(kLeafsPath);
@@ -378,6 +381,7 @@ int main()
     models.floors.push_back(simple_floor_model);
     models.gates.push_back(gate_model);
     models.lamps.push_back(lamp_model);
+    models.lamps_c.push_back(lamp_c_model);
     models.clutter.push_back(bone_model);
     models.clutter_c.push_back(bone_model);
     models.clutter.push_back(box_model);
@@ -777,11 +781,11 @@ int main()
         //LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
-            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", glm::vec3(room->lamp_positions[i].x, 8.0f, room->lamp_positions[i].z));
+            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z));
             LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", point_light_color);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", 1.0f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.09f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 0.032f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.00f);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity /*+ 0.6f * std::sinf(glfwGetTime() * 0.75f)*/);
         }
 
@@ -799,6 +803,16 @@ int main()
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
 
+        if (lbuffer.bloom_)
+        {
+            LBufferPassShader->SetBool("bloom", lbuffer.bloom_);
+            LBufferPassShader->SetFloat("bloom_threshold", lbuffer.bloom_threshold_);
+            LBufferPassShader->SetVec3("bloom_color", lbuffer.bloom_color_);
+        }
+        else
+        {
+            LBufferPassShader->SetBool("bloom", lbuffer.bloom_);
+        }
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
@@ -905,7 +919,8 @@ int main()
         ImGui::Begin("Lights");
         ImGui::LabelText("Point Light", "Point Light");
         ImGui::ColorEdit3("Point L Color", (float*)&point_light_color);
-        ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 20.0f);
+        ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 1000.0f);
+        ImGui::SliderFloat("Height", &lamp_h, 7.0f, 10.0f, "%0.2f");
 
         ImGui::LabelText("Directional Light", "Directional Light");
         ImGui::ColorEdit3("Dir L Color", (float*)&dir_light_color);
@@ -919,6 +934,10 @@ int main()
         ImGui::DragFloat3("Spot L Direction", glm::value_ptr(spot_light_direction), 0.05f, -1.0f, 1.0f);
         ImGui::DragFloat("Spot L Cut Off", &spot_light_cut_off, 0.01f, 0.0f, 50.0f);
         ImGui::DragFloat("Spot L Outer Cut Off", &spot_light_outer_cut_off, 0.01f, 0.0f, 50.0f);
+
+        ImGui::Checkbox("Bloom", &lbuffer.bloom_);
+        ImGui::SliderFloat3("Bloom Color", &lbuffer.bloom_color_.x, 0.0f, 1.0f,"%0.3f");
+        ImGui::SliderFloat("Bloom Threshold", &lbuffer.bloom_threshold_, 0.0f, 1.0f, "%0.2f");
 
         ImGui::End();
 
@@ -1091,6 +1110,18 @@ int main()
         {
             PlayerStatsManager::i_->Apply();
         }
+        ImGui::End();
+
+        static float player_1_hp;
+        static float player_2_hp;
+        player_1_hp = player_1->GetComponent<components::HealthComponent>()->health_;
+        player_2_hp = player_1->GetComponent<components::HealthComponent>()->health_;
+        ImGui::Begin("Player 1 HP");
+        ImGui::SliderFloat("Player 1 HP", &(player_1_hp), 0.0f, player_1->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
+        ImGui::End();
+
+        ImGui::Begin("Player 2 HP");
+        ImGui::SliderFloat("Player 2 HP", &(player_2->GetComponent<components::HealthComponent>()->health_), 0.0f, player_2->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
         ImGui::End();
 
         ImGui::Render();
