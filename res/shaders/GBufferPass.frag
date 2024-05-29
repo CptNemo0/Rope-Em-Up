@@ -5,8 +5,7 @@ layout (location = 2) out vec3 normal_texture;
 layout (location = 3) out vec3 mra_texture;
 layout (location = 4) out vec3 view_position_texture;
 layout (location = 5) out vec3 view_normal_texture;
-layout (location = 6) out vec3 tangent_texture;
-layout (location = 7) out vec3 bitangent_texture;
+layout (location = 6) out vec3 mask_texture;
 
 in vec3 world_position;
 in vec3 view_position;
@@ -41,10 +40,6 @@ void main()
 	normal = normal * 2.0 - 1.0;
 	normal = normalize(TBN * normal);
 
-	tangent_texture = normalize(T - dot(T, normal) * normal);
-	bitangent_texture = normalize(cross(normal, T));
-
-
 	position_texture = world_position;
 	albedo_texture = texture(albedo_map, uv).rgb;
 	normal_texture = (normal + 1.0) * 0.5;
@@ -52,7 +47,5 @@ void main()
 	
 	view_position_texture = view_position;
 	view_normal_texture = (normalize(normal_view_matrix * normal) + 1.0) * 0.5;
-	
-	tangent_texture = tangent_texture * 0.5 + 0.5;
-	bitangent_texture = bitangent_texture * 0.5 + 0.5;
+	mask_texture = vec3(1.0);
 }

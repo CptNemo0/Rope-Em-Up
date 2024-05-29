@@ -36,7 +36,7 @@ public:
 	void Draw();
 	void GenerateKernel(int precision);
 	void GenerateNoise(int precision);
-	void BindTextures(s_ptr<Shader> shader, unsigned int position, unsigned int normals);
+	void BindTextures(s_ptr<Shader> shader, unsigned int position, unsigned int normals, unsigned int mask);
 	void SetKernel(s_ptr<Shader> shader);
 };
 

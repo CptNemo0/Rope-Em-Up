@@ -6,6 +6,7 @@ in vec2 if_uv;
 uniform sampler2D position_texture;
 uniform sampler2D normal_texture;
 uniform sampler2D noise_texture;
+uniform sampler2D mask_texture;
 
 uniform int quality;
 
@@ -28,26 +29,36 @@ void main()
 	vec3 position = texture(position_texture, if_uv).xyz;
     vec3 noise = normalize(texture(noise_texture, if_uv * noise_scale).xyz);
 	vec3 normal =  normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
-	vec3 tangent = normalize(noise - normal * dot(noise, normal));
-    vec3 bitangent = cross(normal, tangent);
-    mat3 TBN = mat3(tangent, bitangent, normal);
 
-    float occlusion = 0.0;
-    for(int i = 0; i < quality; i++)
-	{        
-        vec3 sample_pos = position + (TBN * kernel[i]) * radius; 
+    float mask = texture(mask_texture, if_uv).r;
 
-        vec4 offset = vec4(sample_pos, 1.0);
-        offset = projection_matrix * offset; 
-        offset.xyz /= offset.w; 
-        offset.xyz = offset.xyz * 0.5 + 0.5; 
+    if(mask > 0.01)
+    {
+	    vec3 tangent = normalize(noise - normal * dot(noise, normal));
+        vec3 bitangent = cross(normal, tangent);
+        mat3 TBN = mat3(tangent, bitangent, normal);
 
-        float sample_depth = texture(position_texture, offset.xy).z; 
+        float occlusion = 0.0;
+        for(int i = 0; i < quality; i++)
+	    {        
+            vec3 sample_pos = position + (TBN * kernel[i]) * radius; 
+
+            vec4 offset = vec4(sample_pos, 1.0);
+            offset = projection_matrix * offset; 
+            offset.xyz /= offset.w; 
+            offset.xyz = offset.xyz * 0.5 + 0.5; 
+
+            float sample_depth = texture(position_texture, offset.xy).z; 
         
-        float range_check = smoothstep(0.0, 1.0, radius / abs(position.z - sample_depth));
-        occlusion += (sample_depth > sample_pos.z + bias ? 1.0 : 0.0) * range_check;   
-    }
+            float range_check = smoothstep(0.0, 1.0, radius / abs(position.z - sample_depth));
+            occlusion += (sample_depth > sample_pos.z + bias ? 1.0 : 0.0) * range_check;   
+        }
 
-    occlusion = occlusion * inv_quality;
-    color_texture = vec3(1 - occlusion).rgb;
+        occlusion = occlusion * inv_quality;
+        color_texture = vec3(1 - occlusion).rgb;
+    }
+	else
+    {
+        color_texture = vec3(1.0).rgb;
+    }
 }

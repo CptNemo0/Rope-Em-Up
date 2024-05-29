@@ -305,7 +305,7 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
@@ -740,6 +740,17 @@ int main()
 
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
+
+        //glEnable(GL_BLEND);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        BackgroundShader->Use();
+        BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+        cubemap->BindEnvCubemap(BackgroundShader);
+        cubemap->RenderCube();
+
+        //glDisable(GL_BLEND);
+
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
@@ -750,22 +761,12 @@ int main()
 
         scene_root->PropagateUpdate();
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
-        BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
-        cubemap->BindEnvCubemap(BackgroundShader);
-        cubemap->RenderCube();
-
-        glDisable(GL_BLEND);
-
         //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
         ssao_buffer.Bind();
         SSAOShader->Use();
-        ssao_buffer.BindTextures(SSAOShader, gbuffer.view_position_texture_, gbuffer.view_normal_texture_);
+        ssao_buffer.BindTextures(SSAOShader, gbuffer.view_position_texture_, gbuffer.view_normal_texture_, gbuffer.mask_texture_);
         ssao_buffer.Draw();
         //////////////////////////////////
 
@@ -786,6 +787,10 @@ int main()
         glActiveTexture(GL_TEXTURE4);
         LBufferPassShader->SetInt("ssao_texture", 4);
         glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
+
+        glActiveTexture(GL_TEXTURE8);
+        LBufferPassShader->SetInt("mask_texture", 8);
+        glBindTexture(GL_TEXTURE_2D, gbuffer.mask_texture_);
         LBufferPassShader->SetVec3("camera_position", (*activeCamera)->get_position());
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
@@ -853,10 +858,7 @@ int main()
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
         postprocessor.Draw();
         //////////////////////////////////
-        /*BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
-        cubemap->BindEnvCubemap(BackgroundShader);
-        cubemap->RenderCube();*/
+
 #pragma endregion
 
 #pragma region Interface

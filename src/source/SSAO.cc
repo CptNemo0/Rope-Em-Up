@@ -108,7 +108,7 @@ void SSAOBuffer::SetKernel(s_ptr<Shader> shader)
     }
 }
 
-void SSAOBuffer::BindTextures(s_ptr<Shader> shader, unsigned int position, unsigned int normals)
+void SSAOBuffer::BindTextures(s_ptr<Shader> shader, unsigned int position, unsigned int normals, unsigned int mask)
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, position);
@@ -121,6 +121,10 @@ void SSAOBuffer::BindTextures(s_ptr<Shader> shader, unsigned int position, unsig
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, noise_texture_);
     shader->SetInt("noise_texture", 2);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, mask);
+    shader->SetInt("mask_texture", 3);
 }
 
 SSAOBlurBuffer::SSAOBlurBuffer(int height, int width)

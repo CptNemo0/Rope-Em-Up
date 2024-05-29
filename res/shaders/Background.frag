@@ -1,5 +1,9 @@
 #version 330 core
-out vec4 FragColor;
+
+layout (location = 1) out vec3 albedo_texture;
+layout (location = 6) out vec3 mask_texture;
+
+//out vec4 FragColor;
 in vec3 World_position;
 
 uniform samplerCube environmentMap;
@@ -12,5 +16,6 @@ void main()
     envColor = envColor / (envColor + vec3(1.0));
     envColor = pow(envColor, vec3(1.0/2.2)); 
     
-    FragColor = vec4(envColor, 1.0);
+    albedo_texture = envColor;
+    mask_texture = vec3(0.0);
 }

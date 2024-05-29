@@ -317,16 +317,16 @@ void HDRCubemap::RenderQuad()
 
 void HDRCubemap::BindIBLmaps(s_ptr<Shader> shader)
 {
-	glActiveTexture(GL_TEXTURE8);
-	shader->SetInt("irradanceMap", 8);
+	glActiveTexture(GL_TEXTURE5);
+	shader->SetInt("irradanceMap", 5);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, irradanceMap);
 
-	glActiveTexture(GL_TEXTURE9);
-	shader->SetInt("prefilterMap", 9);
+	glActiveTexture(GL_TEXTURE6);
+	shader->SetInt("prefilterMap", 6);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
 
-	glActiveTexture(GL_TEXTURE10);
-	shader->SetInt("brdfLUT", 10);
+	glActiveTexture(GL_TEXTURE7);
+	shader->SetInt("brdfLUT", 7);
 	glBindTexture(GL_TEXTURE_2D, brdfLUT);
 }
 

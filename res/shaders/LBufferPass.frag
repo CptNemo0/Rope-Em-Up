@@ -2,17 +2,17 @@
 layout (location = 0) out vec3 color_texture;
 layout (location = 1) out vec4 bloom_texture;
 
-uniform sampler2D position_texture;
-uniform sampler2D albedo_texture;
-uniform sampler2D normal_texture;
-uniform sampler2D mra_texture;
-uniform sampler2D ssao_texture;
-uniform sampler2D tangent_texture;
-uniform sampler2D bitangent_texture;
+uniform sampler2D position_texture; //0
+uniform sampler2D albedo_texture; //1
+uniform sampler2D normal_texture;//2
+uniform sampler2D mra_texture;//3
+uniform sampler2D ssao_texture;//4
 
-uniform samplerCube irradanceMap;
-uniform samplerCube prefilterMap;
-uniform sampler2D brdfLUT;
+uniform samplerCube irradanceMap;//5
+uniform samplerCube prefilterMap;//6
+uniform sampler2D brdfLUT;//7
+
+uniform sampler2D mask_texture; //8
 
 uniform vec3 camera_position;
 
@@ -193,62 +193,71 @@ vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float r
 
 void main()
 {
-    vec3 World_position = texture(position_texture, if_uv).rgb;
+    float mask =  texture(mask_texture, if_uv).r;
     vec3 albedo = texture(albedo_texture, if_uv).rgb;
-    vec3 mra = texture(mra_texture, if_uv).rgb;
-	float metallic = mra.r;
-	float roughness = mra.g;
-	float ao = mra.b;
-    float ssao = ((texture(ssao_texture, if_uv).r - 0.5) * 1.5) + 0.5;
 
-    vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
-    vec3 V = normalize(camera_position - World_position);
-    vec3 R = reflect(-V, N);
-
-    vec3 F0 = vec3(0.04);
-    F0 = mix(F0, albedo, metallic);
-
-    //The reflectance equation
-	vec3 Lo = vec3(0.0);
-    for(int i = 0; i < light_num && i <MAX_LIGHTS; ++i) 
+    if(mask > 0)
     {
-		Lo += CalcPointLight(pointLight[i], World_position, V, N, roughness, metallic, albedo, F0);
-    }
+        vec3 World_position = texture(position_texture, if_uv).rgb;   
+        vec3 mra = texture(mra_texture, if_uv).rgb;
+	    float metallic = mra.r;
+	    float roughness = mra.g;
+	    float ao = mra.b;
+        float ssao = ((texture(ssao_texture, if_uv).r - 0.5) * 1.5) + 0.5;
 
-    Lo += CalcDirLight(dirLight[0], V, N, roughness, metallic, albedo, F0);
-    Lo += CalcSpotLight(spotLight[0], World_position, V, N, roughness, metallic, albedo, F0);
+        vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
+        vec3 V = normalize(camera_position - World_position);
+        vec3 R = reflect(-V, N);
 
-    /// ambient lighting IBL ///
-    vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-    vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;	
-  
-    vec3 irradiance = texture(irradanceMap, N).rgb;
-    vec3 diffuse = irradiance * albedo;
+        vec3 F0 = vec3(0.04);
+        F0 = mix(F0, albedo, metallic);
 
-    const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
-    vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-    vec3 specular = prefilteredColor * (kS * brdf.x + brdf.y);
-
-    vec3 ambient = (kD * diffuse + specular) * ao;
-    ///////
-    /// typical ambient lighting ///
-    //vec3 ambient = vec3(0.03) * albedo;
-    ////
-
-    vec3 color   = ambient + Lo;
-    color = color * ssao;
-    //color = color / (color + vec3(1.0));
-    //color = pow(color, vec3(1.0/2.2));
-    color_texture = color;
-
-    if(bloom)
-    {
-        float brightness = dot(color.rgb, bloom_color.rgb);
-        if(brightness > bloom_threshold)
+        //The reflectance equation
+	    vec3 Lo = vec3(0.0);
+        for(int i = 0; i < light_num && i <MAX_LIGHTS; ++i) 
         {
-            bloom_texture = vec4(color.rgb, 1.0f);
+		    Lo += CalcPointLight(pointLight[i], World_position, V, N, roughness, metallic, albedo, F0);
+        }
+
+        Lo += CalcDirLight(dirLight[0], V, N, roughness, metallic, albedo, F0);
+        Lo += CalcSpotLight(spotLight[0], World_position, V, N, roughness, metallic, albedo, F0);
+
+        /// ambient lighting IBL ///
+        vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+        vec3 kD = 1.0 - kS;
+        kD *= 1.0 - metallic;	
+  
+        vec3 irradiance = texture(irradanceMap, N).rgb;
+        vec3 diffuse = irradiance * albedo;
+
+        const float MAX_REFLECTION_LOD = 4.0;
+        vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
+        vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+        vec3 specular = prefilteredColor * (kS * brdf.x + brdf.y);
+
+        vec3 ambient = (kD * diffuse + specular) * ao;
+        ///////
+        /// typical ambient lighting ///
+        //vec3 ambient = vec3(0.03) * albedo;
+        ////
+
+        vec3 color   = ambient + Lo;
+        color = color * ssao;
+        //color = color / (color + vec3(1.0));
+        //color = pow(color, vec3(1.0/2.2));
+        color_texture = color;
+
+        if(bloom)
+        {
+            float brightness = dot(color.rgb, bloom_color.rgb);
+            if(brightness > bloom_threshold)
+            {
+                bloom_texture = vec4(color.rgb, 1.0f);
+            }
+            else
+            {
+                bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            }
         }
         else
         {
@@ -257,6 +266,7 @@ void main()
     }
     else
     {
+        color_texture = albedo;
         bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 }
