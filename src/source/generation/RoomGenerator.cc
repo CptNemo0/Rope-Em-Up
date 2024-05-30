@@ -568,6 +568,19 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
         wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
         wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
         wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+
+        if (room.up_walls_idx[i] == 1)
+        {
+
+        }
+        else if (room.up_walls_idx[i] == 5)
+        {
+
+        }
+        else if (room.up_walls_idx[i] == 6)
+        {
+
+        }
     }
 
     for (int i = 0; i < room.height; i++)

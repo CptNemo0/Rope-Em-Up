@@ -62,7 +62,7 @@
 #include "headers/drop/DropManager.h"
 #include "headers/drop/SpellDropQueue.h"
 #include "headers/PlayerStatsManager.h"
-
+#include "headers/components/GrassRenderer.h"
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -631,62 +631,66 @@ int main()
     CameraManager->setIsometricCamera(isometricCameraComponent);
     CameraManager->setTopDownCamera(topDownCameraComponent);
 
-    unsigned int grass_vao_;
-    unsigned int grass_vbo_;
-    unsigned int grass_ebo_;
-    unsigned int buffer_;
-    float density = 150.0f;
-    std::vector<float> grass_positions;
+    auto grass_object = GameObject::Create(scene_root);
+    grass_object->AddComponent(std::make_shared<components::GrassRenderer>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 0.0f, -5.0f), grass_model, 123.0f));
+    auto grass_component = grass_object->GetComponent<components::GrassRenderer>();
 
-    {
-        glGenVertexArrays(1, &grass_vao_);
-        glGenBuffers(1, &grass_vbo_);
-        glGenBuffers(1, &grass_ebo_);
-        glBindVertexArray(grass_vao_);
+    //unsigned int grass_vao_;
+    //unsigned int grass_vbo_;
+    //unsigned int grass_ebo_;
+    //unsigned int buffer_;
+    //float density = 150.0f;
+    //std::vector<float> grass_positions;
 
-        glBindBuffer(GL_ARRAY_BUFFER, grass_vbo_);
-        glBufferData(GL_ARRAY_BUFFER, grass_model->meshes_[0]->vertices_.size() * sizeof(Vertex), &grass_model->meshes_[0]->vertices_[0], GL_STATIC_DRAW);
+    //{
+    //    glGenVertexArrays(1, &grass_vao_);
+    //    glGenBuffers(1, &grass_vbo_);
+    //    glGenBuffers(1, &grass_ebo_);
+    //    glBindVertexArray(grass_vao_);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grass_ebo_);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, grass_model->meshes_[0]->indices_.size() * sizeof(unsigned int), &grass_model->meshes_[0]->indices_[0], GL_STATIC_DRAW);
+    //    glBindBuffer(GL_ARRAY_BUFFER, grass_vbo_);
+    //    glBufferData(GL_ARRAY_BUFFER, grass_model->meshes_[0]->vertices_.size() * sizeof(Vertex), &grass_model->meshes_[0]->vertices_[0], GL_STATIC_DRAW);
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grass_ebo_);
+    //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, grass_model->meshes_[0]->indices_.size() * sizeof(unsigned int), &grass_model->meshes_[0]->indices_[0], GL_STATIC_DRAW);
 
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    //    glEnableVertexAttribArray(0);
+    //    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture));
+    //    glEnableVertexAttribArray(1);
+    //    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
-        auto ul = walls.up_left_;
-        auto dr = walls.down_right_;
+    //    glEnableVertexAttribArray(2);
+    //    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture));
 
-        float x_dim = std::fabs(dr.x) - std::fabs(ul.x);
-        float y_dim = std::fabs(dr.z) - std::fabs(ul.z);
+    //    auto ul = walls.up_left_;
+    //    auto dr = walls.down_right_;
 
-        float x_step = x_dim / density;
-        float y_step = y_dim / density;
+    //    float x_dim = std::fabs(dr.x) - std::fabs(ul.x);
+    //    float y_dim = std::fabs(dr.z) - std::fabs(ul.z);
 
-        for (float i = -x_step; i > (-x_step * (density - 1)); i -= x_step)
-        {
-            for (float j = -y_step; j > (-y_step * (density - 1)); j -= y_step)
-            {
-                grass_positions.push_back(i + random::RandFloat(-x_step * 0.9f, x_step * 0.9f));
-                grass_positions.push_back(j + random::RandFloat(-y_step * 0.9f, y_step * 0.9f));
-                //cout << i << " " << j << endl;
-            }
-        }
+    //    float x_step = x_dim / density;
+    //    float y_step = y_dim / density;
 
-        glGenBuffers(1, &buffer_);
-        glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-        glBufferData(GL_ARRAY_BUFFER, grass_positions.size() * sizeof(float), &grass_positions[0], GL_STATIC_DRAW);
+    //    for (float i = -x_step; i > (-x_step * (density - 1)); i -= x_step)
+    //    {
+    //        for (float j = -y_step; j > (-y_step * (density - 1)); j -= y_step)
+    //        {
+    //            grass_positions.push_back(i + random::RandFloat(-x_step * 0.9f, x_step * 0.9f));
+    //            grass_positions.push_back(j + random::RandFloat(-y_step * 0.9f, y_step * 0.9f));
+    //            //cout << i << " " << j << endl;
+    //        }
+    //    }
 
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-        glVertexAttribDivisor(3, 1);
-        glBindVertexArray(0);
-    }
+    //    glGenBuffers(1, &buffer_);
+    //    glBindBuffer(GL_ARRAY_BUFFER, buffer_);
+    //    glBufferData(GL_ARRAY_BUFFER, grass_positions.size() * sizeof(float), &grass_positions[0], GL_STATIC_DRAW);
+
+    //    glEnableVertexAttribArray(3);
+    //    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    //    glVertexAttribDivisor(3, 1);
+    //    glBindVertexArray(0);
+    //}
 
     // wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -811,9 +815,7 @@ int main()
         GrassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GrassShader->SetMatrix4("projection_matrix", projection_matrix);
         GrassShader->SetFloat("time", glfwGetTime());
-        glBindVertexArray(grass_vao_);
-        glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(grass_model->meshes_[0]->indices_.size()), GL_UNSIGNED_INT, 0, density* density);
-        glBindVertexArray(0);
+        grass_component->Draw();
 
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
@@ -968,7 +970,7 @@ int main()
         ImGui::Begin("Camera");
         //chose the camera
         const char* items[] = { "Isometric", "Top Down", "Debugging" };
-        static int selectedItem = 0;
+        static int selectedItem = 2;
         ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
 
             switch (selectedItem)
@@ -991,8 +993,8 @@ int main()
         ImGui::DragFloat3("Position", glm::value_ptr((*activeCamera)->position_), 0.1f, -100.0f, 100.0f, "%.2f");
     
         /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
-        ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
-        ImGui::End();
+        ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");
+        ImGui::End();*/
 
         ImGui::Begin("Lights");
         ImGui::LabelText("Point Light", "Point Light");
@@ -1204,7 +1206,7 @@ int main()
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
-
+        
         
 #pragma endregion 
         glfwSwapBuffers(window);
