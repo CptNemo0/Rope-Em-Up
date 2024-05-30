@@ -4,6 +4,8 @@
 #include "glm/glm.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/hash.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/rotate_vector.hpp"
 
 #include <map>
 #include <deque>
@@ -34,8 +36,7 @@
 #include "../GameObject.h"
 #include "../physics/Rope.h"
 #include "Room.h"
-
-
+#include "../GrassRendererManager.h"
 namespace generation
 {
     const float kModuleSize = 16.0f;
@@ -96,6 +97,26 @@ namespace generation
 
         glm::vec3(4.0f, 0.0f, 0.0f),
     };
+
+
+    const std::vector<glm::vec4> kGrassPatch2
+    {
+        glm::vec4(2.911f, 0.0, -3.47f, 1.0f),
+        glm::vec4(8.2893f, 0.0, -0.20745f, 1.0f)
+    };
+
+    const std::vector<glm::vec4> kGrassPatch6
+    {
+        glm::vec4(3.211f, 0.0, -3.47f, 1.0f),
+        glm::vec4(8.2893f, 0.0, -0.20745f, 1.0f)
+    };
+
+    const std::vector<glm::vec4> kGrassPatch7
+    {
+        glm::vec4(-7.57953f, 0.0, -3.4757f, 1.0f),
+        glm::vec4(-2.55601f, 0.0, -0.20745f, 1.0f)
+    };
+
 
     struct RoomLayoutGenerationSettings
     {

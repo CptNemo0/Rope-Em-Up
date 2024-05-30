@@ -568,18 +568,33 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
         wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
         wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
         wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+        wall_up->StartNewComponents();
 
         if (room.up_walls_idx[i] == 1)
         {
+            auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch2[0];
+            auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch2[1];
 
+            auto renderer = GameObject::Create();
+            renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
+            room.room_object->transform_->AddChild(renderer->transform_);
         }
         else if (room.up_walls_idx[i] == 5)
         {
-
+            auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch6[0];
+            auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch6[1];
+            auto renderer = GameObject::Create();
+            renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
+            room.room_object->transform_->AddChild(renderer->transform_);
         }
         else if (room.up_walls_idx[i] == 6)
         {
+            auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch7[0];
+            auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch7[1];
 
+            auto renderer = GameObject::Create();
+            renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
+            room.room_object->transform_->AddChild(renderer->transform_);
         }
     }
 
@@ -589,6 +604,38 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
         wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
         wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
         wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
+        wall_left->StartNewComponents();
+
+        if (room.left_walls_idx[i] == 1)
+        {
+            auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch2[0];
+            auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch2[1];
+
+            auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+            auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+            wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
+        }
+        else if (room.left_walls_idx[i] == 5)
+        {
+            auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch6[0];
+            auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch6[1];
+
+            auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+            auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+            wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
+        }
+        else if (room.left_walls_idx[i] == 6)
+        {
+            auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch7[0];
+            auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch7[1];
+
+            auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+            auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+            wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
+        }
     }
 
     for (int i = 0; i < room.width; i++)

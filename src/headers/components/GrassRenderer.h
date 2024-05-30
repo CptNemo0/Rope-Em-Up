@@ -36,7 +36,7 @@ namespace components
 		std::vector<float> grass_positions_;
 
 		GRASS_PATCH_TYPE patch_type_;
-
+	
 		glm::vec3 ul_;
 		glm::vec3 dr_;
 		float radius_;

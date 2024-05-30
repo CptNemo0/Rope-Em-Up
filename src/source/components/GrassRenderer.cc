@@ -103,15 +103,15 @@ namespace components
 			float x_dim = std::fabs(dr_.x) - std::fabs(ul_.x);
 			float y_dim = std::fabs(dr_.z) - std::fabs(ul_.z);
 
-			float x_step = x_dim / density_;
-			float y_step = y_dim / density_;
+			float x_step = std::fabs(x_dim) / density_;
+			float y_step = std::fabs(y_dim )/ density_;
 
 			for (float i = -x_step; i > (-x_step * (density_ - 1)); i -= x_step)
 			{
 				for (float j = -y_step; j > (-y_step * (density_ - 1)); j -= y_step)
 				{
-					grass_positions_.push_back(i + random::RandFloat(-x_step * 0.9f, x_step * 0.9f));
-					grass_positions_.push_back(j + random::RandFloat(-y_step * 0.9f, y_step * 0.9f));
+					grass_positions_.push_back(ul_.x + i + random::RandFloat(-x_step * 0.9f, x_step * 0.9f));
+					grass_positions_.push_back(ul_.z + j + random::RandFloat(-y_step * 0.9f, y_step * 0.9f));
 				}
 			}
 

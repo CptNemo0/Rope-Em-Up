@@ -63,6 +63,8 @@
 #include "headers/drop/SpellDropQueue.h"
 #include "headers/PlayerStatsManager.h"
 #include "headers/components/GrassRenderer.h"
+#include "headers/GrassRendererManager.h"
+
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -406,6 +408,8 @@ int main()
     models.clutter_c.push_back(boxes_3_c_model);
     models.enemies.push_back(enemy_model);
 
+    GrassRendererManager::Initialize(grass_model);
+
     // Spell Drops
     auto place_holder_drop_model = make_shared<Model>(kDebugMeshPath);
 
@@ -591,8 +595,8 @@ int main()
     SSAOShader->SetInt("height", mode->height);
     SSAOShader->SetInt("width", mode->width);
     SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
-    SSAOShader->SetFloat("radius", 0.4);
-    SSAOShader->SetFloat("bias", 0.02);
+    SSAOShader->SetFloat("radius", 0.2);
+    SSAOShader->SetFloat("bias", 0.01);
     ssao_buffer.SetKernel(SSAOShader);
 
     cubemap->LoadHDRimg(window, *activeCamera);
@@ -815,7 +819,9 @@ int main()
         GrassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GrassShader->SetMatrix4("projection_matrix", projection_matrix);
         GrassShader->SetFloat("time", glfwGetTime());
-        grass_component->Draw();
+        //grass_component->Draw();
+        GrassRendererManager::i_->Draw();
+
 
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
@@ -993,8 +999,8 @@ int main()
         ImGui::DragFloat3("Position", glm::value_ptr((*activeCamera)->position_), 0.1f, -100.0f, 100.0f, "%.2f");
     
         /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
-        ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");
-        ImGui::End();*/
+        ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
+        ImGui::End();
 
         ImGui::Begin("Lights");
         ImGui::LabelText("Point Light", "Point Light");
@@ -1211,7 +1217,8 @@ int main()
 #pragma endregion 
         glfwSwapBuffers(window);
     }
-
+    
+    GrassRendererManager::Destroy();
     PlayerStatsManager::Destroy();
     ChokeList::Destroy();
     drop::SpellDropQueue::Destroy();
