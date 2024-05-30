@@ -635,7 +635,7 @@ int main()
     unsigned int grass_vbo_;
     unsigned int grass_ebo_;
     unsigned int buffer_;
-    float density = 100.0f;
+    float density = 150.0f;
     std::vector<float> grass_positions;
 
     {

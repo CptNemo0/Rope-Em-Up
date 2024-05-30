@@ -16,11 +16,51 @@ uniform mat4 view_matrix;
 
 uniform float time;
 
+const float PI = 3.14159265358979323846;
+
 float hash2(vec2 sample_) 
 {
     vec3 point = fract(vec3(sample_.xyx) * 0.62); 
     point += dot(point, point.yzx + 1.2345); 
     return fract((point.x + point.y) * point.z) * 2.0 - 1.0;
+}
+
+float rand(vec2 c){
+	return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+float noise(vec2 p, float freq ){
+	float unit = 1920.0/freq;
+	vec2 ij = floor(p/unit);
+	vec2 xy = mod(p,unit)/unit;
+	//xy = 3.*xy*xy-2.*xy*xy*xy;
+	xy = .5*(1.-cos(PI*xy));
+	float a = rand((ij+vec2(0.,0.)));
+	float b = rand((ij+vec2(1.,0.)));
+	float c = rand((ij+vec2(0.,1.)));
+	float d = rand((ij+vec2(1.,1.)));
+	float x1 = mix(a, b, xy.x);
+	float x2 = mix(c, d, xy.x);
+	return mix(x1, x2, xy.y);
+}
+
+float pNoise(vec2 p, int res){
+	float persistance = .5;
+	float n = 0.;
+	float normK = 0.;
+	float f = 4.;
+	float amp = 1.;
+	int iCount = 0;
+	for (int i = 0; i<50; i++){
+		n+=amp*noise(p, f);
+		f*=2.;
+		normK+=amp;
+		amp*=persistance;
+		if (iCount == res) break;
+		iCount++;
+	}
+	float nf = n/normK;
+	return nf*nf*nf*nf;
 }
 
 void main()
@@ -54,15 +94,19 @@ void main()
 
 
     // ruch
-    float id_hash = hash2(vec2(gl_InstanceID));
-    float noise_sample = sin(time + id_hash) * hash;
-
+    float wind = pNoise(world_pos + time * 25 + 1000, 100) * 5;
+   
     //zakrzywienie 
 
-    float max_lean = 1.0472 / 3;
-    float height = local_position.y * local_position.y * 0.5;
+    float max_lean = 1.0472 / 5;
+    float height = local_position.y * local_position.y;
     float lean = max_lean * height;
-    float rescaled_lean = lean * hash + (noise_sample * 0.25);
+    float rescaled_lean = lean * hash + wind;
+
+    if(rescaled_lean > 1.57079632679)
+    {
+        rescaled_lean = 1.57079632679;
+    }
 
     cos_angle = cos(rescaled_lean);
     sin_angle = sin(rescaled_lean);
