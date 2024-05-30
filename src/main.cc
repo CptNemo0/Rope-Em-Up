@@ -114,6 +114,9 @@ int main()
     const string kSSAOBlurVertexShaderPath = "res/shaders/SSAOBlur.vert";
     const string kSSAOBlurFragmentShaderPath = "res/shaders/SSAOBlur.frag";
 
+    const string kGrassVertexShaderPath = "res/shaders/GrassShaderVert.vert";
+    const string kGrassFragmentShaderPath = "res/shaders/GrassShaderFrag.frag";
+
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
     const string kHUDTexturePath = "res/textures/placeholder_icon.png";
@@ -156,6 +159,8 @@ int main()
     const string kMod5Path = "res/Modules/mod5.obj";
     const string kMod6Path = "res/Modules/mod6.obj";
     const string kMod7Path = "res/Modules/mod7.obj";
+
+    const string kGrassPath = "res/grass/grass.obj";
 
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
@@ -296,6 +301,7 @@ int main()
     auto BasicDefferedLightShader = make_shared<Shader>(kLBufferVertexShaderPath, kBasicDefferedLightShaderPath);
     auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
     auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
+    auto GrassShader = make_shared<Shader>(kGrassVertexShaderPath, kGrassFragmentShaderPath);
 #pragma endregion Shaders
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -367,6 +373,8 @@ int main()
     auto boxes_3_model = make_shared<Model>(kBoxes3Path);
     auto boxes_3_c_model = make_shared<Model>(kBoxes3CPath);
 
+    auto grass_model = make_shared<Model>(kGrassPath);
+
     // Main modules
     auto mod1_model = make_shared<Model>(kMod1Path);
     auto mod2_model = make_shared<Model>(kMod2Path);
@@ -409,8 +417,6 @@ int main()
         drop::SpellDropQueue::i_->queue_.push(SPELLS::SKULL_MINION);
     }
     
-
-
 #pragma endregion Models
     
     auto scene_root = GameObject::Create();
@@ -457,11 +463,11 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
-    auto test_ball = GameObject::Create(scene_root);
+    /*auto test_ball = GameObject::Create(scene_root);
     test_ball->transform_->set_scale(glm::vec3(0.2f));
     test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(1, 3, -2));
     test_ball->AddComponent(make_shared<components::MeshRenderer>(test_model, GBufferPassShader));
-    test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+    test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));*/
 
     //anim::Animation test_animation = anim::Animation(kMalePlayerMeshPath, M_player_model);
     //auto animator = GameObject::Create(scene_root);
@@ -472,8 +478,6 @@ int main()
     ////male->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     //male->transform_->set_scale(glm::vec3(1.0f));
     //male->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-
-
 
     Rope rope = Rope
     (
@@ -627,6 +631,63 @@ int main()
     CameraManager->setIsometricCamera(isometricCameraComponent);
     CameraManager->setTopDownCamera(topDownCameraComponent);
 
+    unsigned int grass_vao_;
+    unsigned int grass_vbo_;
+    unsigned int grass_ebo_;
+    unsigned int buffer_;
+    float density = 100.0f;
+    std::vector<float> grass_positions;
+
+    {
+        glGenVertexArrays(1, &grass_vao_);
+        glGenBuffers(1, &grass_vbo_);
+        glGenBuffers(1, &grass_ebo_);
+        glBindVertexArray(grass_vao_);
+
+        glBindBuffer(GL_ARRAY_BUFFER, grass_vbo_);
+        glBufferData(GL_ARRAY_BUFFER, grass_model->meshes_[0]->vertices_.size() * sizeof(Vertex), &grass_model->meshes_[0]->vertices_[0], GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grass_ebo_);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, grass_model->meshes_[0]->indices_.size() * sizeof(unsigned int), &grass_model->meshes_[0]->indices_[0], GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture));
+
+        auto ul = walls.up_left_;
+        auto dr = walls.down_right_;
+
+        float x_dim = std::fabs(dr.x) - std::fabs(ul.x);
+        float y_dim = std::fabs(dr.z) - std::fabs(ul.z);
+
+        float x_step = x_dim / density;
+        float y_step = y_dim / density;
+
+        for (float i = -x_step; i > (-x_step * (density - 1)); i -= x_step)
+        {
+            for (float j = -y_step; j > (-y_step * (density - 1)); j -= y_step)
+            {
+                grass_positions.push_back(i + random::RandFloat(-x_step * 0.9f, x_step * 0.9f));
+                grass_positions.push_back(j + random::RandFloat(-y_step * 0.9f, y_step * 0.9f));
+                //cout << i << " " << j << endl;
+            }
+        }
+
+        glGenBuffers(1, &buffer_);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer_);
+        glBufferData(GL_ARRAY_BUFFER, grass_positions.size() * sizeof(float), &grass_positions[0], GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+        glVertexAttribDivisor(3, 1);
+        glBindVertexArray(0);
+    }
+
     // wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -745,6 +806,14 @@ int main()
         BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
+
+        GrassShader->Use();
+        GrassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+        GrassShader->SetMatrix4("projection_matrix", projection_matrix);
+        GrassShader->SetFloat("time", glfwGetTime());
+        glBindVertexArray(grass_vao_);
+        glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(grass_model->meshes_[0]->indices_.size()), GL_UNSIGNED_INT, 0, density* density);
+        glBindVertexArray(0);
 
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
@@ -999,7 +1068,7 @@ int main()
         ImGui::Begin("Texture Window");
         ImVec2 textureSize(160 * 3, 90 * 3); // Adjust as per your texture size
         
-        ImGui::Image((void*)(intptr_t)ssao_buffer.ssao_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((void*)(intptr_t)gbuffer.world_position_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
 
         ImGui::Begin("Rope Manager");
