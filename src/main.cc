@@ -64,6 +64,7 @@
 #include "headers/PlayerStatsManager.h"
 #include "headers/components/GrassRenderer.h"
 #include "headers/GrassRendererManager.h"
+#include "headers/res/Resources.h"
 
 int main()
 {
@@ -292,28 +293,28 @@ int main()
 #pragma endregion CamerasConfiguration
 
 #pragma region Shaders
-    auto HUDshader = make_shared<Shader>(kHUDVertexShaderPath, kHUDFragmentShaderPath);
-    auto HUDTextShader = make_shared<Shader>(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
-    auto PBRShader = make_shared<Shader>(kPBRVertexShaderPath, kPBRFragmentShaderPath);
-    auto EquirectangularToCubemapShader = make_shared<Shader>(kHDRCubemapVertexShaderPath, kHDREquirectangularToCubemapFragmentShaderPath);
-    auto BackgroundShader = make_shared<Shader>(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
-    auto IrradianceShader = make_shared<Shader>(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
-    auto PrefilterShader = make_shared<Shader>(kHDRCubemapVertexShaderPath, kPrefilterFragmentShaderPath);
-    auto BRDFShader = make_shared<Shader>(kBRDVertexShaderPath, kBRDFragmentShaderPath);
-    auto ParticleShader = make_shared<Shader>(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
-    auto PostprocessingShader = make_shared<Shader>(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
-    auto GBufferPassShader = make_shared<Shader>(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
-    auto LBufferPassShader = make_shared<Shader>(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
-    auto BasicDefferedLightShader = make_shared<Shader>(kLBufferVertexShaderPath, kBasicDefferedLightShaderPath);
-    auto SSAOShader = make_shared<Shader>(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
-    auto SSAOBlurShader = make_shared<Shader>(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
-    auto GrassShader = make_shared<Shader>(kGrassVertexShaderPath, kGrassFragmentShaderPath);
+    auto HUDshader = res::get_shader(kHUDVertexShaderPath, kHUDFragmentShaderPath);
+    auto HUDTextShader = res::get_shader(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
+    auto PBRShader = res::get_shader(kPBRVertexShaderPath, kPBRFragmentShaderPath);
+    auto EquirectangularToCubemapShader = res::get_shader(kHDRCubemapVertexShaderPath, kHDREquirectangularToCubemapFragmentShaderPath);
+    auto BackgroundShader = res::get_shader(kBackgroundVertexShaderPath, kBackgroundFragmentShaderPath);
+    auto IrradianceShader = res::get_shader(kHDRCubemapVertexShaderPath, kIrradianceFragmentShaderPath);
+    auto PrefilterShader = res::get_shader(kHDRCubemapVertexShaderPath, kPrefilterFragmentShaderPath);
+    auto BRDFShader = res::get_shader(kBRDVertexShaderPath, kBRDFragmentShaderPath);
+    auto ParticleShader = res::get_shader(kParticleVertexShaderPath, kParticleGeometryShaderPath, kParticleFragmentShaderPath);
+    auto PostprocessingShader = res::get_shader(kPostprocessingVertexShaderPath, kPostprocessingFragmentShaderPath);
+    auto GBufferPassShader = res::get_shader(kGBufferVertexShaderPath, kGBufferFragmentShaderPath);
+    auto LBufferPassShader = res::get_shader(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
+    auto BasicDefferedLightShader = res::get_shader(kLBufferVertexShaderPath, kBasicDefferedLightShaderPath);
+    auto SSAOShader = res::get_shader(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
+    auto SSAOBlurShader = res::get_shader(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
+    auto GrassShader = res::get_shader(kGrassVertexShaderPath, kGrassFragmentShaderPath);
 #pragma endregion Shaders
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
-    auto HUD_texture = make_shared<tmp::Texture>(kHUDTexturePath);
-    auto HUD_texture2 = make_shared<tmp::Texture>(kHUDTexturePath2);
-    auto Smoke_texture = make_shared<tmp::Texture>(kTestSmokeTexturePath);
+    auto HUD_texture = res::get_texture(kHUDTexturePath);
+    auto HUD_texture2 = res::get_texture(kHUDTexturePath2);
+    auto Smoke_texture = res::get_texture(kTestSmokeTexturePath);
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
@@ -352,43 +353,43 @@ int main()
 #pragma endregion Lights
 
 #pragma region Models
-    auto test_model = make_shared<Model>(kTestPath);
+    auto test_model = res::get_model(kTestPath);
 
-    auto cube_model = make_shared<Model>(kCubeMeshPath);
-    auto player_model = make_shared<Model>(kPlayerMeshPath);
-    //auto F_player_model = make_shared<Model>(lFemalePlayerMeshPath);
-    auto M_player_model = make_shared<Model>(kMalePlayerMeshPath);
-    auto debug_model = make_shared<Model>(kDebugMeshPath);
-    auto enemy_model = make_shared<Model>(kEnemyMeshPath);
-    auto wall_model = make_shared<Model>(kWallPath);
-    auto module_1_model = make_shared<Model>(kModule1Path);
-    auto module_2_model = make_shared<Model>(kModule2Path);
-    auto simple_floor_model = make_shared<Model>(kSimpleFloodPath);
-    auto test_ball_model = make_shared<Model>(kTestBallPath);
-    auto gate_model = make_shared<Model>(kGatePath);
-    auto lamp_model = make_shared<Model>(kLampPath);
-    auto lamp_c_model = make_shared<Model>(kLampCPath);
+    auto cube_model = res::get_model(kCubeMeshPath);
+    auto player_model = res::get_model(kPlayerMeshPath);
+    //auto F_player_model = res::get_model(lFemalePlayerMeshPath);
+    auto M_player_model = res::get_model(kMalePlayerMeshPath);
+    auto debug_model = res::get_model(kDebugMeshPath);
+    auto enemy_model = res::get_model(kEnemyMeshPath);
+    auto wall_model = res::get_model(kWallPath);
+    auto module_1_model = res::get_model(kModule1Path);
+    auto module_2_model = res::get_model(kModule2Path);
+    auto simple_floor_model = res::get_model(kSimpleFloodPath);
+    auto test_ball_model = res::get_model(kTestBallPath);
+    auto gate_model = res::get_model(kGatePath);
+    auto lamp_model = res::get_model(kLampPath);
+    auto lamp_c_model = res::get_model(kLampCPath);
 
-    auto bone_model = make_shared<Model>(kBonePath);
-    auto leafs_model = make_shared<Model>(kLeafsPath);
-    auto box_model = make_shared<Model>(kBoxPath);
-    auto box_c_model = make_shared<Model>(kBoxCPath);
-    auto boxes_1_model = make_shared<Model>(kBoxes1Path);
-    auto boxes_1_c_model = make_shared<Model>(kBoxes1CPath);
-    auto boxes_2_model = make_shared<Model>(kBoxes2Path);
-    auto boxes_3_model = make_shared<Model>(kBoxes3Path);
-    auto boxes_3_c_model = make_shared<Model>(kBoxes3CPath);
+    auto bone_model = res::get_model(kBonePath);
+    auto leafs_model = res::get_model(kLeafsPath);
+    auto box_model = res::get_model(kBoxPath);
+    auto box_c_model = res::get_model(kBoxCPath);
+    auto boxes_1_model = res::get_model(kBoxes1Path);
+    auto boxes_1_c_model = res::get_model(kBoxes1CPath);
+    auto boxes_2_model = res::get_model(kBoxes2Path);
+    auto boxes_3_model = res::get_model(kBoxes3Path);
+    auto boxes_3_c_model = res::get_model(kBoxes3CPath);
 
-    auto grass_model = make_shared<Model>(kGrassPath);
+    auto grass_model = res::get_model(kGrassPath);
 
     // Main modules
-    auto mod1_model = make_shared<Model>(kMod1Path);
-    auto mod2_model = make_shared<Model>(kMod2Path);
-    auto mod3_model = make_shared<Model>(kMod3Path);
-    auto mod4_model = make_shared<Model>(kMod4Path);
-    auto mod5_model = make_shared<Model>(kMod5Path);
-    auto mod6_model = make_shared<Model>(kMod6Path);
-    auto mod7_model = make_shared<Model>(kMod7Path);
+    auto mod1_model = res::get_model(kMod1Path);
+    auto mod2_model = res::get_model(kMod2Path);
+    auto mod3_model = res::get_model(kMod3Path);
+    auto mod4_model = res::get_model(kMod4Path);
+    auto mod5_model = res::get_model(kMod5Path);
+    auto mod6_model = res::get_model(kMod6Path);
+    auto mod7_model = res::get_model(kMod7Path);
 
     generation::RoomModels models;
     models.walls.push_back(mod1_model);
@@ -415,7 +416,7 @@ int main()
     GrassRendererManager::Initialize(grass_model);
 
     // Spell Drops
-    auto place_holder_drop_model = make_shared<Model>(kDebugMeshPath);
+    auto place_holder_drop_model = res::get_model(kDebugMeshPath);
 
     drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
     drop::SpellDropQueue::i_->shader = GBufferPassShader;
