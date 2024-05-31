@@ -54,7 +54,7 @@ vec3 apply_vignette(vec3 color, float value)
     float dist = length(position * vec2(resolution.y / resolution.x, 1.0));
 
     float radius = value;
-    float softness = 0.1;
+    float softness = 0.2;
     float vignette = smoothstep(radius, radius - softness, dist);
 
     color.rgb = color.rgb - (1.0 - vignette);
@@ -86,17 +86,16 @@ void main()
     color = adjust_brightness(color, cbg.y);
     color = adjust_gamma(color, cbg.z);
     color = apply_film_grain(color);
-    color = apply_vignete(color);
-    color = apply_vignette(color, transition_vignette_amount);
 
-    if(bloom)
+    if (bloom)
     {
-        vec3 bloom = bloor_bloom();
-        FragColor = vec4(color, 1.0) + vec4(bloom.rgb, 1.0f);
+        vec3 bloom_color = bloor_bloom();
+        color = color + bloom_color;
     }
-    else
-    {
-        FragColor = vec4(color, 1.0);
-    }
-    
+
+    // prosze zostawic to jako ostatnie
+    color = apply_vignete(color);
+    color = vec3(clamp(color, 0.0, 1.0));
+    color = apply_vignette(color, transition_vignette_amount);
+    FragColor = vec4(color, 1.0);
 } 
