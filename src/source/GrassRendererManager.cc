@@ -35,8 +35,34 @@ void GrassRendererManager::RemoveRenderer(std::shared_ptr<components::GrassRende
 	}
 }
 
-void GrassRendererManager::Draw()
+void GrassRendererManager::Draw(unsigned int id)
 {
+    for (unsigned int i = 0; i < model_->meshes_[0]->textures_.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        string name = model_->meshes_[0]->textures_[i].type_;
+        if (name == "texture_albedo")
+        {
+            glUniform1i(glGetUniformLocation(id, "albedo_map"), i);
+            glBindTexture(GL_TEXTURE_2D, model_->meshes_[0]->textures_[i].id_);
+        }
+        else if (name == "texture_normal")
+        {
+            glUniform1i(glGetUniformLocation(id, "normal_map"), i);
+            glBindTexture(GL_TEXTURE_2D, model_->meshes_[0]->textures_[i].id_);
+        }
+        else if (name == "texture_metallic")
+        {
+            glUniform1i(glGetUniformLocation(id, "metallic_map"), i);
+            glBindTexture(GL_TEXTURE_2D, model_->meshes_[0]->textures_[i].id_);
+        }
+        else if (name == "texture_roughness")
+        {
+            glUniform1i(glGetUniformLocation(id, "roughness_map"), i);
+            glBindTexture(GL_TEXTURE_2D, model_->meshes_[0]->textures_[i].id_);
+        }
+    }
+
 	for (auto r : renderers_)
 	{
 		if (r->active_)

@@ -1,12 +1,14 @@
-# Blender 4.0.1 MTL File: 'grass.blend'
+# Blender 4.1.1 MTL File: 'grass.blend'
 # www.blender.org
 
-newmtl Grass
-Ns 637.067627
-Ka 0.215596 0.215596 0.215596
+newmtl grass
+Kd 0.008866 0.062285 0.008866
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
-Ni 1.450000
+Ni 1.500000
 d 1.000000
-illum 3
-map_Kd grass/albedo_texture.png
+illum 2
+map_Kd grass_blade_albedo.png
+map_Pm grass_blade_metallic.png
+map_NS grarss_blade_roughness.png
+map_Bump -bm 20.000000 grass_blade_normal.png

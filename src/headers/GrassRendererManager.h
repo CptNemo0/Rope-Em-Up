@@ -41,7 +41,7 @@ public:
     void AddRenderer(std::shared_ptr<components::GrassRenderer>);
     void RemoveRenderer(std::shared_ptr<components::GrassRenderer>);
 
-    void Draw();
+    void Draw(unsigned int id);
 };
 
 

@@ -217,6 +217,10 @@ int main()
     }
     cout << "GLAD Initialized.\n";
 
+    /*glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);*/
+
     utility::InitImGUI(window);
 
     collisions::CollisionManager::Initialize();
@@ -696,6 +700,9 @@ int main()
     //    glBindVertexArray(0);
     //}
 
+    //auto grass = GameObject::Create(scene_root);
+    //grass->AddComponent(GrassRendererManager::i_->CreateRenderer(walls.up_left_, walls.down_right_, 170));
+
     // wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -819,8 +826,7 @@ int main()
         GrassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GrassShader->SetMatrix4("projection_matrix", projection_matrix);
         GrassShader->SetFloat("time", glfwGetTime());
-        //grass_component->Draw();
-        GrassRendererManager::i_->Draw();
+        GrassRendererManager::i_->Draw(GrassShader->get_id());
 
 
         GBufferPassShader->Use();
@@ -1208,6 +1214,25 @@ int main()
 
         ImGui::Begin("Player 2 HP");
         ImGui::SliderFloat("Player 2 HP", &(player_2->GetComponent<components::HealthComponent>()->health_), 0.0f, player_2->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
+        ImGui::End();
+
+        static glm::vec3 bot_color;
+        static glm::vec3 top_color;
+        static float offset;
+        GrassShader->Use();
+        ImGui::Begin("Grass");
+        if (ImGui::ColorEdit3("bot_color", (float*)&bot_color))
+        {
+            GrassShader->SetVec3("bot_color", bot_color);
+        }
+        if (ImGui::ColorEdit3("top_color", (float*)&top_color))
+        {
+            GrassShader->SetVec3("top_color", top_color);
+        }
+        if (ImGui::SliderFloat("offset", &offset, -1.0f, 1.0f, "%0.3f"))
+        {
+            GrassShader->SetFloat("offset", offset);
+        }
         ImGui::End();
 
         ImGui::Render();

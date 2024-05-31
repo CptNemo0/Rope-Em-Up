@@ -78,21 +78,21 @@ void main()
 	else
 	{
 
-    vec4 internal_world_position = model_matrix * vec4(iv_position, 1.0);
-	vec4 internal_view_position = view_matrix * internal_world_position;
+		vec4 internal_world_position = model_matrix * vec4(iv_position, 1.0);
+		vec4 internal_view_position = view_matrix * internal_world_position;
 
-	world_position = internal_world_position.xyz;
-	view_position = internal_view_position.xyz;
+		world_position = internal_world_position.xyz;
+		view_position = internal_view_position.xyz;
 
-	uv = iv_texture;
+		uv = iv_texture;
 
-	normal_world_matrix = transpose(inverse(mat3(model_matrix)));
-	normal_view_matrix = transpose(inverse(mat3(view_matrix * model_matrix)));
+		normal_world_matrix = transpose(inverse(mat3(model_matrix)));
+		normal_view_matrix = transpose(inverse(mat3(view_matrix * model_matrix)));
 	
-	gl_Position = projection_matrix * internal_view_position;
+		gl_Position = projection_matrix * internal_view_position;
 
-    T = normalize(vec3(model_matrix * vec4(iv_tangent,   0.0)));
-    B = normalize(vec3(model_matrix * vec4(iv_bitangent, 0.0)));
-    N = normalize(vec3(model_matrix * vec4(iv_normal,    0.0)));
+		T = normalize(vec3(model_matrix * vec4(iv_tangent,   0.0)));
+		B = normalize(vec3(model_matrix * vec4(iv_bitangent, 0.0)));
+		N = normalize(vec3(model_matrix * vec4(iv_normal,    0.0)));
 	}
 }

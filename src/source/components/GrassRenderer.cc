@@ -16,11 +16,11 @@ namespace components
 		glGenBuffers(1, &instnace_buffer_);
 		glBindVertexArray(grass_vao_);
 
-		glBindBuffer(GL_ARRAY_BUFFER, grass_vbo_);
-		glBufferData(GL_ARRAY_BUFFER, mesh_->vertices_.size() * sizeof(Vertex), &mesh_->vertices_[0], GL_STATIC_DRAW);
-
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grass_ebo_);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_->indices_.size() * sizeof(unsigned int), &mesh_->indices_[0], GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, grass_vbo_);
+		glBufferData(GL_ARRAY_BUFFER, mesh_->vertices_.size() * sizeof(Vertex), &mesh_->vertices_[0], GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -31,9 +31,14 @@ namespace components
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture));
 
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+
 		GeneratePositions();
 
-		glGenBuffers(1, &instnace_buffer_);
 		glBindBuffer(GL_ARRAY_BUFFER, instnace_buffer_);
 		glBufferData(GL_ARRAY_BUFFER, grass_positions_.size() * sizeof(float), &grass_positions_[0], GL_STATIC_DRAW);
 
@@ -55,11 +60,11 @@ namespace components
 		glGenBuffers(1, &instnace_buffer_);
 		glBindVertexArray(grass_vao_);
 
-		glBindBuffer(GL_ARRAY_BUFFER, grass_vbo_);
-		glBufferData(GL_ARRAY_BUFFER, mesh_->vertices_.size() * sizeof(Vertex), &mesh_->vertices_[0], GL_STATIC_DRAW);
-
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grass_ebo_);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_->indices_.size() * sizeof(unsigned int), &mesh_->indices_[0], GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, grass_vbo_);
+		glBufferData(GL_ARRAY_BUFFER, mesh_->vertices_.size() * sizeof(Vertex), &mesh_->vertices_[0], GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -70,9 +75,14 @@ namespace components
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture));
 
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+
 		GeneratePositions();
 
-		glGenBuffers(1, &instnace_buffer_);
 		glBindBuffer(GL_ARRAY_BUFFER, instnace_buffer_);
 		glBufferData(GL_ARRAY_BUFFER, grass_positions_.size() * sizeof(float), &grass_positions_[0], GL_STATIC_DRAW);
 
@@ -89,7 +99,7 @@ namespace components
 		case components::CIRCLE:
 
 			glm::vec3 position = gameObject_.lock()->transform_->get_global_position();
-
+			grass_positions_.reserve(density_);
 			for (int i = 0; i < density_; i++)
 			{
 				float border = random::RandFloat(0.8f, 1.2f);
@@ -99,7 +109,7 @@ namespace components
 
 			break;
 		case components::RECTANGLE:
-
+			grass_positions_.reserve(density_ * density_);
 			float x_dim = std::fabs(dr_.x) - std::fabs(ul_.x);
 			float y_dim = std::fabs(dr_.z) - std::fabs(ul_.z);
 
