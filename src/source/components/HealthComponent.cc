@@ -55,4 +55,22 @@ namespace components
 		std::cout << "Destroying HealthCompoent" << std::endl;
 	}
 
+    HealthComponent::HealthComponent(json &j)
+    {
+		this->HealthComponent::HealthComponent(j["max_health"], j["health_type"]);
+		health_ = j["current_health"];
+		damage_cooldown_ = j["damage_cooldown"];
+    }
+
+    json HealthComponent::Serialize()
+    {
+        json j;
+
+		j["health_type"] = type_;
+		j["current_health"] = health_;
+		j["max_health"] = max_health_;
+		j["damage_cooldown"] = damage_cooldown_;
+
+		return j;
+    }
 }

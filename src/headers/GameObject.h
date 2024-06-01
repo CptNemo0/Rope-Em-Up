@@ -68,6 +68,8 @@ public:
 
 	// If we ever need to remove a single component from a GameObject
 	// Remember to refactor Destroys so it works
+
+	json Serialize();
 };
 
 

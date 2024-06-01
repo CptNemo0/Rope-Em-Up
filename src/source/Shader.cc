@@ -1,6 +1,7 @@
 #include "../headers/Shader.h"
 
 Shader::Shader(const string& vertex_shader_path, const string& fragment_shader_path)
+    : v_path(vertex_shader_path), f_path(fragment_shader_path)
 {
     // Zmienne z kodem zrodlowym shaderow
     string v;
@@ -103,6 +104,7 @@ Shader::Shader(const string& vertex_shader_path, const string& fragment_shader_p
 }
 
 Shader::Shader(const string &vertex_shader_path, const string &geometry_shader_path, const string &fragment_shader_path)
+    : v_path(vertex_shader_path), g_path(geometry_shader_path), f_path(fragment_shader_path)
 {
         // Zmienne z kodem zrodlowym shaderow
     string v;

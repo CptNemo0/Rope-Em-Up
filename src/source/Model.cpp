@@ -1,6 +1,7 @@
 #include "../headers/Model.h"
 
-Model::Model(string path, bool gamma) : gammaCorrection(gamma)
+Model::Model(string path, bool gamma) 
+    : gammaCorrection(gamma), path_(path)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);

@@ -22,6 +22,7 @@ class Font
 {
 public:
     Font(FT_Library &ft, const char *font_path);
+    string path_;
     std::unordered_map<char, Glyph> glyphs_;
 };
 

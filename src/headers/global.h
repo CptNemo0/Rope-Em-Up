@@ -6,6 +6,8 @@
 #include <iostream>
 #include <chrono>
 
+#include "nlohmann/json.hpp"
+
 template <typename T>
 using s_ptr = std::shared_ptr<T>;
 template <typename T>
@@ -24,6 +26,8 @@ using std::chrono::duration;
 using std::chrono::microseconds;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
+
+using json = nlohmann::json;
 
 const float kQuadVertices[] =
 {

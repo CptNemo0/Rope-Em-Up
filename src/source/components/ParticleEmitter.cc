@@ -127,3 +127,20 @@ void components::ParticleEmitter::DrawParticles()
 
     glDrawArrays(GL_POINTS, 0, particles_count);
 }
+
+components::ParticleEmitter::ParticleEmitter(json &j)
+{
+    // TODO:
+    // make camera global cus I can't really serialize a camera
+}
+
+json components::ParticleEmitter::Serialize()
+{
+    json j;
+
+    j["max_particles"] = max_particles_;
+    j["texture_path"] = texture_->path_;
+    j["shader_paths"] = {shader_->v_path, shader_->g_path, shader_->f_path};
+
+    return j;
+}

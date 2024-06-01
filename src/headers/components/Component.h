@@ -3,6 +3,10 @@
 
 #include <memory>
 
+#include "nlohmann/json.hpp"
+
+#include "../global.h"
+
 class GameObject;
 
 class Component
@@ -17,6 +21,8 @@ public:
     virtual void Start() = 0;
     virtual void Update() = 0;
     virtual void Destroy() = 0;
+
+    virtual json Serialize() { return json(); }
 };
 
 #endif // !COMPONENT_H

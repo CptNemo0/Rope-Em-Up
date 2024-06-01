@@ -2,10 +2,13 @@
 #define HUDRENDERER_H
 
 #include <memory>
+#include "nlohmann/json.hpp"
 
-#include "../global.h"
 #include "../GameObject.h"
 #include "../Texture.h"
+#include "../res/Resources.h"
+
+#include "../global.h"
 
 namespace components
 {
@@ -29,6 +32,9 @@ public:
     void Start() override;
     void Update() override;
     void Destroy() override {}
+
+    HUDRenderer(json &j);
+    json Serialize() override;
 };
 
 }; // namespace Components

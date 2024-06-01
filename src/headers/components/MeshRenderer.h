@@ -4,14 +4,16 @@
 #include "glad/glad.h"
 
 #include <memory>
+#include "nlohmann/json.hpp"
 
-#include "../global.h"
 #include "../GameObject.h"
 #include "../Model.h"
 #include "../Texture.h"
-
+#include "../res/Resources.h"
 #include "../Shader.h"
 #include "../components/Transform.h"
+
+#include "../global.h"
 
 namespace components
 {
@@ -31,6 +33,9 @@ namespace components
         void Update() override;
         void Destroy() override {}
         void Render(s_ptr<Shader> shader);
+
+        MeshRenderer(json &j);
+        json Serialize() override;
     };
 
 };

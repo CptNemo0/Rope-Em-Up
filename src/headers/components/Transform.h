@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <memory>
+#include "nlohmann/json.hpp"
 
 #include "../global.h"
 
@@ -74,6 +75,9 @@ public:
     void TeleportToPosition(glm::vec3 position);
 
     void FixOrientation();
+
+    void set_from_json(json &j);
+    json Serialize();
 };
 
 };

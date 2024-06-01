@@ -61,3 +61,25 @@ void components::TextRenderer::Update()
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+components::TextRenderer::TextRenderer(json &j)
+{
+    auto shader = res::get_shader(j["shader_paths"][0], j["shader_paths"][1]);
+    auto font = res::get_font(j["font_path"]);
+    auto text = j["text"];
+    auto color = glm::vec3(j["color"][0], j["color"][1], j["color"][2]);
+
+    this->TextRenderer::TextRenderer(shader, font, text, color);
+}
+
+json components::TextRenderer::Serialize()
+{
+    json j;
+
+    j["shader_paths"] = {shader_->v_path, shader_->f_path};
+    j["font_path"] = font_->path_;
+    j["text"] = text_;
+    j["color"] = {color_.r, color_.g, color_.b};
+
+    return j;
+}

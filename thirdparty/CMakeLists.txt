@@ -51,6 +51,11 @@ CPMAddPackage(
 	NAME freetype
 	URL https://gitlab.freedesktop.org/freetype/freetype/-/archive/master/freetype-master.zip
 )
+CPMAddPackage(
+    NAME nlohmann_json
+    GITHUB_REPOSITORY nlohmann/json
+	VERSION 3.11.3
+)
 
 set(imgui_SOURCE_DIR ${imgui_SOURCE_DIR} CACHE INTERNAL "")
 add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp

@@ -1,9 +1,14 @@
 #ifndef HEALTH_COMOPONENT_H
 #define HEALTH_COMOPONENT_H
 
+#include "nlohmann/json.hpp"
+
+#include "../res/Resources.h"
 #include "Component.h"
 #include "../GameObject.h"
 #include "../Timer.h"
+
+#include "../global.h"
 
 enum HEALTH_TYPE
 {
@@ -42,6 +47,9 @@ namespace components
 		void Start() override;
 		void Update() override;
 		void Destroy() override;
+
+		HealthComponent(json &j);
+		json Serialize() override;
 	};
 }
 

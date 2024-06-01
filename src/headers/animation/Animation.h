@@ -33,6 +33,9 @@ public:
 	Animation() = default;
 	~Animation() = default;
 
+	string animation_path_;
+	s_ptr<Model> model_;
+
 	Animation(const std::string& animationPath, s_ptr<Model> model);
 	Bone* FindBone(const std::string& name);
 

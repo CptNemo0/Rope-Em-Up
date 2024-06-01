@@ -2,10 +2,12 @@
 #define TEXTRENDERER_H
 
 #include "GLFW/glfw3.h"
+#include "nlohmann/json.hpp"
 
-#include "../global.h"
+#include "../res/Resources.h"
 #include "../Font.h"
 #include "../GameObject.h"
+#include "../global.h"
 
 namespace components
 {
@@ -26,6 +28,9 @@ public:
     void Start() override;
     void Update() override;
     void Destroy() override {}
+
+    TextRenderer(json &j);
+    json Serialize() override;
 };
 
 }

@@ -251,6 +251,7 @@ int main()
     drop::DropManager::Initialize();
     drop::SpellDropQueue::Initialize();
     ChokeList::Initialize();
+    res::init_freetype();
     
 
 #pragma endregion Initialization
@@ -536,13 +537,7 @@ int main()
 
     auto HUDText_root = GameObject::Create();
 
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft))
-    {
-        cout << "ERROR::FREETYPE: Could not init FreeType Library" << endl;
-        return -1;
-    }
-    auto maturasc_font = make_shared<Font>(ft, kFontPath.c_str());
+    auto maturasc_font = res::get_font(kFontPath);
 
     auto HUDText_object = GameObject::Create(HUDText_root);
     HUDText_object->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "TEST", glm::vec3(1.0f)));
@@ -1234,6 +1229,16 @@ int main()
         {
             GrassShader->SetFloat("offset", offset);
         }
+        ImGui::End();
+
+        ImGui::Begin("Serialize");
+
+        if (ImGui::Button("Serialize"))
+        {
+            json j = room->room_object->Serialize();
+            cout << j.dump() << endl;
+        }
+
         ImGui::End();
 
         ImGui::Render();

@@ -1,6 +1,7 @@
 #include "../headers/Font.h"
 
 Font::Font(FT_Library &ft, const char *font_path)
+    : path_(font_path)
 {
     FT_Face face;
     if (FT_New_Face(ft, font_path, 0, &face))

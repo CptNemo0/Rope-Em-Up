@@ -1,10 +1,14 @@
 #ifndef HP_DROP_COMPONENT_H
 #define HP_DROP_COMPONENT_H
 
+#include "nlohmann/json.hpp"
+
 #include "../components/Component.h"
 #include "../drop/DropManager.h"
 #include "../drop/Drop.h"
 #include "../drop/DropArgs.h"
+
+#include "../global.h"
 
 namespace components
 {
@@ -13,7 +17,7 @@ namespace components
 	public:
 		float value_;
 
-		HpDropComponent(float value) : value_(value) {}
+		HpDropComponent(float value);
 
 		void Start() override;
 
@@ -21,6 +25,8 @@ namespace components
 
 		void Destroy() override;
 
+		HpDropComponent(json &j);
+		json Serialize() override;
 	};
 }
 

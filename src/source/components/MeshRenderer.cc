@@ -30,3 +30,20 @@ void components::MeshRenderer::Render(s_ptr<Shader> shader)
 	shader->SetMatrix4("model_matrix", transform_->get_model_matrix());
 	model_->Draw(shader);
 }
+
+components::MeshRenderer::MeshRenderer(json &j)
+{
+	auto model = res::get_model(j["model_path"]);
+	auto shader = res::get_shader(j["shader_paths"][0], j["shader_paths"][1]);
+	this->MeshRenderer::MeshRenderer(model, shader);
+}
+
+json components::MeshRenderer::Serialize()
+{
+    json j;
+
+	j["model_path"] = model_->path_;
+	j["shader_paths"] = {shader_->v_path, shader_->f_path};
+
+	return j;
+}

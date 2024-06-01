@@ -188,3 +188,29 @@ void components::Transform::FixOrientation()
     float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
     set_rotation(glm::vec3(0.0f, angle, 0.0f));
 }
+
+void components::Transform::set_from_json(json &j)
+{
+    position_ = glm::vec3(j["position"][0], j["position"][1], j["position"][2]);
+    rotation_ = glm::vec3(j["rotation"][0], j["rotation"][1], j["rotation"][2]);
+    scale_ = glm::vec3(j["scale"][0], j["scale"][1], j["scale"][2]);
+
+    previous_position_ = glm::vec3(j["previous_position"][0], j["previous_position"][1], j["previous_position"][2]);
+    predicted_position_ = glm::vec3(j["predicted_position"][0], j["predicted_position"][1], j["predicted_position"][2]);
+
+    UpdateSelfAndChildren();
+}
+
+json components::Transform::Serialize()
+{
+    json j;
+
+    j["position"] = { position_.x, position_.y, position_.z };
+    j["rotation"] = { rotation_.x, rotation_.y, rotation_.z };
+    j["scale"] = { scale_.x, scale_.y, scale_.z };
+
+    j["previous_position"] = { previous_position_.x, previous_position_.y, previous_position_.z };
+    j["predicted_position"] = { predicted_position_.x, predicted_position_.y, predicted_position_.z };
+
+    return j;
+}

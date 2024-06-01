@@ -89,3 +89,27 @@ void GameObject::Disable()
 		child->game_object_->Disable();
 	}
 }
+
+json GameObject::Serialize()
+{
+    json j;
+
+	j["transform"] = transform_->Serialize();
+	
+	for (auto &component : components_)
+	{
+		json j_comp;
+		j_comp["type"] = component.first;
+		j_comp["data"] = component.second->Serialize();
+
+		j["components"].push_back(j_comp);
+	}
+
+	for (auto &child : transform_->children_)
+	{
+		json j_child = child->game_object_->Serialize();
+		j["children"].push_back(j_child);
+	}
+
+	return j;
+}

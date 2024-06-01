@@ -27,6 +27,7 @@ public:
 		std::vector <Texture> textures_loaded_; //na razie nie robi�am oddzielnych materia��w bo tak by�o w sumie szybciej i nie wiem czy klasa Model jest nam rzeczywi�cie potrzebna D:
 		string directory_;
 		bool gammaCorrection;
+		string path_;
 
 		Model(string path, bool gamma = false);
 

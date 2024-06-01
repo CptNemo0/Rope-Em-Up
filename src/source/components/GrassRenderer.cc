@@ -3,6 +3,7 @@
 namespace components
 {
 	GrassRenderer::GrassRenderer(glm::vec3 ul, glm::vec3 dr, std::shared_ptr<Model> model, float density)
+		: model_(model)
 	{
 		mesh_ = model->meshes_[0];
 		patch_type_ = RECTANGLE;
@@ -48,6 +49,7 @@ namespace components
 		glBindVertexArray(0);
 	}
 	GrassRenderer::GrassRenderer(float radius, std::shared_ptr<Model> model, float density)
+		: model_(model)
 	{
 		mesh_ = model->meshes_[0];
 		patch_type_ = CIRCLE;
@@ -159,4 +161,48 @@ namespace components
 	void GrassRenderer::Destroy()
 	{
 	}
+
+    GrassRenderer::GrassRenderer(json &j)
+    {
+		GRASS_PATCH_TYPE patch_type = j["patch_type"];
+		int density = j["density"];
+		string model_path = j["model_path"];
+		
+		switch (patch_type)
+		{
+			case GRASS_PATCH_TYPE::CIRCLE:
+			{
+				this->GrassRenderer::GrassRenderer(j["radius"], res::get_model(model_path), density);
+				break;
+			}
+			case GRASS_PATCH_TYPE::RECTANGLE:
+			{
+				auto ul = glm::vec3(j["ul"][0], j["ul"][1], j["ul"][2]);
+				auto dr = glm::vec3(j["dr"][0], j["dr"][1], j["dr"][2]);
+				this->GrassRenderer::GrassRenderer(ul, dr, res::get_model(model_path), density);
+				break;
+			}
+		}
+    }
+
+    json GrassRenderer::Serialize()
+    {
+        json j;
+		j["model_path"] = model_->path_;
+		j["density"] = density_;
+		j["patch_type"] = patch_type_;
+		
+		switch (patch_type_)
+		{
+			case GRASS_PATCH_TYPE::CIRCLE:
+				j["radius"] = radius_;
+				break;
+			case GRASS_PATCH_TYPE::RECTANGLE:
+				j["ul"] = { ul_.x, ul_.y, ul_.z };
+				j["dr"] = { dr_.x, dr_.y, dr_.z };
+				break;
+		}
+		
+		return j;
+    }
 }

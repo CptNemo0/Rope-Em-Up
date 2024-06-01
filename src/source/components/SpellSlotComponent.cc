@@ -43,3 +43,18 @@ void components::SpellSlotComponent::Destroy()
 		drop::DropManager::i_->AddSpellDrop(drop);
 	}
 }
+
+components::SpellSlotComponent::SpellSlotComponent(json &j)
+{
+	this->SpellSlotComponent::SpellSlotComponent();
+	type_ = j["spell_type"];
+}
+
+json components::SpellSlotComponent::Serialize()
+{
+    json j;
+
+	j["spell_type"] = type_;
+
+	return j;
+}

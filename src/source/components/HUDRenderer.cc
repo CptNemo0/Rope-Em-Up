@@ -31,3 +31,20 @@ void components::HUDRenderer::Update()
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
+
+components::HUDRenderer::HUDRenderer(json &j)
+{
+    auto texture = res::get_texture(j["texture_path"]);
+    auto shader = res::get_shader(j["shader_paths"][0], j["shader_paths"][1]);
+    this->HUDRenderer::HUDRenderer(texture, shader);
+}
+
+json components::HUDRenderer::Serialize()
+{
+    json j;
+
+    j["texture_path"] = texture_->path_;
+    j["shader_paths"] = {shader_->v_path, shader_->f_path};
+
+    return j;
+}

@@ -2,6 +2,7 @@
 
 
 tmp::Texture::Texture(const string& path)
+    : path_(path)
 {
     id_ = 0;
     glGenTextures(1, &id_);

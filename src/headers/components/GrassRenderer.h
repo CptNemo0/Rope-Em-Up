@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include <vector>
+#include "nlohmann/json.hpp"
 
 #include "Component.h"
 #include "../Mesh.h"
@@ -13,6 +14,8 @@
 #include "../Random.h"
 #include "../GameObject.h"
 #include "Transform.h"
+#include "../res/Resources.h"
+#include "../global.h"
 
 namespace components
 {
@@ -31,6 +34,7 @@ namespace components
 		unsigned int instnace_buffer_;
 		float density_;
 
+		s_ptr<Model> model_;
 		std::shared_ptr<Mesh> mesh_;
 
 		std::vector<float> grass_positions_;
@@ -52,6 +56,9 @@ namespace components
 		void Start() override;
 		void Update() override;
 		void Destroy() override;
+
+		GrassRenderer(json &j);
+		json Serialize() override;
 	};
 }
 

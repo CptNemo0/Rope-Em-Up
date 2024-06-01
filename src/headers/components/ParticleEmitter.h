@@ -4,8 +4,9 @@
 #include <chrono>
 #include <deque>
 #include <unordered_set>
+#include "nlohmann/json.hpp"
 
-#include "../global.h"
+#include "../res/Resources.h"
 #include "../GameObject.h"
 #include "../Texture.h"
 #include "../Timer.h"
@@ -13,6 +14,8 @@
 #include "../ParticleEmitterManager.h"
 #include "../Camera.h"
 #include "../Random.h"
+
+#include "../global.h"
 
 struct Particle
 {
@@ -72,6 +75,9 @@ public:
     void UpdateParticles(float delta_time);
     void EmitParticles();
     void DrawParticles();
+
+    ParticleEmitter(json &j);
+    json Serialize() override;
 };
 
 } // namespace components

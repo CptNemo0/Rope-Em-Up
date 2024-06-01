@@ -23,6 +23,8 @@ public:
     Shader() = default;
     Shader(const string& vertex_shader_path, const string& fragment_shader_path);
     Shader(const string& vertex_shader_path, const string& geometry_shader_path, const string& fragment_shader_path);
+
+    string v_path, f_path, g_path;
     
     ~Shader();
 

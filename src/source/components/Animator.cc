@@ -1,9 +1,9 @@
 #include "./headers/components/Animator.h"
 
-components::Animator::Animator(anim::Animation* currentAnimation)
+components::Animator::Animator(s_ptr<anim::Animation> animation)
 {
     m_CurrentTime = 0.0;
-    m_CurrentAnimation = currentAnimation;
+    m_CurrentAnimation = animation;
 
     m_FinalBoneMatrices.reserve(MAX_BONES);
 
@@ -24,7 +24,7 @@ void components::Animator::UpdateAnimation(float dt)
 	}
 }
 
-void components::Animator::PlayAnimation(anim::Animation* animation)
+void components::Animator::PlayAnimation(s_ptr<anim::Animation> animation)
 {
 	m_CurrentAnimation = animation;
 	m_CurrentTime = 0.0f;
@@ -55,4 +55,19 @@ void components::Animator::CalculateBoneTransform(const anim::AssimpNodeData* no
 
 	for (int i = 0; i < node->childrenCount; i++)
 		CalculateBoneTransform(&node->children[i], globalTransformation);
+}
+
+components::Animator::Animator(json &j)
+{
+	auto animation = make_shared<anim::Animation>(j["animation_path"], res::get_model(j["model_path"]));
+	this->Animator::Animator(animation);
+}
+
+json components::Animator::Serialize()
+{
+	json j;
+	j["animation_path"] = m_CurrentAnimation->animation_path_;
+	j["model_path"] = m_CurrentAnimation->model_->path_;
+	
+	return j;
 }
