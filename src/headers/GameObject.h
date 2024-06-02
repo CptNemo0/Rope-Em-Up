@@ -36,11 +36,10 @@ public:
 	void Enable();
 	void Disable();
 
-	template <typename T>
-	void AddComponent(s_ptr<T> component)
+	void AddComponent(s_ptr<Component> component)
 	{
 		dirty_ = true;
-		components_[typeid(T).name()] = component;
+		components_[typeid(*component).name()] = component;
 		component->gameObject_ = shared_from_this();
 	}
 
@@ -70,6 +69,8 @@ public:
 	// Remember to refactor Destroys so it works
 
 	json Serialize();
+
+	static s_ptr<GameObject> Deserialize(json &j);
 };
 
 

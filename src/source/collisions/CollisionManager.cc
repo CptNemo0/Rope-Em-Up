@@ -16,10 +16,17 @@ void collisions::CollisionManager::AddCollider(s_ptr<components::Collider> colli
     colliders_.push_back(collider);
 }
 
-s_ptr<components::Collider> collisions::CollisionManager::CreateCollider(int layer, int precision, s_ptr<Mesh> mesh, s_ptr<components::Transform> transform)
+s_ptr<components::Collider> collisions::CollisionManager::CreateCollider(int layer, int precision, s_ptr<Model> model, int mesh_index, s_ptr<components::Transform> transform)
 {
     assert(layer > -1 && layer < 32);
-    auto return_value = make_shared<components::Collider>(layer, precision, mesh, transform);
+    auto return_value = make_shared<components::Collider>(layer, precision, model, mesh_index, transform);
+    AddCollider(return_value);
+    return return_value;
+}
+
+s_ptr<components::Collider> collisions::CollisionManager::CreateCollider(json &j, s_ptr<GameObject> go)
+{
+    auto return_value = make_shared<components::Collider>(j, go);
     AddCollider(return_value);
     return return_value;
 }

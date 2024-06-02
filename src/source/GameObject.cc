@@ -113,3 +113,30 @@ json GameObject::Serialize()
 
 	return j;
 }
+
+s_ptr<GameObject> GameObject::Deserialize(json &j)
+{
+    auto go = GameObject::Create();
+
+	go->transform_->set_from_json(j["transform"]);
+
+	if (j.contains("components"))
+	{
+		for (auto &j_comp : j["components"])
+		{
+			auto comp = Component::Deserialize(j_comp, go);
+			go->AddComponent(comp);
+		}
+	}
+
+	if (j.contains("children"))
+	{
+		for (auto &j_child : j["children"])
+		{
+			auto child = GameObject::Deserialize(j_child);
+			go->transform_->AddChild(child->transform_);
+		}
+	}
+
+	return go;
+}

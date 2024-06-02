@@ -2,6 +2,7 @@
 #define COMPONENT_H
 
 #include <memory>
+#include <functional>
 
 #include "nlohmann/json.hpp"
 
@@ -11,6 +12,8 @@ class GameObject;
 
 class Component
 {
+private:
+    static std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> component_factory;
 protected:
     Component() = default;
 public:
@@ -22,6 +25,7 @@ public:
     virtual void Update() = 0;
     virtual void Destroy() = 0;
 
+    static s_ptr<Component> Deserialize(json &j, s_ptr<GameObject> go);
     virtual json Serialize() { return json(); }
 };
 

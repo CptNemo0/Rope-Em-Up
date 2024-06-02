@@ -1,12 +1,15 @@
 #ifndef PLAYERCONTROLLER_H
 #define PLAYERCONTROLLER_H
 
-#include "../global.h"
+#include "nlohmann/json.hpp"
+
 #include "../GameObject.h"
 #include "../input/InputObserver.h"
 #include "../input/InputManager.h"
 #include "../physics/PBD.h"
 #include "../Timer.h"
+
+#include "../global.h"
 
 namespace components
 {
@@ -29,6 +32,9 @@ public:
     void Destroy() override;
 
     void OnAction(Action action, input::State state) override;
+
+    PlayerController(json &j);
+    json Serialize() override;
 };
 
 } // namespace Components

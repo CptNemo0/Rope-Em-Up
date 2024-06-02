@@ -692,7 +692,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
         s_ptr<GameObject> lamp = GameObject::Create(room.lamps);
         lamp->transform_->set_position(pos);
         lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
-        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps_c[0]->meshes_[0], lamp->transform_));
+        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps_c[0], 0, lamp->transform_));
     }
 
     // generate clutter
@@ -703,7 +703,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
         clutter->transform_->set_position(room.clutter_positions[i]);
         clutter->transform_->set_scale(glm::vec3(1.0f, 0.5f, 1.0f));
         clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
-        clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::CLUTTER, gPRECISION, rm->clutter_c[room.clutter_idx[i]]->meshes_[0], clutter->transform_));
+        clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::CLUTTER, gPRECISION, rm->clutter_c[room.clutter_idx[i]], 0, clutter->transform_));
         clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
     }
 
@@ -713,7 +713,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
         auto enemy = GameObject::Create(room.enemies);
         enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
         enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
-        enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE , gPRECISION, rm->enemies[room.enemies_idx[i]]->meshes_[0], enemy->transform_));
+        enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE , gPRECISION, rm->enemies[room.enemies_idx[i]], 0, enemy->transform_));
         enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
         enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
         enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));

@@ -71,3 +71,18 @@ void components::PlayerController::OnAction(Action action, input::State state)
         }
     }
 }
+
+components::PlayerController::PlayerController(json &j)
+{
+    int gamepadID = j["gamepad_id"];
+    this->PlayerController::PlayerController(gamepadID);
+}
+
+json components::PlayerController::Serialize()
+{
+    json j;
+
+    j["gamepad_id"] = gamepadID_;
+
+    return j;
+}

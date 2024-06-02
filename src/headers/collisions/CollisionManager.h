@@ -6,13 +6,17 @@
 #include <chrono>
 #include <ctime>
 #include <format>
+#include "nlohmann/json.hpp"
 
 #include "Collider.h"
 #include "Collisions.h"
 #include "../GameObject.h"
-#include "../Mesh.h"
+#include "../Model.h"
 #include "../physics/PBD.h"
 #include "../components/Transform.h"
+#include "../res/Resources.h"
+
+#include "../global.h"
 
 class components::Collider;
 
@@ -60,7 +64,8 @@ namespace collisions
 
         std::vector<s_ptr<components::Collider>> colliders_;
 
-        s_ptr<components::Collider> CreateCollider(int layer, int precision, s_ptr<Mesh> mesh, s_ptr<components::Transform> transform);
+        s_ptr<components::Collider> CreateCollider(int layer, int precision, s_ptr<Model> model, int mesh_index, s_ptr<components::Transform> transform);
+        s_ptr<components::Collider> CreateCollider(json &j, s_ptr<GameObject> go);
         void RemoveCollider(s_ptr<components::Collider> collider);
     
         void CollisionCheckPBD(std::vector<pbd::Contact>& contacts);

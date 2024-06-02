@@ -9,6 +9,7 @@
 #include <memory>
 #include <ratio>
 #include <stdlib.h>
+#include <fstream>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
@@ -458,7 +459,7 @@ int main()
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
-    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model->meshes_[0], player_1->transform_));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model, 0, player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
@@ -466,7 +467,7 @@ int main()
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
-    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model->meshes_[0], player_2->transform_));
+    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model, 0, player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
@@ -1233,10 +1234,30 @@ int main()
 
         ImGui::Begin("Serialize");
 
+        static char filename_buf[32] = "save.json";
+        ImGui::InputText("File", filename_buf, 32);
+
         if (ImGui::Button("Serialize"))
         {
             json j = room->room_object->Serialize();
-            cout << j.dump() << endl;
+            
+            std::ofstream save_file;
+            save_file.open(filename_buf);
+            save_file << j.dump();
+            save_file.close();
+        }
+
+        if (ImGui::Button("Deserialize"))
+        {
+            std::ifstream save_file;
+            save_file.open(filename_buf);
+            json j = json::parse(save_file);
+            save_file.close();
+
+            room->room_object->Destroy();
+            room->room_object = nullptr;
+            room->room_object = GameObject::Deserialize(j);
+            scene_root->transform_->AddChild(room->room_object->transform_);
         }
 
         ImGui::End();

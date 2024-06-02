@@ -17,6 +17,19 @@ namespace components
 		drop::ExpDrop drop = drop::ExpDrop(args);
 		drop::DropManager::i_->AddExpDrop(drop);
 	}
+
+    ExpDropComponent::ExpDropComponent(json &j)
+    {
+		float value = j["value"];
+		this->ExpDropComponent::ExpDropComponent(value);
+    }
+
+    json ExpDropComponent::Serialize()
+    {
+        json j;
+
+		j["value"] = value_;
+
+		return j;
+    }
 }
-
-

@@ -1,10 +1,13 @@
 #ifndef EXP_DROP_COMPONENT_H
 #define EXP_DROP_COMPONENT_H
 
+#include "nlohmann/json.hpp"
+
 #include "../components/Component.h"
 #include "../drop/DropManager.h"
 #include "../drop/Drop.h"
 #include "../drop/DropArgs.h"
+#include "../global.h"
 
 namespace components
 {
@@ -20,6 +23,9 @@ namespace components
 		void Start() override;
 		void Update() override;
 		void Destroy() override;
+
+		ExpDropComponent(json &j);
+		json Serialize() override;
 	};
 }
 

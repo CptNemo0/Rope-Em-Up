@@ -29,7 +29,7 @@ void Rope::CreateSegments(glm::vec3 start, glm::vec3 end, std::shared_ptr<GameOb
 		rope_segment->transform_->set_scale(glm::vec3(1.3f, 1.3f, 1.3f));
 		rope_segment->transform_->TeleportToPosition(start + player_dir * kDistance * (float)i);
 		rope_segment->AddComponent(make_shared<components::MeshRenderer>(model, shader));
-		rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::ROPE, gPRECISION, model->meshes_[0], rope_segment->transform_));
+		rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::ROPE, gPRECISION, model, 0, rope_segment->transform_));
 		rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(segment_mass_, segment_drag_, rope_segment->transform_));
 
 		if (i > 0)
@@ -122,7 +122,7 @@ void Rope::AddSegment(std::shared_ptr<GameObject> scene_root)
 	rope_segment->transform_->set_scale(glm::vec3(1.3f, 1.3f, 1.3f));
 	rope_segment->transform_->TeleportToPosition(new_position);
 	rope_segment->AddComponent(make_shared<components::MeshRenderer>(model_, shader_));
-	rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, model_->meshes_[0], rope_segment->transform_));
+	rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, model_, 0, rope_segment->transform_));
 	rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(segment_mass_, segment_drag_, rope_segment->transform_));
 	rope_segments_.push_back(rope_segment);
 
