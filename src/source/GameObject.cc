@@ -56,14 +56,27 @@ void GameObject::StartNewComponents()
 	}
 }
 
-void GameObject::Destroy()
+void GameObject::PropagateDestroy()
 {
 	for (auto& component : components_)
 	{
 		component.second->Destroy();
 	}
+	for (auto& child : transform_->children_)
+	{
+		child->game_object_->PropagateDestroy();
+	}
+	transform_->children_.clear();
 	transform_->game_object_ = nullptr;
-	transform_->parent_->RemoveChild(transform_);
+}
+
+void GameObject::Destroy()
+{
+	PropagateDestroy();
+	if (transform_->parent_)
+	{
+		transform_->parent_->RemoveChild(transform_);
+	}
 }
 
 void GameObject::Enable()

@@ -21,6 +21,10 @@ private:
 	std::unordered_map<string, s_ptr<Component>> components_;
 	bool dirty_ = true;
 
+	void Update();
+	void StartNewComponents();
+	void PropagateDestroy();
+
 public:
 	GameObject();
 	~GameObject() = default;
@@ -29,18 +33,21 @@ public:
 	static s_ptr<GameObject> Create();
 	static s_ptr<GameObject> Create(s_ptr<GameObject> parent);
 
-	void Update();
 	void PropagateUpdate();
-	void StartNewComponents();
+
+	// Deep destroy of the gameobject and its children
 	void Destroy();
 	void Enable();
 	void Disable();
 
 	void AddComponent(s_ptr<Component> component)
 	{
-		dirty_ = true;
-		components_[typeid(*component).name()] = component;
-		component->gameObject_ = shared_from_this();
+		if (component != nullptr)
+		{
+			dirty_ = true;
+			components_[typeid(*component).name()] = component;
+			component->gameObject_ = shared_from_this();
+		}
 	}
 
 	template <typename T>
