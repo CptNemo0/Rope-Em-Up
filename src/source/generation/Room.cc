@@ -63,3 +63,16 @@ generation::Room::Room(glm::ivec2 position, std::shared_ptr<GameObject> root)
     down_gate_pos = glm::vec3(0.0f);
     left_gate_pos = glm::vec3(0.0f);
 }
+
+void generation::Room::Destroy()
+{
+    room_object->Destroy();
+    room_object = nullptr;
+    enemies = nullptr;
+    clutter = nullptr;
+    lamps = nullptr;
+    walls = nullptr;
+    gates = nullptr;
+    floors = nullptr;
+    drops = nullptr;
+}

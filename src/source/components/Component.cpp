@@ -16,7 +16,7 @@
 #include "../../headers/components/TextRenderer.h"
 #include "../../headers/collisions/Collider.h"
 #include "../../headers/collisions/CollisionManager.h"
-
+#include "../../headers/physics/PBD.h"
 
 std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Component::component_factory = 
 {
@@ -75,10 +75,18 @@ std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Comp
     {   // Collider
         typeid(components::Collider).name(), 
         [](json &j, s_ptr<GameObject> go) { return collisions::CollisionManager::i_->CreateCollider(j, go); } 
+    },
+    {   // PBDParticle
+        typeid(components::PBDParticle).name(), 
+        [](json &j, s_ptr<GameObject> go) { return pbd::PBDManager::i_->CreateParticle(j, go); } 
     }
 };
 
 s_ptr<Component> Component::Deserialize(json &j, s_ptr<GameObject> go)
 {
-    return component_factory[j["type"]](j["data"], go);
+    if (component_factory.contains(j["type"]))
+    {
+        return component_factory[j["type"]](j["data"], go);
+    }
+    return nullptr;
 }

@@ -100,6 +100,16 @@ void components::PBDParticle::Destroy()
 	pbd::PBDManager::i_->RemoveConstraint(this_shared);
 }
 
+json components::PBDParticle::Serialize()
+{
+	json j;
+
+	j["mass"] = mass_;
+	j["damping_factor"] = damping_factor_;
+
+	return j;
+}
+
 void pbd::BasicGenerator::GenerateForce(s_ptr<components::PBDParticle> particle)
 {
 	particle->AddForce(direction_ * magnitude_);
@@ -387,6 +397,17 @@ float pbd::PBDManager::GetDistanceToClosestWall(s_ptr<components::PBDParticle> p
 
 s_ptr<components::PBDParticle> pbd::PBDManager::CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform)
 {
+	auto p = make_shared<components::PBDParticle>(mass, damping_factor, transform);
+	particles_.push_back(p);
+	
+	return p;
+}
+
+s_ptr<components::PBDParticle> pbd::PBDManager::CreateParticle(json &j, s_ptr<GameObject> go)
+{
+	float mass = j["mass"];
+	float damping_factor = j["damping_factor"];
+	auto transform = go->transform_;
 	auto p = make_shared<components::PBDParticle>(mass, damping_factor, transform);
 	particles_.push_back(p);
 	

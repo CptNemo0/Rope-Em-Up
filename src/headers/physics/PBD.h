@@ -7,10 +7,12 @@
 #include <deque>
 
 #include "glm/glm.hpp"
+#include "nlohmann/json.hpp"
 
 #include "../components/Component.h"
 #include "../GameObject.h"
 #include "../components/Transform.h"
+#include "../global.h"
 
 namespace components
 {
@@ -49,6 +51,8 @@ namespace components
 		void Start() override;
 		void Update() override;
 		void Destroy() override;
+
+		json Serialize() override;
 
 		~PBDParticle();
 	};
@@ -215,6 +219,7 @@ namespace pbd
 		float GetDistanceToClosestWall(s_ptr<components::PBDParticle> p);
 
 		s_ptr<components::PBDParticle> CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform);
+		s_ptr<components::PBDParticle> CreateParticle(json &j, s_ptr<GameObject> go);
 		void CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pbd::BasicGenerator> g);
 		s_ptr<pbd::RopeConstraint> CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
 		void ClearContacts();

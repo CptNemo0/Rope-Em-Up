@@ -1254,8 +1254,7 @@ int main()
             json j = json::parse(save_file);
             save_file.close();
 
-            room->room_object->Destroy();
-            room->room_object = nullptr;
+            room->Destroy();
             room->room_object = GameObject::Deserialize(j);
             scene_root->transform_->AddChild(room->room_object->transform_);
         }

@@ -76,6 +76,8 @@ namespace generation
         Room(glm::ivec2 position);
         Room(glm::ivec2 position, std::shared_ptr<GameObject> root);
 
+        void Destroy();
+
     };
 }
 
