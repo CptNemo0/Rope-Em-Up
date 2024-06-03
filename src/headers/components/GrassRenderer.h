@@ -25,7 +25,7 @@ namespace components
 		RECTANGLE
 	};
 
-	class GrassRenderer : public Component
+	class GrassRenderer : public Component, public std::enable_shared_from_this<GrassRenderer>
 	{
 	public:
 		unsigned int grass_vao_;

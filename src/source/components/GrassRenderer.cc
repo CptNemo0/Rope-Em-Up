@@ -1,5 +1,7 @@
 #include "../../headers/components/GrassRenderer.h"
 
+#include "../../headers/GrassRendererManager.h"
+
 namespace components
 {
 	GrassRenderer::GrassRenderer(glm::vec3 ul, glm::vec3 dr, std::shared_ptr<Model> model, float density)
@@ -160,6 +162,7 @@ namespace components
 	}
 	void GrassRenderer::Destroy()
 	{
+		GrassRendererManager::i_->RemoveRenderer(shared_from_this());
 	}
 
     GrassRenderer::GrassRenderer(json &j)
