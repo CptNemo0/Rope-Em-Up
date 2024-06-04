@@ -153,14 +153,44 @@ void generation::RoomLayoutGenerator::GenerateGates()
 
 void generation::RoomLayoutGenerator::AddRoom(glm::ivec2 position, std::shared_ptr<GameObject> root)
 {
-    int rooms_size_before = rooms.size();
-    rooms.insert(std::make_pair(position, Room(position, root)));
-    int rooms_size_after = rooms.size();
-    if (rooms_size_before != rooms_size_after)
+    if (!rooms.contains(position))
     {
+        Room room = Room(position, root);
+        rooms.insert(std::make_pair(position, room));
         cout << "position.x: " << position.x << " position.y: " << position.y << endl;
-        rooms_ordered.push_back(Room(position));
+        rooms_ordered.push_back(room);
     }
+}
+
+void generation::RoomLayoutGenerator::Destroy()
+{
+    for (auto &[position, room] : rooms)
+    {
+        room.Destroy();
+    }
+    rooms.clear();
+    rooms_ordered.clear();
+}
+
+generation::RoomLayoutGenerator::RoomLayoutGenerator(json &j, std::shared_ptr<GameObject> root)
+{
+    for (auto &j_room : j["rooms"])
+    {
+        glm::ivec2 position = {j_room["position"][0], j_room["position"][1]};
+        rooms.insert(std::make_pair(position, Room(j_room, root)));
+    }
+}
+
+json generation::RoomLayoutGenerator::Serialize()
+{
+    json j;
+
+    for (auto &[position, room] : rooms)
+    {
+        j["rooms"].push_back(room.Serialize());
+    }
+
+    return j;
 }
 
 void generation::RoomGenerator::IncreaseSize()

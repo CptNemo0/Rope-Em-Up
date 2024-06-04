@@ -113,6 +113,7 @@ json GameObject::Serialize()
 	{
 		json j_comp;
 		j_comp["type"] = component.first;
+		j_comp["active"] = component.second->active_;
 		j_comp["data"] = component.second->Serialize();
 
 		j["components"].push_back(j_comp);
@@ -138,6 +139,7 @@ s_ptr<GameObject> GameObject::Deserialize(json &j)
 		for (auto &j_comp : j["components"])
 		{
 			auto comp = Component::Deserialize(j_comp, go);
+			comp->active_ = j_comp["active"];
 			go->AddComponent(comp);
 		}
 	}

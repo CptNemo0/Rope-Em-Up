@@ -6,6 +6,7 @@
 #include "glm/gtx/hash.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/rotate_vector.hpp"
+#include "nlohmann/json.hpp"
 
 #include <map>
 #include <deque>
@@ -17,7 +18,6 @@
 #include <vector>
 #include <set>
 
-#include "../global.h"
 #include "../Random.h"
 #include "unordered_set"
 #include "../Model.h"
@@ -37,6 +37,8 @@
 #include "../physics/Rope.h"
 #include "Room.h"
 #include "../GrassRendererManager.h"
+#include "../global.h"
+
 namespace generation
 {
     const float kModuleSize = 16.0f;
@@ -155,6 +157,11 @@ namespace generation
         void GenerateRooms(const RoomLayoutGenerationSettings& settings, std::shared_ptr<GameObject> root);
         void GenerateGates();
         void AddRoom(glm::ivec2 position, std::shared_ptr<GameObject> root);
+
+        void Destroy();
+
+        RoomLayoutGenerator(json &j, std::shared_ptr<GameObject> root);
+        json Serialize();
     };
 
     

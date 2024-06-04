@@ -1,9 +1,11 @@
 #ifndef ROOM_H
 #define ROOM_H
 
-#include "../global.h"
-#include "../GameObject.h"
 #include "glm/glm.hpp"
+#include "nlohmann/json.hpp"
+
+#include "../GameObject.h"
+#include "../global.h"
 
 namespace generation
 {
@@ -78,6 +80,8 @@ namespace generation
 
         void Destroy();
 
+        Room(json j, s_ptr<GameObject> root);
+        json Serialize();
     };
 }
 

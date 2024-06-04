@@ -600,7 +600,7 @@ int main()
     SSAOShader->SetFloat("bias", 0.01);
     ssao_buffer.SetKernel(SSAOShader);
 
-    cubemap->LoadHDRimg(window, *activeCamera);
+    // cubemap->LoadHDRimg(window, *activeCamera);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     /*int scrWidth, scrHeight;
@@ -1239,7 +1239,9 @@ int main()
 
         if (ImGui::Button("Serialize"))
         {
-            json j = room->room_object->Serialize();
+            json j = rlg.Serialize();
+
+            j["current_room"] = { room->position.x, room->position.y };
             
             std::ofstream save_file;
             save_file.open(filename_buf);
@@ -1254,9 +1256,10 @@ int main()
             json j = json::parse(save_file);
             save_file.close();
 
-            room->Destroy();
-            room->room_object = GameObject::Deserialize(j);
-            scene_root->transform_->AddChild(room->room_object->transform_);
+            rlg.Destroy();
+            rlg = generation::RoomLayoutGenerator(j, room_root);
+            glm::ivec2 current_room = { j["current_room"][0], j["current_room"][1] };
+            room = &rlg.rooms[current_room];
         }
 
         ImGui::End();
