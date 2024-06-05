@@ -3,6 +3,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include <unordered_map>
+
 #include "../res/Resources.h"
 #include "Component.h"
 #include "../drop/DropManager.h"
@@ -11,6 +13,7 @@
 #include "../drop/SpellDropQueue.h"
 
 #include "../global.h"
+
 
 namespace components
 {
@@ -25,6 +28,8 @@ namespace components
 	public:
 
 		SPELLS type_;
+
+		std::unordered_map<SPELLS, int> spell_levels;
 
 		SpellSlotComponent(SSC_INIT init);
 		SpellSlotComponent() = default;

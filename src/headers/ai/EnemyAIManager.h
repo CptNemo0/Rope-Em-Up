@@ -79,7 +79,7 @@ namespace ai
 			assert(player_1 != player_2);
 
 			player_1_ = player_1;
-			player_2_ = player_1;
+			player_2_ = player_2;
 
 			players_set = true;
 		}

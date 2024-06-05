@@ -39,6 +39,9 @@ void HealthManager::RemoveHealthComponent(std::shared_ptr<components::HealthComp
 
 void HealthManager::DeathUpdate()
 {
+	something_died_ = false;
+	where_ = glm::vec3(0.0f);
+	what_ = OTHER;
 	int i = 0;
 	for (auto& h : health_components_)
 	{
@@ -51,6 +54,10 @@ void HealthManager::DeathUpdate()
 		{
 			if (h->health_ <= 0.0)
 			{
+				something_died_ = true;
+				where_ = h->gameObject_.lock()->transform_->get_position();
+				what_ = h->type_;
+
 				h->gameObject_.lock()->Destroy();
 			}
 		}

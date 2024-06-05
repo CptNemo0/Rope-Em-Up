@@ -139,9 +139,14 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 	{
 		machine->current_state_ = IdleState::Instance();
 	}
-	cout << "ATTACK!!\n";
-	assert(machine->current_state_ && PatrolState::Instance());
-	machine->current_state_ = PatrolState::Instance();
+	else
+	{
+		cout << "ATTACK!!\n";
+		machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
+		assert(machine->current_state_ && PatrolState::Instance());
+		machine->current_state_ = PatrolState::Instance();
+	}
+	
 }
 
 ai::PursuitState* ai::PursuitState::Instance()

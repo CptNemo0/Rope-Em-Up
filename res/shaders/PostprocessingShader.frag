@@ -5,7 +5,9 @@ out vec4 FragColor;
 
 uniform sampler2D color_texture;
 uniform sampler2D bloom_texture;
+
 uniform bool bloom;
+uniform bool slowed_time;
 
 uniform vec3 cbg;
 
@@ -76,6 +78,7 @@ vec3 bloor_bloom()
         }
     }
     result *= 0.00390265;
+    result *= (0.27 * (sin(if_time * 2.0) + 1.0));
     return result;
 }
 
@@ -97,5 +100,6 @@ void main()
     color = apply_vignete(color);
     color = vec3(clamp(color, 0.0, 1.0));
     color = apply_vignette(color, transition_vignette_amount);
+
     FragColor = vec4(color, 1.0);
 } 
