@@ -19,9 +19,16 @@ Timer CreateTimer(float delay, std::function<void()> finish_callback, std::funct
     return timer;
 }
 
-void AddTimer(float delay, std::function<void()> finish_callback, std::function<void(float)> update_callback, bool loop)
+Timer AddTimer(float delay, std::function<void()> finish_callback, std::function<void(float)> update_callback, bool loop)
 {
-    timers.push_back(CreateTimer(delay, finish_callback, update_callback, loop));
+    Timer timer = CreateTimer(delay, finish_callback, update_callback, loop);
+    timers.push_back(timer);
+    return timer;
+}
+
+void RemoveTimer(unsigned int id)
+{
+    ids_to_remove.push_back(id);
 }
 
 bool UpdateTimer(Timer &timer, float delta_time)
