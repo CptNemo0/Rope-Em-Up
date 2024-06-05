@@ -11,13 +11,14 @@ out vec3 out_view_position;
 out vec2 out_uv;
 out mat3 out_normal_world_matrix;
 out mat3 out_normal_view_matrix;
-
 out vec3 T;
 out vec3 B;
 out vec3 N;
-
 uniform mat4 projection_matrix;
 uniform mat4 view_matrix;
+
+uniform vec3 pp1;
+uniform vec3 pp2;
 
 uniform float time;
 
@@ -112,20 +113,20 @@ void main()
     float pos_hash = cnoise(world_pos.xy);
     float scale_hash = ((pos_hash * 0.75) + 0.25);
 
+    float pp1l = length(pp1 - vec3(world_pos.x, 0, world_pos.y));
+    float pp2l = length(pp2 - vec3(world_pos.x, 0, world_pos.y));
+
+    pp1l = pp1l < 1.0 ? pp1l : 1.0;
+    pp2l = pp2l < 1.0 ? pp2l : 1.0;
+
     mat4 scale_matrix = mat4(1.0);
     scale_matrix[0][0] = 1.0;
-    scale_matrix[1][1] = 2.0 * scale_hash;
+    scale_matrix[1][1] = 2.0 * scale_hash * pp1l * pp2l;
     scale_matrix[2][2] = 1.0;    
    
     //zakrzywienie 
-
-    float random_sign = hash2(world_pos);
-    float height = local_position.y * local_position.y;
-    float lean = hash2(world_pos) * PI / (height * pos_hash * 2000.0);
    
-    float wind = sin(cnoise(world_pos + time * 0.2) * 2.0 - 1.0) * 2.0 * pos_hash;
-
-    float lean_wind = lean + wind;
+    float wind = sin(cnoise(world_pos + time * 0.2) * 2.0 - 1.0) * 1.0 * pos_hash;
 
     cos_angle = cos(wind);
     sin_angle = sin(wind);
@@ -137,21 +138,20 @@ void main()
         vec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    mat4 model_matrix = translation_matrix * rotation_matrix_y * scale_matrix * rotation_matrix_x;
+    mat4 model_matrix = translation_matrix * rotation_matrix_y * rotation_matrix_x * scale_matrix;
     
     vec4 world_position = (model_matrix * vec4(local_position, 1.0));
     vec4 view_position = (view_matrix * world_position);
 
-    mat3 normal_world_matrix = transpose(inverse(mat3(model_matrix)));
-	mat3 normal_view_matrix = transpose(inverse(mat3(view_matrix * model_matrix)));
+    out_world_position = world_position.xyz;
+    out_view_position = view_position.xyz;
+
+    out_uv = tx;
+
+    out_normal_world_matrix = transpose(inverse(mat3(model_matrix)));
+    out_normal_view_matrix = transpose(inverse(mat3(view_matrix * model_matrix)));
 
     gl_Position = projection_matrix * view_position;
-    out_world_position = world_position.xyz;
-
-    out_view_position = view_position.xyz;
-    out_uv = tx;
-    out_normal_world_matrix = normal_world_matrix;
-    out_normal_view_matrix = normal_view_matrix;
 
     T = normalize(vec3(model_matrix * vec4(tangent,   0.0)));
     B = normalize(vec3(model_matrix * vec4(bitangent, 0.0)));

@@ -329,14 +329,14 @@ int main()
 
     float lamp_h = 8.0f;
     glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
-    float point_light_intensity = 500.0f;
+    float point_light_intensity = 0.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     point_light.color = point_light_color;
 
     DirectionalLight directional_light{};
     glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 1.f);
-    glm::vec3 dir_light_direction = glm::vec3(-1.0f, -0.3f, -1.0f);
-    float dir_light_intensity = 0.34f;
+    glm::vec3 dir_light_direction = glm::vec3(0.0f, -1.0f, -1.0f);
+    float dir_light_intensity = 3.0f;
     directional_light.direction = dir_light_direction;
     directional_light.color = dir_light_color;
 
@@ -697,8 +697,8 @@ int main()
     //    glBindVertexArray(0);
     //}
 
-    //auto grass = GameObject::Create(scene_root);
-    //grass->AddComponent(GrassRendererManager::i_->CreateRenderer(walls.up_left_, walls.down_right_, 170));
+     auto grass = GameObject::Create(scene_root);
+     grass->AddComponent(GrassRendererManager::i_->CreateRenderer(walls.up_left_, walls.down_right_, 600));
 
     // wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -747,6 +747,8 @@ int main()
         if (!moving_through_room)
         {
 
+            rg_settings.width = random::RandInt(1, 5);
+            rg_settings.height = random::RandInt(1, 5);
             rg_settings.enemies = random::RandInt(1, 5);
             rg_settings.lamps = random::RandInt(1, 5);
             rg_settings.clutter = random::RandInt(1, 5);
@@ -823,6 +825,8 @@ int main()
         GrassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GrassShader->SetMatrix4("projection_matrix", projection_matrix);
         GrassShader->SetFloat("time", glfwGetTime());
+        GrassShader->SetVec3("pp1", player_1->transform_->get_position());
+        GrassShader->SetVec3("pp2", player_2->transform_->get_position());
         GrassRendererManager::i_->Draw(GrassShader->get_id());
 
 
@@ -1009,7 +1013,7 @@ int main()
         ImGui::LabelText("Point Light", "Point Light");
         ImGui::ColorEdit3("Point L Color", (float*)&point_light_color);
         ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 1000.0f);
-        ImGui::SliderFloat("Height", &lamp_h, 7.0f, 10.0f, "%0.2f");
+        ImGui::SliderFloat("Height", &lamp_h, 0.0f, 10.0f, "%0.2f");
 
         ImGui::LabelText("Directional Light", "Directional Light");
         ImGui::ColorEdit3("Dir L Color", (float*)&dir_light_color);

@@ -24,11 +24,6 @@ uniform sampler2D ao_map;
 
 out vec4 color;
 
-float LinearizeDepth(float depth) 
-{
-    float z = depth * 2.0 - 1.0; 
-    return (2.0 * 0.1 * 100) / (100 + 0.1 - z * (100 - 0.1));	
-}
 
 void main()
 {
