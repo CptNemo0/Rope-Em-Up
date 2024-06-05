@@ -132,7 +132,7 @@ int main()
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
     const string lFemalePlayerMeshPath = "res/Players/Female/kobieta_test.fbx";
-    const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test.fbx";
+    const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test_2.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/ball.obj";
@@ -458,16 +458,16 @@ int main()
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_1->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
-    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model, 0, player_1->transform_));
+    player_1->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_2->AddComponent(make_shared<components::MeshRenderer>(player_model, GBufferPassShader));
-    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model, 0, player_2->transform_));
+    player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
@@ -479,16 +479,11 @@ int main()
     test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(1, 3, -2));
     test_ball->AddComponent(make_shared<components::MeshRenderer>(test_model, GBufferPassShader));
     test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));*/
-
-    //anim::Animation test_animation = anim::Animation(kMalePlayerMeshPath, M_player_model);
-    //auto animator = GameObject::Create(scene_root);
-    //animator->AddComponent(make_shared<components::Animator>(&test_animation));
-    /*components::Animator animator = &test_animation;*/
-
-    //auto male = GameObject::Create(scene_root);
-    ////male->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    //male->transform_->set_scale(glm::vec3(1.0f));
-    //male->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    
+    auto test_animation = make_shared<anim::Animation>(kMalePlayerMeshPath, M_player_model); 
+    player_1->AddComponent(make_shared<components::Animator>(test_animation));
+    player_1->transform_->set_scale(glm::vec3(0.01f));
+    player_2->transform_->set_scale(glm::vec3(0.01f));
 
     Rope rope = Rope
     (
@@ -600,7 +595,7 @@ int main()
     SSAOShader->SetFloat("bias", 0.01);
     ssao_buffer.SetKernel(SSAOShader);
 
-    // cubemap->LoadHDRimg(window, *activeCamera);
+    cubemap->LoadHDRimg(window, *activeCamera);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     /*int scrWidth, scrHeight;
@@ -735,7 +730,7 @@ int main()
     
         Timer::Update(delta_time);
 
-        //animator->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
+        player_1->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
         utility::DebugCameraMovement(window, debugCamera, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
@@ -834,9 +829,9 @@ int main()
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
         GBufferPassShader->SetInt("numBones", maxBones);
-        /*auto transforms = animator->GetComponent<components::Animator>()->GetFinalBoneMatrices();
+        auto transforms = player_1->GetComponent<components::Animator>()->GetFinalBoneMatrices();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());*/
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());
 
         scene_root->PropagateUpdate();
 
