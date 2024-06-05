@@ -66,6 +66,7 @@
 #include "headers/components/GrassRenderer.h"
 #include "headers/GrassRendererManager.h"
 #include "headers/res/Resources.h"
+#include "headers/SpellCaster.h"
 
 int main()
 {
@@ -248,6 +249,7 @@ int main()
     drop::DropManager::Initialize();
     drop::SpellDropQueue::Initialize();
     ChokeList::Initialize();
+    SpellCaster::Initialize();
     res::init_freetype();
     
 
@@ -460,6 +462,8 @@ int main()
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
     player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
+    player_1->GetComponent<components::SpellSlotComponent>()->type_ = SKULL_MINION;
+    player_1->GetComponent<components::SpellSlotComponent>()->spell_levels[SKULL_MINION] = 3;
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
@@ -469,6 +473,8 @@ int main()
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
     player_2->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
+    player_2->GetComponent<components::SpellSlotComponent>()->type_ = SKULL_MINION;
+    player_2->GetComponent<components::SpellSlotComponent>()->spell_levels[SKULL_MINION] = 22;
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
@@ -743,9 +749,14 @@ int main()
         static float slowdown_smooth_factor = 0.055f;
         if (HealthManager::i_->something_died_ && HealthManager::i_->what_ == MONSTER)
         {
+            auto ss1 = player_1->GetComponent<components::SpellSlotComponent>()->type_;
+            auto ss2 = player_2->GetComponent<components::SpellSlotComponent>()->type_;
+
+            if(!(ss1 == NOT_A_SPELL && ss2 == NOT_A_SPELL))
             cout << HealthManager::i_->what_ << " " << HealthManager::i_->where_.x << " " << HealthManager::i_->where_.z << endl;
 
             postprocessor.slowed_time = true;
+            SpellCaster::i_->active_ = true;
             Timer::Timer spell_timer = Timer::AddTimer(cast_time,
             [&fixed_update_rate, &postprocessor]()
             {
@@ -757,10 +768,11 @@ int main()
             {
                 fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
 
-                if (glfwGetKey(window, GLFW_KEY_SPACE))
+                if (!SpellCaster::i_->active_)
                 {
                     fixed_update_rate = pbd::kMsPerUpdate;
                     postprocessor.slowed_time = false;
+                    SpellCaster::i_->Cast();
                     Timer::RemoveTimer(id);
                 }
 
@@ -1176,13 +1188,13 @@ int main()
         static float player_1_hp;
         static float player_2_hp;
         player_1_hp = player_1->GetComponent<components::HealthComponent>()->health_;
-        player_2_hp = player_1->GetComponent<components::HealthComponent>()->health_;
+        player_2_hp = player_2->GetComponent<components::HealthComponent>()->health_;
         ImGui::Begin("Player 1 HP");
         ImGui::SliderFloat("Player 1 HP", &(player_1_hp), 0.0f, player_1->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
         ImGui::End();
 
         ImGui::Begin("Player 2 HP");
-        ImGui::SliderFloat("Player 2 HP", &(player_2->GetComponent<components::HealthComponent>()->health_), 0.0f, player_2->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
+        ImGui::SliderFloat("Player 2 HP", &(player_2_hp), 0.0f, player_2->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
         ImGui::End();
 
         static glm::vec3 bot_color;
@@ -1244,6 +1256,7 @@ int main()
         glfwSwapBuffers(window);
     }
     
+    SpellCaster::Destroy();
     GrassRendererManager::Destroy();
     PlayerStatsManager::Destroy();
     ChokeList::Destroy();

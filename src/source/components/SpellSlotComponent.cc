@@ -1,5 +1,6 @@
 #include "../../headers/components/SpellSlotComponent.h"
 
+
 components::SpellSlotComponent::SpellSlotComponent(SSC_INIT init)
 {
 	switch (init)

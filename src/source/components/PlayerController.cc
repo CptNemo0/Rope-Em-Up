@@ -1,5 +1,5 @@
 #include "../../headers/components/PlayerController.h"
-
+#include "../../headers/SpellCaster.h"
 components::PlayerController::PlayerController(int gamepadID)
 {
     this->gamepadID_ = gamepadID;
@@ -71,7 +71,8 @@ void components::PlayerController::OnAction(Action action, input::State state)
         }
         case Action::CAST_SPELL:
         {
-            cout << "CASTING_SPELL" << endl;
+            cout << "AAAAAAAAAAAA" << endl;
+            SpellCaster::i_->QueueUpSpell(gameObject_.lock()->GetComponent<components::SpellSlotComponent>());
             break;
         }
     }
