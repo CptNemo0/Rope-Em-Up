@@ -738,20 +738,35 @@ int main()
         
         // glfwGetKey(window, GLFW_KEY_SPACE
         // HealthManager::i_->something_died_
-        if (HealthManager::i_->something_died_)
+        
+        static float cast_time = 2.0f;
+        static float slowdown_smooth_factor = 0.055f;
+        if (HealthManager::i_->something_died_ && HealthManager::i_->what_ == MONSTER)
         {
             cout << HealthManager::i_->what_ << " " << HealthManager::i_->where_.x << " " << HealthManager::i_->where_.z << endl;
 
             postprocessor.slowed_time = true;
-            Timer::AddTimer(2.0f, [&fixed_update_rate, &postprocessor]()
+            Timer::Timer spell_timer = Timer::AddTimer(cast_time,
+            [&fixed_update_rate, &postprocessor]()
+            {
+                fixed_update_rate = pbd::kMsPerUpdate;
+                postprocessor.slowed_time = false;
+            },
+
+            [&fixed_update_rate, &id = spell_timer.id, &window, &postprocessor](float delta_time)
+            {
+                fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
+
+                if (glfwGetKey(window, GLFW_KEY_SPACE))
                 {
                     fixed_update_rate = pbd::kMsPerUpdate;
                     postprocessor.slowed_time = false;
-                },
-                [&fixed_update_rate](float delta_time)
-                {
-                    fixed_update_rate = fixed_update_rate * (1.0f - 0.055f) + 0.0000000001f * 0.055f;
-                }, false);
+                    Timer::RemoveTimer(id);
+                }
+
+            },
+
+            false);
                 
         }
 

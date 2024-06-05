@@ -69,6 +69,11 @@ void components::PlayerController::OnAction(Action action, input::State state)
             }
             break;
         }
+        case Action::CAST_SPELL:
+        {
+            cout << "CASTING_SPELL" << endl;
+            break;
+        }
     }
 }
 

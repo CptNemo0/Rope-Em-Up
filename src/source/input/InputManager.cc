@@ -21,12 +21,14 @@ input::InputManager::InputManager(GLFWwindow *window, s_ptr<llr::Camera> *camera
         {GLFW_JOYSTICK_1,
         {
             {Action::MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_I, GLFW_KEY_K, GLFW_KEY_J, GLFW_KEY_L}}},
-            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_U}}
+            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_U}},
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_KEY_O} }
         }},
         {GLFW_JOYSTICK_2,
         {
             {Action::MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_T, GLFW_KEY_G, GLFW_KEY_F, GLFW_KEY_H}}},
-            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_Y}}
+            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_Y}},
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_KEY_R} }
         }}
     };
 
@@ -35,12 +37,14 @@ input::InputManager::InputManager(GLFWwindow *window, s_ptr<llr::Camera> *camera
         {GLFW_JOYSTICK_1,
         {
             {Action::MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
-            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_A}}
+            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_A}},
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}}
         }},
         {GLFW_JOYSTICK_2,
         {
             {Action::MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
-            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_A}}
+            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_A}},
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}}
         }}
     };
 }
@@ -87,6 +91,12 @@ void input::InputManager::UpdateGamepadState(int gamepadID)
             NotifyAction(gamepadID, Action::PULL_ROPE, State{.button = (int)new_gamepad_state.buttons[pull_rope_button]});
         }
 
+        auto cast_spell_button = gamepad_mappings[gamepadID][Action::CAST_SPELL].buttonID;
+        if (new_gamepad_state.buttons[cast_spell_button] != old_gamepad_states_[gamepadID].buttons[cast_spell_button])
+        {
+            NotifyAction(gamepadID, Action::CAST_SPELL, State{ .button = (int)new_gamepad_state.buttons[cast_spell_button] });
+        }
+
         old_gamepad_states_[gamepadID] = new_gamepad_state;
     }
 }
@@ -122,6 +132,14 @@ void input::InputManager::UpdateKeyboardState(int gamepadID)
     {
         keyboard_state[pull_rope_button] = pull_rope_button_state;
         NotifyAction(gamepadID, Action::PULL_ROPE, State{.button = pull_rope_button_state});
+    }
+
+    auto& cast_spell_button = keyboard_mappings[gamepadID][Action::CAST_SPELL].buttonID;
+    int cast_spell_button_state = glfwGetKey(window_, cast_spell_button);
+    if (cast_spell_button_state != (int)keyboard_state[cast_spell_button])
+    {
+        keyboard_state[cast_spell_button] = cast_spell_button_state;
+        NotifyAction(gamepadID, Action::CAST_SPELL, State{ .button = cast_spell_button_state });
     }
 }
 
