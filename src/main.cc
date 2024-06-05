@@ -264,8 +264,6 @@ int main()
     camera->set_far(kFar);
     camera->set_aspect_ratio(((float)mode->width / (float)mode->height));
     camera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
-    camera->set_pitch(-89.0f);
-    camera->set_yaw(-89.0f);
 
     auto topCamera = make_shared<llr::Camera>();
     topCamera->set_fov(kFov);
@@ -273,8 +271,6 @@ int main()
     topCamera->set_far(kFar);
     topCamera->set_aspect_ratio(((float)mode->width / (float)mode->height));
     topCamera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
-    topCamera->set_pitch(-89.0f);
-    topCamera->set_yaw(90.0f);
 
     auto debugCamera = make_shared<llr::Camera>();
     debugCamera->set_fov(kFov);
@@ -510,14 +506,20 @@ int main()
 
     auto isometricCamera = GameObject::Create(scene_root);
     isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    isometricCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
+    isometricCamera->AddComponent(make_shared<components::CameraComponent>(player_1, player_2, camera));
 
     auto topDownCamera = GameObject::Create(scene_root);
     topDownCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    topDownCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, topCamera));
+    topDownCamera->AddComponent(make_shared<components::CameraComponent>(player_1, player_2, topCamera));
 
-    auto isometricCameraComponent = isometricCamera->GetComponent<components::GameplayCameraComponent>();
-    auto topDownCameraComponent = topDownCamera->GetComponent<components::GameplayCameraComponent>();
+    auto DebugCamera = GameObject::Create(scene_root);
+    DebugCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    DebugCamera->AddComponent(make_shared<components::CameraComponent>(debugCamera));
+
+
+    auto isometricCameraComponent = isometricCamera->GetComponent<components::CameraComponent>();
+    auto topDownCameraComponent = topDownCamera->GetComponent<components::CameraComponent>();
+    auto DebugCameraComponent = DebugCamera->GetComponent<components::CameraComponent>();
     
     auto HUD_root = GameObject::Create();
 
@@ -620,17 +622,6 @@ int main()
     // SETUP CAMERA MANAGER
     //////////////////////////
 
-    //llr::CameraManager::debuggingCamera_ = debugCamera;
-    camera->pitch_ = -45.0f;
-    camera->yaw_ = 55.0f;
-
-    isometricCameraComponent->height_ = 17.0f;
-    isometricCameraComponent->distance_ = 21.0f;
-
-    auto CameraManager = make_shared<llr::CameraManager>();
-    CameraManager->setIsometricCamera(isometricCameraComponent);
-    CameraManager->setTopDownCamera(topDownCameraComponent);
-
     auto grass_object = GameObject::Create(scene_root);
     grass_object->AddComponent(std::make_shared<components::GrassRenderer>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 0.0f, -5.0f), grass_model, 123.0f));
     auto grass_component = grass_object->GetComponent<components::GrassRenderer>();
@@ -731,7 +722,7 @@ int main()
         Timer::Update(delta_time);
 
         player_1->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
-        utility::DebugCameraMovement(window, debugCamera, delta_time);
+        utility::DebugCameraMovement(window, DebugCameraComponent->camera_, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
 
@@ -985,23 +976,25 @@ int main()
             {
             case 0:
                 *activeCamera = isometricCameraComponent->camera_;
+                //isometricCameraComponent->transform_->set_position((*activeCamera)->position_);
+                ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
+                ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, 0.0f, 100.0f, "%.2f");
+                ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, 0.0f, 100.0f, "%.2f");
                 break;
             case 1:
                 *activeCamera = topDownCameraComponent->camera_;
+                //topDownCameraComponent->transform_->set_position((*activeCamera)->position_);
+                ImGui::SliderFloat("Y", &topDownCameraComponent->height_, 1.0f, 100.0f, "%.2f");
                 break;
             case 2:
-                *activeCamera = debugCamera;
+                *activeCamera = DebugCameraComponent->camera_;
+                //DebugCameraComponent->transform_->set_position((*activeCamera)->position_);
                 break;
             }
 
-        ImGui::SliderFloat("Pitch", &camera->pitch_, -89.0f, 89.0f, "%.2f");
-        ImGui::SliderFloat("Yaw", &camera->yaw_, -179.0f, 179.0f, "%.2f");
-        ImGui::SliderFloat("Height", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
-        ImGui::SliderFloat("Distance", &isometricCameraComponent->distance_, 1.0f, 100.0f, "%.2f");
+
         ImGui::DragFloat3("Position", glm::value_ptr((*activeCamera)->position_), 0.1f, -100.0f, 100.0f, "%.2f");
     
-        /*ImGui::SliderFloat("Yaw Angle", &isometricCameraComponent->yawAngle_, -179.0f, 179.0f, "%.1f");
-        ImGui::SliderFloat("Pitch Angle", &isometricCameraComponent->pitchAngle_, -89.0f, 89.0f, "%.1f");*/
         ImGui::End();
 
         ImGui::Begin("Lights");

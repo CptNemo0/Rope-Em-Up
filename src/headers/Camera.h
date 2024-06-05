@@ -161,7 +161,7 @@ namespace llr
 
 		inline glm::mat4 GetViewMatrix()
 		{
-			return glm::lookAt(position_, position_ + front_, up_);
+			return view_matrix_;
 		}
 
 		inline void SetViewMatrix(glm::mat4 new_view_matrix)
@@ -176,32 +176,30 @@ namespace llr
 
 namespace components
 {
+	//class CameraComponent : public Component
+	//{
+	//public:
+	//	s_ptr<components::Transform> transfrom_;
+	//	s_ptr<llr::Camera> camera_;
+
+	//	// Inherited via Component
+	//	void Start() override;
+
+	//	void Update() override;
+	//	void Destroy() override {}
+
+	//};
+
 	class CameraComponent : public Component
 	{
-	public:
-		s_ptr<components::Transform> transfrom_;
-		s_ptr<llr::Camera> camera_;
-
-		// Inherited via Component
-		void Start() override;
-
-		void Update() override;
-		void Destroy() override {}
-
-	};
-
-	class GameplayCameraComponent : public Component
-	{
 public:
-		s_ptr<components::Transform> transfrom_;
+		s_ptr<components::Transform> transform_;
 		s_ptr <llr::Camera> camera_;
 		s_ptr <GameObject> target1_;
 		s_ptr <GameObject> target2_;
-		float distance_ = 0;
-		float yawAngle_= 0.0f;
-		float pitchAngle_ = 0.0f;
+		float distanceX_ = 0.0f;
+		float distanceZ_ = 0.0f;
 		float height_ = 12.0f;
-
 
 		// Inherited via Component
 		void Start() override;
@@ -210,12 +208,10 @@ public:
 
 		void Destroy() override;
 
-		GameplayCameraComponent(s_ptr <GameObject> target1, s_ptr <GameObject> target2, s_ptr <llr::Camera> camera);
+		CameraComponent(s_ptr <GameObject> target1, s_ptr <GameObject> target2, s_ptr <llr::Camera> camera);
+		CameraComponent(s_ptr <llr::Camera> camera);
 
 		glm::vec3 calculateMidPoint();
-
-		void RotateCameraAroundMidPoint(float yawAngle);
-
 
 		void SetTargets(s_ptr <GameObject> target1, s_ptr <GameObject> target2);
  
