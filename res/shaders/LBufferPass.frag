@@ -25,6 +25,8 @@ uniform bool bloom;
 uniform vec3 bloom_color;
 uniform float bloom_threshold;
 
+uniform bool slowed_time;
+
 in vec2 if_uv;
 
 
@@ -245,6 +247,12 @@ void main()
         color = color * ssao;
         //color = color / (color + vec3(1.0));
         //color = pow(color, vec3(1.0/2.2));
+
+        if(slowed_time)
+        {
+            color = vec3( dot(color, vec3(0.2126, 0.7152, 0.0722)) );
+        }
+
         color_texture = color;
 
         if(bloom)
@@ -266,6 +274,10 @@ void main()
     }
     else
     {
+        if(slowed_time)
+        {
+            albedo = vec3( dot(albedo, vec3(0.2126, 0.7152, 0.0722)) );
+        }
         color_texture = albedo;
         bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }

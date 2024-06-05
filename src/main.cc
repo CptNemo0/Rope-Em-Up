@@ -219,10 +219,6 @@ int main()
     }
     cout << "GLAD Initialized.\n";
 
-    /*glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);*/
-
     utility::InitImGUI(window);
 
     collisions::CollisionManager::Initialize();
@@ -329,14 +325,14 @@ int main()
 
     float lamp_h = 8.0f;
     glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
-    float point_light_intensity = 0.0f;
+    float point_light_intensity = 250.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     point_light.color = point_light_color;
 
     DirectionalLight directional_light{};
     glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 1.f);
     glm::vec3 dir_light_direction = glm::vec3(0.0f, -1.0f, -1.0f);
-    float dir_light_intensity = 3.0f;
+    float dir_light_intensity = 0.38f;
     directional_light.direction = dir_light_direction;
     directional_light.color = dir_light_color;
 
@@ -463,6 +459,7 @@ int main()
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
+    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
@@ -471,6 +468,7 @@ int main()
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
+    player_2->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
@@ -508,6 +506,13 @@ int main()
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     PlayerStatsManager::Initialize(&rope, player_1, player_2);
 
+
+#pragma region Camera
+
+    //////////////////////////
+    // SETUP CAMERA MANAGER
+    //////////////////////////
+
     auto isometricCamera = GameObject::Create(scene_root);
     isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     isometricCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, camera));
@@ -517,8 +522,19 @@ int main()
     topDownCamera->AddComponent(make_shared<components::GameplayCameraComponent>(player_1, player_2, topCamera));
 
     auto isometricCameraComponent = isometricCamera->GetComponent<components::GameplayCameraComponent>();
+    isometricCameraComponent->height_ = 10.65f;
+    isometricCameraComponent->distance_ = 15.77f;
     auto topDownCameraComponent = topDownCamera->GetComponent<components::GameplayCameraComponent>();
-    
+
+    camera->pitch_ = -42.98f;
+    camera->yaw_ = 55.0f;
+
+    auto CameraManager = make_shared<llr::CameraManager>();
+    CameraManager->setIsometricCamera(isometricCameraComponent);
+    CameraManager->setTopDownCamera(topDownCameraComponent);
+
+#pragma endregion Camera
+
     auto HUD_root = GameObject::Create();
 
     auto HUD_object = GameObject::Create(HUD_root);
@@ -602,107 +618,28 @@ int main()
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     glViewport(0, 0, scrWidth, scrHeight);*/
 
-    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, player_1, player_2]()
+    float fixed_update_rate = pbd::kMsPerUpdate;
+    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, &fixed_update_rate, player_1, player_2]()
     {
         ai::EnemyAIManager::i_->UpdateAI();
         pbd::PBDManager::i_->GeneratorUpdate();
-        pbd::PBDManager::i_->Integration(pbd::kMsPerUpdate);
+        pbd::PBDManager::i_->Integration(fixed_update_rate);
         pbd::PBDManager::i_->ClearContacts();
         collisions::CollisionManager::i_->PredictColliders();
         collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
-        pbd::PBDManager::i_->ProjectConstraints(pbd::kMsPerUpdate);
-        pbd::PBDManager::i_->UpdatePositions(pbd::kMsPerUpdate);
-        ParticleEmitterManager::i_->Update(pbd::kMsPerUpdate);
+        pbd::PBDManager::i_->ProjectConstraints(fixed_update_rate);
+        pbd::PBDManager::i_->UpdatePositions(fixed_update_rate);
+        ParticleEmitterManager::i_->Update(fixed_update_rate);
 
     }, nullptr, true);
 
-    //////////////////////////
-    // SETUP CAMERA MANAGER
-    //////////////////////////
+    
+    //auto grass = GameObject::Create(scene_root);
+    //grass->AddComponent(GrassRendererManager::i_->CreateRenderer(walls.up_left_, walls.down_right_, 600));
 
-    //llr::CameraManager::debuggingCamera_ = debugCamera;
-    camera->pitch_ = -45.0f;
-    camera->yaw_ = 55.0f;
-
-    isometricCameraComponent->height_ = 17.0f;
-    isometricCameraComponent->distance_ = 21.0f;
-
-    auto CameraManager = make_shared<llr::CameraManager>();
-    CameraManager->setIsometricCamera(isometricCameraComponent);
-    CameraManager->setTopDownCamera(topDownCameraComponent);
-
-    auto grass_object = GameObject::Create(scene_root);
-    grass_object->AddComponent(std::make_shared<components::GrassRenderer>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 0.0f, -5.0f), grass_model, 123.0f));
-    auto grass_component = grass_object->GetComponent<components::GrassRenderer>();
-
-    //unsigned int grass_vao_;
-    //unsigned int grass_vbo_;
-    //unsigned int grass_ebo_;
-    //unsigned int buffer_;
-    //float density = 150.0f;
-    //std::vector<float> grass_positions;
-
-    //{
-    //    glGenVertexArrays(1, &grass_vao_);
-    //    glGenBuffers(1, &grass_vbo_);
-    //    glGenBuffers(1, &grass_ebo_);
-    //    glBindVertexArray(grass_vao_);
-
-    //    glBindBuffer(GL_ARRAY_BUFFER, grass_vbo_);
-    //    glBufferData(GL_ARRAY_BUFFER, grass_model->meshes_[0]->vertices_.size() * sizeof(Vertex), &grass_model->meshes_[0]->vertices_[0], GL_STATIC_DRAW);
-
-    //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grass_ebo_);
-    //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, grass_model->meshes_[0]->indices_.size() * sizeof(unsigned int), &grass_model->meshes_[0]->indices_[0], GL_STATIC_DRAW);
-
-    //    glEnableVertexAttribArray(0);
-    //    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-
-    //    glEnableVertexAttribArray(1);
-    //    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-
-    //    glEnableVertexAttribArray(2);
-    //    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture));
-
-    //    auto ul = walls.up_left_;
-    //    auto dr = walls.down_right_;
-
-    //    float x_dim = std::fabs(dr.x) - std::fabs(ul.x);
-    //    float y_dim = std::fabs(dr.z) - std::fabs(ul.z);
-
-    //    float x_step = x_dim / density;
-    //    float y_step = y_dim / density;
-
-    //    for (float i = -x_step; i > (-x_step * (density - 1)); i -= x_step)
-    //    {
-    //        for (float j = -y_step; j > (-y_step * (density - 1)); j -= y_step)
-    //        {
-    //            grass_positions.push_back(i + random::RandFloat(-x_step * 0.9f, x_step * 0.9f));
-    //            grass_positions.push_back(j + random::RandFloat(-y_step * 0.9f, y_step * 0.9f));
-    //            //cout << i << " " << j << endl;
-    //        }
-    //    }
-
-    //    glGenBuffers(1, &buffer_);
-    //    glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-    //    glBufferData(GL_ARRAY_BUFFER, grass_positions.size() * sizeof(float), &grass_positions[0], GL_STATIC_DRAW);
-
-    //    glEnableVertexAttribArray(3);
-    //    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    //    glVertexAttribDivisor(3, 1);
-    //    glBindVertexArray(0);
-    //}
-
-     auto grass = GameObject::Create(scene_root);
-     grass->AddComponent(GrassRendererManager::i_->CreateRenderer(walls.up_left_, walls.down_right_, 600));
-
-    // wireframe
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    /////////////////////////////////////////////
     /////////////////////////////////////////////
     /////////////////////////////////////////////
     // GAME LOOP GAME LOOP GAME LOOP GAME LOOP //
-    /////////////////////////////////////////////
     /////////////////////////////////////////////
     /////////////////////////////////////////////
     
@@ -742,8 +679,8 @@ int main()
         if (!moving_through_room)
         {
 
-            rg_settings.width = random::RandInt(1, 5);
-            rg_settings.height = random::RandInt(1, 5);
+            rg_settings.width = random::RandInt(1, 2);
+            rg_settings.height = random::RandInt(1, 2);
             rg_settings.enemies = random::RandInt(1, 5);
             rg_settings.lamps = random::RandInt(1, 5);
             rg_settings.clutter = random::RandInt(1, 5);
@@ -798,6 +735,26 @@ int main()
         rope.ChokeCheck(room);
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
+        
+        // glfwGetKey(window, GLFW_KEY_SPACE
+        // HealthManager::i_->something_died_
+        if (HealthManager::i_->something_died_)
+        {
+            cout << HealthManager::i_->what_ << " " << HealthManager::i_->where_.x << " " << HealthManager::i_->where_.z << endl;
+
+            postprocessor.slowed_time = true;
+            Timer::AddTimer(2.0f, [&fixed_update_rate, &postprocessor]()
+                {
+                    fixed_update_rate = pbd::kMsPerUpdate;
+                    postprocessor.slowed_time = false;
+                },
+                [&fixed_update_rate](float delta_time)
+                {
+                    fixed_update_rate = fixed_update_rate * (1.0f - 0.055f) + 0.0000000001f * 0.055f;
+                }, false);
+                
+        }
+
         drop::DropManager::i_->DropHp(players_vector);
         drop::DropManager::i_->DropSpells(*room);
         drop::DropManager::i_->DropExp();
@@ -869,7 +826,7 @@ int main()
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
-        //LBufferPassShader->SetFloat("intensity", 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
+        //LBufferPassShader->SetFloat("intensity", poin 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
             LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z));
@@ -877,7 +834,7 @@ int main()
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.00f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity /*+ 0.6f * std::sinf(glfwGetTime() * 0.75f)*/);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
@@ -893,7 +850,7 @@ int main()
         LBufferPassShader->SetFloat("spotLight[0].constant", 1.0f);
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
-
+        LBufferPassShader->SetBool("slowed_time", postprocessor.slowed_time);
         if (lbuffer.bloom_)
         {
             LBufferPassShader->SetBool("bloom", lbuffer.bloom_);
@@ -931,6 +888,7 @@ int main()
         PostprocessingShader->Use();
         lbuffer.BindTextures(PostprocessingShader);
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
+        
         postprocessor.Draw();
         //////////////////////////////////
 
@@ -942,10 +900,10 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
-        /*HUDshader->Use();
+        HUDshader->Use();
 
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
-        HUD_root->PropagateUpdate();*/
+        HUD_root->PropagateUpdate();
         
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
@@ -978,7 +936,7 @@ int main()
         ImGui::Begin("Camera");
         //chose the camera
         const char* items[] = { "Isometric", "Top Down", "Debugging" };
-        static int selectedItem = 2;
+        static int selectedItem = 0;
         ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
 
             switch (selectedItem)

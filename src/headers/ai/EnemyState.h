@@ -3,7 +3,7 @@
 
 #include "../SteeringBehaviors.h"
 #include "EnemyStateMachine.h"
-
+#include "headers/components/HealthComponent.h"
 namespace ai
 {
 	class EnemyStateMachine;

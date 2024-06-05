@@ -4,6 +4,7 @@
 #include "components/HealthComponent.h"
 #include <memory>
 #include <deque>
+#include "glm/glm.hpp"
 
 class HealthManager
 {
@@ -15,6 +16,9 @@ private:
 
 public:
     std::deque<std::shared_ptr<components::HealthComponent>> health_components_;
+    bool something_died_;
+    glm::vec3 where_;
+    HEALTH_TYPE what_;
 
     std::shared_ptr<components::HealthComponent> CreateHealthComponent(float health, HEALTH_TYPE type);
     void AddHealthComponent(std::shared_ptr<components::HealthComponent> h);

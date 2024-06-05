@@ -64,6 +64,7 @@ namespace pbd
 	// Right now it's half of actual fixed delta time
 	// so that the game doesn't run too fast
 	const float kMsPerUpdate = 1.0f / 240.0f;
+	const float kMsPerUpdateHalf = 1.0f / 960.0f;
 	const float kFriction = 0.35f;
 
 	class ForceGenerator

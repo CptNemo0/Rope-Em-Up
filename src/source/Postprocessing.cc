@@ -14,6 +14,7 @@ ppc::Postprocessor::Postprocessor(int height, int width, s_ptr<Shader> shader)
     vignete_contrast_ = 50.0f;
     transition_vignette_time_ = 0.3f;
     transition_vignette_current_time_ = 0.0f;
+    slowed_time = false;
 	Init();
 }
 
