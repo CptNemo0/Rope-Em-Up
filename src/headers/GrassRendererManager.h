@@ -1,9 +1,12 @@
 #ifndef GRASS_RENDERER_MANAGER
 #define GRASS_RENDERER_MANAGER
 
-#include "components/GrassRenderer.h"
 #include <vector>
 #include <memory>
+#include "nlohmann/json.hpp"
+
+#include "components/GrassRenderer.h"
+#include "global.h"
 
 class GrassRendererManager
 {
@@ -37,6 +40,7 @@ public:
 
     std::shared_ptr<components::GrassRenderer> CreateRenderer(glm::vec3 ul, glm::vec3 dr, float density);
     std::shared_ptr<components::GrassRenderer> CreateRenderer(float radius,  float density);
+    std::shared_ptr<components::GrassRenderer> CreateRenderer(json &j);
 
     void AddRenderer(std::shared_ptr<components::GrassRenderer>);
     void RemoveRenderer(std::shared_ptr<components::GrassRenderer>);

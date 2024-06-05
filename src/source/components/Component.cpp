@@ -7,6 +7,7 @@
 #include "../../headers/components/ExpDropComponent.h"
 #include "../../headers/components/GrassRenderer.h"
 #include "../../headers/components/HealthComponent.h"
+#include "../../headers/HealthManager.h"
 #include "../../headers/components/HpDropComponent.h"
 #include "../../headers/components/HUDRenderer.h"
 #include "../../headers/components/MeshRenderer.h"
@@ -17,6 +18,7 @@
 #include "../../headers/collisions/Collider.h"
 #include "../../headers/collisions/CollisionManager.h"
 #include "../../headers/physics/PBD.h"
+#include "../../headers/GrassRendererManager.h"
 
 std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Component::component_factory = 
 {
@@ -38,11 +40,11 @@ std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Comp
     },
     {   // GrassRenderer
         typeid(components::GrassRenderer).name(), 
-        [](json &j, s_ptr<GameObject> go) { return make_shared<components::GrassRenderer>(j); } 
+        [](json &j, s_ptr<GameObject> go) { return GrassRendererManager::i_->CreateRenderer(j); } 
     },
     {   // HealthComponent
         typeid(components::HealthComponent).name(), 
-        [](json &j, s_ptr<GameObject> go) { return make_shared<components::HealthComponent>(j); } 
+        [](json &j, s_ptr<GameObject> go) { return HealthManager::i_->CreateHealthComponent(j); } 
     },
     {   // HpDropComponent
         typeid(components::HpDropComponent).name(), 

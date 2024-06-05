@@ -21,6 +21,13 @@ std::shared_ptr<components::GrassRenderer> GrassRendererManager::CreateRenderer(
 	return return_value;
 }
 
+std::shared_ptr<components::GrassRenderer> GrassRendererManager::CreateRenderer(json &j)
+{
+    auto return_value = std::make_shared<components::GrassRenderer>(j);
+    AddRenderer(return_value);
+    return return_value;
+}
+
 void GrassRendererManager::AddRenderer(std::shared_ptr<components::GrassRenderer> r)
 {
 	renderers_.push_back(r);

@@ -15,6 +15,13 @@ std::shared_ptr<components::HealthComponent> HealthManager::CreateHealthComponen
 	return hc;
 }
 
+std::shared_ptr<components::HealthComponent> HealthManager::CreateHealthComponent(json &j)
+{
+    auto hc = std::make_shared<components::HealthComponent>(j);
+	AddHealthComponent(hc);
+	return hc;
+}
+
 void HealthManager::AddHealthComponent(std::shared_ptr<components::HealthComponent> h)
 {
 	health_components_.push_back(h);
