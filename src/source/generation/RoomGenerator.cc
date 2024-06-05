@@ -606,7 +606,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
 
             auto renderer = GameObject::Create();
             renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-            room.room_object->transform_->AddChild(renderer->transform_);
+            room.floors->transform_->AddChild(renderer->transform_);
         }
         else if (room.up_walls_idx[i] == 5)
         {
@@ -614,7 +614,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
             auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch6[1];
             auto renderer = GameObject::Create();
             renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-            room.room_object->transform_->AddChild(renderer->transform_);
+            room.floors->transform_->AddChild(renderer->transform_);
         }
         else if (room.up_walls_idx[i] == 6)
         {
@@ -623,7 +623,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
 
             auto renderer = GameObject::Create();
             renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-            room.room_object->transform_->AddChild(renderer->transform_);
+            room.floors->transform_->AddChild(renderer->transform_);
         }
     }
 

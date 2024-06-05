@@ -32,7 +32,8 @@ namespace Timer
     /// @param finish_callback callback to be called when the timer finishes
     /// @param update_callback callback to be called every time the timer is updated
     /// @param loop bool to determine if the timer should loop
-    void AddTimer(float delay, std::function<void()> finish_callback, std::function<void(float)> update_callback = nullptr, bool loop = false);
+    Timer AddTimer(float delay, std::function<void()> finish_callback, std::function<void(float)> update_callback = nullptr, bool loop = false);
+    void RemoveTimer(unsigned int id);
 
     bool UpdateTimer(Timer &timer, float delta_time);
     void Update(float delta_time);

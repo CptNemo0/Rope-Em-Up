@@ -168,7 +168,7 @@ int main()
 
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
 
-    const string kBruhPath = "res/sounds/bruh.wav";
+    const string kBruhPath = "res/sounds/tentaclepull.wav";
 
     const string kEnemyAiInitPath = "res/config/EnemyAiInit.ini";
     const string kVehicleInitPath = "res/config/VehicleInit.ini";
