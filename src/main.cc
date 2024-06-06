@@ -512,7 +512,11 @@ int main()
 #pragma region Camera
     auto isometricCamera = GameObject::Create(scene_root);
     isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    isometricCamera->AddComponent(make_shared<components::CameraComponent>(player_1, player_2, camera));
+    auto isometricCameraComp = make_shared<components::CameraComponent>(player_1, player_2, camera);
+    isometricCamera->AddComponent(isometricCameraComp);
+    isometricCameraComp->distanceX_ = -7.0f;
+    isometricCameraComp->distanceZ_ = -7.0f;
+    isometricCameraComp->height_ = 10.0f;
 
     auto topDownCamera = GameObject::Create(scene_root);
     topDownCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -605,7 +609,7 @@ int main()
     SSAOShader->SetFloat("bias", 0.01);
     ssao_buffer.SetKernel(SSAOShader);
 
-    cubemap->LoadHDRimg(window, *activeCamera);
+    // cubemap->LoadHDRimg(window, *activeCamera);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     /*int scrWidth, scrHeight;
@@ -960,9 +964,9 @@ int main()
             case 0:
                 *activeCamera = isometricCameraComponent->camera_;
                 //isometricCameraComponent->transform_->set_position((*activeCamera)->position_);
-                ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 100.0f, "%.2f");
-                ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, 0.0f, 100.0f, "%.2f");
-                ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, 0.0f, 100.0f, "%.2f");
+                ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 20.0f, "%.0f");
+                ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, -10.0f, 10.0f, "%.0f");
+                ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, -10.0f, 10.0f, "%.0f");
                 break;
             case 1:
                 *activeCamera = topDownCameraComponent->camera_;

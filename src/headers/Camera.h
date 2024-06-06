@@ -197,7 +197,7 @@ public:
 		s_ptr <llr::Camera> camera_;
 		s_ptr <GameObject> target1_;
 		s_ptr <GameObject> target2_;
-		float distanceX_ = 0.0f;
+		float distanceX_ = 0.0001f;
 		float distanceZ_ = 0.0f;
 		float height_ = 12.0f;
 

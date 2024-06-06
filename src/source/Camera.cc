@@ -61,20 +61,19 @@ void components::CameraComponent::Update()
 	}
 	else
 	{
-		glm::vec3 midPoint = calculateMidPoint();
+		glm::vec3 midPoint = calculateMidPoint() + glm::vec3(0.0f, 1.0f, 0.0f);
 
-		glm::vec3 directionToMidpoint = glm::normalize(midPoint - transform_->get_position());
-
-		// Ustawienie pozycji kamery w sta³ej odleg³oœci od punktu œrodkowego
-		glm::vec3 cameraPosition = midPoint + glm::vec3(directionToMidpoint.x * distanceX_, height_, directionToMidpoint.z * distanceZ_);
-
-		// Ustawienie wysokoœci kamery
+		glm::vec3 cameraPosition = glm::vec3(midPoint.x + distanceX_, midPoint.y + height_, midPoint.z + distanceZ_);
 		camera_->set_position(glm::vec3(cameraPosition));
 
-		camera_->view_matrix_ = glm::lookAt(camera_->get_position(), midPoint + camera_->get_front(), camera_->get_up());
-	}
+		glm::vec3 viewDir = glm::normalize(midPoint - camera_->get_position());
 
-	camera_->UpdateDirectionVectors();
+		camera_->yaw_ = glm::degrees(atan2(viewDir.z, viewDir.x));
+		camera_->pitch_ = glm::degrees(atan2(viewDir.y, sqrt(viewDir.x * viewDir.x + viewDir.z * viewDir.z)));
+
+		camera_->UpdateDirectionVectors();
+		camera_->view_matrix_ = glm::lookAt(camera_->get_position(), camera_->get_position() + camera_->get_front(), camera_->get_up());
+	}
 }
 
 void components::CameraComponent::Destroy()
