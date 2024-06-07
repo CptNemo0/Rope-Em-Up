@@ -19,18 +19,21 @@ class Mesh
 {
 public:
 	unsigned int vao_;
+	unsigned int ssbo_;
 
 	std::vector<Vertex> vertices_;
 	std::vector<unsigned int> indices_;
 	std::vector<Texture> textures_;
+	bool isRigged_;
 
 	Mesh() = default;
 	//Mesh(string mesh_path);
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, bool isRigged = false);
 	~Mesh();
 
 	void Init();
 	void Draw(s_ptr<Shader> shader) const;
+	void UpdateTransforms(std::vector<glm::mat4> transforms);
 };
 
 #endif //MESH_H

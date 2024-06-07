@@ -44,6 +44,8 @@ public:
 		auto& GetBoneInfoMap() { return m_BoneInfoMap; }
 		int& GetBoneCount() { return m_BoneCounter; }
 
+		void UpdateBoneTransforms(std::vector<glm::mat4> transforms);
+
 		void SetVertexBoneDataToDefault(Vertex& vertex);
 		void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
 		void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);

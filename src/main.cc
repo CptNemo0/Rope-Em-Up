@@ -476,15 +476,12 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
-    /*auto test_ball = GameObject::Create(scene_root);
-    test_ball->transform_->set_scale(glm::vec3(0.2f));
-    test_ball->transform_->set_position(player_2->transform_->get_position() + glm::vec3(1, 3, -2));
-    test_ball->AddComponent(make_shared<components::MeshRenderer>(test_model, GBufferPassShader));
-    test_ball->transform_->add_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));*/
-    
-    auto test_animation = make_shared<anim::Animation>(kMalePlayerMeshPath, M_player_model); 
+    auto test_animation = make_shared<anim::Animation>(kMalePlayerMeshPath, 0, M_player_model); 
     player_1->AddComponent(make_shared<components::Animator>(test_animation));
     player_1->transform_->set_scale(glm::vec3(0.01f));
+
+    auto test_animation2 = make_shared<anim::Animation>(kMalePlayerMeshPath, 1, M_player_model);
+    player_2->AddComponent(make_shared<components::Animator>(test_animation2));
     player_2->transform_->set_scale(glm::vec3(0.01f));
 
     Rope rope = Rope
@@ -576,15 +573,6 @@ int main()
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-
-    GBufferPassShader->Use();
-    unsigned int maxBones = MAX_BONES;
-    unsigned int ssbo;
-    glGenBuffers(1, &ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, maxBones * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
-
     LBufferPassShader->Use();
     LBufferPassShader->SetInt("irradianceMap", 8);
     LBufferPassShader->SetInt("prefilterMap", 9);
@@ -669,6 +657,7 @@ int main()
         Timer::Update(delta_time);
 
         player_1->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
+        player_2->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
         utility::DebugCameraMovement(window, DebugCameraComponent->camera_, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
@@ -806,11 +795,13 @@ int main()
 
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
-        GBufferPassShader->SetInt("numBones", maxBones);
-        auto transforms = player_1->GetComponent<components::Animator>()->GetFinalBoneMatrices();
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());
+        GBufferPassShader->SetInt("numBones", MAX_BONES);
+        //player_1->GetComponent<components::Animator>()->Update();
+        //auto transforms = player_1->GetComponent<components::Animator>()->GetFinalBoneMatrices();
+        /*glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());*/
 
         scene_root->PropagateUpdate();
 

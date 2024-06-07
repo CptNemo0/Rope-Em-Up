@@ -115,8 +115,14 @@ s_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
     textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
 
     ExtractBoneWeightForVertices(vertices, mesh, scene);
-
-    return std::make_shared<Mesh>(vertices, indices, textures);
+    if (m_BoneCounter > 0)
+    {
+        return std::make_shared<Mesh>(vertices, indices, textures, true);
+    }
+    else
+    {
+        return std::make_shared<Mesh>(vertices, indices, textures);
+    }
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
@@ -150,6 +156,12 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
     return textures;
 }
 
+
+void Model::UpdateBoneTransforms(std::vector<glm::mat4> transforms)
+{
+    for (unsigned int i = 0; i < meshes_.size(); i++)
+        meshes_.at(i)->UpdateTransforms(transforms);
+}
 
 void Model::SetVertexBoneDataToDefault(Vertex& vertex)
 {

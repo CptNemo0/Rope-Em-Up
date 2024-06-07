@@ -21,7 +21,9 @@ void components::Animator::UpdateAnimation(float dt)
 		m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt;
 		m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
 		CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
+		m_CurrentAnimation->model_->UpdateBoneTransforms(m_FinalBoneMatrices);
 	}
+
 }
 
 void components::Animator::PlayAnimation(s_ptr<anim::Animation> animation)
@@ -59,8 +61,8 @@ void components::Animator::CalculateBoneTransform(const anim::AssimpNodeData* no
 
 components::Animator::Animator(json &j)
 {
-	auto animation = make_shared<anim::Animation>(j["animation_path"], res::get_model(j["model_path"]));
-	this->Animator::Animator(animation);
+	/*auto animation = make_shared<anim::Animation>(j["animation_path"], res::get_model(j["model_path"]));
+	this->Animator::Animator(animation);*/
 }
 
 json components::Animator::Serialize()
