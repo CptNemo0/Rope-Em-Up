@@ -111,6 +111,9 @@ s_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<Texture> aoMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_ao");
     textures.insert(textures.end(), aoMaps.begin(), aoMaps.end());
 
+    std::vector<Texture> emissionMaps = loadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emission");
+    textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
+
     ExtractBoneWeightForVertices(vertices, mesh, scene);
 
     return std::make_shared<Mesh>(vertices, indices, textures);

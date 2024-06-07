@@ -51,6 +51,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd door/door_albedo.png
+map_Ke door/dorr_emissive.png
 map_Ns door/door_roughness.png
 map_Pm door/door_metallic.png
 map_Bump -bm 20.000000 door/door_normal.png
@@ -85,6 +86,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd sub3/sub3_albedo.png
+map_Ke sub3/sub3_emmisive.png
 map_Ns sub3/sub3_roughness.png
 map_Pm sub3/sub3_metallic.png
 map_Bump -bm 20.000000 sub3/sub3_normal.png
@@ -99,6 +101,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd sub4/sub4_albedo.png
+map_Ke sub4/sub4_emmisive.png
 map_Ns sub4/sub4_roughness.png
 map_Pm sub4/sub4_metallic.png
 map_Bump -bm 20.000000 sub4/sub4_normal.png
@@ -113,6 +116,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd sub5/sub5_albedo.png
+map_Ke sub5/sub5_emmisive.png
 map_Ns sub5/sub5_roughness.png
 map_Pm sub5/sub5_metallic.png
 map_Bump -bm 20.000000 sub5/sub5_normal.png

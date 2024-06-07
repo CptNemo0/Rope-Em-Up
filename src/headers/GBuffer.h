@@ -20,6 +20,7 @@ public:
 	unsigned int view_position_texture_;
 	unsigned int view_normal_texture_;
 	unsigned int mask_texture_;
+	unsigned int emissive_texture_;
 
 	unsigned int rbo_;
 

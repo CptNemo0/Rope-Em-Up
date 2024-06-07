@@ -12,3 +12,4 @@ map_Kd grass_blade_albedo.png
 map_Pm grass_blade_metallic.png
 map_NS grarss_blade_roughness.png
 map_Bump -bm 20.000000 grass_blade_normal.png
+map_Ke no_emission.png

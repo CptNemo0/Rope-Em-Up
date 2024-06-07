@@ -77,7 +77,7 @@ vec3 bloor_bloom()
             result += texture(bloom_texture, if_uv + offset).rgb;
         }
     }
-    result *= 0.00390265;
+    result *= 0.00690265;
     result *= (0.27 * (sin(if_time * 2.0) + 1.0));
     return result;
 }

@@ -13,3 +13,4 @@ map_Kd box/box_albedo.png
 map_Ns box/box_roughness.png
 map_Pm box/box_metallic.png
 map_Bump -bm 20.000000 box/box_normal.png
+map_Ke box/no_emission.png

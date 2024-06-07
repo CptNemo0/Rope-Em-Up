@@ -82,7 +82,12 @@ void Mesh::Draw(s_ptr<Shader> shader) const
         {
             glUniform1i(glGetUniformLocation(shader->id_, "roughness_map"), i);
             glBindTexture(GL_TEXTURE_2D, textures_[i].id_);
-        }   
+        }
+        else if (name == "texture_emission")
+        {
+            glUniform1i(glGetUniformLocation(shader->id_, "emission_map"), i);
+            glBindTexture(GL_TEXTURE_2D, textures_[i].id_);
+        }
     }
 
 

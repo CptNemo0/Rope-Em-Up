@@ -13,6 +13,7 @@ uniform samplerCube prefilterMap;//6
 uniform sampler2D brdfLUT;//7
 
 uniform sampler2D mask_texture; //8
+uniform sampler2D emissive_texture; //9
 
 uniform vec3 camera_position;
 
@@ -197,6 +198,7 @@ void main()
 {
     float mask =  texture(mask_texture, if_uv).r;
     vec3 albedo = texture(albedo_texture, if_uv).rgb;
+    vec3 emission = texture(emissive_texture, if_uv).rgb;
 
     if(mask > 0)
     {
@@ -206,6 +208,7 @@ void main()
 	    float roughness = mra.g;
 	    float ao = mra.b;
         float ssao = ((texture(ssao_texture, if_uv).r - 0.5) * 1.5) + 0.5;
+        
 
         vec3 N = normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
         vec3 V = normalize(camera_position - World_position);
@@ -243,7 +246,7 @@ void main()
         //vec3 ambient = vec3(0.03) * albedo;
         ////
 
-        vec3 color   = ambient + Lo;
+        vec3 color   = ambient + Lo + emission;
         color = color * ssao;
         //color = color / (color + vec3(1.0));
         //color = pow(color, vec3(1.0/2.2));
@@ -257,10 +260,10 @@ void main()
 
         if(bloom)
         {
-            float brightness = dot(color.rgb, bloom_color.rgb);
+            float brightness = dot(emission.rgb, bloom_color.rgb);
             if(brightness > bloom_threshold)
             {
-                bloom_texture = vec4(color.rgb, 1.0f);
+                bloom_texture = vec4(emission, 1.0f);
             }
             else
             {
@@ -278,7 +281,7 @@ void main()
         {
             albedo = vec3( dot(albedo, vec3(0.2126, 0.7152, 0.0722)) );
         }
-        color_texture = albedo;
+        color_texture = albedo + emission;
         bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 }

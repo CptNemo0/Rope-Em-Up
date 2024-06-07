@@ -834,16 +834,16 @@ int main()
         lbuffer.Bind();
         LBufferPassShader->Use();
         gbuffer.BindTextures(LBufferPassShader);
-        //cubemap->BindIrradianceMap(LBufferPassShader);
+        cubemap->BindIrradianceMap(LBufferPassShader);
         cubemap->BindIBLmaps(LBufferPassShader);
 
         glActiveTexture(GL_TEXTURE4);
         LBufferPassShader->SetInt("ssao_texture", 4);
         glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
 
-        glActiveTexture(GL_TEXTURE8);
-        LBufferPassShader->SetInt("mask_texture", 8);
-        glBindTexture(GL_TEXTURE_2D, gbuffer.mask_texture_);
+        //glActiveTexture(GL_TEXTURE8);
+        //LBufferPassShader->SetInt("mask_texture", 8);
+        //glBindTexture(GL_TEXTURE_2D, gbuffer.mask_texture_);
         LBufferPassShader->SetVec3("camera_position", (*activeCamera)->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
