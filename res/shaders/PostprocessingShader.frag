@@ -78,7 +78,7 @@ vec3 bloor_bloom()
         }
     }
     result *= 0.00690265;
-    result *= (0.27 * (sin(if_time * 2.0) + 1.0));
+    //result *= (0.27 * (sin(if_time * 2.0) + 1.0));
     return result;
 }
 

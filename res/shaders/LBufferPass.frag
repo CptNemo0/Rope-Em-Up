@@ -241,16 +241,19 @@ void main()
         vec3 specular = prefilteredColor * (kS * brdf.x + brdf.y);
 
         vec3 ambient = (kD * diffuse) * ao;
-        ///////
-        /// typical ambient lighting ///
-        //vec3 ambient = vec3(0.03) * albedo;
-        ////
+        
+        vec3 color = vec3(0.0);
+        if (emission != vec3(0.0))
+        {
+            color = emission;
+        }
+        else
+        {
+            color = ambient + Lo;
+        }
 
-        vec3 color   = ambient + Lo + emission;
         color = color * ssao;
-        //color = color / (color + vec3(1.0));
-        //color = pow(color, vec3(1.0/2.2));
-
+      
         if(slowed_time)
         {
             color = vec3( dot(color, vec3(0.2126, 0.7152, 0.0722)) );

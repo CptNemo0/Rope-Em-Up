@@ -24,11 +24,11 @@ uniform mat4 projection_matrix;
 void main()
 {
 	float inv_quality = 1.0 / quality;
-	vec2 noise_scale = vec2(width * 0.25, height * 0.25);
+	vec2 noise_scale = vec2(width * 0.25, height *  0.25);
 
 	vec3 position = texture(position_texture, if_uv).xyz;
     vec3 noise = normalize(texture(noise_texture, if_uv * noise_scale).xyz);
-	vec3 normal =  normalize(texture(normal_texture, if_uv).rgb * 2.0 - 1.0);
+	vec3 normal =  normalize(texture(normal_texture, if_uv).rgb)* 2.0 - 1.0;
 
     float mask = texture(mask_texture, if_uv).r;
 
