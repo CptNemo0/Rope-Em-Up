@@ -176,6 +176,8 @@ int main()
     const string kRoomLayoutGenerationSettingsInitPath = "res/config/RoomLayoutGenerationSettingsInit.ini";
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
+
+    const string kTentaclPath = "res/enemy/enemy.obj";
 #pragma endregion Resources Paths
     
 #pragma region CameraSettings
@@ -356,7 +358,7 @@ int main()
     //auto F_player_model = res::get_model(lFemalePlayerMeshPath);
     auto M_player_model = res::get_model(kMalePlayerMeshPath);
     auto debug_model = res::get_model(kDebugMeshPath);
-    auto enemy_model = res::get_model(kEnemyMeshPath);
+    auto enemy_model = res::get_model(kTentaclPath);
     auto wall_model = res::get_model(kWallPath);
     auto module_1_model = res::get_model(kModule1Path);
     auto module_2_model = res::get_model(kModule2Path);
@@ -920,10 +922,10 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
-        HUDshader->Use();
+        /*HUDshader->Use();
 
         HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
-        HUD_root->PropagateUpdate();
+        HUD_root->PropagateUpdate();*/
         
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
