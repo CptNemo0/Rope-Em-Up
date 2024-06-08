@@ -597,7 +597,7 @@ int main()
     SSAOShader->SetInt("height", mode->height);
     SSAOShader->SetInt("width", mode->width);
     SSAOShader->SetInt("quality",(int)ssao_buffer.quality_);
-    SSAOShader->SetFloat("radius", 0.75);
+    SSAOShader->SetFloat("radius", 0.4);
     SSAOShader->SetFloat("bias", 0.1);
     ssao_buffer.SetKernel(SSAOShader);
 
@@ -813,7 +813,7 @@ int main()
 
         if (use_ssao)
         {
-            glViewport(0, 0, mode->width / 2, mode->height / 2);
+            glViewport(0, 0, mode->width * 0.75f, mode->height * 0.75f);
             ssao_buffer.Bind();
             SSAOShader->Use();
             ssao_buffer.BindTextures(SSAOShader, gbuffer.view_position_texture_, gbuffer.normal_texture_, gbuffer.mask_texture_);
@@ -836,12 +836,6 @@ int main()
         }
         //////////////////////////////////
         
-        // Bind buffer - Bind textures - Use Shader - Draw 
-        /**/
-
-        
-        
-        //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
         lbuffer.Bind();
