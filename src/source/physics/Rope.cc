@@ -62,7 +62,6 @@ void Rope::AssignPlayerBegin(std::shared_ptr<GameObject> player_begin)
 	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(player_particle, segment_particle, kDistance + 0.001f);
 	rope_constraints_.push_front(constraint);
 	player_begin_ = player_begin;
-	player_begin_controller_ = player_begin->GetComponent<components::PlayerController>();
 }
 
 void Rope::AssignPlayerEnd(std::shared_ptr<GameObject> player_end)
@@ -83,7 +82,6 @@ void Rope::AssignPlayerEnd(std::shared_ptr<GameObject> player_end)
 	auto constraint = pbd::PBDManager::i_->CreateRopeConstraint(segment_particle, player_particle, kDistance + 0.001f);
 	rope_constraints_.push_back(constraint);
 	player_end_ = player_end;
-	player_end_controller_ = player_end->GetComponent<components::PlayerController>();
 }
 
 int Rope::Size()
@@ -167,6 +165,8 @@ void Rope::RemoveSegment()
 
 void Rope::ChokeCheck(generation::Room *room)
 {
+	s_ptr<components::PlayerController> player_begin_controller_ = player_begin_->GetComponent<components::PlayerController>();
+	s_ptr<components::PlayerController> player_end_controller_ = player_end_->GetComponent<components::PlayerController>();
 	if (!pull_cooldown_ && player_begin_controller_->is_pulling_ && player_end_controller_->is_pulling_)
 	{
 		ChokeList::i_->Choke(10.0f);
@@ -177,6 +177,39 @@ void Rope::ChokeCheck(generation::Room *room)
 	{
 		pull_cooldown_ = false;
 	}
+}
+
+json Rope::Serialize()
+{
+    json j;
+
+	j["rope_length"] = rope_segments_.size();
+	for (auto &segment : rope_segments_)
+	{
+		auto pos = segment->transform_->get_position();
+		j["rope_segment_positions"].push_back({pos.x, pos.y, pos.z});
+	}
+
+	j["segment_mass"] = segment_mass_;
+	j["segment_drag"] = segment_drag_;
+
+	return j;
+}
+
+void Rope::Deserialize(json &j)
+{
+	while (rope_constraints_.size() != 1)
+	{
+		RemoveSegment();
+	}
+	for (auto j_pos : j["rope_segment_positions"])
+	{
+		AddSegment(root_);
+		glm::vec3 segment_pos = {j_pos[0], j_pos[1], j_pos[2]};
+		rope_segments_.back()->transform_->TeleportToPosition(segment_pos);
+	}
+	segment_mass_ = j["segment_mass"];
+	segment_drag_ = j["segment_drag"];
 }
 
 Rope::~Rope()

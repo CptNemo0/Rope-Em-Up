@@ -38,7 +38,7 @@ void components::ParticleEmitter::Start()
     nullptr, true));
     ParticleEmitterManager::i_->emitters_.push_back(shared_from_this());
 
-    Timer::AddTimer(emission_rate_, [this]()
+    emission_timer_ = Timer::AddTimer(emission_rate_, [this]()
     {
         if (active_)
         {
@@ -54,6 +54,10 @@ void components::ParticleEmitter::Update()
 
 void components::ParticleEmitter::Destroy()
 {
+    Timer::RemoveTimer(emission_timer_.id);
+    ParticleEmitterManager::i_->RemoveEmitter(shared_from_this());
+    glDeleteVertexArrays(1, &VAO_);
+    glDeleteBuffers(1, &VBO_);
 }
 
 void components::ParticleEmitter::UpdateParticles(float delta_time)
@@ -90,22 +94,25 @@ void components::ParticleEmitter::UpdateParticles(float delta_time)
 
 void components::ParticleEmitter::EmitParticles()
 {
-    int rand_amount = random::RandInt(spawns_per_emission_.x, spawns_per_emission_.y);
-
-    for (int i = 0; i < rand_amount; i++)
+    if (active_)
     {
-        Particle particle;
-        particle.life_time = microseconds(static_cast<int>(life_time_ * 1000000));
-        particle.expiration_time = particle.life_time;
-        particle.size = random::RandFloat(start_size_.x, start_size_.y);
-        particle.color = start_color_;
-        particle.position = transform_->get_global_position() + random::RandInsideSphere() * start_position_displacement_;
-        particle.velocity = start_velocity_ + glm::vec3(random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
-                                                        random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
-                                                        random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_));
-        particle.rotation_angle = random::RandFloat(0.0f, glm::two_pi<float>());
-        particle.id_ = current_id_++;
-        particles_.push_back(particle);
+        int rand_amount = random::RandInt(spawns_per_emission_.x, spawns_per_emission_.y);
+
+        for (int i = 0; i < rand_amount; i++)
+        {
+            Particle particle;
+            particle.life_time = microseconds(static_cast<int>(life_time_ * 1000000));
+            particle.expiration_time = particle.life_time;
+            particle.size = random::RandFloat(start_size_.x, start_size_.y);
+            particle.color = start_color_;
+            particle.position = transform_->get_global_position() + random::RandInsideSphere() * start_position_displacement_;
+            particle.velocity = start_velocity_ + glm::vec3(random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
+                                                            random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
+                                                            random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_));
+            particle.rotation_angle = random::RandFloat(0.0f, glm::two_pi<float>());
+            particle.id_ = current_id_++;
+            particles_.push_back(particle);
+        }
     }
 }
 
@@ -129,8 +136,22 @@ void components::ParticleEmitter::DrawParticles()
 
 components::ParticleEmitter::ParticleEmitter(json &j)
 {
-    // TODO:
-    // make camera global cus I can't really serialize a camera
+    int max_particles = j["max_particles"];
+    s_ptr<tmp::Texture> texture = res::get_texture(j["texture_path"]);
+    s_ptr<Shader> shader = res::get_shader(j["shader_paths"][0], j["shader_paths"][1], j["shader_paths"][2]);
+
+    this->ParticleEmitter::ParticleEmitter(max_particles, texture, shader);
+    emission_rate_ = j["emission_rate"];
+    spawns_per_emission_ = {j["spawns_per_emission"][0], j["spawns_per_emission"][1]};
+    life_time_ = j["life_time"];
+    start_size_ = {j["start_size"][0], j["start_size"][1]};
+    end_size_ = {j["end_size"][0], j["end_size"][1]};
+    start_color_ = {j["start_color"][0], j["start_color"][1], j["start_color"][2], j["start_color"][3]};
+    end_color_ = {j["end_color"][0], j["end_color"][1], j["end_color"][2], j["end_color"][3]};
+    start_position_displacement_ = j["start_position_displacement"];
+    start_velocity_ = {j["start_velocity"][0], j["start_velocity"][1], j["start_velocity"][2]};
+    start_velocity_displacement_ = j["start_velocity_displacement"];
+    start_acceleration_ = {j["start_acceleration"][0], j["start_acceleration"][1], j["start_acceleration"][2]};
 }
 
 json components::ParticleEmitter::Serialize()
@@ -140,6 +161,18 @@ json components::ParticleEmitter::Serialize()
     j["max_particles"] = max_particles_;
     j["texture_path"] = texture_->path_;
     j["shader_paths"] = {shader_->v_path, shader_->g_path, shader_->f_path};
+
+    j["emission_rate"] = emission_rate_;
+    j["spawns_per_emission"] = {spawns_per_emission_.x, spawns_per_emission_.y};
+    j["life_time"] = life_time_;
+    j["start_size"] = {start_size_.x, start_size_.y};
+    j["end_size"] = {end_size_.x, end_size_.y};
+    j["start_color"] = {start_color_.r, start_color_.g, start_color_.b, start_color_.a};
+    j["end_color"] = {end_color_.r, end_color_.g, end_color_.b, end_color_.a};
+    j["start_position_displacement"] = start_position_displacement_;
+    j["start_velocity"] = {start_velocity_.x, start_velocity_.y, start_velocity_.z};
+    j["start_velocity_displacement"] = start_velocity_displacement_;
+    j["start_acceleration"] = {start_acceleration_.x, start_acceleration_.y, start_acceleration_.z};
 
     return j;
 }

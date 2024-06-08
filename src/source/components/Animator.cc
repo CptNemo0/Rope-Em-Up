@@ -61,15 +61,21 @@ void components::Animator::CalculateBoneTransform(const anim::AssimpNodeData* no
 
 components::Animator::Animator(json &j)
 {
-	/*auto animation = make_shared<anim::Animation>(j["animation_path"], res::get_model(j["model_path"]));
-	this->Animator::Animator(animation);*/
+	string animation_path = j["animation_path"];
+	string model_path = j["model_path"];
+	int animation_number = j["animation_number"];
+
+	auto animation = res::get_animation(animation_path, animation_number, model_path);
+	this->Animator::Animator(animation);
 }
 
 json components::Animator::Serialize()
 {
 	json j;
+	
 	j["animation_path"] = m_CurrentAnimation->animation_path_;
 	j["model_path"] = m_CurrentAnimation->model_->path_;
+	j["animation_number"] = m_CurrentAnimation->animationNumber_;
 	
 	return j;
 }

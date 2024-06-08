@@ -7,6 +7,7 @@
 #include "../Shader.h"
 #include "../Texture.h"
 #include "../Font.h"
+#include "../animation/Animation.h"
 
 #include "../typedef.h"
 
@@ -20,6 +21,8 @@ namespace res
     s_ptr<tmp::Texture> get_texture(string path);
 
     s_ptr<Font> get_font(string path);
+
+    s_ptr<anim::Animation> get_animation(string anim_path, int anim_number, string model_path);
 
     int init_freetype();
 };

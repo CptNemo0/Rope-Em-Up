@@ -35,6 +35,8 @@ public:
 
 	void PropagateUpdate();
 
+	void ClearComponents();
+
 	// Deep destroy of the gameobject and its children
 	void Destroy();
 	void Enable();

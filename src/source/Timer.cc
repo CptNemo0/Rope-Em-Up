@@ -67,6 +67,16 @@ bool UpdateTimer(Timer &timer, float delta_time)
 
 void Update(float delta_time)
 {
+    for (auto &id : ids_to_remove)
+    {
+        auto it = std::find_if(timers.begin(), timers.end(), [id](const Timer &t){ return t.id == id; });
+        if (it != timers.end())
+        {
+            timers.erase(it);
+        }
+    }
+    ids_to_remove.clear();
+
     auto size = timers.size();
     for (size_t idx = 0u; idx < size; ++idx)
     {
@@ -77,15 +87,6 @@ void Update(float delta_time)
             ids_to_remove.push_back(timer.id);
         }
     }
-    for (auto &id : ids_to_remove)
-    {
-        auto it = std::find_if(timers.begin(), timers.end(), [id](const Timer &t){ return t.id == id; });
-        if (it != timers.end())
-        {
-            timers.erase(it);
-        }
-    }
-    ids_to_remove.clear();
 }
 
 } // namespace Timer

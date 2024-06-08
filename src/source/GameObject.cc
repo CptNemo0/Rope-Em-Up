@@ -44,6 +44,15 @@ void GameObject::PropagateUpdate()
 	}
 }
 
+void GameObject::ClearComponents()
+{
+	for (auto& component : components_)
+	{
+		component.second->Destroy();
+	}
+	components_.clear();
+}
+
 void GameObject::StartNewComponents()
 {
 	for (auto& component : components_)
@@ -58,10 +67,7 @@ void GameObject::StartNewComponents()
 
 void GameObject::PropagateDestroy()
 {
-	for (auto& component : components_)
-	{
-		component.second->Destroy();
-	}
+	ClearComponents();
 	for (auto& child : transform_->children_)
 	{
 		child->game_object_->PropagateDestroy();

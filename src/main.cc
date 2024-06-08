@@ -325,7 +325,7 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     Bloom bloom = Bloom(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
@@ -486,11 +486,11 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
-    auto test_animation = make_shared<anim::Animation>(kMalePlayerMeshPath, 0, M_player_model); 
+    auto test_animation = res::get_animation(kMalePlayerMeshPath, 0, M_player_model->path_);
     player_1->AddComponent(make_shared<components::Animator>(test_animation));
     player_1->transform_->set_scale(glm::vec3(0.01f));
 
-    auto test_animation2 = make_shared<anim::Animation>(kMalePlayerMeshPath, 1, M_player_model);
+    auto test_animation2 = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
     player_2->AddComponent(make_shared<components::Animator>(test_animation2));
     player_2->transform_->set_scale(glm::vec3(0.01f));
 
@@ -519,7 +519,9 @@ int main()
 
 
 #pragma region Camera
-    auto isometricCamera = GameObject::Create(scene_root);
+    auto camera_root = GameObject::Create();
+
+    auto isometricCamera = GameObject::Create(camera_root);
     isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     auto isometricCameraComp = make_shared<components::CameraComponent>(player_1, player_2, camera);
     isometricCamera->AddComponent(isometricCameraComp);
@@ -527,11 +529,11 @@ int main()
     isometricCameraComp->distanceZ_ = -10.0f;
     isometricCameraComp->height_ = 15.0f;
 
-    auto topDownCamera = GameObject::Create(scene_root);
+    auto topDownCamera = GameObject::Create(camera_root);
     topDownCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     topDownCamera->AddComponent(make_shared<components::CameraComponent>(player_1, player_2, topCamera));
 
-    auto DebugCamera = GameObject::Create(scene_root);
+    auto DebugCamera = GameObject::Create(camera_root);
     DebugCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     DebugCamera->AddComponent(make_shared<components::CameraComponent>(debugCamera));
 
@@ -617,8 +619,9 @@ int main()
     glViewport(0, 0, scrWidth, scrHeight);*/
 
     float fixed_update_rate = pbd::kMsPerUpdate;
-    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, &fixed_update_rate, player_1, player_2]()
+    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, &fixed_update_rate, &player_1, &player_2, &camera_root]()
     {
+        camera_root->PropagateUpdate();
         ai::EnemyAIManager::i_->UpdateAI();
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(fixed_update_rate);
@@ -1256,6 +1259,9 @@ int main()
         if (ImGui::Button("Serialize"))
         {
             json j = rlg.Serialize();
+            j["rope"] = rope.Serialize();
+            j["player_1"] = player_1->Serialize();
+            j["player_2"] = player_2->Serialize();
 
             j["current_room"] = { room->position.x, room->position.y };
             
@@ -1276,6 +1282,20 @@ int main()
             rlg = generation::RoomLayoutGenerator(j, room_root);
             glm::ivec2 current_room = { j["current_room"][0], j["current_room"][1] };
             room = &rlg.rooms[current_room];
+            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+            pbd::PBDManager::i_->set_walls(walls);
+
+            rope.Deserialize(j["rope"]);
+            player_1->Destroy();
+            player_2->Destroy();
+            *player_1 = *GameObject::Deserialize(j["player_1"]);
+            *player_2 = *GameObject::Deserialize(j["player_2"]);
+            scene_root->transform_->AddChild(player_1->transform_);
+            scene_root->transform_->AddChild(player_2->transform_);
+            rope.rope_constraints_.pop_back();
+            rope.rope_constraints_.pop_front();
+            rope.AssignPlayerBegin(player_1);
+            rope.AssignPlayerEnd(player_2);
         }
 
         ImGui::End();

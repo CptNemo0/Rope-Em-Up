@@ -3,8 +3,10 @@
 
 #include "glm/glm.hpp"
 #include <list>
-#include "PBD.h"
 #include <memory>
+#include "nlohmann/json.hpp"
+#include "PBD.h"
+
 #include "../GameObject.h"
 #include "../Model.h"
 #include "../components/MeshRenderer.h"
@@ -18,6 +20,7 @@
 #include "../ChokeList.h"
 #include "../Model.h"
 #include "../Shader.h"
+#include "../typedef.h"
 
 class Rope
 {
@@ -27,15 +30,11 @@ public:
 	std::deque<s_ptr<GameObject>> rope_segments_;
 	std::deque<s_ptr<pbd::RopeConstraint>> rope_constraints_;
 	
-	int rope_lenght_;
-	
 	float segment_mass_;
 	float segment_drag_;
 
 	s_ptr<GameObject> player_begin_;
 	s_ptr<GameObject> player_end_;
-	s_ptr<components::PlayerController> player_begin_controller_;
-	s_ptr<components::PlayerController> player_end_controller_;
 	bool pull_cooldown_ = false;
 
 	std::shared_ptr<Model> model_;
@@ -58,6 +57,9 @@ public:
 	void RemoveSegment();
 
 	void ChokeCheck(generation::Room *room);
+
+	json Serialize();
+	void Deserialize(json &j);
 
 	~Rope();
 };

@@ -66,6 +66,7 @@ public:
     glm::vec3 start_acceleration_ = glm::vec3(0.0f, 0.0f, 0.0f);
 
     s_ptr<Timer::Timer> emitter_timer_;
+    Timer::Timer emission_timer_;
 
     ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader);
     void Start() override;

@@ -42,6 +42,7 @@ public:
     std::vector<s_ptr<components::ParticleEmitter>> emitters_;
 
     void Update(float delta_time);
+    void RemoveEmitter(s_ptr<components::ParticleEmitter> emitter);
     void Draw();
 };
 

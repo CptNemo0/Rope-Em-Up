@@ -29,13 +29,13 @@ private:
 	std::vector<Bone> m_Bones;
 	AssimpNodeData m_RootNode;
 	std::map<std::string, BoneInfo> m_BoneInfoMap;
-	int animationNumber_;
 public:
 	Animation() = default;
 	~Animation() = default;
 
 	string animation_path_;
 	s_ptr<Model> model_;
+	int animationNumber_;
 
 	Animation(const std::string& animationPath, int animationNumber, s_ptr<Model> model);
 	Bone* FindBone(const std::string& name);
