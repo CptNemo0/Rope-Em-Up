@@ -83,6 +83,13 @@ void components::Transform::set_scale(const glm::vec3 & scale)
     UpdateSelfAndChildren();
 }
 
+void components::Transform::scale_in(const glm::vec3 &direction, float amount)
+{
+    position_ += direction * ((amount - 1.0f) * scale_);
+    scale_ *= glm::abs(direction) * amount + (glm::vec3(1.0f) - glm::abs(direction));
+    UpdateSelfAndChildren();
+}
+
 void components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
 {
     const glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), scale_);
