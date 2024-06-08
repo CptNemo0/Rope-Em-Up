@@ -2,8 +2,8 @@
 
 input::InputManager *input::InputManager::i_ = nullptr;
 
-input::InputManager::InputManager(GLFWwindow *window, s_ptr<llr::Camera> *camera)
-    : window_(window), camera_(camera)
+input::InputManager::InputManager(GLFWwindow *window)
+    : window_(window)
 {
     glfwSetJoystickCallback(JoystickStateCallback);
     old_gamepad_states_.emplace(GLFW_JOYSTICK_1, GLFWgamepadstate());
@@ -81,7 +81,7 @@ void input::InputManager::UpdateGamepadState(int gamepadID)
 
         if (new_axis_state != old_axis_state)
         {
-            auto axis = -1.0f * glm::rotate(new_axis_state, glm::radians((*camera_)->yaw_ - 90.0f));
+            auto axis = -1.0f * glm::rotate(new_axis_state, glm::radians(Global::i_->active_camera_->yaw_ - 90.0f));
             NotifyAction(gamepadID, Action::MOVE, State(axis));
         }
 
@@ -122,7 +122,7 @@ void input::InputManager::UpdateKeyboardState(int gamepadID)
     if (key_state_changed)
     {
         axis_state = SafeNormalize(axis_state);
-        auto axis = glm::rotate(axis_state, glm::radians((*camera_)->yaw_ - 90.0f));
+        auto axis = glm::rotate(axis_state, glm::radians(Global::i_->active_camera_->yaw_ - 90.0f));
         NotifyAction(gamepadID, Action::MOVE, State(axis));
     }
 

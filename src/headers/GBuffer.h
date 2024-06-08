@@ -5,7 +5,7 @@
 #include <stdlib.h>  
 #include <memory>
 
-#include "global.h"
+#include "typedef.h"
 #include "Shader.h"
 
 class GBuffer

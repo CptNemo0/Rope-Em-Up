@@ -10,7 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "global.h"
+#include "typedef.h"
 #include "Lights.h"
 
 class Shader

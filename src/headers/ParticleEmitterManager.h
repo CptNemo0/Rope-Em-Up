@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "global.h"
+#include "typedef.h"
 #include "components/ParticleEmitter.h"
 #include "Timer.h"
 #include "Camera.h"

@@ -6,7 +6,7 @@
 #include "nlohmann/json.hpp"
 
 #include "components/HealthComponent.h"
-#include "global.h"
+#include "typedef.h"
 #include "glm/glm.hpp"
 
 class HealthManager

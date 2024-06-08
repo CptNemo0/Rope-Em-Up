@@ -13,7 +13,7 @@
 #include "../Shader.h"
 #include "../components/Transform.h"
 
-#include "../global.h"
+#include "../typedef.h"
 
 namespace components
 {

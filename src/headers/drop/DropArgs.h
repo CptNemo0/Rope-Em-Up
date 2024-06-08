@@ -2,7 +2,7 @@
 #define DROP_ARGS_H
 
 #include "glm/glm.hpp"
-#include "../global.h"
+#include "../typedef.h"
 #include "../Shader.h"
 #include "../Model.h"
 namespace drop

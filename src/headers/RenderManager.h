@@ -3,7 +3,7 @@
 
 #include "GBuffer.h"
 #include "LBuffer.h"
-#include "global.h"
+#include "typedef.h"
 #include "Shader.h"
 #include "components/MeshRenderer.h"
 #include "glad/glad.h"

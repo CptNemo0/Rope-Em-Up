@@ -2,7 +2,7 @@
 #define PLAYER_STATS_MANAGER
 
 #include "GameObject.h"
-#include "global.h"
+#include "typedef.h"
 #include "physics/Rope.h"
 
 class PlayerStatsManager

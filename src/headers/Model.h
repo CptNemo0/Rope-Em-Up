@@ -12,7 +12,7 @@
 #include "animation/AnimData.h"
 #include "glad/glad.h"
 
-#include "global.h"
+#include "typedef.h"
 #include "Vertex.h"
 #include "Mesh.h"
 #include <map>

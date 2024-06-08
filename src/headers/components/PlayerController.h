@@ -10,7 +10,7 @@
 #include "../Timer.h"
 
 
-#include "../global.h"
+#include "../typedef.h"
 
 namespace components
 {

@@ -4,7 +4,7 @@
 #include "glad/glad.h"
 #include <stdlib.h>
 
-#include "global.h"
+#include "typedef.h"
 #include "Shader.h"
 
 namespace ppc

@@ -4,7 +4,7 @@
 #include "../res/Resources.h"
 #include "../animation/Animation.h"
 #include "Component.h"
-#include "../global.h"
+#include "../typedef.h"
 
 namespace components
 {

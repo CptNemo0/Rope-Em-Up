@@ -2,7 +2,7 @@
 #define FILE_READ_H
 
 #include "ini.h"
-#include "../global.h"
+#include "../typedef.h"
 #include "../ai/EnemyAIManager.h"
 #include "../Vehicle.h"
 #include "glm/glm.hpp"

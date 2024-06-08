@@ -8,7 +8,7 @@
 #include "../Texture.h"
 #include "../Font.h"
 
-#include "../global.h"
+#include "../typedef.h"
 
 namespace res
 {

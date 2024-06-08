@@ -8,7 +8,7 @@
 #include "../GameObject.h"
 #include "../Timer.h"
 
-#include "../global.h"
+#include "../typedef.h"
 
 enum HEALTH_TYPE
 {

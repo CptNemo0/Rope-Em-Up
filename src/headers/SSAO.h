@@ -1,7 +1,7 @@
 #ifndef SSAO_H
 #define SSAO_H
 
-#include "global.h"
+#include "typedef.h"
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include <random>

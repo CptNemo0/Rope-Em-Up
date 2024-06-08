@@ -1,59 +1,33 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <memory>
-#include <string>
-#include <iostream>
-#include <chrono>
+#include "Camera.h"
+#include "typedef.h"
 
-#include "nlohmann/json.hpp"
-
-template <typename T>
-using s_ptr = std::shared_ptr<T>;
-template <typename T>
-using w_ptr = std::weak_ptr<T>;
-using std::make_shared;
-
-using std::string;
-using std::cout;
-using std::endl;
-using std::cerr;
-
-using std::chrono::steady_clock;
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-using std::chrono::duration;
-using std::chrono::microseconds;
-using std::chrono::milliseconds;
-using std::chrono::seconds;
-
-using json = nlohmann::json;
-
-const float kQuadVertices[] =
+class Global
 {
-    // positions   // texCoords
-    -1.0f,  1.0f,  0.0f, 1.0f,
-    -1.0f, -1.0f,  0.0f, 0.0f,
-     1.0f, -1.0f,  1.0f, 0.0f,
+private:
+    Global() {}
+    ~Global() {}
+public:
+    static Global *i_;
+    static void Initialize()
+    {
+        if (i_ == nullptr)
+        {
+            i_ = new Global();
+        }
+    }
+    static void Destroy()
+    {
+        if (i_ != nullptr)
+        {
+            delete i_;
+            i_ = nullptr;
+        }
+    }
 
-    -1.0f,  1.0f,  0.0f, 1.0f,
-     1.0f, -1.0f,  1.0f, 0.0f,
-     1.0f,  1.0f,  1.0f, 1.0f
+    s_ptr<llr::Camera> active_camera_ = nullptr;
 };
-
-enum DROP_TYPE
-{
-    EXP,
-    HP,
-    SPELL
-};
-
-enum SPELLS
-{
-    NOT_A_SPELL,
-    SKULL_MINION
-};
-
-#define MAX_BONES 200
 
 #endif // !GLOBAL_H

@@ -37,7 +37,7 @@
 #include "../physics/Rope.h"
 #include "Room.h"
 #include "../GrassRendererManager.h"
-#include "../global.h"
+#include "../typedef.h"
 
 namespace generation
 {

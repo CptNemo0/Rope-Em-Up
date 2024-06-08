@@ -16,7 +16,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/vector_angle.hpp"
 #include "stb_easy_font.h"
-#include "headers/global.h"
+#include "headers/typedef.h"
 #include "headers/Camera.h"
 #include "headers/collisions/Collider.h"
 #include "headers/collisions/Collisions.h"
@@ -67,6 +67,7 @@
 #include "headers/GrassRendererManager.h"
 #include "headers/res/Resources.h"
 #include "headers/SpellCaster.h"
+#include "headers/Global.h"
 
 int main()
 {
@@ -182,7 +183,7 @@ int main()
 #pragma endregion Resources Paths
     
 #pragma region CameraSettings
-    const float kFov = 90.0f;
+    const float kFov = 60.0f;
     const float kNear = 0.1f;
     const float kFar = 1000.0f;
     float kpitch = -90.0f;
@@ -254,7 +255,8 @@ int main()
     ChokeList::Initialize();
     SpellCaster::Initialize();
     res::init_freetype();
-    
+    Global::Initialize();
+    input::InputManager::Initialize(window);
 
 #pragma endregion Initialization
     
@@ -282,11 +284,9 @@ int main()
     debugCamera->set_pitch(-90.0f);
     debugCamera->set_yaw(-90.0f);
 
-    s_ptr<llr::Camera>* activeCamera = &camera;
+    Global::i_->active_camera_ = camera;
 
-    input::InputManager::Initialize(window, activeCamera);
-
-    auto projection_matrix = glm::perspective(glm::radians((*activeCamera)->get_fov()), (*activeCamera)->get_aspect_ratio(), (*activeCamera)->get_near(), (*activeCamera)->get_far());
+    auto projection_matrix = glm::perspective(glm::radians(camera->get_fov()), camera->get_aspect_ratio(), camera->get_near(), camera->get_far());
     auto ortho_matrix = glm::ortho(0.0f, (float)mode->width, 0.0f, (float)mode->height);
 
 #pragma endregion CamerasConfiguration
@@ -318,7 +318,7 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
@@ -515,9 +515,9 @@ int main()
     isometricCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     auto isometricCameraComp = make_shared<components::CameraComponent>(player_1, player_2, camera);
     isometricCamera->AddComponent(isometricCameraComp);
-    isometricCameraComp->distanceX_ = -7.0f;
-    isometricCameraComp->distanceZ_ = -7.0f;
-    isometricCameraComp->height_ = 10.0f;
+    isometricCameraComp->distanceX_ = -10.0f;
+    isometricCameraComp->distanceZ_ = -10.0f;
+    isometricCameraComp->height_ = 15.0f;
 
     auto topDownCamera = GameObject::Create(scene_root);
     topDownCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -559,7 +559,7 @@ int main()
 
     auto particle_emitter = GameObject::Create(player_1);
     particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader, activeCamera));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->life_time_ = 1.0f;
@@ -779,16 +779,18 @@ int main()
 
         glViewport(0, 0, mode->width, mode->height);
 
+        auto active_camera = Global::i_->active_camera_;
+
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
 
         BackgroundShader->Use();
-        BackgroundShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+        BackgroundShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
 
         GrassShader->Use();
-        GrassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+        GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         GrassShader->SetMatrix4("projection_matrix", projection_matrix);
         GrassShader->SetFloat("time", glfwGetTime());
         GrassShader->SetVec3("pp1", player_1->transform_->get_position());
@@ -797,7 +799,7 @@ int main()
 
 
         GBufferPassShader->Use();
-        GBufferPassShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+        GBufferPassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
         GBufferPassShader->SetInt("numBones", MAX_BONES);
@@ -852,7 +854,7 @@ int main()
         //glActiveTexture(GL_TEXTURE8);
         //LBufferPassShader->SetInt("mask_texture", 8);
         //glBindTexture(GL_TEXTURE_2D, gbuffer.mask_texture_);
-        LBufferPassShader->SetVec3("camera_position", (*activeCamera)->get_position());
+        LBufferPassShader->SetVec3("camera_position", active_camera->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         LBufferPassShader->SetInt("light_num", room->lamp_positions.size());
@@ -906,7 +908,7 @@ int main()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         ParticleShader->Use();
-        ParticleShader->SetMatrix4("view_matrix", (*activeCamera)->GetViewMatrix());
+        ParticleShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
 
@@ -985,30 +987,22 @@ int main()
         const char* items[] = { "Isometric", "Top Down", "Debugging" };
         static int selectedItem = 0;
         ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
-
-            switch (selectedItem)
-            {
-            case 0:
-                *activeCamera = isometricCameraComponent->camera_;
-                //isometricCameraComponent->transform_->set_position((*activeCamera)->position_);
-                ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 20.0f, "%.0f");
-                ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, -10.0f, 10.0f, "%.0f");
-                ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, -10.0f, 10.0f, "%.0f");
-                break;
-            case 1:
-                *activeCamera = topDownCameraComponent->camera_;
-                //topDownCameraComponent->transform_->set_position((*activeCamera)->position_);
-                ImGui::SliderFloat("Y", &topDownCameraComponent->height_, 1.0f, 100.0f, "%.2f");
-                break;
-            case 2:
-                *activeCamera = DebugCameraComponent->camera_;
-                //DebugCameraComponent->transform_->set_position((*activeCamera)->position_);
-                break;
-            }
-
-
-        ImGui::DragFloat3("Position", glm::value_ptr((*activeCamera)->position_), 0.1f, -100.0f, 100.0f, "%.2f");
-    
+        switch (selectedItem)
+        {
+        case 0:
+            Global::i_->active_camera_ = isometricCameraComponent->camera_;
+            ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 20.0f, "%.0f");
+            ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, -10.0f, 10.0f, "%.0f");
+            ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, -10.0f, 10.0f, "%.0f");
+            break;
+        case 1:
+            Global::i_->active_camera_ = topDownCameraComponent->camera_;
+            ImGui::SliderFloat("Y", &topDownCameraComponent->height_, 1.0f, 100.0f, "%.2f");
+            break;
+        case 2:
+            Global::i_->active_camera_ = DebugCameraComponent->camera_;
+            break;
+        }
         ImGui::End();
 
         ImGui::Begin("Lights");

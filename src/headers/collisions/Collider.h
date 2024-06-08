@@ -12,7 +12,7 @@
 #include "Collisions.h"
 #include "../Model.h"
 
-#include "../global.h"
+#include "../typedef.h"
 
 namespace components
 {

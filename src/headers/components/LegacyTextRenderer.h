@@ -4,7 +4,7 @@
 #include "stb_easy_font.h"
 #include <vector>
 
-#include "../global.h"
+#include "../typedef.h"
 #include "../GameObject.h"
 #include "../components/Transform.h"
 

@@ -2,7 +2,7 @@
 #define L_BUFFER_H
 
 #include "glad/glad.h"
-#include "global.h"
+#include "typedef.h"
 #include "Shader.h"
 #include "glm/glm.hpp"
 class LBuffer

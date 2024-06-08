@@ -6,7 +6,7 @@
 
 #include "nlohmann/json.hpp"
 
-#include "../global.h"
+#include "../typedef.h"
 
 class GameObject;
 

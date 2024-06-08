@@ -9,7 +9,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "../global.h"
+#include "../typedef.h"
 #include "../Mesh.h"
 
 namespace collisions

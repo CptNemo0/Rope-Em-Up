@@ -8,7 +8,7 @@
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
-#include "global.h"
+#include "typedef.h"
 
 struct Glyph
 {

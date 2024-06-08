@@ -15,7 +15,7 @@
 #include "../GameObject.h"
 #include "Transform.h"
 #include "../res/Resources.h"
-#include "../global.h"
+#include "../typedef.h"
 
 namespace components
 {

@@ -15,7 +15,8 @@
 #include "../Camera.h"
 #include "../Random.h"
 
-#include "../global.h"
+#include "../typedef.h"
+#include "../Global.h"
 
 struct Particle
 {
@@ -43,7 +44,6 @@ private:
 
     s_ptr<tmp::Texture> texture_;
     s_ptr<Shader> shader_;
-    s_ptr<llr::Camera> *camera_;
     s_ptr<Transform> transform_;
 
     std::deque<Particle> particles_;
@@ -67,7 +67,7 @@ public:
 
     s_ptr<Timer::Timer> emitter_timer_;
 
-    ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, s_ptr<llr::Camera> *camera);
+    ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader);
     void Start() override;
     void Update() override;
     void Destroy() override;

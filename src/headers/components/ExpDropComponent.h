@@ -7,7 +7,7 @@
 #include "../drop/DropManager.h"
 #include "../drop/Drop.h"
 #include "../drop/DropArgs.h"
-#include "../global.h"
+#include "../typedef.h"
 
 namespace components
 {

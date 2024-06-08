@@ -16,7 +16,7 @@
 #include "../components/Transform.h"
 #include "../res/Resources.h"
 
-#include "../global.h"
+#include "../typedef.h"
 
 class components::Collider;
 

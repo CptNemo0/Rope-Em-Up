@@ -11,7 +11,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include "../global.h"
+#include "../typedef.h"
 #include "Sounds.h"
 #include "../Random.h"
 

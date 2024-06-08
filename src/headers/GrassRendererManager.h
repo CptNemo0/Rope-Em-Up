@@ -6,7 +6,7 @@
 #include "nlohmann/json.hpp"
 
 #include "components/GrassRenderer.h"
-#include "global.h"
+#include "typedef.h"
 
 class GrassRendererManager
 {

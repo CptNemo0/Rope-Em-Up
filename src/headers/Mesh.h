@@ -10,7 +10,7 @@
 #include "assimp/postprocess.h"
 #include "glad/glad.h"
 
-#include "global.h"
+#include "typedef.h"
 #include "Vertex.h"
 #include "Shader.h"
 #include "Texture.h"

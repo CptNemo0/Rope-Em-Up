@@ -12,7 +12,7 @@
 #include "../components/Component.h"
 #include "../GameObject.h"
 #include "../components/Transform.h"
-#include "../global.h"
+#include "../typedef.h"
 
 namespace components
 {

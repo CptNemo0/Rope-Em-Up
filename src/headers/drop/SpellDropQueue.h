@@ -4,7 +4,7 @@
 #include "../drop/Drop.h"
 #include "../drop/DropArgs.h"
 #include <queue>
-#include "../global.h"
+#include "../typedef.h"
 
 namespace drop
 {

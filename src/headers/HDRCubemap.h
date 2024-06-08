@@ -5,7 +5,7 @@
 #include "string"
 #include <iostream>
 
-#include "global.h"
+#include "typedef.h"
 #include "Camera.h"
 #include "Shader.h"
 #include "Texture.h"	

@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <typeindex>
 
-#include "global.h"
+#include "typedef.h"
 #include "Texture.h"
 #include "components/Transform.h"
 #include "Mesh.h"

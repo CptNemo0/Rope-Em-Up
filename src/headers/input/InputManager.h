@@ -9,11 +9,11 @@
 #include "glm/glm.hpp"
 #include "glfw/glfw3.h"
 
-#include "../global.h"
+#include "../typedef.h"
 #include "InputObserver.h"
 #include "GamepadAxisType.h"
 #include "ActionMappingType.h"
-#include "../Camera.h"
+#include "../Global.h"
 
 namespace input
 {
@@ -25,20 +25,19 @@ class InputManager
 
 // Singleton stuff
 private:
-    InputManager(GLFWwindow *window, s_ptr<llr::Camera> *camera);
+    InputManager(GLFWwindow *window);
     ~InputManager() = default;
 
     GLFWwindow *window_;
-    s_ptr<llr::Camera> *camera_;
 
 public:
     static InputManager *i_;
 
-    static void Initialize(GLFWwindow *window, s_ptr<llr::Camera> *camera)
+    static void Initialize(GLFWwindow *window)
     {
         if (i_ == nullptr)
         {
-            i_ = new InputManager(window, camera);
+            i_ = new InputManager(window);
         }
     }
 

@@ -8,7 +8,7 @@
 #include "Bone.h"
 #include "AnimData.h"
 #include <headers/Model.h>
-#include <headers/global.h>
+#include <headers/typedef.h>
 
 
 namespace anim {

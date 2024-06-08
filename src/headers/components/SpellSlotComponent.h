@@ -12,7 +12,7 @@
 #include "../drop/DropArgs.h"
 #include "../drop/SpellDropQueue.h"
 
-#include "../global.h"
+#include "../typedef.h"
 
 
 namespace components

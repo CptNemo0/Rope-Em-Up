@@ -5,7 +5,7 @@
 #include "nlohmann/json.hpp"
 
 #include "../GameObject.h"
-#include "../global.h"
+#include "../typedef.h"
 
 namespace generation
 {

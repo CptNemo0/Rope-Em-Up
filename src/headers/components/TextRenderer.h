@@ -7,7 +7,7 @@
 #include "../res/Resources.h"
 #include "../Font.h"
 #include "../GameObject.h"
-#include "../global.h"
+#include "../typedef.h"
 
 namespace components
 {

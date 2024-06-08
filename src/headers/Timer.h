@@ -6,7 +6,7 @@
 #include <vector>
 #include <deque>
 
-#include "global.h"
+#include "typedef.h"
 
 namespace Timer
 {

@@ -3,7 +3,7 @@
 
 #include "components/SpellSlotComponent.h"
 #include <vector>
-#include "global.h"
+#include "typedef.h"
 
 class SpellCaster
 {

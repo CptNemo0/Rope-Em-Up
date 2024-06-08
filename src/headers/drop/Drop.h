@@ -1,7 +1,7 @@
 #ifndef DROP_H
 #define DROP_H
 
-#include "../global.h"
+#include "../typedef.h"
 #include "DropArgs.h"
 #include "../GameObject.h"
 #include "../components/HealthComponent.h"

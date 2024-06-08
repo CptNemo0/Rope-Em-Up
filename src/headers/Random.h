@@ -5,7 +5,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/constants.hpp"
 
-#include "global.h"
+#include "typedef.h"
 
 namespace random
 {

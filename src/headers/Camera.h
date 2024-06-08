@@ -5,7 +5,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include <memory>
 
-#include "global.h"
+#include "typedef.h"
 #include "components/Component.h"
 #include "components/Transform.h"
 #include "GameObject.h"
