@@ -35,7 +35,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd sub2/sub2_albedo.png
-map_Ke sub1/sub2_emmisive.png
+map_Ke sub2/sub2_emmisive.png
 map_Ns sub2/sub2_roughness.png
 map_Pm sub2/sub2_metallic.png
 map_Bump -bm 20.000000 sub2/sub2_normal.png

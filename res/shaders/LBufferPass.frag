@@ -28,6 +28,8 @@ uniform float bloom_threshold;
 
 uniform bool slowed_time;
 
+uniform bool use_ssao;
+
 in vec2 if_uv;
 
 
@@ -252,7 +254,12 @@ void main()
             color = ambient + Lo;
         }
 
-        color = color * ssao;
+        if(use_ssao)
+        {
+            color = color * ssao;
+        }
+
+        
       
         if(slowed_time)
         {
@@ -260,6 +267,7 @@ void main()
         }
 
         color_texture = color;
+        //color_texture = vec3(ssao);
 
         if(bloom)
         {

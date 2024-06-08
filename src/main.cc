@@ -117,7 +117,8 @@ int main()
     const string kSSAOFragmentShaderPath = "res/shaders/SSAO.frag";
 
     const string kSSAOBlurVertexShaderPath = "res/shaders/SSAOBlur.vert";
-    const string kSSAOBlurFragmentShaderPath = "res/shaders/SSAOBlur.frag";
+    const string kSSAOBlurFragmentVerticalShaderPath = "res/shaders/SSAOBlurVertical.frag";
+    const string kSSAOBlurFragmentHorizontalShaderPath = "res/shaders/SSAOBlurHorizontal.frag";
 
     const string kGrassVertexShaderPath = "res/shaders/GrassShaderVert.vert";
     const string kGrassFragmentShaderPath = "res/shaders/GrassShaderFrag.frag";
@@ -305,7 +306,8 @@ int main()
     auto LBufferPassShader = res::get_shader(kLBufferVertexShaderPath, kLBufferFragmentShaderPath);
     auto BasicDefferedLightShader = res::get_shader(kLBufferVertexShaderPath, kBasicDefferedLightShaderPath);
     auto SSAOShader = res::get_shader(kSSAOVertexShaderPath, kSSAOFragmentShaderPath);
-    auto SSAOBlurShader = res::get_shader(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentShaderPath);
+    auto SSAOBlurVerticalShader = res::get_shader(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentVerticalShaderPath);
+    auto SSAOBlurHorizontalShader = res::get_shader(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentHorizontalShaderPath);
     auto GrassShader = res::get_shader(kGrassVertexShaderPath, kGrassFragmentShaderPath);
 #pragma endregion Shaders
 
@@ -633,10 +635,6 @@ int main()
 
     }, nullptr, true);
 
-    
-    //auto grass = GameObject::Create(scene_root);
-    //grass->AddComponent(GrassRendererManager::i_->CreateRenderer(walls.up_left_, walls.down_right_, 600));
-
 
     /////////////////////////////////////////////
     /////////////////////////////////////////////
@@ -644,6 +642,11 @@ int main()
     /////////////////////////////////////////////
     /////////////////////////////////////////////
     
+    int frame = 0;
+    float frame_time = 0;
+    float fps = 0;
+    string debug_info;
+    bool use_ssao = true;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -815,31 +818,51 @@ int main()
         scene_root->PropagateUpdate();
 
         //////////////////////////////////
+        // Bind buffer - Bind textures - Use Shader - Draw 
+
+        if (use_ssao)
+        {
+            glViewport(0, 0, mode->width / 2, mode->height / 2);
+            ssao_buffer.Bind();
+            SSAOShader->Use();
+            ssao_buffer.BindTextures(SSAOShader, gbuffer.view_position_texture_, gbuffer.normal_texture_, gbuffer.mask_texture_);
+            ssao_buffer.Draw();
+
+            ssao_blur_buffer.Bind();
+            SSAOBlurVerticalShader->Use();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, ssao_buffer.ssao_texture_);
+            SSAOBlurVerticalShader->SetInt("ssao_texture", 0);
+            ssao_blur_buffer.Draw();
+
+            SSAOBlurHorizontalShader->Use();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.intermediate_texture_);
+            SSAOBlurHorizontalShader->SetInt("intermediate_texture", 0);
+            ssao_blur_buffer.Draw();
+
+            glViewport(0, 0, mode->width, mode->height);
+        }
+        //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
-        ssao_buffer.Bind();
-        SSAOShader->Use();
-        ssao_buffer.BindTextures(SSAOShader, gbuffer.view_position_texture_, gbuffer.normal_texture_, gbuffer.mask_texture_);
-        ssao_buffer.Draw();
-        //////////////////////////////////
+        /**/
 
-        // Bind buffer - Bind textures - Use Shader - Draw 
-        ssao_blur_buffer.Bind();
-        SSAOBlurShader->Use();
-        ssao_blur_buffer.BindTextures(SSAOBlurShader, ssao_buffer.ssao_texture_);
-        ssao_blur_buffer.Draw();
+        
+        
         //////////////////////////////////
         
         // Bind buffer - Bind textures - Use Shader - Draw 
         lbuffer.Bind();
         LBufferPassShader->Use();
+        LBufferPassShader->SetBool("use_ssao", use_ssao);
         gbuffer.BindTextures(LBufferPassShader);
         cubemap->BindIrradianceMap(LBufferPassShader);
         cubemap->BindIBLmaps(LBufferPassShader);
 
         glActiveTexture(GL_TEXTURE4);
         LBufferPassShader->SetInt("ssao_texture", 4);
-        glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.texture_);
+        glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.intermediate_texture_);
 
         //glActiveTexture(GL_TEXTURE8);
         //LBufferPassShader->SetInt("mask_texture", 8);
@@ -929,8 +952,25 @@ int main()
         
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
-        
-        HUDText_object->GetComponent<components::TextRenderer>()->text_ = "fps: " + std::to_string(1.0f / delta_time);
+
+
+        frame++;
+        fps += 1.0f / delta_time;
+        frame_time += delta_time;
+
+        if (frame == 30)
+        {
+            fps /= 30.0f;
+            frame_time /= 30.0f;
+
+            debug_info = "fps: " + std::to_string(fps) + "\n frame time: " + std::to_string(frame_time);
+
+            frame = 0;
+            fps = 0.0f;
+            frame_time = 0.0f;
+        }
+
+        HUDText_object->GetComponent<components::TextRenderer>()->text_ = debug_info;
         HUDText_root->PropagateUpdate();
         
         glDisable(GL_BLEND);
@@ -1005,6 +1045,13 @@ int main()
         ImGui::DragFloat("Spot L Cut Off", &spot_light_cut_off, 0.01f, 0.0f, 50.0f);
         ImGui::DragFloat("Spot L Outer Cut Off", &spot_light_outer_cut_off, 0.01f, 0.0f, 50.0f);
 
+        
+        if (ImGui::Checkbox("SSAO", &use_ssao))
+        {
+            LBufferPassShader->Use();
+            LBufferPassShader->SetBool("use_ssao", use_ssao);
+        }
+
         ImGui::Checkbox("Bloom", &lbuffer.bloom_);
         ImGui::ColorEdit3("Bloom Color", (float*)&lbuffer.bloom_color_);
         ImGui::SliderFloat("Bloom Threshold", &lbuffer.bloom_threshold_, 0.0f, 1.0f, "%0.2f");
@@ -1060,7 +1107,7 @@ int main()
         ImGui::Begin("Texture Window");
         ImVec2 textureSize(160 * 3, 90 * 3); // Adjust as per your texture size
         
-        ImGui::Image((void*)(intptr_t)gbuffer.world_position_texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((void*)(intptr_t)ssao_blur_buffer.texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
 
         ImGui::Begin("Rope Manager");

@@ -44,6 +44,7 @@ class SSAOBlurBuffer
 {
 public:
 	unsigned int fbo_;
+	unsigned int intermediate_texture_;
 	unsigned int texture_;
 
 	unsigned int vao_;
