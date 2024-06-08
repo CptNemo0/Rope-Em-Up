@@ -26,7 +26,7 @@ void SSAOBuffer::Init(int height, int width)
     
     glGenTextures(1, &ssao_texture_);
     glBindTexture(GL_TEXTURE_2D, ssao_texture_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width * 0.75f, height * 0.75f, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, float(width) * 0.75f, float(height) * 0.75f, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_texture_, 0);
@@ -157,14 +157,14 @@ void SSAOBlurBuffer::Init(int height, int width)
 
     glGenTextures(1, &intermediate_texture_);
     glBindTexture(GL_TEXTURE_2D, intermediate_texture_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width * 0.75f, height * 0.75f, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, float(width) * 0.75f, float(height) * 0.75f, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, intermediate_texture_, 0);
 
     glGenTextures(1, &texture_);
     glBindTexture(GL_TEXTURE_2D, texture_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width * 0.75f, height * 0.75f, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, float(width) * 0.75f, float(height) * 0.75f, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture_, 0);

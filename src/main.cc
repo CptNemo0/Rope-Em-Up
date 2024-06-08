@@ -68,7 +68,7 @@
 #include "headers/res/Resources.h"
 #include "headers/SpellCaster.h"
 #include "headers/Global.h"
-
+#include "headers/Bloom.h"
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -124,6 +124,10 @@ int main()
     const string kGrassVertexShaderPath = "res/shaders/GrassShaderVert.vert";
     const string kGrassFragmentShaderPath = "res/shaders/GrassShaderFrag.frag";
 
+    const string kBloomThresholdShaderPath = "res/shaders/BloomThreshold.frag";
+    const string kBloomBlurHorizontalShaderPath = "res/shaders/BloomBlurHorizontal.frag";
+    const string kBloomBlurVerticalShaderPath = "res/shaders/BloomBlurVertical.frag";
+    
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
     const string kHUDTexturePath = "res/textures/placeholder_icon.png";
@@ -309,6 +313,9 @@ int main()
     auto SSAOBlurVerticalShader = res::get_shader(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentVerticalShaderPath);
     auto SSAOBlurHorizontalShader = res::get_shader(kSSAOBlurVertexShaderPath, kSSAOBlurFragmentHorizontalShaderPath);
     auto GrassShader = res::get_shader(kGrassVertexShaderPath, kGrassFragmentShaderPath);
+    auto BloomThresholdShader = res::get_shader(kSSAOVertexShaderPath, kBloomThresholdShaderPath);
+    auto BloomBlurVerticalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurVerticalShaderPath);
+    auto BloomBlurHorizontalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurHorizontalShaderPath);
 #pragma endregion Shaders
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -318,8 +325,9 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
+    Bloom bloom = Bloom(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
 
 #pragma region Lights
@@ -815,13 +823,14 @@ int main()
 
         if (use_ssao)
         {
-            glViewport(0, 0, mode->width * 0.75f, mode->height * 0.75f);
+            glViewport(0, 0, float(mode->width) * 0.75f, float(mode->height) * 0.75f);
             ssao_buffer.Bind();
             SSAOShader->Use();
             ssao_buffer.BindTextures(SSAOShader, gbuffer.view_position_texture_, gbuffer.normal_texture_, gbuffer.mask_texture_);
             ssao_buffer.Draw();
 
             ssao_blur_buffer.Bind();
+
             SSAOBlurVerticalShader->Use();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, ssao_buffer.ssao_texture_);
@@ -851,9 +860,6 @@ int main()
         LBufferPassShader->SetInt("ssao_texture", 4);
         glBindTexture(GL_TEXTURE_2D, ssao_blur_buffer.intermediate_texture_);
 
-        //glActiveTexture(GL_TEXTURE8);
-        //LBufferPassShader->SetInt("mask_texture", 8);
-        //glBindTexture(GL_TEXTURE_2D, gbuffer.mask_texture_);
         LBufferPassShader->SetVec3("camera_position", active_camera->get_position());
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
@@ -883,19 +889,39 @@ int main()
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
         LBufferPassShader->SetBool("slowed_time", postprocessor.slowed_time);
-        if (lbuffer.bloom_)
-        {
-            LBufferPassShader->SetBool("bloom", lbuffer.bloom_);
-            LBufferPassShader->SetFloat("bloom_threshold", lbuffer.bloom_threshold_);
-            LBufferPassShader->SetVec3("bloom_color", lbuffer.bloom_color_);
-        }
-        else
-        {
-            LBufferPassShader->SetBool("bloom", lbuffer.bloom_);
-        }
-
+        
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
+        BloomThresholdShader->Use();
+
+        // BLOOM
+        if (lbuffer.bloom_)
+        {
+            bloom.Bind();
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, lbuffer.color_texture_);
+            BloomThresholdShader->SetInt("color_texture", 0);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, gbuffer.emissive_texture_);
+            BloomThresholdShader->SetInt("emission_texture", 1);
+            ssao_buffer.Draw();
+
+            BloomBlurHorizontalShader->Use();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, bloom.downscaled_);
+            BloomBlurHorizontalShader->SetInt("downscaled_texture", 0);
+            ssao_buffer.Draw();
+
+            BloomBlurVerticalShader->Use();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, bloom.horizontal_);
+            BloomBlurVerticalShader->SetInt("horizontal_texture", 0);
+            ssao_buffer.Draw();
+        }
+        
+        
         //////////////////////////////////
 
         // FORWARD PASS - FORWARD PASS - FORWARD PASS - FORWARD PASS
@@ -920,7 +946,9 @@ int main()
         PostprocessingShader->Use();
         lbuffer.BindTextures(PostprocessingShader);
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
-        
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, bloom.vertical_);
+        PostprocessingShader->SetInt("bloom_texture", 1);
         postprocessor.Draw();
         //////////////////////////////////
 
@@ -1083,10 +1111,8 @@ int main()
         }
         ImGui::End();
 
-        ImGui::Begin("Texture Window");
-        ImVec2 textureSize(160 * 3, 90 * 3); // Adjust as per your texture size
-        
-        ImGui::Image((void*)(intptr_t)ssao_blur_buffer.texture_, textureSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Begin("Texture Display");
+        ImGui::Image((void*)(intptr_t)ssao_blur_buffer.texture_, ImVec2(1920.0f * 0.25f, 1080.0f * 0.25f)); // Display the texture with size 256x256
         ImGui::End();
 
         ImGui::Begin("Rope Manager");
@@ -1220,24 +1246,7 @@ int main()
         ImGui::SliderFloat("Player 2 HP", &(player_2_hp), 0.0f, player_2->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
         ImGui::End();
 
-        static glm::vec3 bot_color;
-        static glm::vec3 top_color;
-        static float offset;
-        GrassShader->Use();
-        ImGui::Begin("Grass");
-        if (ImGui::ColorEdit3("bot_color", (float*)&bot_color))
-        {
-            GrassShader->SetVec3("bot_color", bot_color);
-        }
-        if (ImGui::ColorEdit3("top_color", (float*)&top_color))
-        {
-            GrassShader->SetVec3("top_color", top_color);
-        }
-        if (ImGui::SliderFloat("offset", &offset, -1.0f, 1.0f, "%0.3f"))
-        {
-            GrassShader->SetFloat("offset", offset);
-        }
-        ImGui::End();
+       
 
         ImGui::Begin("Serialize");
 

@@ -4,12 +4,11 @@ layout (location = 1) out vec3 color_texture;
 in vec2 if_uv;
 
 uniform sampler2D intermediate_texture;
-
-const float div = 0.1;
+const float div = 0.04166666 * 1.25;
 
 void main()
 {
-    float w[7] = float[7](0.5, 1, 2, 4, 2, 1, 0.5);
+    float w[7] = float[7](1, 2, 3, 4, 3, 2, 1);
     vec2 texel_size = 1.0 / vec2(textureSize(intermediate_texture, 0));
     float result = 0.0;
     int idx = 0;

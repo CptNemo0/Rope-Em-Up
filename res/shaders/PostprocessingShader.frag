@@ -78,7 +78,6 @@ vec3 bloor_bloom()
         }
     }
     result *= 0.00690265;
-    //result *= (0.27 * (sin(if_time * 2.0) + 1.0));
     return result;
 }
 
@@ -91,9 +90,8 @@ void main()
     color = apply_film_grain(color);
 
     if (bloom)
-    {
-        vec3 bloom_color = bloor_bloom();
-        color = color + bloom_color;
+    { 
+        color = color + texture(bloom_texture, if_uv).rgb;
     }
 
     // prosze zostawic to jako ostatnie

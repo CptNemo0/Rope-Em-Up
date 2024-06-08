@@ -1,6 +1,6 @@
 #version 330 core
 layout (location = 0) out vec3 color_texture;
-layout (location = 1) out vec4 bloom_texture;
+//layout (location = 1) out vec4 bloom_texture;
 
 uniform sampler2D position_texture; //0
 uniform sampler2D albedo_texture; //1
@@ -21,10 +21,6 @@ const int MAX_LIGHTS = 16;
 uniform int light_num = 3;
 uniform vec3 light_positions[MAX_LIGHTS];
 uniform vec3 light_colors[MAX_LIGHTS];
-
-uniform bool bloom;
-uniform vec3 bloom_color;
-uniform float bloom_threshold;
 
 uniform bool slowed_time;
 
@@ -247,7 +243,8 @@ void main()
         vec3 color = vec3(0.0);
         if (emission != vec3(0.0))
         {
-            color = emission;
+            float hm = dot(albedo, emission);
+            color = albedo * (1 - hm) + emission * hm;
         }
         else
         {
@@ -259,32 +256,12 @@ void main()
             color = color * ssao;
         }
 
-        
-      
         if(slowed_time)
         {
             color = vec3( dot(color, vec3(0.2126, 0.7152, 0.0722)) );
         }
 
-        color_texture = color;
-        //color_texture = vec3(ssao);
-
-        if(bloom)
-        {
-            float brightness = dot(emission.rgb, bloom_color.rgb);
-            if(brightness > bloom_threshold)
-            {
-                bloom_texture = vec4(emission, 1.0f);
-            }
-            else
-            {
-                bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-            }
-        }
-        else
-        {
-            bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        }
+        color_texture = color;   
     }
     else
     {
@@ -293,6 +270,5 @@ void main()
             albedo = vec3( dot(albedo, vec3(0.2126, 0.7152, 0.0722)) );
         }
         color_texture = albedo + emission;
-        bloom_texture = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 }

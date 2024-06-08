@@ -71,10 +71,6 @@ void LBuffer::BindTextures(s_ptr<Shader> shader)
 	glBindTexture(GL_TEXTURE_2D, color_texture_);
 	shader->SetInt("color_texture", 0);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, bloom_texture_);
-	shader->SetInt("bloom_texture", 1);
-
 	shader->SetBool("bloom", bloom_);
 }
 
