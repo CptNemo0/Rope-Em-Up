@@ -1,12 +1,12 @@
 #include "./headers/animation/Animation.h"
 
-anim::Animation::Animation(const std::string& animationPath, s_ptr<Model> model)
-	: animation_path_(animationPath), model_(model)
+anim::Animation::Animation(const std::string& animationPath, int animationNumber, s_ptr<Model> model)
+	: animation_path_(animationPath), model_(model), animationNumber_(animationNumber)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
 	assert(scene && scene->mRootNode);
-	auto animation = scene->mAnimations[0];
+	auto animation = scene->mAnimations[animationNumber];
 	m_Duration = animation->mDuration;
 	m_TicksPerSecond = animation->mTicksPerSecond;
 	aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;

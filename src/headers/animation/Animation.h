@@ -29,6 +29,7 @@ private:
 	std::vector<Bone> m_Bones;
 	AssimpNodeData m_RootNode;
 	std::map<std::string, BoneInfo> m_BoneInfoMap;
+	int animationNumber_;
 public:
 	Animation() = default;
 	~Animation() = default;
@@ -36,7 +37,7 @@ public:
 	string animation_path_;
 	s_ptr<Model> model_;
 
-	Animation(const std::string& animationPath, s_ptr<Model> model);
+	Animation(const std::string& animationPath, int animationNumber, s_ptr<Model> model);
 	Bone* FindBone(const std::string& name);
 
 	inline float GetTicksPerSecond() { return m_TicksPerSecond; }

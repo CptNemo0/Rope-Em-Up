@@ -1,11 +1,12 @@
 #include "../headers/Mesh.h"
 
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, bool isRigged)
 {
     this->vertices_ = vertices;
     this->indices_ = indices;
     this->textures_ = textures;
+    this->isRigged_ = isRigged;
 
     Init();
 }
@@ -31,6 +32,15 @@ void Mesh::Init()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int), &indices_[0], GL_STATIC_DRAW);
 
+    if (isRigged_)
+    {
+        glGenBuffers(1, &ssbo_);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_BONES * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_);
+    }
+
+    
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
@@ -96,4 +106,10 @@ void Mesh::Draw(s_ptr<Shader> shader) const
     glBindVertexArray(0);
 
     glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::UpdateTransforms(std::vector<glm::mat4> transforms)
+{
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_);
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, MAX_BONES * sizeof(glm::mat4), transforms.data());
 }
