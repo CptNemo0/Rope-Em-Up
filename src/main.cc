@@ -69,6 +69,8 @@
 #include "headers/SpellCaster.h"
 #include "headers/Global.h"
 #include "headers/Bloom.h"
+#include "headers/Minimap.h"
+
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -458,7 +460,7 @@ int main()
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     generation::GenerateRoom(*room, &rg_settings, &models);
-    generation::BuildRoom(*room, &models, GBufferPassShader);
+    generation::BuildRoom(*room, &models, GBufferPassShader, &rlg);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
@@ -547,7 +549,7 @@ int main()
     auto HUD_root = GameObject::Create();
 
     auto HUD_object = GameObject::Create(HUD_root);
-    HUD_object->AddComponent(make_shared<components::HUDRenderer>(HUD_texture, HUDshader));
+    HUD_object->AddComponent(make_shared<components::HUDRenderer>(HUD_texture, HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 0.1f)));
     HUD_object->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
     HUD_object->transform_->set_position(glm::vec3(-0.75f, -0.75f, 0.0f));
 
@@ -555,6 +557,14 @@ int main()
     HUD_object2->AddComponent(make_shared<components::HUDRenderer>(HUD_texture2, HUDshader));
     HUD_object2->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
     HUD_object2->transform_->set_position(glm::vec3(0.75f, -0.75f, 0.0f));
+    HUD_object2->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+
+
+    auto minimap_object = GameObject::Create(HUD_root);
+    minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/color.png"), HUDshader, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f)));
+    minimap_object->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.4f);
+    minimap_object->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+    auto minimap = Minimap(minimap_object);
 
     auto HUDText_root = GameObject::Create();
 
@@ -731,6 +741,8 @@ int main()
                 }, false);
             }
         }
+
+        minimap.Update(rlg, room);
        
 #pragma endregion
 
@@ -963,10 +975,8 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
-        /*HUDshader->Use();
-
-        HUD_object->transform_->add_rotation(glm::vec3(133.0f * delta_time, 100.0f * delta_time, 66.0f * delta_time));
-        HUD_root->PropagateUpdate();*/
+        HUDshader->Use();
+        HUD_root->PropagateUpdate();
         
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);

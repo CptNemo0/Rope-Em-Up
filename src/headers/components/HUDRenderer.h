@@ -27,8 +27,9 @@ private:
     std::weak_ptr<Transform> transform_;
 public:
     s_ptr<tmp::Texture> texture_;
+    glm::vec4 color_ = glm::vec4(1.0f);
 
-    HUDRenderer(s_ptr<tmp::Texture> texture, s_ptr<Shader> shader);
+    HUDRenderer(s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, glm::vec4 color = glm::vec4(1.0f));
     void Start() override;
     void Update() override;
     void Destroy() override {}

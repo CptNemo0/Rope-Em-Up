@@ -38,6 +38,7 @@ public:
     void SetFloat(const string& name, float value) const;
     void SetVec3(const string& name, glm::vec3 value) const;
     void SetVec2(const string& name, glm::vec2 value) const;
+    void SetVec4(const string& name, glm::vec4 value) const;
     void SetMatrix4(const string& name, glm::mat4 value) const;
 
     void SetLight(const string& name, Light value);

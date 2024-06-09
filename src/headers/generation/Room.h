@@ -30,6 +30,7 @@ namespace generation
 
         bool is_generated = false;
         bool is_built = false;
+        bool is_discovered = false;
 
         // Values that will be generated during room generation
 

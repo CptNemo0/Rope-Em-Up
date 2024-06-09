@@ -1,9 +1,10 @@
 #include "../../headers/components/HUDRenderer.h"
 
-components::HUDRenderer::HUDRenderer(s_ptr<tmp::Texture> texture, s_ptr<Shader> shader)
+components::HUDRenderer::HUDRenderer(s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, glm::vec4 color)
 {
     this->texture_ = texture;
     this->shader_ = shader;
+    this->color_ = color;
 
     glGenVertexArrays(1, &VAO_);
     glBindVertexArray(VAO_);
@@ -24,6 +25,7 @@ void components::HUDRenderer::Start()
 void components::HUDRenderer::Update()
 {
     shader_->SetMatrix4("model_matrix", transform_.lock()->get_model_matrix());
+    shader_->SetVec4("color", color_);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_->id_);
 

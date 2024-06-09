@@ -269,6 +269,11 @@ void Shader::SetVec2(const string& name, glm::vec2 value) const
     glUniform2f(glGetUniformLocation(id_, name.c_str()), value.x, value.y);
 }
 
+void Shader::SetVec4(const string &name, glm::vec4 value) const
+{
+    glUniform4f(glGetUniformLocation(id_, name.c_str()), value.x, value.y, value.z, value.w);
+}
+
 void Shader::SetLight(const string& name, Light value)
 {
     string intensity_name = name + ".intensity";

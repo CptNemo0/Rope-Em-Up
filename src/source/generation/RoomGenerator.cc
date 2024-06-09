@@ -588,9 +588,14 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     }
 }
     
-void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader)
+void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, RoomLayoutGenerator* rlg)
 {
     room.is_built = true;
+
+    if (rlg->rooms.contains(room.position + glm::ivec2(0, -1))) rlg->rooms[room.position + glm::ivec2(0, -1)].is_discovered = true;
+    if (rlg->rooms.contains(room.position + glm::ivec2(-1, 0))) rlg->rooms[room.position + glm::ivec2(-1, 0)].is_discovered = true;
+    if (rlg->rooms.contains(room.position + glm::ivec2(0, 1))) rlg->rooms[room.position + glm::ivec2(0, 1)].is_discovered = true;
+    if (rlg->rooms.contains(room.position + glm::ivec2(1, 0))) rlg->rooms[room.position + glm::ivec2(1, 0)].is_discovered = true;
 
     for (int i = 0; i < room.width; i++)
     {
@@ -818,7 +823,7 @@ void generation::ChangeRooms(Room*& room, RoomLayoutGenerator& rlg, RoomGenerati
             generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
         }
 
-        generation::BuildRoom(*room, &models, GBufferPassShader);
+        generation::BuildRoom(*room, &models, GBufferPassShader, &rlg);
     }
 
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);

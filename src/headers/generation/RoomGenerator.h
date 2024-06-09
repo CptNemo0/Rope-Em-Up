@@ -204,7 +204,7 @@ namespace generation
 
     void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 
-    void BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader);
+    void BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, RoomLayoutGenerator* rlg);
 
     glm::ivec2 GetMoveDirection(Room* room, std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2);
     
