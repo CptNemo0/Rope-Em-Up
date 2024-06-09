@@ -100,7 +100,7 @@ void components::Transform::CalculateModelMatrix(const glm::mat4 parent_model)
 
     const glm::mat4 translation = glm::translate(glm::mat4(1.0f), position_);
 
-    model_matrix_ = translation * rotation_Y * rotation_X * rotation_Z * scale_matrix * parent_model;
+    model_matrix_ = parent_model * translation * rotation_Y * rotation_X * rotation_Z * scale_matrix;
 
     auto up = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
     auto forward = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -159,7 +159,7 @@ const glm::mat4 components::Transform::get_prediction_matrix() const
 
     const glm::mat4 translation = glm::translate(glm::mat4(1.0f), predicted_position_);
 
-    return translation * rotation_Y * rotation_X * rotation_Z * scale_matrix * parent_->get_model_matrix();
+    return parent_->get_model_matrix() * translation * rotation_Y * rotation_X * rotation_Z * scale_matrix;
 }
 
 const glm::vec3 components::Transform::get_up() const
