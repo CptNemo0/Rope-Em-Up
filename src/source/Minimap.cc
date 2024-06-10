@@ -27,7 +27,15 @@ void Minimap::Update(generation::RoomLayoutGenerator &rlg, generation::Room *cur
     }
     auto current_room_object = minimap_rooms[current_room->position];
     auto hud_renderer = current_room_object->GetComponent<components::HUDRenderer>();
-    hud_renderer->color_ = glm::vec4(1.0f, 0.0f, 0.0f, 0.6f);
+    if (current_room->enemies->transform_->children_.size())
+    {
+        hud_renderer->color_ = glm::vec4(1.0f, 0.0f, 0.0f, 0.6f);
+    }
+    else
+    {
+        hud_renderer->color_ = glm::vec4(0.0f, 1.0f, 0.0f, 0.6f);
+    }
+    
 }
 
 void Minimap::Rebuild(generation::RoomLayoutGenerator &rlg)

@@ -28,6 +28,7 @@
 #include "../components/HpDropComponent.h"
 #include "../components/ExpDropComponent.h"
 #include "../components/SpellSlotComponent.h"
+#include "../components/ParticleEmitter.h"
 #include "../collisions/Collider.h"
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"
@@ -38,6 +39,7 @@
 #include "Room.h"
 #include "../GrassRendererManager.h"
 #include "../typedef.h"
+#include "../Texture.h"
 
 namespace generation
 {
@@ -204,13 +206,15 @@ namespace generation
 
     void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 
-    void BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, RoomLayoutGenerator* rlg);
+    void BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, RoomLayoutGenerator* rlg, s_ptr<tmp::Texture> particle_texture, s_ptr<Shader> particle_shader);
 
     glm::ivec2 GetMoveDirection(Room* room, std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2);
     
-    void ChangeRooms(Room*& room, RoomLayoutGenerator& rlg, RoomGenerationSettings& rg_settings, RoomModels& models, glm::ivec2& next_room_pos, std::shared_ptr<Shader> GBufferPassShader);
+    void ChangeRooms(Room*& room, RoomLayoutGenerator& rlg, RoomGenerationSettings& rg_settings, RoomModels& models, glm::ivec2& next_room_pos, std::shared_ptr<tmp::Texture> particle_texture, std::shared_ptr<Shader> GBufferPassShader, std::shared_ptr<Shader> ParticleShader);
 
     void DisplacePlayersAndRope(Room* room, glm::ivec2 move_direction, std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2, Rope& rope);
+
+    void AttachParticleEmittersToGates(Room* room, s_ptr<tmp::Texture> particle_texture, s_ptr<Shader> particle_shader);
 
 }; // namespace generation
 

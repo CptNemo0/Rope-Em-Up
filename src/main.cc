@@ -135,6 +135,7 @@ int main()
     const string kHUDTexturePath = "res/textures/placeholder_icon.png";
     const string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
     const string kTestSmokeTexturePath = "res/textures/test_smoke.png";
+    const string kTrailTexturePath = "res/textures/trail.png";
 
     const string kHDREquirectangularPath = "res/cubemaps/puresky_2k.hdr";
 
@@ -324,10 +325,10 @@ int main()
     auto HUD_texture = res::get_texture(kHUDTexturePath);
     auto HUD_texture2 = res::get_texture(kHUDTexturePath2);
     auto Smoke_texture = res::get_texture(kTestSmokeTexturePath);
-
+    auto trail_texture = res::get_texture(kTrailTexturePath);
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     Bloom bloom = Bloom(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
@@ -460,7 +461,7 @@ int main()
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     generation::GenerateRoom(*room, &rg_settings, &models);
-    generation::BuildRoom(*room, &models, GBufferPassShader, &rlg);
+    generation::BuildRoom(*room, &models, GBufferPassShader, &rlg, trail_texture, ParticleShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
@@ -575,18 +576,16 @@ int main()
     HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
 
-    auto particle_root = GameObject::Create();
-
-    auto particle_emitter = GameObject::Create(player_1);
-    particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.5f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, Smoke_texture, ParticleShader));
+    /*auto particle_emitter = GameObject::Create(player_1);
+    particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, trail_texture, ParticleShader));
     auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
     particle_emitter_component->emission_rate_ = 0.1f;
     particle_emitter_component->life_time_ = 1.0f;
-    particle_emitter_component->start_acceleration_ = glm::vec3(0.0f, 9.81f, 0.0f);
-    particle_emitter_component->start_size_ = glm::vec2(0.1f, 0.0f);
-    particle_emitter_component->end_size_ = glm::vec2(0.5f, 1.0f);
-    particle_emitter_component->start_position_displacement_ = 1.0f;
+    particle_emitter_component->start_acceleration_ = glm::vec3(9.81f, 0.0, 0.0f);
+    particle_emitter_component->start_size_ = glm::vec2(0.5f, 0.4f);
+    particle_emitter_component->end_size_ = glm::vec2(1.0f, 2.0f);
+    particle_emitter_component->start_position_displacement_ = 1.0f;*/
 
     auto audio_test_obj = GameObject::Create(scene_root);
     audio_test_obj->AddComponent(make_shared<components::AudioSource>());
@@ -690,9 +689,19 @@ int main()
 
         static bool moving_through_room = false;
 
-        if (!moving_through_room)
-        {
+        bool no_enemies = room->enemies->transform_->children_.empty();
 
+        if (no_enemies)
+        {
+            for (auto& gate : room->gates->transform_->children_)
+            {
+                gate->game_object_->GetComponent<components::ParticleEmitter>()->active_ = true;
+            }
+            
+        }
+
+        if (!moving_through_room && no_enemies)
+        {
             rg_settings.width = random::RandInt(1, 2);
             rg_settings.height = random::RandInt(1, 2);
             rg_settings.enemies = random::RandInt(1, 5);
@@ -717,9 +726,9 @@ int main()
                 pc2->direction_ = glm::vec3(0.0f);
                 pc2->move_generator_->direction_ = glm::vec3(0.0f);
 
-                Timer::AddTimer(postprocessor.transition_vignette_time_, [&room, &rlg, &rg_settings, &models, &next_room_pos, &GBufferPassShader, &move_direction, &player_1, &player_2, &rope, &pc1, &pc2, &postprocessor]()
+                Timer::AddTimer(postprocessor.transition_vignette_time_, [&room, &rlg, &rg_settings, &models, &next_room_pos, &GBufferPassShader, &move_direction, &player_1, &player_2, &rope, &pc1, &pc2, &postprocessor, &trail_texture, &ParticleShader]()
                 {
-                    generation::ChangeRooms(room, rlg, rg_settings, models, next_room_pos, GBufferPassShader);
+                    generation::ChangeRooms(room, rlg, rg_settings, models, next_room_pos, trail_texture, GBufferPassShader, ParticleShader);
                     generation::DisplacePlayersAndRope(room, move_direction, player_1, player_2, rope);
                     pc1->active_ = true;
                     pc2->active_ = true;
@@ -907,13 +916,16 @@ int main()
         
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
-        BloomThresholdShader->Use();
-
+        
+        glViewport(0, 0, mode->width, mode->height);
         // BLOOM
         if (lbuffer.bloom_)
         {
+           glViewport(0, 0, 0.5 * mode->width, 0.5 * mode->height);
+
             bloom.Bind();
 
+            BloomThresholdShader->Use();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, lbuffer.color_texture_);
             BloomThresholdShader->SetInt("color_texture", 0);
@@ -921,19 +933,21 @@ int main()
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, gbuffer.emissive_texture_);
             BloomThresholdShader->SetInt("emission_texture", 1);
-            ssao_buffer.Draw();
+            lbuffer.Draw();
 
-            BloomBlurHorizontalShader->Use();
+            /*BloomBlurHorizontalShader->Use();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, bloom.downscaled_);
             BloomBlurHorizontalShader->SetInt("downscaled_texture", 0);
-            ssao_buffer.Draw();
+            lbuffer.Draw();
 
             BloomBlurVerticalShader->Use();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, bloom.horizontal_);
             BloomBlurVerticalShader->SetInt("horizontal_texture", 0);
-            ssao_buffer.Draw();
+            lbuffer.Draw();*/
+
+            glViewport(0, 0, mode->width, mode->height);
         }
         
         
@@ -962,7 +976,7 @@ int main()
         lbuffer.BindTextures(PostprocessingShader);
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, bloom.vertical_);
+        glBindTexture(GL_TEXTURE_2D, bloom.downscaled_);
         PostprocessingShader->SetInt("bloom_texture", 1);
         postprocessor.Draw();
         //////////////////////////////////

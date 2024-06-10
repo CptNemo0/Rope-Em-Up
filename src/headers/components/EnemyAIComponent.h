@@ -6,9 +6,12 @@
 #include <memory>
 #include "../collisions/Raycast.h"
 #include "../ChokeList.h"
+
+class GameObject;
+
 namespace components
 {
-	class GameObject;
+	
 
 	class EnemyAIComponent : public Component, public std::enable_shared_from_this<EnemyAIComponent>
 	{
