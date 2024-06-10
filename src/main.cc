@@ -327,7 +327,7 @@ int main()
 
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::LOW_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     Bloom bloom = Bloom(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
@@ -690,9 +690,10 @@ int main()
 
         static bool moving_through_room = false;
 
-        if (!moving_through_room)
-        {
+        bool no_enemies = room->enemies->transform_->children_.empty();
 
+        if (!moving_through_room && no_enemies)
+        {
             rg_settings.width = random::RandInt(1, 2);
             rg_settings.height = random::RandInt(1, 2);
             rg_settings.enemies = random::RandInt(1, 5);
@@ -907,13 +908,16 @@ int main()
         
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
-        BloomThresholdShader->Use();
-
+        
+        glViewport(0, 0, mode->width, mode->height);
         // BLOOM
         if (lbuffer.bloom_)
         {
+           glViewport(0, 0, 0.5 * mode->width, 0.5 * mode->height);
+
             bloom.Bind();
 
+            BloomThresholdShader->Use();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, lbuffer.color_texture_);
             BloomThresholdShader->SetInt("color_texture", 0);
@@ -921,19 +925,21 @@ int main()
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, gbuffer.emissive_texture_);
             BloomThresholdShader->SetInt("emission_texture", 1);
-            ssao_buffer.Draw();
+            lbuffer.Draw();
 
-            BloomBlurHorizontalShader->Use();
+            /*BloomBlurHorizontalShader->Use();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, bloom.downscaled_);
             BloomBlurHorizontalShader->SetInt("downscaled_texture", 0);
-            ssao_buffer.Draw();
+            lbuffer.Draw();
 
             BloomBlurVerticalShader->Use();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, bloom.horizontal_);
             BloomBlurVerticalShader->SetInt("horizontal_texture", 0);
-            ssao_buffer.Draw();
+            lbuffer.Draw();*/
+
+            glViewport(0, 0, mode->width, mode->height);
         }
         
         
@@ -962,7 +968,7 @@ int main()
         lbuffer.BindTextures(PostprocessingShader);
         PostprocessingShader->SetFloat("if_time", glfwGetTime());
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, bloom.vertical_);
+        glBindTexture(GL_TEXTURE_2D, bloom.downscaled_);
         PostprocessingShader->SetInt("bloom_texture", 1);
         postprocessor.Draw();
         //////////////////////////////////

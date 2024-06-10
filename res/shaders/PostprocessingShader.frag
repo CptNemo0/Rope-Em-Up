@@ -66,18 +66,26 @@ vec3 apply_vignette(vec3 color, float value)
 
 vec3 bloor_bloom()
 {
+    float div = 0.04166666 * 0.1875;
+    float w[7] = float[7](1, 2, 3, 4, 3, 2, 1);
+
+    int idx_x = 0;
+    int idx_y = 0;
 
     vec2 texel_size = 1.0 / vec2(textureSize(bloom_texture, 0));
     vec3 result = vec3(0.0f);
-    for (int x = -4; x < 4; ++x) 
+    for (int x = -3; x < 3; ++x) 
     {
-        for (int y = -4; y < 4; ++y) 
+        for (int y = -3; y < 3; ++y) 
         {
             vec2 offset = vec2(float(x), float(y)) * texel_size;
-            result += texture(bloom_texture, if_uv + offset).rgb;
+            result += w[idx_x] * w[idx_y] * texture(bloom_texture, if_uv + offset).rgb;
+            idx_y++;
         }
+        idx_x++;
+        idx_y = 0;
     }
-    result *= 0.00690265;
+    result *= div;
     return result;
 }
 
@@ -91,7 +99,7 @@ void main()
 
     if (bloom)
     { 
-        color = color + texture(bloom_texture, if_uv).rgb;
+        color = color + bloor_bloom();
     }
 
     // prosze zostawic to jako ostatnie
@@ -99,5 +107,5 @@ void main()
     color = vec3(clamp(color, 0.0, 1.0));
     color = apply_vignette(color, transition_vignette_amount);
 
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(color.rgb, 1.0);
 } 
