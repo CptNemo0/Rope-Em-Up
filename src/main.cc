@@ -140,8 +140,8 @@ int main()
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
-    const string lFemalePlayerMeshPath = "res/Players/Female/kobieta_test.fbx";
-    const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test_2.fbx";
+    const string kFemalePlayerMeshPath = "res/players/test-anim.fbx";
+    const string kMalePlayerMeshPath = "res/players/male/player_M_Test_2.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/ball.obj";
@@ -367,7 +367,7 @@ int main()
 
     auto cube_model = res::get_model(kCubeMeshPath);
     auto player_model = res::get_model(kPlayerMeshPath);
-    //auto F_player_model = res::get_model(lFemalePlayerMeshPath);
+    auto F_player_model = res::get_model(kFemalePlayerMeshPath);
     auto M_player_model = res::get_model(kMalePlayerMeshPath);
     auto debug_model = res::get_model(kDebugMeshPath);
     auto enemy_model = res::get_model(kTentaclPath);
@@ -477,8 +477,8 @@ int main()
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_2->transform_));
+    player_2->AddComponent(make_shared<components::MeshRenderer>(F_player_model, GBufferPassShader));
+    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, F_player_model, 0, player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
@@ -492,7 +492,7 @@ int main()
     player_1->AddComponent(make_shared<components::Animator>(test_animation));
     player_1->transform_->set_scale(glm::vec3(0.01f));
 
-    auto test_animation2 = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
+    auto test_animation2 = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
     player_2->AddComponent(make_shared<components::Animator>(test_animation2));
     player_2->transform_->set_scale(glm::vec3(0.01f));
 
