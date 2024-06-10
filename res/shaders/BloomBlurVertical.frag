@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 layout (location = 2) out vec3 vertical_texture;
 
 in vec2 if_uv;
