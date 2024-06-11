@@ -96,8 +96,8 @@ void PlayerStatsManager::AddExp(float exp)
 	e1->start_acceleration_ = glm::vec3(0.0f, 100.0f, 0.0f) + dir1;
 	e2->texture_ = tex;
 	e2->start_acceleration_ = glm::vec3(0.0f, 100.0f, 0.0f) + dir2;
-	e1->Burst(50);
-	e2->Burst(50);
+	e1->Burst(10);
+	e2->Burst(10);
 }
 
 void PlayerStatsManager::LevelUpSpeed()
