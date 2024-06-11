@@ -141,8 +141,8 @@ int main()
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kPlayerMeshPath = "res/models/player.obj";
-    const string lFemalePlayerMeshPath = "res/Players/Female/kobieta_test.fbx";
-    const string kMalePlayerMeshPath = "res/Players/Male/player_M_Test_2.fbx";
+    const string kFemalePlayerMeshPath = "res/players/female/kobieta_poprawa_riga.fbx";
+    const string kMalePlayerMeshPath = "res/players/male/player_M_Test_2.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/ball.obj";
@@ -370,7 +370,7 @@ int main()
 
     auto cube_model = res::get_model(kCubeMeshPath);
     auto player_model = res::get_model(kPlayerMeshPath);
-    //auto F_player_model = res::get_model(lFemalePlayerMeshPath);
+    auto F_player_model = res::get_model(kFemalePlayerMeshPath);
     auto M_player_model = res::get_model(kMalePlayerMeshPath);
     auto debug_model = res::get_model(kDebugMeshPath);
     auto enemy_model = res::get_model(kTentaclPath);
