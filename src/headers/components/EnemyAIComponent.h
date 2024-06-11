@@ -17,8 +17,8 @@ namespace components
 	{
 	public:
 		std::shared_ptr<ai::EnemyStateMachine> state_machine_;
-
-		EnemyAIComponent(std::shared_ptr<ai::EnemyStateMachine> state_machine) : state_machine_(state_machine) {};
+		bool is_passive_;
+		EnemyAIComponent(std::shared_ptr<ai::EnemyStateMachine> state_machine, bool is_passive) : state_machine_(state_machine), is_passive_(is_passive){};
 
 		void CheckChoke();
 

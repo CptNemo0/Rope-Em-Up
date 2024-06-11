@@ -39,6 +39,7 @@ generation::Room::Room(glm::ivec2 position, std::shared_ptr<GameObject> root)
     walls = GameObject::Create(room_object);
     floors = GameObject::Create(room_object);
     drops = GameObject::Create(room_object);
+    barells = GameObject::Create(room_object);
 
     up_gate = false;
     right_gate = false;
@@ -87,6 +88,7 @@ generation::Room::Room(json j, s_ptr<GameObject> root)
     gates = GameObject::Deserialize(j["gates_root"]);
     floors = GameObject::Deserialize(j["floors_root"]);
     drops = GameObject::Deserialize(j["drops_root"]);
+    barells = GameObject::Deserialize(j["barells_root"]);
 
     room_object->transform_->AddChild(enemies->transform_);
     room_object->transform_->AddChild(clutter->transform_);
@@ -151,6 +153,16 @@ generation::Room::Room(json j, s_ptr<GameObject> root)
         clutter_idx.push_back(i);
     }
 
+
+    for (auto& i : j["barells_positions"])
+    {
+        barells_positions.push_back({ i[0], i[1], i[2] });
+    }
+    for (auto& i : j["barell_idx"])
+    {
+        barell_idx.push_back(i);
+    }
+
     for (auto &i : j["enemies_positions"])
     {
         enemies_positions.push_back({i[0], i[1], i[2]});
@@ -172,6 +184,7 @@ json generation::Room::Serialize()
     j["gates_root"] = gates->Serialize();
     j["floors_root"] = floors->Serialize();
     j["drops_root"] = drops->Serialize();
+    j["barells_root"] = barells->Serialize();
 
     j["position"] = {position.x, position.y};
     j["up_gate"] = up_gate;
@@ -225,6 +238,15 @@ json generation::Room::Serialize()
     for (auto &i : clutter_idx)
     {
         j["clutter_idx"].push_back(i);
+    }
+
+    for (auto& i : barells_positions)
+    {
+        j["barells_positions"].push_back({ i.x, i.y, i.z });
+    }
+    for (auto& i : barell_idx)
+    {
+        j["barell_idx"].push_back(i);
     }
 
     for (auto &i : enemies_positions)

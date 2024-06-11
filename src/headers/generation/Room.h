@@ -19,6 +19,7 @@ namespace generation
         std::shared_ptr<GameObject> gates;
         std::shared_ptr<GameObject> floors;
         std::shared_ptr<GameObject> drops;
+        std::shared_ptr<GameObject> barells;
 
         // Values that will be generated during layout generation
         glm::ivec2 position;
@@ -65,15 +66,16 @@ namespace generation
         std::vector<glm::vec3> clutter_positions;
         std::vector<int> clutter_idx;
 
+        //Barells 
+        std::vector<glm::vec3> barells_positions;
+        std::vector<int> barell_idx;
+        // 
         //Enemies
         std::vector<glm::vec3> enemies_positions;
         std::vector<int> enemies_idx;
 
         // !Values that will be generated during room generation
 
-        //Static values
-        //static std::deque<w_ptr<GameObject>> room_parts;
-        //static std::vector<w_ptr<GameObject>> enemies;
 
         Room() = default;
         Room(glm::ivec2 position);

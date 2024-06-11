@@ -97,7 +97,7 @@ namespace ai
 		}
 	
 		std::shared_ptr<components::EnemyAIComponent> CreateEnemyAI(std::shared_ptr<GameObject> game_object);
-
+		std::shared_ptr<components::EnemyAIComponent> CreateEnemyAI(std::shared_ptr<GameObject> game_object, bool is_passive);
 		void UpdateEnemyStateMachine(s_ptr<ai::EnemyStateMachine> machine);
 		void RemoveEnemyAI(std::shared_ptr<components::EnemyAIComponent> a);
 	};

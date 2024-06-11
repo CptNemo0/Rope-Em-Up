@@ -34,7 +34,10 @@ void ai::EnemyAIManager::UpdateAI()
 		if (a->active_)
 		{
 			a->CheckChoke();
-			UpdateEnemyStateMachine(a->state_machine_);
+			if (!a->is_passive_)
+			{
+				UpdateEnemyStateMachine(a->state_machine_);
+			}
 		}
 	}
 }
@@ -44,7 +47,17 @@ std::shared_ptr<components::EnemyAIComponent> ai::EnemyAIManager::CreateEnemyAI(
 	auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
 	pbd::PBDManager::i_->CreateFGRRecord(game_object->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
 	auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(game_object, enemy_movement_generator_1, vehicle_template_);
-	auto enemy_ai_component = make_shared<components::EnemyAIComponent>(enemy_state_machine_1);
+	auto enemy_ai_component = make_shared<components::EnemyAIComponent>(enemy_state_machine_1, false);
+	enemy_ais_.push_back(enemy_ai_component);
+	return enemy_ai_component;
+}
+
+std::shared_ptr<components::EnemyAIComponent> ai::EnemyAIManager::CreateEnemyAI(std::shared_ptr<GameObject> game_object, bool is_passive)
+{
+	auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
+	pbd::PBDManager::i_->CreateFGRRecord(game_object->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
+	auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(game_object, enemy_movement_generator_1, vehicle_template_);
+	auto enemy_ai_component = make_shared<components::EnemyAIComponent>(enemy_state_machine_1, is_passive);
 	enemy_ais_.push_back(enemy_ai_component);
 	return enemy_ai_component;
 }

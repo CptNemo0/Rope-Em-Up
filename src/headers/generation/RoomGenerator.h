@@ -140,7 +140,9 @@ namespace generation
         int lamps = 1;
         int active_lamps = 0;
         int clutter = 10;
+        int barells = 0;
         int enemies = 1;
+        int generated_rooms = 0;
     };
 
     class RoomLayoutGenerator
@@ -154,6 +156,8 @@ namespace generation
     public:
         std::unordered_map<glm::ivec2, Room> rooms;
         std::deque<Room> rooms_ordered;
+
+        int built_rooms_ = 0;
 
         RoomLayoutGenerator() = default;
         void GenerateRooms(const RoomLayoutGenerationSettings& settings, std::shared_ptr<GameObject> root);
@@ -178,6 +182,7 @@ namespace generation
         std::vector<s_ptr<Model>> clutter;
         std::vector<s_ptr<Model>> clutter_c;
         std::vector<s_ptr<Model>> enemies;
+        std::vector<s_ptr<Model>> barrles;
     };
 
     class RoomGenerator
@@ -205,6 +210,8 @@ namespace generation
     bool CheckGateProximity(glm::vec3 pos, Room& room, float proximity);
 
     void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
+
+    void GenerateFirstRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 
     void BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, RoomLayoutGenerator* rlg, s_ptr<tmp::Texture> particle_texture, s_ptr<Shader> particle_shader);
 

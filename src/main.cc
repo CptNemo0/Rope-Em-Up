@@ -174,6 +174,8 @@ int main()
     const string kMod6Path = "res/Modules/mod6.obj";
     const string kMod7Path = "res/Modules/mod7.obj";
 
+    const string kBarellPath = "res/barell/barell.obj";
+
     const string kGrassPath = "res/grass/grass.obj";
 
     const string kFontPath = "res/fonts/CourierPrime-Regular.ttf";
@@ -363,7 +365,7 @@ int main()
 
 #pragma endregion Lights
 
-#pragma region Models
+#pragma region Models.
     auto test_model = res::get_model(kTestPath);
 
     auto cube_model = res::get_model(kCubeMeshPath);
@@ -402,6 +404,8 @@ int main()
     auto mod6_model = res::get_model(kMod6Path);
     auto mod7_model = res::get_model(kMod7Path);
 
+    auto barell_model = res::get_model(kBarellPath);
+
     generation::RoomModels models;
     models.walls.push_back(mod1_model);
     models.walls.push_back(mod2_model);
@@ -423,6 +427,8 @@ int main()
     models.clutter.push_back(boxes_3_model);
     models.clutter_c.push_back(boxes_3_c_model);
     models.enemies.push_back(enemy_model);
+    models.barrles.push_back(barell_model);
+    
 
     GrassRendererManager::Initialize(grass_model);
 
@@ -468,24 +474,24 @@ int main()
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_1->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_1->transform_));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model, 0, player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
     player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
-    player_1->GetComponent<components::SpellSlotComponent>()->type_ = SKULL_MINION;
-    player_1->GetComponent<components::SpellSlotComponent>()->spell_levels[SKULL_MINION] = 3;
+    player_1->GetComponent<components::SpellSlotComponent>()->type_ = SPELLS::NOT_A_SPELL;
+    
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_2->transform_));
+    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model, 0, player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
     player_2->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
-    player_2->GetComponent<components::SpellSlotComponent>()->type_ = SKULL_MINION;
-    player_2->GetComponent<components::SpellSlotComponent>()->spell_levels[SKULL_MINION] = 22;
+    player_2->GetComponent<components::SpellSlotComponent>()->type_ = SPELLS::NOT_A_SPELL;
+    
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
@@ -507,7 +513,6 @@ int main()
         test_ball_model,
         GBufferPassShader
     );
-
 
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
@@ -575,17 +580,6 @@ int main()
     HUDText_object->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "TEST", glm::vec3(1.0f)));
     HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
-
-    /*auto particle_emitter = GameObject::Create(player_1);
-    particle_emitter->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-    particle_emitter->AddComponent(make_shared<components::ParticleEmitter>(100, trail_texture, ParticleShader));
-    auto particle_emitter_component = particle_emitter->GetComponent<components::ParticleEmitter>();
-    particle_emitter_component->emission_rate_ = 0.1f;
-    particle_emitter_component->life_time_ = 1.0f;
-    particle_emitter_component->start_acceleration_ = glm::vec3(9.81f, 0.0, 0.0f);
-    particle_emitter_component->start_size_ = glm::vec2(0.5f, 0.4f);
-    particle_emitter_component->end_size_ = glm::vec2(1.0f, 2.0f);
-    particle_emitter_component->start_position_displacement_ = 1.0f;*/
 
     auto audio_test_obj = GameObject::Create(scene_root);
     audio_test_obj->AddComponent(make_shared<components::AudioSource>());
@@ -829,16 +823,11 @@ int main()
         GrassShader->SetVec3("pp2", player_2->transform_->get_position());
         GrassRendererManager::i_->Draw(GrassShader->get_id());
 
-
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
         GBufferPassShader->SetInt("numBones", MAX_BONES);
-        //player_1->GetComponent<components::Animator>()->Update();
-        //auto transforms = player_1->GetComponent<components::Animator>()->GetFinalBoneMatrices();
-        /*glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, transforms.size() * sizeof(glm::mat4), transforms.data());*/
 
         scene_root->PropagateUpdate();
 
@@ -934,18 +923,6 @@ int main()
             glBindTexture(GL_TEXTURE_2D, gbuffer.emissive_texture_);
             BloomThresholdShader->SetInt("emission_texture", 1);
             lbuffer.Draw();
-
-            /*BloomBlurHorizontalShader->Use();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, bloom.downscaled_);
-            BloomBlurHorizontalShader->SetInt("downscaled_texture", 0);
-            lbuffer.Draw();
-
-            BloomBlurVerticalShader->Use();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, bloom.horizontal_);
-            BloomBlurVerticalShader->SetInt("horizontal_texture", 0);
-            lbuffer.Draw();*/
 
             glViewport(0, 0, mode->width, mode->height);
         }

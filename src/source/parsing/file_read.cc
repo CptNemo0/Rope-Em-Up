@@ -92,7 +92,9 @@ void LoadRoomGenerationSettingsInitStruct(const string& path, generation::RoomGe
 	target.lamps = std::stoi(ini["RoomGenerationSettings"]["lamps"]);
 	target.active_lamps = std::stoi(ini["RoomGenerationSettings"]["active_lamps"]);
 	target.clutter = std::stoi(ini["RoomGenerationSettings"]["clutter"]);
+	target.barells = std::stoi(ini["RoomGenerationSettings"]["barells"]);
 	target.enemies = std::stoi(ini["RoomGenerationSettings"]["enemies"]);
+	target.generated_rooms = std::stoi(ini["RoomGenerationSettings"]["generated_rooms"]);
 
 	ini.clear();
 	file.~INIFile();

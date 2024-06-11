@@ -1,9 +1,7 @@
 ﻿#include "../../headers/generation/RoomGenerator.h"
 
-
 //std::deque<w_ptr<GameObject>> generation::Room::room_parts = std::deque<w_ptr<GameObject>>();
 //std::vector<w_ptr<GameObject>> generation::Room::enemies = std::vector<w_ptr<GameObject>>();
-
 
 
 std::pair<int, glm::ivec2> generation::RoomLayoutGenerator::FindNextClosestPoint(const glm::ivec2 &A, const glm::ivec2 &B, const glm::ivec2 &point, int prev_direction)
@@ -322,6 +320,734 @@ bool generation::CheckGateProximity(glm::vec3 pos, Room& room, float proximity)
 
 void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
 {
+    switch (rgs->generated_rooms)
+    {
+    case 1:
+        GenerateFirstRoom(room, rgs, rm);
+        break;
+    default:
+    {
+        room.is_generated = true;
+
+        room.up_walls_idx.clear();
+        room.left_walls_idx.clear();
+        room.lamp_positions.clear();
+        room.clutter_positions.clear();
+        room.clutter_idx.clear();
+
+        std::random_device rd;
+        std::mt19937 g(rd());
+
+        //generate upper walls
+        room.width = rgs->width;
+        room.height = rgs->height;
+
+        room.up_walls_idx.reserve(rgs->width);
+
+        if ((rm->walls.size() - 1) != 0)
+        {
+            for (int i = 0; i < rgs->width; i++)
+            {
+                int model_idx = random::RandInt(0, rm->walls.size() - 1);
+                room.up_walls_idx.push_back(model_idx);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < rgs->width; i++)
+            {
+                room.up_walls_idx.push_back(0);
+            }
+        }
+
+
+        //generate left walls
+        room.left_walls_idx.reserve(rgs->height);
+
+        if (rm->walls.size() != 1)
+        {
+            for (int i = 0; i < rgs->height; i++)
+            {
+                int model_idx = random::RandInt(0, rm->walls.size() - 1);
+                room.left_walls_idx.push_back(model_idx);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < rgs->height; i++)
+            {
+                room.left_walls_idx.push_back(0);
+            }
+        }
+
+        //generate gates
+        //up
+
+        int model_idx = 0;
+        assert(rm->gates.size() != 0);
+        assert(room.width != 0);
+        assert(room.height != 0);
+        if (room.up_gate)
+        {
+
+            room.up_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+            room.up_gate_wall = random::RandInt(0, room.width - 1);
+            room.up_gate_pos = glm::vec3(-8.0f - room.up_gate_wall * kModuleSize, 0.0f, 0.0f);
+        }
+
+        //down
+        if (room.down_gate)
+        {
+            room.down_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+            room.down_gate_wall = random::RandInt(0, room.width - 1);
+            room.down_gate_pos = glm::vec3(-8.0f - room.down_gate_wall * kModuleSize, 0.0f, -room.height * kModuleSize);
+        }
+
+        //right
+        if (room.right_gate)
+        {
+            room.right_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+            room.right_gate_wall = random::RandInt(0, room.height - 1);
+            room.right_gate_pos = glm::vec3(-room.width * kModuleSize, 0.0f, -8.0f - room.right_gate_wall * kModuleSize);
+        }
+
+        //left
+        if (room.left_gate)
+        {
+            room.left_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+            room.left_gate_wall = random::RandInt(0, room.height - 1);
+            room.left_gate_pos = glm::vec3(0.0f, 0.0f, -8.0 - room.left_gate_wall * kModuleSize);
+        }
+
+
+        // Lamps
+
+        int lamp_num = rgs->lamps;
+        std::unordered_set<glm::vec3> lamp_set;
+
+        for (int i = 0; i < room.width; i++)
+        {
+            for (int j = 0; j < room.height; j++)
+            {
+                auto pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize);
+                for (int k = 0; k < kLanternPlacement.size(); k++)
+                {
+                    lamp_set.insert(kLanternPlacement[k] + pos);
+                }
+            }
+        }
+
+        // Left top
+        if (lamp_num > 0)
+        {
+            auto left_top = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+            left_top += kLanternPlacement[0];
+            room.lamp_positions.push_back(left_top);
+            lamp_set.erase(left_top);
+            lamp_num--;
+
+        }
+
+        // Right bot
+        if (lamp_num > 0)
+        {
+            auto right_bot = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+            right_bot += kLanternPlacement[3];
+            room.lamp_positions.push_back(right_bot);
+            lamp_set.erase(right_bot);
+            lamp_num--;
+        }
+
+        // Right top
+        if (lamp_num > 0)
+        {
+            auto right_top = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+            right_top += kLanternPlacement[1];
+            room.lamp_positions.push_back(right_top);
+            lamp_set.erase(right_top);
+            lamp_num--;
+        }
+
+        // Left bot
+        if (lamp_num > 0)
+        {
+            auto left_bot = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+            left_bot += kLanternPlacement[2];
+            room.lamp_positions.push_back(left_bot);
+            lamp_set.erase(left_bot);
+            lamp_num--;
+        }
+
+        // Above 4 - random
+        std::vector<glm::vec3> shuffled_set = std::vector<glm::vec3>(lamp_set.begin(), lamp_set.end());
+        std::shuffle(shuffled_set.begin(), shuffled_set.end(), g);
+
+        if (lamp_num > 0)
+        {
+            for (auto& pos : shuffled_set)
+            {
+                room.lamp_positions.push_back(pos);
+                lamp_num--;
+                if (lamp_num == 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        // Clutter in corners
+        std::vector<glm::vec3> clutter_vector;
+        std::unordered_set<glm::vec3> clutter_set;
+        for (int i = 0; i < room.width; i++)
+        {
+            auto top_pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+            auto bot_pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (CheckGateProximity(top_pos + kCornerTopLeft[i], room, 2.5f))
+                {
+                    clutter_set.insert(top_pos + kCornerTopLeft[i]);
+                }
+
+                if (CheckGateProximity(top_pos + kCornerTopRight[i], room, 2.5f))
+                {
+                    clutter_set.insert(top_pos + kCornerTopRight[i]);
+                }
+
+                if (CheckGateProximity(bot_pos + kCornerBotLeft[i], room, 2.5f))
+                {
+                    clutter_set.insert(bot_pos + kCornerBotLeft[i]);
+                }
+
+                if (CheckGateProximity(bot_pos + kCornerBotRight[i], room, 2.5f))
+                {
+                    clutter_set.insert(bot_pos + kCornerBotRight[i]);
+                }
+            }
+        }
+        for (int i = 0; i < room.height; i++)
+        {
+            auto left_pos = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
+            auto right_pos = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (CheckGateProximity(left_pos + kCornerTopLeft[i], room, 2.5f))
+                {
+                    clutter_set.insert(left_pos + kCornerTopLeft[i]);
+                }
+
+                if (CheckGateProximity(left_pos + kCornerTopLeft[i], room, 2.5f))
+                {
+                    clutter_set.insert(left_pos + kCornerTopLeft[i]);
+                }
+
+                if (CheckGateProximity(left_pos + kCornerBotLeft[i], room, 2.5f))
+                {
+                    clutter_set.insert(left_pos + kCornerBotLeft[i]);
+                }
+
+                if (CheckGateProximity(right_pos + kCornerBotRight[i], room, 2.5f))
+                {
+                    clutter_set.insert(right_pos + kCornerBotRight[i]);
+                }
+            }
+        }
+        clutter_vector = std::vector<glm::vec3>(clutter_set.begin(), clutter_set.end());
+        std::shuffle(clutter_vector.begin(), clutter_vector.end(), g);
+
+
+        assert(rm->clutter.size() > 0);
+        for (int i = 0; i < rgs->clutter && i < clutter_vector.size(); i++)
+        {
+            room.clutter_positions.push_back(clutter_vector[i]);
+            room.clutter_idx.push_back(random::RandInt(0, rm->clutter.size() - 1));
+        }
+
+        //Enemies
+        std::unordered_set<glm::vec3> enemies_set;
+        std::vector<glm::vec3> enemies_positions;
+
+        for (int i = 0; i < room.width; i++)
+        {
+            for (int j = 0; j < room.height; j++)
+            {
+                for (int k = 0; k < kEnemiesPositions.size(); k++)
+                {
+                    enemies_set.insert(kEnemiesPositions[k] + (glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize)));
+                }
+            }
+        }
+
+        enemies_positions = std::vector<glm::vec3>(enemies_set.begin(), enemies_set.end());
+
+        int enemies_positons_size = enemies_positions.size();
+
+        std::shuffle(enemies_positions.begin(), enemies_positions.end(), g);
+
+        if (enemies_positons_size)
+        {
+            for (int i = 0; i < rgs->enemies; i++)
+            {
+                room.enemies_positions.push_back(enemies_positions[i % enemies_positions.size()]);
+                room.enemies_idx.push_back(random::RandInt(0, -1 + rm->enemies.size()));
+            }
+        }
+
+        // barells
+
+        int rest_positions = enemies_positons_size - rgs->enemies;
+        int barell_fit = rest_positions / rgs->barells;
+        int ceil = barell_fit > 0 ? rgs->barells : rest_positions;
+
+        for (int i = 0; i < ceil; i++)
+        {
+            room.barells_positions.push_back(enemies_positions[(i + enemies_positons_size - 1) % enemies_positions.size()]);
+            room.barell_idx.push_back(random::RandInt(0, -1 + rm->barrles.size()));
+        }
+    }
+        break;
+    }
+    
+
+    rgs->generated_rooms++;
+}
+    
+void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, RoomLayoutGenerator* rlg, s_ptr<tmp::Texture> particle_texture, s_ptr<Shader> particle_shader)
+{
+    room.is_built = true;
+
+    if (rlg->rooms.contains(room.position + glm::ivec2(0, -1))) rlg->rooms[room.position + glm::ivec2(0, -1)].is_discovered = true;
+    if (rlg->rooms.contains(room.position + glm::ivec2(-1, 0))) rlg->rooms[room.position + glm::ivec2(-1, 0)].is_discovered = true;
+    if (rlg->rooms.contains(room.position + glm::ivec2(0, 1))) rlg->rooms[room.position + glm::ivec2(0, 1)].is_discovered = true;
+    if (rlg->rooms.contains(room.position + glm::ivec2(1, 0))) rlg->rooms[room.position + glm::ivec2(1, 0)].is_discovered = true;
+
+    switch (rlg->built_rooms_)
+    {
+    case 1:
+    {
+        for (int i = 0; i < room.width; i++)
+        {
+            s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
+            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+            wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+            wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+
+            if (room.up_walls_idx[i] == 1)
+            {
+                auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch2[0];
+                auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch2[1];
+
+                auto renderer = GameObject::Create();
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+                room.floors->transform_->AddChild(renderer->transform_);
+            }
+            else if (room.up_walls_idx[i] == 5)
+            {
+                auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch6[0];
+                auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch6[1];
+                auto renderer = GameObject::Create();
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+                room.floors->transform_->AddChild(renderer->transform_);
+            }
+            else if (room.up_walls_idx[i] == 6)
+            {
+                auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch7[0];
+                auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch7[1];
+
+                auto renderer = GameObject::Create();
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+                room.floors->transform_->AddChild(renderer->transform_);
+            }
+        }
+
+        for (int i = 0; i < room.height; i++)
+        {
+            s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
+            wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+            wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+            wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
+
+            if (room.left_walls_idx[i] == 1)
+            {
+                auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch2[0];
+                auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch2[1];
+
+                auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+                auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+            }
+            else if (room.left_walls_idx[i] == 5)
+            {
+                auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch6[0];
+                auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch6[1];
+
+                auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+                auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+            }
+            else if (room.left_walls_idx[i] == 6)
+            {
+                auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch7[0];
+                auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch7[1];
+
+                auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+                auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+            }
+        }
+
+        for (int i = 0; i < room.width; i++)
+        {
+            for (int j = 0; j < room.height; j++)
+            {
+                s_ptr<GameObject> floor = GameObject::Create(room.floors);
+                floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+                floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
+            }
+        }
+
+        //generate gates
+        //up
+        if (room.up_gate)
+        {
+            s_ptr<GameObject> gate = GameObject::Create(room.gates);
+            gate->transform_->set_position(room.up_gate_pos);
+            gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            auto emitter = gate->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.1f;
+            emitter->life_time_ = 1.0f;
+            emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, 5.0f);
+            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
+            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_displacement_ = 2.0f;
+            emitter->active_ = false;
+        }
+
+        //down
+        if (room.down_gate)
+        {
+            s_ptr<GameObject> gate = GameObject::Create(room.gates);
+            gate->transform_->set_position(room.down_gate_pos);
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            auto emitter = gate->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.01f;
+            emitter->life_time_ = 1.0f;
+            emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, -5.0f);
+            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
+            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_displacement_ = 2.0f;
+            emitter->active_ = false;
+        }
+
+        //right
+        if (room.right_gate)
+        {
+            s_ptr<GameObject> gate = GameObject::Create(room.gates);
+            gate->transform_->set_position(room.right_gate_pos);
+            gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            auto emitter = gate->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.1f;
+            emitter->life_time_ = 1.0f;
+            emitter->start_acceleration_ = glm::vec3(-5.0f, 0.0f, 0.0f);
+            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
+            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_displacement_ = 2.0f;
+            emitter->active_ = false;
+        }
+
+        //left
+        if (room.left_gate)
+        {
+            s_ptr<GameObject> gate = GameObject::Create(room.gates);
+            gate->transform_->set_position(room.left_gate_pos);
+            gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            auto emitter = gate->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.1f;
+            emitter->life_time_ = 1.0f;
+            emitter->start_acceleration_ = glm::vec3(5.0f, 0.0f, 0.0f);
+            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
+            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_displacement_ = 2.0f;
+            emitter->active_ = false;
+        }
+
+        // generate lamps
+
+        for (auto pos : room.lamp_positions)
+        {
+            s_ptr<GameObject> lamp = GameObject::Create(room.lamps);
+            lamp->transform_->set_position(pos);
+            lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
+            lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps_c[0], 0, lamp->transform_));
+        }
+
+        // generate clutter
+
+        for (int i = 0; i < room.clutter_idx.size(); i++)
+        {
+            s_ptr<GameObject> clutter = GameObject::Create(room.clutter);
+            clutter->transform_->set_position(room.clutter_positions[i]);
+            clutter->transform_->set_scale(glm::vec3(1.0f, 0.5f, 1.0f));
+            clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
+            clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::CLUTTER, gPRECISION, rm->clutter_c[room.clutter_idx[i]], 0, clutter->transform_));
+            clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
+        }
+
+        // generate enemies
+        for (int i = 0; i < room.enemies_positions.size(); i++)
+        {
+            auto enemy = GameObject::Create(room.enemies);
+            enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
+            enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+            enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, rm->enemies[room.enemies_idx[i]], 0, enemy->transform_));
+            enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
+            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
+            enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy, true));
+            enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
+            enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));
+            enemy->AddComponent(std::make_shared<components::ParticleEmitter>(100, res::get_texture("res/textures/zzz.png"), particle_shader));
+            auto emitter = enemy->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.5f;
+            emitter->life_time_ = 2.0f;
+            emitter->start_acceleration_ = glm::vec3(0.0, 10.0, 0.0);
+            emitter->start_size_ = glm::vec2(2.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(2.5f, 2.5f);
+            
+        }
+    }
+        break;
+    default:
+    {
+        for (int i = 0; i < room.width; i++)
+        {
+            s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
+            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+            wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+            wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+
+            if (room.up_walls_idx[i] == 1)
+            {
+                auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch2[0];
+                auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch2[1];
+
+                auto renderer = GameObject::Create();
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+                room.floors->transform_->AddChild(renderer->transform_);
+            }
+            else if (room.up_walls_idx[i] == 5)
+            {
+                auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch6[0];
+                auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch6[1];
+                auto renderer = GameObject::Create();
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+                room.floors->transform_->AddChild(renderer->transform_);
+            }
+            else if (room.up_walls_idx[i] == 6)
+            {
+                auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch7[0];
+                auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch7[1];
+
+                auto renderer = GameObject::Create();
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+                room.floors->transform_->AddChild(renderer->transform_);
+            }
+        }
+
+        for (int i = 0; i < room.height; i++)
+        {
+            s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
+            wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+            wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+            wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
+
+            if (room.left_walls_idx[i] == 1)
+            {
+                auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch2[0];
+                auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch2[1];
+
+                auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+                auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+            }
+            else if (room.left_walls_idx[i] == 5)
+            {
+                auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch6[0];
+                auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch6[1];
+
+                auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+                auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+            }
+            else if (room.left_walls_idx[i] == 6)
+            {
+                auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch7[0];
+                auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch7[1];
+
+                auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
+                auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
+
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
+            }
+        }
+
+        for (int i = 0; i < room.width; i++)
+        {
+            for (int j = 0; j < room.height; j++)
+            {
+                s_ptr<GameObject> floor = GameObject::Create(room.floors);
+                floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+                floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
+            }
+        }
+
+        //generate gates
+        //up
+        if (room.up_gate)
+        {
+            s_ptr<GameObject> gate = GameObject::Create(room.gates);
+            gate->transform_->set_position(room.up_gate_pos);
+            gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            auto emitter = gate->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.1f;
+            emitter->life_time_ = 1.0f;
+            emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, 5.0f);
+            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
+            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_displacement_ = 2.0f;
+            emitter->active_ = false;
+        }
+
+        //down
+        if (room.down_gate)
+        {
+            s_ptr<GameObject> gate = GameObject::Create(room.gates);
+            gate->transform_->set_position(room.down_gate_pos);
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            auto emitter = gate->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.01f;
+            emitter->life_time_ = 1.0f;
+            emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, -5.0f);
+            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
+            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_displacement_ = 2.0f;
+            emitter->active_ = false;
+        }
+
+        //right
+        if (room.right_gate)
+        {
+            s_ptr<GameObject> gate = GameObject::Create(room.gates);
+            gate->transform_->set_position(room.right_gate_pos);
+            gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            auto emitter = gate->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.1f;
+            emitter->life_time_ = 1.0f;
+            emitter->start_acceleration_ = glm::vec3(-5.0f, 0.0f, 0.0f);
+            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
+            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_displacement_ = 2.0f;
+            emitter->active_ = false;
+        }
+
+        //left
+        if (room.left_gate)
+        {
+            s_ptr<GameObject> gate = GameObject::Create(room.gates);
+            gate->transform_->set_position(room.left_gate_pos);
+            gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            auto emitter = gate->GetComponent<components::ParticleEmitter>();
+            emitter->emission_rate_ = 0.1f;
+            emitter->life_time_ = 1.0f;
+            emitter->start_acceleration_ = glm::vec3(5.0f, 0.0f, 0.0f);
+            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
+            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_displacement_ = 2.0f;
+            emitter->active_ = false;
+        }
+
+        // generate lamps
+
+        for (auto pos : room.lamp_positions)
+        {
+            s_ptr<GameObject> lamp = GameObject::Create(room.lamps);
+            lamp->transform_->set_position(pos);
+            lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
+            lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps_c[0], 0, lamp->transform_));
+        }
+
+        // generate clutter
+
+        for (int i = 0; i < room.clutter_idx.size(); i++)
+        {
+            s_ptr<GameObject> clutter = GameObject::Create(room.clutter);
+            clutter->transform_->set_position(room.clutter_positions[i]);
+            clutter->transform_->set_scale(glm::vec3(1.0f, 0.5f, 1.0f));
+            clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
+            clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::CLUTTER, gPRECISION, rm->clutter_c[room.clutter_idx[i]], 0, clutter->transform_));
+            clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
+        }
+
+        // generate enemies
+        for (int i = 0; i < room.enemies_positions.size(); i++)
+        {
+            auto enemy = GameObject::Create(room.enemies);
+            enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
+            enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+            enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, rm->enemies[room.enemies_idx[i]], 0, enemy->transform_));
+            enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
+            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
+            enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
+            enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
+            enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));
+        }
+
+        //generate barells
+        for (int i = 0; i < room.barells_positions.size(); i++)
+        {
+            auto barell = GameObject::Create(room.barells);
+            barell->transform_->TeleportToPosition(room.barells_positions[i]);
+            barell->AddComponent(make_shared<components::MeshRenderer>(rm->barrles[room.barell_idx[i]], shader));
+            barell->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, rm->barrles[room.barell_idx[i]], 0, barell->transform_));
+            barell->AddComponent(pbd::PBDManager::i_->CreateParticle(5.0f, 0.78f, barell->transform_));
+            barell->AddComponent(HealthManager::i_->CreateHealthComponent(1.0f, BARELL));
+            barell->AddComponent(std::make_shared<components::HpDropComponent>(10.0f));
+            barell->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(barell, true));
+            
+        }
+    }
+        break;
+    }
+
+   
+    
+    rlg->built_rooms_++;
+}
+
+void generation::GenerateFirstRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
+{
     room.is_generated = true;
 
     room.up_walls_idx.clear();
@@ -334,14 +1060,14 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     std::mt19937 g(rd());
 
     //generate upper walls
-    room.width = rgs->width;
-    room.height = rgs->height;
+    room.width = 1;
+    room.height = 1;
 
-    room.up_walls_idx.reserve(rgs->width);
+    room.up_walls_idx.reserve(room.width);
 
     if ((rm->walls.size() - 1) != 0)
     {
-        for (int i = 0; i < rgs->width; i++)
+        for (int i = 0; i < room.width; i++)
         {
             int model_idx = random::RandInt(0, rm->walls.size() - 1);
             room.up_walls_idx.push_back(model_idx);
@@ -349,19 +1075,19 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     }
     else
     {
-        for (int i = 0; i < rgs->width; i++)
+        for (int i = 0; i < room.width; i++)
         {
             room.up_walls_idx.push_back(0);
         }
     }
-    
+
 
     //generate left walls
-    room.left_walls_idx.reserve(rgs->height);
+    room.left_walls_idx.reserve(room.height);
 
     if (rm->walls.size() != 1)
     {
-        for (int i = 0; i < rgs->height; i++)
+        for (int i = 0; i < room.height; i++)
         {
             int model_idx = random::RandInt(0, rm->walls.size() - 1);
             room.left_walls_idx.push_back(model_idx);
@@ -369,7 +1095,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     }
     else
     {
-        for (int i = 0; i < rgs->height; i++)
+        for (int i = 0; i < room.height; i++)
         {
             room.left_walls_idx.push_back(0);
         }
@@ -384,12 +1110,12 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     assert(room.height != 0);
     if (room.up_gate)
     {
-        
+
         room.up_gate_idx = random::RandInt(0, rm->gates.size() - 1);
         room.up_gate_wall = random::RandInt(0, room.width - 1);
         room.up_gate_pos = glm::vec3(-8.0f - room.up_gate_wall * kModuleSize, 0.0f, 0.0f);
     }
-    
+
     //down
     if (room.down_gate)
     {
@@ -397,7 +1123,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         room.down_gate_wall = random::RandInt(0, room.width - 1);
         room.down_gate_pos = glm::vec3(-8.0f - room.down_gate_wall * kModuleSize, 0.0f, -room.height * kModuleSize);
     }
-    
+
     //right
     if (room.right_gate)
     {
@@ -416,8 +1142,8 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 
 
     // Lamps
-    
-    int lamp_num = rgs->lamps;
+
+    int lamp_num = 4;
     std::unordered_set<glm::vec3> lamp_set;
 
     for (int i = 0; i < room.width; i++)
@@ -440,9 +1166,9 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         room.lamp_positions.push_back(left_top);
         lamp_set.erase(left_top);
         lamp_num--;
-        
+
     }
-    
+
     // Right bot
     if (lamp_num > 0)
     {
@@ -452,7 +1178,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         lamp_set.erase(right_bot);
         lamp_num--;
     }
-    
+
     // Right top
     if (lamp_num > 0)
     {
@@ -462,7 +1188,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         lamp_set.erase(right_top);
         lamp_num--;
     }
-    
+
     // Left bot
     if (lamp_num > 0)
     {
@@ -471,23 +1197,6 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
         room.lamp_positions.push_back(left_bot);
         lamp_set.erase(left_bot);
         lamp_num--;
-    }
-
-    // Above 4 - random
-    std::vector<glm::vec3> shuffled_set = std::vector<glm::vec3>(lamp_set.begin(), lamp_set.end());
-    std::shuffle(shuffled_set.begin(), shuffled_set.end(), g);
-    
-    if (lamp_num > 0)
-    {
-        for (auto& pos : shuffled_set)
-        {
-            room.lamp_positions.push_back(pos);
-            lamp_num--;
-            if (lamp_num == 0)
-            {
-                break;
-            }
-        }
     }
 
     // Clutter in corners
@@ -504,7 +1213,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
             {
                 clutter_set.insert(top_pos + kCornerTopLeft[i]);
             }
-            
+
             if (CheckGateProximity(top_pos + kCornerTopRight[i], room, 2.5f))
             {
                 clutter_set.insert(top_pos + kCornerTopRight[i]);
@@ -518,13 +1227,13 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
             if (CheckGateProximity(bot_pos + kCornerBotRight[i], room, 2.5f))
             {
                 clutter_set.insert(bot_pos + kCornerBotRight[i]);
-            }   
+            }
         }
     }
     for (int i = 0; i < room.height; i++)
     {
         auto left_pos = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
-        auto right_pos = glm::vec3(-8.0f - (room.width - 1) *kModuleSize, 0.0f, -8.0f - i * kModuleSize);
+        auto right_pos = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
 
         for (int i = 0; i < 3; i++)
         {
@@ -561,240 +1270,8 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
     }
 
     //Enemies
-    std::unordered_set<glm::vec3> enemies_set;
-    std::vector<glm::vec3> enemies_positions;
-
-    for (int i = 0; i < room.width; i++)
-    {
-        for (int j = 0; j < room.height; j++)
-        {
-            for (int k = 0; k < kEnemiesPositions.size(); k++)
-            {
-                enemies_set.insert(kEnemiesPositions[k] + (glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize)));
-            }
-        }
-    }
-
-    enemies_positions = std::vector<glm::vec3>(enemies_set.begin(), enemies_set.end());
-    std::shuffle(enemies_positions.begin(), enemies_positions.end(), g);
-
-    if (enemies_positions.size())
-    {
-        for (int i = 0; i < rgs->enemies; i++)
-        {
-            room.enemies_positions.push_back(enemies_positions[i % enemies_positions.size()]);
-            room.enemies_idx.push_back(random::RandInt(0, -1 + rm->enemies.size()));
-        }
-    }
-}
-    
-void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, RoomLayoutGenerator* rlg, s_ptr<tmp::Texture> particle_texture, s_ptr<Shader> particle_shader)
-{
-    room.is_built = true;
-
-    if (rlg->rooms.contains(room.position + glm::ivec2(0, -1))) rlg->rooms[room.position + glm::ivec2(0, -1)].is_discovered = true;
-    if (rlg->rooms.contains(room.position + glm::ivec2(-1, 0))) rlg->rooms[room.position + glm::ivec2(-1, 0)].is_discovered = true;
-    if (rlg->rooms.contains(room.position + glm::ivec2(0, 1))) rlg->rooms[room.position + glm::ivec2(0, 1)].is_discovered = true;
-    if (rlg->rooms.contains(room.position + glm::ivec2(1, 0))) rlg->rooms[room.position + glm::ivec2(1, 0)].is_discovered = true;
-
-    for (int i = 0; i < room.width; i++)
-    {
-        s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
-        wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
-        wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-        wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
-
-        if (room.up_walls_idx[i] == 1)
-        {
-            auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch2[0];
-            auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch2[1];
-
-            auto renderer = GameObject::Create();
-            renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-            room.floors->transform_->AddChild(renderer->transform_);
-        }
-        else if (room.up_walls_idx[i] == 5)
-        {
-            auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch6[0];
-            auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch6[1];
-            auto renderer = GameObject::Create();
-            renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-            room.floors->transform_->AddChild(renderer->transform_);
-        }
-        else if (room.up_walls_idx[i] == 6)
-        {
-            auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch7[0];
-            auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch7[1];
-
-            auto renderer = GameObject::Create();
-            renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-            room.floors->transform_->AddChild(renderer->transform_);
-        }
-    }
-
-    for (int i = 0; i < room.height; i++)
-    {
-        s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
-        wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
-        wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-        wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
-
-        if (room.left_walls_idx[i] == 1)
-        {
-            auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch2[0];
-            auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch2[1];
-
-            auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
-            auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
-
-            wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-        }
-        else if (room.left_walls_idx[i] == 5)
-        {
-            auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch6[0];
-            auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch6[1];
-
-            auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
-            auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
-
-            wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-        }
-        else if (room.left_walls_idx[i] == 6)
-        {
-            auto tmp_ul = wall_left->transform_->get_model_matrix() * kGrassPatch7[0];
-            auto tmp_dr = wall_left->transform_->get_model_matrix() * kGrassPatch7[1];
-
-            auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
-            auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
-
-            wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 70));
-        }
-    }
-
-    for (int i = 0; i < room.width; i++)
-    {
-        for (int j = 0; j < room.height; j++)
-        {
-            s_ptr<GameObject> floor = GameObject::Create(room.floors);
-            floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-            floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
-        }
-    }
-
-    //generate gates
-    //up
-    if (room.up_gate)
-    {
-        s_ptr<GameObject> gate = GameObject::Create(room.gates);
-        gate->transform_->set_position(room.up_gate_pos);
-        gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
-        auto emitter = gate->GetComponent<components::ParticleEmitter>();
-        emitter->emission_rate_ = 0.05f;
-        emitter->life_time_ = 1.0f;
-        emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, 2.0f);
-        emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-        emitter->end_size_ = glm::vec2(1.0f, 2.0f);
-        emitter->start_position_displacement_ = 2.0f;
-        emitter->active_ = false;
-        /*particle_emitter_component->emission_rate_ = 0.1f;
-        particle_emitter_component->life_time_ = 1.0f;
-        particle_emitter_component->start_acceleration_ = glm::vec3(9.81f, 0.0, 0.0f);
-        particle_emitter_component->start_size_ = glm::vec2(0.5f, 0.4f);
-        particle_emitter_component->end_size_ = glm::vec2(1.0f, 2.0f);
-        particle_emitter_component->start_position_displacement_ = 1.0f;*/
-    }
-
-    //down
-    if (room.down_gate)
-    {
-        s_ptr<GameObject> gate = GameObject::Create(room.gates);
-        gate->transform_->set_position(room.down_gate_pos);
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
-        auto emitter = gate->GetComponent<components::ParticleEmitter>();
-        emitter->emission_rate_ = 0.05f;
-        emitter->life_time_ = 1.0f;
-        emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, -2.0f);
-        emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-        emitter->end_size_ = glm::vec2(1.0f, 2.0f);
-        emitter->start_position_displacement_ = 2.0f;
-        emitter->active_ = false;
-    }
-
-    //right
-    if (room.right_gate)
-    {
-        s_ptr<GameObject> gate = GameObject::Create(room.gates);
-        gate->transform_->set_position(room.right_gate_pos);
-        gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
-        auto emitter = gate->GetComponent<components::ParticleEmitter>();
-        emitter->emission_rate_ = 0.05f;
-        emitter->life_time_ = 1.0f;
-        emitter->start_acceleration_ = glm::vec3(-2.0f, 0.0f, 0.0f);
-        emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-        emitter->end_size_ = glm::vec2(1.0f, 2.0f);
-        emitter->start_position_displacement_ = 2.0f;
-        emitter->active_ = false;
-    }
-
-    //left
-    if (room.left_gate)
-    {
-        s_ptr<GameObject> gate = GameObject::Create(room.gates);
-        gate->transform_->set_position(room.left_gate_pos);
-        gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-        gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
-        auto emitter = gate->GetComponent<components::ParticleEmitter>();
-        emitter->emission_rate_ = 0.05f;
-        emitter->life_time_ = 1.0f;
-        emitter->start_acceleration_ = glm::vec3(2.0f, 0.0f, 0.0f);
-        emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-        emitter->end_size_ = glm::vec2(1.0f, 2.0f);
-        emitter->start_position_displacement_ = 2.0f;
-        emitter->active_ = false;
-    }
-
-    // generate lamps
-
-    for (auto pos : room.lamp_positions)
-    {
-        s_ptr<GameObject> lamp = GameObject::Create(room.lamps);
-        lamp->transform_->set_position(pos);
-        lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
-        lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps_c[0], 0, lamp->transform_));
-    }
-
-    // generate clutter
-
-    for (int i = 0; i < room.clutter_idx.size(); i++)
-    {
-        s_ptr<GameObject> clutter = GameObject::Create(room.clutter);
-        clutter->transform_->set_position(room.clutter_positions[i]);
-        clutter->transform_->set_scale(glm::vec3(1.0f, 0.5f, 1.0f));
-        clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
-        clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::CLUTTER, gPRECISION, rm->clutter_c[room.clutter_idx[i]], 0, clutter->transform_));
-        clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
-    }
-
-    // generate enemies
-    for (int i = 0; i < room.enemies_positions.size(); i++)
-    {
-        auto enemy = GameObject::Create(room.enemies);
-        enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
-        enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
-        enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE , gPRECISION, rm->enemies[room.enemies_idx[i]], 0, enemy->transform_));
-        enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
-        enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
-        enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
-        enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
-        enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));
-    }
+    room.enemies_positions.push_back(glm::vec3(-8.0f, 0.0f, -8.0f));
+    room.enemies_idx.push_back(random::RandInt(0, -1 + rm->enemies.size()));
 }
 
 glm::ivec2 generation::GetMoveDirection(Room* room, std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2)

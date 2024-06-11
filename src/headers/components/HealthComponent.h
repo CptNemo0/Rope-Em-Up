@@ -14,6 +14,7 @@ enum HEALTH_TYPE
 {
 	PLAYER,
 	MONSTER,
+	BARELL,
 	OTHER
 };
 

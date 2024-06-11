@@ -1,0 +1,14 @@
+# Blender 4.0.1 MTL File: 'None'
+# www.blender.org
+
+newmtl barell
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd barell_albedo.png
+map_Ns barell_roughness.png
+map_refl barell_metallic.png
+map_Ke no_emission.png
+map_Bump -bm 20.000000 barell_normal.png
