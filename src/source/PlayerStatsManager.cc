@@ -85,6 +85,19 @@ void PlayerStatsManager::AddExp(float exp)
 	{
 		LevelUp();
 	}
+
+
+	glm::vec3 dir1 = glm::normalize(player_1_->transform_->get_position() - player_1_->transform_->get_previous_position());
+	glm::vec3 dir2 = glm::normalize(player_2_->transform_->get_position() - player_2_->transform_->get_previous_position());
+	auto tex = res::get_texture("res/textures/test_smoke.png");
+	auto e1 = player_1_->GetComponent<components::ParticleEmitter>();
+	auto e2 = player_2_->GetComponent<components::ParticleEmitter>();
+	e1->texture_ = tex;
+	e1->start_acceleration_ = glm::vec3(0.0f, 100.0f, 0.0f) + dir1;
+	e2->texture_ = tex;
+	e2->start_acceleration_ = glm::vec3(0.0f, 100.0f, 0.0f) + dir2;
+	e1->Burst(50);
+	e2->Burst(50);
 }
 
 void PlayerStatsManager::LevelUpSpeed()

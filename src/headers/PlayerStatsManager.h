@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "typedef.h"
 #include "physics/Rope.h"
-
+#include "components/ParticleEmitter.h"
 class PlayerStatsManager
 {
 public:

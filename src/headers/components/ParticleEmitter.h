@@ -42,7 +42,7 @@ class ParticleEmitter : public Component, public std::enable_shared_from_this<Pa
 private:
     int max_particles_;
 
-    s_ptr<tmp::Texture> texture_;
+    
     s_ptr<Shader> shader_;
     s_ptr<Transform> transform_;
 
@@ -53,6 +53,9 @@ private:
 
     unsigned int current_id_ = 0;
 public:
+
+    s_ptr<tmp::Texture> texture_;
+
     float emission_rate_ = 0.05f;
     glm::ivec2 spawns_per_emission_ = glm::ivec2(1, 1);
     float life_time_ = 1.0f;
@@ -65,16 +68,20 @@ public:
     float start_velocity_displacement_ = 0.0f;
     glm::vec3 start_acceleration_ = glm::vec3(0.0f, 0.0f, 0.0f);
 
+    bool burst_emitter_;
+
     s_ptr<Timer::Timer> emitter_timer_;
     Timer::Timer emission_timer_;
 
-    ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader);
+    ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, bool burst_emitter = false);
+   
     void Start() override;
     void Update() override;
     void Destroy() override;
 
     void UpdateParticles(float delta_time);
     void EmitParticles();
+    void Burst(int amount);
     void DrawParticles();
 
     ParticleEmitter(json &j);

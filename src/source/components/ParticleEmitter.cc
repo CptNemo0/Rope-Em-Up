@@ -1,11 +1,11 @@
 #include "../../headers/components/ParticleEmitter.h"
 
-components::ParticleEmitter::ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader)
+components::ParticleEmitter::ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, bool burst_emitter )
 {
     this->texture_ = texture;
     this->shader_ = shader;
     this->max_particles_ = max_particles;
-
+    this->burst_emitter_ = burst_emitter;
     glGenVertexArrays(1, &VAO_);
     glGenBuffers(1, &VBO_);
     glBindVertexArray(VAO_);
@@ -38,14 +38,17 @@ void components::ParticleEmitter::Start()
     nullptr, true));
     ParticleEmitterManager::i_->emitters_.push_back(shared_from_this());
 
-    emission_timer_ = Timer::AddTimer(emission_rate_, [this]()
+    if (!burst_emitter_)
     {
-        if (active_)
-        {
-            this->EmitParticles();
-        }
-    },
-    nullptr, true);
+        emission_timer_ = Timer::AddTimer(emission_rate_, [this]()
+            {
+                if (active_)
+                {
+                    this->EmitParticles();
+                }
+            },
+            nullptr, true);
+    }
 }
 
 void components::ParticleEmitter::Update()
@@ -116,6 +119,29 @@ void components::ParticleEmitter::EmitParticles()
     }
 }
 
+void components::ParticleEmitter::Burst(int amount)
+{
+    if (active_)
+    {
+        for (int i = 0; i < amount; i++)
+        {
+            Particle particle;
+            particle.life_time = microseconds(static_cast<int>(life_time_ * 1000000));
+            particle.expiration_time = particle.life_time;
+            particle.size = random::RandFloat(start_size_.x, start_size_.y);
+            particle.color = start_color_;
+            particle.position = transform_->get_global_position() + random::RandInsideSphere() * start_position_displacement_;
+            particle.velocity = start_velocity_ + glm::vec3(random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
+                random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
+                random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_));
+            particle.rotation_angle = 0.0f;
+            particle.id_ = current_id_++;
+            particles_.push_back(particle);
+        }
+    }
+}
+
+
 void components::ParticleEmitter::DrawParticles()
 {
     shader_->Use();
@@ -152,6 +178,7 @@ components::ParticleEmitter::ParticleEmitter(json &j)
     start_velocity_ = {j["start_velocity"][0], j["start_velocity"][1], j["start_velocity"][2]};
     start_velocity_displacement_ = j["start_velocity_displacement"];
     start_acceleration_ = {j["start_acceleration"][0], j["start_acceleration"][1], j["start_acceleration"][2]};
+    burst_emitter_ = j["burst_emitter_"];
 }
 
 json components::ParticleEmitter::Serialize()
@@ -173,6 +200,6 @@ json components::ParticleEmitter::Serialize()
     j["start_velocity"] = {start_velocity_.x, start_velocity_.y, start_velocity_.z};
     j["start_velocity_displacement"] = start_velocity_displacement_;
     j["start_acceleration"] = {start_acceleration_.x, start_acceleration_.y, start_acceleration_.z};
-
+    j["burst_emitter_"] = burst_emitter_;
     return j;
 }

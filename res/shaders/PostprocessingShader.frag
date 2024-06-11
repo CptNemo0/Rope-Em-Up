@@ -66,7 +66,7 @@ vec3 apply_vignette(vec3 color, float value)
 
 vec3 bloor_bloom()
 {
-    float div = 0.04166666 * 0.1875;
+    float div = 0.04166666 * 0.15;
     float w[7] = float[7](1, 2, 3, 4, 3, 2, 1);
 
     int idx_x = 0;
