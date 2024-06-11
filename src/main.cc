@@ -330,7 +330,7 @@ int main()
     auto trail_texture = res::get_texture(kTrailTexturePath);
     LBuffer lbuffer = LBuffer(mode->height, mode->width);
     GBuffer gbuffer = GBuffer(mode->height, mode->width);
-    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::HIGH_SSAO);
+    SSAOBuffer ssao_buffer = SSAOBuffer(mode->height, mode->width, SSAOPrecision::MEDIUM_SSAO);
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     Bloom bloom = Bloom(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
@@ -584,7 +584,10 @@ int main()
     minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/color.png"), HUDshader, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f)));
     minimap_object->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.4f);
     minimap_object->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
-    auto minimap = Minimap(minimap_object);
+    auto minimap_layer = GameObject::Create(minimap_object);
+    minimap_layer->transform_->set_scale(glm::vec3(glm::sqrt(0.5f), glm::sqrt(0.5f), 1.0f));
+    minimap_layer->transform_->set_rotation(glm::vec3(0.0f, 0.0f, -45.0f));
+    auto minimap = Minimap(minimap_layer);
 
     auto HUDText_root = GameObject::Create();
 
@@ -639,7 +642,6 @@ int main()
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, &fixed_update_rate, &player_1, &player_2, &camera_root]()
     {
         camera_root->PropagateUpdate();
-        ai::EnemyAIManager::i_->UpdateAI();
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(fixed_update_rate);
         pbd::PBDManager::i_->ClearContacts();
@@ -649,6 +651,12 @@ int main()
         pbd::PBDManager::i_->UpdatePositions(fixed_update_rate);
         ParticleEmitterManager::i_->Update(fixed_update_rate);
 
+    }, nullptr, true);
+
+    Timer::Timer slow_fixed_update_timer = Timer::CreateTimer(1.0f / 4.0f, [&rlg, &room, &minimap]
+    {
+        ai::EnemyAIManager::i_->UpdateAI();
+        minimap.Update(rlg, room);
     }, nullptr, true);
 
 
@@ -758,8 +766,6 @@ int main()
                 }, false);
             }
         }
-
-        minimap.Update(rlg, room);
        
 #pragma endregion
 
@@ -767,6 +773,7 @@ int main()
   
         rope.ChokeCheck(room);
         Timer::UpdateTimer(fixed_update_timer, delta_time);
+        Timer::UpdateTimer(slow_fixed_update_timer, delta_time);
         HealthManager::i_->DeathUpdate();
         
         // glfwGetKey(window, GLFW_KEY_SPACE
