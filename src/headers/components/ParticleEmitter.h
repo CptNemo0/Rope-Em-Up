@@ -59,6 +59,7 @@ public:
     float emission_rate_ = 0.05f;
     glm::ivec2 spawns_per_emission_ = glm::ivec2(1, 1);
     float life_time_ = 1.0f;
+    glm::vec3 start_position_ = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec2 start_size_ = glm::vec2(1.0f, 1.0f);
     glm::vec2 end_size_ = glm::vec2(0.0f, 0.0f);
     glm::vec4 start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);

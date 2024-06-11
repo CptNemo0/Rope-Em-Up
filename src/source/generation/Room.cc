@@ -107,6 +107,7 @@ generation::Room::Room(json j, s_ptr<GameObject> root)
 
     is_generated = j["is_generated"];
     is_built = j["is_built"];
+    is_discovered = j["is_discovered"];
 
     width = j["width"];
     height = j["height"];
@@ -194,6 +195,7 @@ json generation::Room::Serialize()
 
     j["is_generated"] = is_generated;
     j["is_built"] = is_built;
+    j["is_discovered"] = is_discovered;
 
     j["width"] = width;
     j["height"] = height;

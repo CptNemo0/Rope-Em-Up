@@ -108,7 +108,7 @@ void components::ParticleEmitter::EmitParticles()
             particle.expiration_time = particle.life_time;
             particle.size = random::RandFloat(start_size_.x, start_size_.y);
             particle.color = start_color_;
-            particle.position = transform_->get_global_position() + random::RandInsideSphere() * start_position_displacement_;
+            particle.position = transform_->get_global_position() + start_position_ + random::RandInsideSphere() * start_position_displacement_;
             particle.velocity = start_velocity_ + glm::vec3(random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
                                                             random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
                                                             random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_));
@@ -170,6 +170,7 @@ components::ParticleEmitter::ParticleEmitter(json &j)
     emission_rate_ = j["emission_rate"];
     spawns_per_emission_ = {j["spawns_per_emission"][0], j["spawns_per_emission"][1]};
     life_time_ = j["life_time"];
+    start_position_ = {j["start_position"][0], j["start_position"][1], j["start_position"][2]};
     start_size_ = {j["start_size"][0], j["start_size"][1]};
     end_size_ = {j["end_size"][0], j["end_size"][1]};
     start_color_ = {j["start_color"][0], j["start_color"][1], j["start_color"][2], j["start_color"][3]};
@@ -192,6 +193,7 @@ json components::ParticleEmitter::Serialize()
     j["emission_rate"] = emission_rate_;
     j["spawns_per_emission"] = {spawns_per_emission_.x, spawns_per_emission_.y};
     j["life_time"] = life_time_;
+    j["start_position"] = {start_position_.x, start_position_.y, start_position_.z};
     j["start_size"] = {start_size_.x, start_size_.y};
     j["end_size"] = {end_size_.x, end_size_.y};
     j["start_color"] = {start_color_.r, start_color_.g, start_color_.b, start_color_.a};

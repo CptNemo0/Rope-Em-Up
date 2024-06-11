@@ -727,13 +727,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->transform_->set_position(room.up_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.1f;
+            emitter->emission_rate_ = 0.02f;
+            emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+            emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
             emitter->life_time_ = 1.0f;
-            emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, 5.0f);
-            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_ = glm::vec3(0.0f, 2.0f, -3.0f);
+            emitter->start_velocity_ = glm::vec3(0.0f, 0.0f, 3.0f);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
             emitter->active_ = false;
         }
@@ -744,13 +747,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.down_gate_pos);
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.1f;
+            emitter->emission_rate_ = 0.02f;
+            emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+            emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
             emitter->life_time_ = 1.0f;
-            emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, -5.0f);
-            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_ = glm::vec3(0.0f, 2.0f, 3.0f);
+            emitter->start_velocity_ = glm::vec3(0.0f, 0.0f, -3.0f);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
             emitter->active_ = false;
         }
@@ -762,13 +768,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->transform_->set_position(room.right_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.1f;
+            emitter->emission_rate_ = 0.02f;
+            emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+            emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
             emitter->life_time_ = 1.0f;
-            emitter->start_acceleration_ = glm::vec3(-5.0f, 0.0f, 0.0f);
-            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_ = glm::vec3(3.0f, 2.0f, 0.0f);
+            emitter->start_velocity_ = glm::vec3(-3.0f, 0.0f, 0.0f);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
             emitter->active_ = false;
         }
@@ -781,13 +790,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.1f;
+            emitter->emission_rate_ = 0.02f;
+            emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+            emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
             emitter->life_time_ = 1.0f;
-            emitter->start_acceleration_ = glm::vec3(5.0f, 0.0f, 0.0f);
-            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_ = glm::vec3(-3.0f, 2.0f, 0.0f);
+            emitter->start_velocity_ = glm::vec3(3.0f, 0.0f, 0.0f);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
             emitter->active_ = false;
         }
@@ -826,14 +838,15 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy, true));
             enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
             enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));
+
             enemy->AddComponent(std::make_shared<components::ParticleEmitter>(100, res::get_texture("res/textures/zzz.png"), particle_shader));
             auto emitter = enemy->GetComponent<components::ParticleEmitter>();
+            emitter->start_position_ = {0.0f, 5.5f, 0.0f};
             emitter->emission_rate_ = 0.5f;
-            emitter->life_time_ = 2.0f;
-            emitter->start_acceleration_ = glm::vec3(0.0, 10.0, 0.0);
-            emitter->start_size_ = glm::vec2(2.5f, 2.5f);
-            emitter->end_size_ = glm::vec2(2.5f, 2.5f);
-            
+            emitter->life_time_ = 1.5f;
+            emitter->start_acceleration_ = glm::vec3(0.0, 8.0, 0.0);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(5.0f, 5.0f);
         }
     }
         break;
@@ -931,13 +944,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->transform_->set_position(room.up_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.1f;
+            emitter->emission_rate_ = 0.02f;
+            emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+            emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
             emitter->life_time_ = 1.0f;
-            emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, 5.0f);
-            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_ = glm::vec3(0.0f, 2.0f, -3.0f);
+            emitter->start_velocity_ = glm::vec3(0.0f, 0.0f, 3.0f);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
             emitter->active_ = false;
         }
@@ -948,13 +964,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.down_gate_pos);
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.01f;
+            emitter->emission_rate_ = 0.02f;
+            emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+            emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
             emitter->life_time_ = 1.0f;
-            emitter->start_acceleration_ = glm::vec3(0.0f, 0.0f, -5.0f);
-            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_ = glm::vec3(0.0f, 2.0f, 3.0f);
+            emitter->start_velocity_ = glm::vec3(0.0f, 0.0f, -3.0f);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
             emitter->active_ = false;
         }
@@ -966,13 +985,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->transform_->set_position(room.right_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.1f;
+            emitter->emission_rate_ = 0.02f;
+            emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+            emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
             emitter->life_time_ = 1.0f;
-            emitter->start_acceleration_ = glm::vec3(-5.0f, 0.0f, 0.0f);
-            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_ = glm::vec3(3.0f, 2.0f, 0.0f);
+            emitter->start_velocity_ = glm::vec3(-3.0f, 0.0f, 0.0f);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
             emitter->active_ = false;
         }
@@ -985,13 +1007,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::ParticleEmitter>(100, particle_texture, particle_shader));
+            gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.1f;
+            emitter->emission_rate_ = 0.02f;
+            emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+            emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
             emitter->life_time_ = 1.0f;
-            emitter->start_acceleration_ = glm::vec3(5.0f, 0.0f, 0.0f);
-            emitter->start_size_ = glm::vec2(0.5f, 0.4f);
-            emitter->end_size_ = glm::vec2(1.0f, 2.0f);
+            emitter->start_position_ = glm::vec3(-3.0f, 2.0f, 0.0f);
+            emitter->start_velocity_ = glm::vec3(3.0f, 0.0f, 0.0f);
+            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
+            emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
             emitter->active_ = false;
         }
