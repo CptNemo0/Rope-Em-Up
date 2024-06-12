@@ -169,7 +169,7 @@ void Rope::ChokeCheck(generation::Room *room)
 	s_ptr<components::PlayerController> player_end_controller_ = player_end_->GetComponent<components::PlayerController>();
 	if (!pull_cooldown_ && player_begin_controller_->is_pulling_ && player_end_controller_->is_pulling_)
 	{
-		ChokeList::i_->Choke(10.0f);
+		ChokeList::i_->Choke(1.0f);
 		pull_cooldown_ = true;
 		cout << "CHOKE'EM MOTHAFUCKA!!!!\n";
 	}

@@ -831,12 +831,13 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             auto enemy = GameObject::Create(room.enemies);
             enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
-            enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
-            enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, rm->enemies[room.enemies_idx[i]], 0, enemy->transform_));
+            //enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+            enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, res::get_model("res/models/capsule.obj"), 0, enemy->transform_));
             enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
-            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
+            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(2.0f, MONSTER));
             enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy, true));
             enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
+            enemy->AddComponent(std::make_shared<components::EnemySizeManager>());
             enemy->AddComponent(std::make_shared<components::ParticleEmitter>(100, res::get_texture("res/textures/zzz.png"), particle_shader));
             auto emitter = enemy->GetComponent<components::ParticleEmitter>();
             emitter->start_position_ = {0.0f, 5.5f, 0.0f};
@@ -845,6 +846,9 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_acceleration_ = glm::vec3(0.0, 8.0, 0.0);
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(5.0f, 5.0f);
+
+            auto enemy_mesh = GameObject::Create(enemy);
+            enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
         }
     }
         break;
@@ -1046,13 +1050,17 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             auto enemy = GameObject::Create(room.enemies);
             enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
-            enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
-            enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, rm->enemies[room.enemies_idx[i]], 0, enemy->transform_));
+            //enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+            enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, res::get_model("res/models/capsule.obj"), 0, enemy->transform_));
             enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
-            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
+            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(5.0f, MONSTER));
             enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
             enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
             enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));
+            enemy->AddComponent(std::make_shared<components::EnemySizeManager>());
+
+            auto enemy_mesh = GameObject::Create(enemy);
+            enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
         }
 
         //generate barells
@@ -1174,7 +1182,7 @@ void generation::GenerateFirstRoom(Room& room, RoomGenerationSettings* rgs, Room
 
     // Lamps
 
-    int lamp_num = 4;
+    int lamp_num = 3;
     std::unordered_set<glm::vec3> lamp_set;
 
     for (int i = 0; i < room.width; i++)
@@ -1200,16 +1208,7 @@ void generation::GenerateFirstRoom(Room& room, RoomGenerationSettings* rgs, Room
 
     }
 
-    // Right bot
-    if (lamp_num > 0)
-    {
-        auto right_bot = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
-        right_bot += kLanternPlacement[3];
-        room.lamp_positions.push_back(right_bot);
-        lamp_set.erase(right_bot);
-        lamp_num--;
-    }
-
+    
     // Right top
     if (lamp_num > 0)
     {

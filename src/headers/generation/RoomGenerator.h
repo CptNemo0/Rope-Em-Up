@@ -29,6 +29,7 @@
 #include "../components/ExpDropComponent.h"
 #include "../components/SpellSlotComponent.h"
 #include "../components/ParticleEmitter.h"
+#include "../components/EnemySizeManager.h"
 #include "../collisions/Collider.h"
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"

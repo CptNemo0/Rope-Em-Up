@@ -140,7 +140,7 @@ int main()
     const string kHDREquirectangularPath = "res/cubemaps/puresky_2k.hdr";
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
-    const string kPlayerMeshPath = "res/models/player.obj";
+    const string kCapsuleMeshPath = "res/models/capsule.obj";
     const string kFemalePlayerMeshPath = "res/players/female/kobieta_poprawa_riga.fbx";
     const string kMalePlayerMeshPath = "res/players/male/player_M_Test_2.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
@@ -369,7 +369,7 @@ int main()
     auto test_model = res::get_model(kTestPath);
 
     auto cube_model = res::get_model(kCubeMeshPath);
-    auto player_model = res::get_model(kPlayerMeshPath);
+    auto capsule_model = res::get_model(kCapsuleMeshPath);
     auto F_player_model = res::get_model(kFemalePlayerMeshPath);
     auto M_player_model = res::get_model(kMalePlayerMeshPath);
     auto debug_model = res::get_model(kDebugMeshPath);

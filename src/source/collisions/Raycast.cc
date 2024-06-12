@@ -2,6 +2,8 @@
 
 collisions::RaycastHit collisions::Raycast(glm::vec3 start, glm::vec3 dir, float distance, int layer, s_ptr<GameObject> caster)
 {
+    //start.y = 1.0f;
+
     RaycastHit return_value;
     return_value.object = nullptr;
     return_value.distance = FLT_MAX;
@@ -85,7 +87,9 @@ bool collisions::ChokeCheck(s_ptr<GameObject> caster, int precision, int thresho
     for (int i = 0; i < precision; i++)
     {
         auto direction = glm::rotateY(glm::vec3(forward.x, 0.0f, forward.z), (float)glm::radians((float)(angle_step * i)));
-        auto raycast_data = Raycast(caster->transform_->get_position(), direction, distance, collider->layer_, caster);
+        auto start_pos = caster->transform_->get_position();
+        start_pos.y = 1.0f;
+        auto raycast_data = Raycast(start_pos, direction, distance, collider->layer_, caster);
         hits = hits + (int)raycast_data.hit;
     }
 
