@@ -66,6 +66,7 @@ void components::ParticleEmitter::Destroy()
 void components::ParticleEmitter::UpdateParticles(float delta_time)
 {
     auto view_matrix = Global::i_->active_camera_->GetViewMatrix();
+    camera_distance_ = (view_matrix * glm::vec4(transform_->get_global_position(), 0.0f)).z;
     float inverse_life_time = 1.0f / static_cast<float>(microseconds(static_cast<int>(life_time_ * 1000000)).count());
     for (auto &particle : particles_)
     {

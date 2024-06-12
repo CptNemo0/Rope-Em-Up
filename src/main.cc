@@ -473,8 +473,8 @@ int main()
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-    player_1->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model, 0, player_1->transform_));
+    player_1->AddComponent(make_shared<components::MeshRenderer>(F_player_model, GBufferPassShader));
+    player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, F_player_model, 0, player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
@@ -492,7 +492,7 @@ int main()
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
-    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, player_model, 0, player_2->transform_));
+    player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
@@ -509,7 +509,7 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
-    auto test_animation = res::get_animation(kMalePlayerMeshPath, 0, M_player_model->path_);
+    auto test_animation = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
     player_1->AddComponent(make_shared<components::Animator>(test_animation));
     player_1->transform_->set_scale(glm::vec3(0.01f));
 
