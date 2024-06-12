@@ -41,7 +41,6 @@ class ParticleEmitter : public Component, public std::enable_shared_from_this<Pa
 {
 private:
     int max_particles_;
-
     
     s_ptr<Shader> shader_;
     s_ptr<Transform> transform_;
@@ -53,6 +52,7 @@ private:
 
     unsigned int current_id_ = 0;
 public:
+    float camera_distance_ = 0.0f;
 
     s_ptr<tmp::Texture> texture_;
 
