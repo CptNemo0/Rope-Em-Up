@@ -11,6 +11,10 @@ void ParticleEmitterManager::Update(float delta_time)
             Timer::UpdateTimer(*(emitter->emitter_timer_), delta_time);
         }
     }
+    std::sort(emitters_.begin(), emitters_.end(), [](const s_ptr<components::ParticleEmitter> &a, const s_ptr<components::ParticleEmitter> &b)
+    {
+        return a->camera_distance_ < b->camera_distance_;
+    });
 }
 
 void ParticleEmitterManager::RemoveEmitter(s_ptr<components::ParticleEmitter> emitter)
