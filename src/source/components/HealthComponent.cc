@@ -29,6 +29,11 @@ namespace components
 	void HealthComponent::ForceHeal(float heal)
 	{
 		health_ += heal;
+
+		if (health_ > max_health_)
+		{
+			health_ = max_health_;
+		}
 	}
 
 	void HealthComponent::DamageCooldown()

@@ -9,5 +9,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Kd bone_albedo.png
+map_Ke bone_metallic.png
 map_Ns bone_roughness.png
 map_refl bone_metallic.png

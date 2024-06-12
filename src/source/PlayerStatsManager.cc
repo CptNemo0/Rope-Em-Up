@@ -75,6 +75,8 @@ void PlayerStatsManager::LevelUp()
 	level_++;
 	unspent_levels_++;
 	exp_ = 0.0f;
+	player_1_->GetComponent<components::HealthComponent>()->health_ = max_health_;
+	player_2_->GetComponent<components::HealthComponent>()->health_ = max_health_;
 }
 
 void PlayerStatsManager::AddExp(float exp)

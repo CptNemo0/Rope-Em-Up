@@ -837,8 +837,6 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy->AddComponent(HealthManager::i_->CreateHealthComponent(10.0f, MONSTER));
             enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy, true));
             enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
-            enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));
-
             enemy->AddComponent(std::make_shared<components::ParticleEmitter>(100, res::get_texture("res/textures/zzz.png"), particle_shader));
             auto emitter = enemy->GetComponent<components::ParticleEmitter>();
             emitter->start_position_ = {0.0f, 5.5f, 0.0f};
@@ -1373,7 +1371,7 @@ void generation::GenerateSecondRoom(Room& room, RoomGenerationSettings* rgs, Roo
     {
 
         room.up_gate_idx = random::RandInt(0, rm->gates.size() - 1);
-        room.up_gate_wall = random::RandInt(0, room.width - 1);
+        room.up_gate_wall = 0;
         room.up_gate_pos = glm::vec3(-8.0f - room.up_gate_wall * kModuleSize, 0.0f, 0.0f);
     }
 
@@ -1381,7 +1379,7 @@ void generation::GenerateSecondRoom(Room& room, RoomGenerationSettings* rgs, Roo
     if (room.down_gate)
     {
         room.down_gate_idx = random::RandInt(0, rm->gates.size() - 1);
-        room.down_gate_wall = random::RandInt(0, room.width - 1);
+        room.down_gate_wall = 0;
         room.down_gate_pos = glm::vec3(-8.0f - room.down_gate_wall * kModuleSize, 0.0f, -room.height * kModuleSize);
     }
 
