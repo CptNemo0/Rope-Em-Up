@@ -69,6 +69,7 @@ void Mesh::Init()
 
 void Mesh::Draw(s_ptr<Shader> shader) const
 {
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_);
     for (unsigned int i = 0; i < textures_.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
