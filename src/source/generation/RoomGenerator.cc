@@ -831,7 +831,6 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             auto enemy = GameObject::Create(room.enemies);
             enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
-            //enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
             enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, res::get_model("res/models/capsule.obj"), 0, enemy->transform_));
             enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
             enemy->AddComponent(HealthManager::i_->CreateHealthComponent(2.0f, MONSTER));
@@ -1050,7 +1049,6 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             auto enemy = GameObject::Create(room.enemies);
             enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
-            //enemy->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
             enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, res::get_model("res/models/capsule.obj"), 0, enemy->transform_));
             enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
             enemy->AddComponent(HealthManager::i_->CreateHealthComponent(5.0f, MONSTER));
@@ -1080,8 +1078,6 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         break;
     }
 
-   
-    
     rlg->built_rooms_++;
 }
 

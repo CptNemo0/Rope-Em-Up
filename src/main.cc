@@ -130,6 +130,8 @@ int main()
     const string kBloomBlurHorizontalShaderPath = "res/shaders/BloomBlurHorizontal.frag";
     const string kBloomBlurVerticalShaderPath = "res/shaders/BloomBlurVertical.frag";
     
+    const string kHudBarShaderPath = "res/shaders/HUDBarShader.frag";
+
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
     const string kHUDTexturePath = "res/textures/placeholder_icon.png";
@@ -321,6 +323,7 @@ int main()
     auto BloomThresholdShader = res::get_shader(kSSAOVertexShaderPath, kBloomThresholdShaderPath);
     auto BloomBlurVerticalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurVerticalShaderPath);
     auto BloomBlurHorizontalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurHorizontalShaderPath);
+    auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
 #pragma endregion Shaders
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -602,6 +605,15 @@ int main()
     minimap_layer->transform_->set_rotation(glm::vec3(0.0f, 0.0f, -45.0f));
     auto minimap = Minimap(minimap_layer);
 
+
+    auto test_hud = GameObject::Create(HUD_root);
+    test_hud->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/test_smoke.png"), HUDBarShader, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+    //test_hud->transform_->scale_in({ 0.25f, 0.01f, 0.0f }, 0.4f);
+    test_hud->transform_->scale_in({ 2.0f, 2.0f, 0.0f }, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+    test_hud->transform_->set_rotation({0.0f, 0.0f, 180.0f});
+    test_hud->transform_->set_position({ 0.0f, 0.0f, 0.0 });
+
+
     auto HUDText_root = GameObject::Create();
 
     auto maturasc_font = res::get_font(kFontPath);
@@ -791,7 +803,9 @@ int main()
         
         // glfwGetKey(window, GLFW_KEY_SPACE
         // HealthManager::i_->something_died_
-        
+        HUDBarShader->Use();
+        HUDBarShader->SetFloat("percentage", std::cosf(glfwGetTime() ) * 0.5f + 0.5f);
+
         static float cast_time = 2.0f;
         static float slowdown_smooth_factor = 0.055f;
         if (HealthManager::i_->something_died_ && HealthManager::i_->what_ == MONSTER)

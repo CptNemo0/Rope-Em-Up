@@ -24,6 +24,7 @@ void components::HUDRenderer::Start()
 
 void components::HUDRenderer::Update()
 {
+    shader_->Use();
     shader_->SetMatrix4("model_matrix", transform_.lock()->get_model_matrix());
     shader_->SetVec4("color", color_);
     glActiveTexture(GL_TEXTURE0);
