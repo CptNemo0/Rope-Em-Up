@@ -473,6 +473,7 @@ int main()
 
     auto player_1 = GameObject::Create(scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_1->transform_->set_scale(glm::vec3(0.01f));
     player_1->AddComponent(make_shared<components::MeshRenderer>(F_player_model, GBufferPassShader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, F_player_model, 0, player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
@@ -491,6 +492,7 @@ int main()
 
     auto player_2 = GameObject::Create(scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_2->transform_->set_scale(glm::vec3(0.01f));
     player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
@@ -509,13 +511,24 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
-    auto test_animation = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
-    player_1->AddComponent(make_shared<components::Animator>(test_animation));
-    player_1->transform_->set_scale(glm::vec3(0.01f));
+#pragma region Animations
 
-    auto test_animation2 = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
-    player_2->AddComponent(make_shared<components::Animator>(test_animation2));
-    player_2->transform_->set_scale(glm::vec3(0.01f));
+    auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
+
+    player_1->AddComponent(make_shared<components::Animator>());
+    player_1->GetComponent<components::Animator>()->AddAnimation("Run", F_anim_run);
+    player_1->GetComponent<components::Animator>()->PlayAnimation("Run");
+
+
+    auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
+    auto M_anim_idle = res::get_animation(kMalePlayerMeshPath, 0, M_player_model->path_);
+
+    player_2->AddComponent(make_shared<components::Animator>());
+    player_2->GetComponent<components::Animator>()->AddAnimation("Idle", M_anim_idle);
+    player_2->GetComponent<components::Animator>()->AddAnimation("Run", M_anim_run);
+    player_2->GetComponent<components::Animator>()->PlayAnimation("Idle");
+
+#pragma endregion Animations
 
     Rope rope = Rope
     (

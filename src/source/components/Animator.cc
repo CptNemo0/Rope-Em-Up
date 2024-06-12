@@ -2,6 +2,7 @@
 
 components::Animator::Animator(s_ptr<anim::Animation> animation)
 {
+
     m_CurrentTime = 0.0;
     m_CurrentAnimation = animation;
 
@@ -9,6 +10,16 @@ components::Animator::Animator(s_ptr<anim::Animation> animation)
 
     for (int i = 0; i < MAX_BONES; i++)
         m_FinalBoneMatrices.push_back(glm::mat4(1.0f));
+}
+
+components::Animator::Animator()
+{
+	m_CurrentTime = 0.0;
+
+	m_FinalBoneMatrices.reserve(MAX_BONES);
+
+	for (int i = 0; i < MAX_BONES; i++)
+		m_FinalBoneMatrices.push_back(glm::mat4(1.0f));
 }
 
 
@@ -30,6 +41,26 @@ void components::Animator::PlayAnimation(s_ptr<anim::Animation> animation)
 {
 	m_CurrentAnimation = animation;
 	m_CurrentTime = 0.0f;
+}
+
+void components::Animator::PlayAnimation(const std::string& animationName)
+{
+	if (m_Animations.find(animationName) != m_Animations.end())
+	{
+		m_CurrentAnimation = m_Animations[animationName];
+		m_CurrentTime = 0.0f;
+	}
+}
+
+void components::Animator::AddAnimation(const std::string& name, s_ptr<anim::Animation> animation)
+{
+	m_Animations[name] = animation;
+}
+
+void components::Animator::RemoveAnimation(const std::string& name)
+{
+	if (m_Animations.find(name) != m_Animations.end())
+		m_Animations.erase(name);
 }
 
 void components::Animator::CalculateBoneTransform(const anim::AssimpNodeData* node, glm::mat4 parentTransform)

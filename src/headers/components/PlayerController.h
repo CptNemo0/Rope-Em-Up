@@ -8,6 +8,7 @@
 #include "../input/InputManager.h"
 #include "../physics/PBD.h"
 #include "../Timer.h"
+#include "Animator.h"
 
 
 #include "../typedef.h"

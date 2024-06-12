@@ -46,12 +46,21 @@ void components::PlayerController::OnAction(Action action, input::State state)
         case Action::MOVE:
         {
             direction_ = glm::vec3(state.axis.x, 0.0f, state.axis.y);
+            if (glm::length(direction_) <= glm::length(glm::vec3(0.001f)))
+            {
+                gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Idle");
+            }
+            else
+            {
+                gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Run");
+			}
             break;
         }
         case Action::PULL_ROPE:
         {
             if (state.button && !pulling_cooldown_ && glm::length(move_generator_->direction_) >= 0.01f)
             {
+                gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Pull");
                 pulling_cooldown_ = true;
                 Timer::AddTimer(1.0f, [this]()
                 {
