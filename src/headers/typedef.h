@@ -54,6 +54,6 @@ enum SPELLS
     SKULL_MINION
 };
 
-#define MAX_BONES 210
+#define MAX_BONES 132
 
 #endif // !TYPEDEF_H
