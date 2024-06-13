@@ -173,7 +173,19 @@ void Rope::ChokeCheck(generation::Room *room)
 		if (choked.contains(HEALTH_TYPE::MONSTER))
 		{
 			cout << "CHOKE'EM MOTHAFUCKA!!!!\n";
-			audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/tentaclepull.wav"));
+			auto num = random::RandInt(1, 3);
+			switch (num)
+			{
+				case 1:
+					audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/tentaclepull1.wav"));
+					break;
+				case 2:
+					audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/tentaclepull2.wav"));
+					break;
+				case 3:
+					audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/tentaclepull3.wav"));
+					break;
+			}
 		}
 		pull_cooldown_ = true;
 	}
