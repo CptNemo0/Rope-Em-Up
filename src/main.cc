@@ -42,8 +42,6 @@
 #include "headers/ParticleEmitterManager.h"
 #include "headers/generation/RoomGenerator.h"
 #include "headers/audio/AudioManager.h"
-#include "headers/audio/Sounds.h"
-#include "headers/components/AudioSource.h"
 #include "headers/CameraManager.h"
 #include "headers/SteeringBehaviors.h"
 #include "headers/Vehicle.h"
@@ -263,7 +261,6 @@ int main()
     ParticleEmitterManager::Initialize();
     HealthManager::Initialize();
     audio::AudioManager::Initialize();
-    audio::AudioManager::i_->LoadSound(audio::Sounds::bruh, kBruhPath);
     drop::DropManager::Initialize();
     drop::SpellDropQueue::Initialize();
     ChokeList::Initialize();
@@ -642,9 +639,6 @@ int main()
     HUDText_object->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "TEST", glm::vec3(1.0f)));
     HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
-
-    auto audio_test_obj = GameObject::Create(scene_root);
-    audio_test_obj->AddComponent(make_shared<components::AudioSource>());
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -1227,7 +1221,7 @@ int main()
         ImGui::Begin("Sound");
         if (ImGui::Button("Play bruh.wav"))
         {
-            audio_test_obj->GetComponent<components::AudioSource>()->PlaySound(audio::Sounds::bruh);
+            audio::AudioManager::i_->PlaySound(res::get_sound(kBruhPath));
         }
         ImGui::End();
 

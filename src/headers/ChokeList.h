@@ -17,7 +17,7 @@ public:
 
     void AddHealthComponent(std::shared_ptr<components::HealthComponent> h);
     void RemoveHealthComponent(std::shared_ptr<components::HealthComponent> h);
-    void Choke(float dmg);
+    std::unordered_set<HEALTH_TYPE> Choke(float dmg);
     void RemoveDead();
 
     static void Initialize()

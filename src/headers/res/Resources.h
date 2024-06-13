@@ -8,6 +8,7 @@
 #include "../Texture.h"
 #include "../Font.h"
 #include "../animation/Animation.h"
+#include "../audio/AudioManager.h"
 
 #include "../typedef.h"
 
@@ -23,6 +24,8 @@ namespace res
     s_ptr<Font> get_font(string path);
 
     s_ptr<anim::Animation> get_animation(string anim_path, int anim_number, string model_path);
+
+    s_ptr<audio::AudioBuffer> get_sound(string path);
 
     int init_freetype();
 };

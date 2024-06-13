@@ -20,6 +20,7 @@
 #include "../ChokeList.h"
 #include "../Model.h"
 #include "../Shader.h"
+#include "../audio/AudioManager.h"
 #include "../typedef.h"
 
 class Rope

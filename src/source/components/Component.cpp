@@ -1,7 +1,6 @@
 #include "../../headers/components/Component.h"
 
 #include "../../headers/components/Animator.h"
-#include "../../headers/components/AudioSource.h"
 #include "../../headers/components/EnemyAIComponent.h"
 #include "../../headers/ai/EnemyAIManager.h"
 #include "../../headers/components/ExpDropComponent.h"
@@ -25,10 +24,6 @@ std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Comp
     {   // Animator
         typeid(components::Animator).name(), 
         [](json &j, s_ptr<GameObject> go) { return make_shared<components::Animator>(j); } 
-    },
-    {   // AudioSource
-        typeid(components::AudioSource).name(), 
-        [](json &j, s_ptr<GameObject> go) { return make_shared<components::AudioSource>(); } 
     },
     {   // EnemyAIComponent
         typeid(components::EnemyAIComponent).name(), 

@@ -2,7 +2,7 @@
 
 audio::AudioManager *audio::AudioManager::i_ = nullptr;
 
-char *audio::AudioManager::LoadWAV(const string path, AudioBuffer &audio_buffer)
+char *audio::AudioManager::LoadWAV(const string path, s_ptr<AudioBuffer> audio_buffer)
 {
     std::ifstream file;
     file.open(path, std::ios::binary);
@@ -88,12 +88,12 @@ char *audio::AudioManager::LoadWAV(const string path, AudioBuffer &audio_buffer)
     file.read(buf, 4);
     int data_bytes = (int)((unsigned char)buf[0] | ((unsigned char)buf[1] << 8) | ((unsigned char)buf[2] << 16) | ((unsigned char)buf[3] << 24));
 
-    audio_buffer.size = data_bytes;
+    audio_buffer->size = data_bytes;
 
     int format = AL_FORMAT_MONO8 + 2*(no_channels-1) + (bits_per_sample/8)-1;
-    audio_buffer.format = format;
+    audio_buffer->format = format;
 
-    audio_buffer.freq = sample_rate;
+    audio_buffer->freq = sample_rate;
 
     // Data
     char *data = new char[data_bytes];
@@ -141,22 +141,23 @@ audio::AudioManager::~AudioManager()
         alSourceStop(source);
         alDeleteSources(1, &source);
     }
-    for (auto &sound : sounds_)
-    {
-        for (auto &audio_buffer : sound.second)
-        {
-            alDeleteBuffers(1, &audio_buffer.buffer);
-        }
-    }
+    // TODO: fix
+    // for (auto &sound : sounds_)
+    // {
+    //     for (auto &audio_buffer : sound.second)
+    //     {
+    //         alDeleteBuffers(1, &audio_buffer.buffer);
+    //     }
+    // }
     alcDestroyContext(context_);
     alcCloseDevice(device_);
 }
 
-void audio::AudioManager::LoadSound(Sounds sound, const string path)
+s_ptr<audio::AudioBuffer> audio::AudioManager::LoadSound(const string path)
 {
-    AudioBuffer ab;
+    auto ab = make_shared<AudioBuffer>();
 
-    alGenBuffers(1, &ab.buffer);
+    alGenBuffers(1, &ab->buffer);
     CheckALError("alGenBuffers");
 
     char *data = LoadWAV(path, ab);
@@ -164,15 +165,15 @@ void audio::AudioManager::LoadSound(Sounds sound, const string path)
     if (!data)
     {
         cerr << "Couldn't load sound: " << path << endl;
-        return;
+        return nullptr;
     }
 
-    alBufferData(ab.buffer, ab.format, data, ab.size, ab.freq);
+    alBufferData(ab->buffer, ab->format, data, ab->size, ab->freq);
     CheckALError("alBufferData");
 
     delete[] data;
 
-    sounds_[sound].push_back(ab);
+    return ab;
 }
 
 void audio::AudioManager::Update()
@@ -213,17 +214,13 @@ const ALuint audio::AudioManager::GetFreeSource()
     }
 }
 
-void audio::AudioManager::PlaySource(const ALuint &source)
+void audio::AudioManager::PlaySound(const s_ptr<audio::AudioBuffer> buffer)
 {
+    auto source = GetFreeSource();
+    alSourcei(source, AL_BUFFER, buffer->buffer);
+
     alSourcePlay(source);
     busy_sources_.push_back(source);
-}
-
-audio::AudioBuffer audio::AudioManager::GetBuffer(Sounds sound)
-{
-    auto buffers = sounds_[sound];
-    auto rand_it = random::RandIntExcl(0, buffers.size());
-    return buffers[rand_it];
 }
 
 void audio::CheckALError(const string info)

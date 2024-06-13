@@ -12,7 +12,6 @@
 #include <AL/alc.h>
 
 #include "../typedef.h"
-#include "Sounds.h"
 #include "../Random.h"
 
 #define NO_SOURCES 128
@@ -43,9 +42,8 @@ private:
     std::list<ALuint> busy_sources_;
     std::unordered_set<ALuint> sources_to_free_;
     std::deque<ALuint> free_sources_;
-    std::unordered_map<Sounds, std::vector<AudioBuffer>> sounds_;
 
-    char *LoadWAV(const string path, AudioBuffer &audio_buffer);
+    char *LoadWAV(const string path, s_ptr<AudioBuffer> audio_buffer);
 
 public:
     static AudioManager *i_;
@@ -67,12 +65,11 @@ public:
         }
     }
 
-    void LoadSound(Sounds sound, const string path);
+    s_ptr<AudioBuffer> LoadSound(const string path);
     void Update();
     // Returns -1 if no free source available
     const ALuint GetFreeSource();
-    void PlaySource(const ALuint &source);
-    AudioBuffer GetBuffer(Sounds sound);
+    void PlaySound(const s_ptr<AudioBuffer> source);
 };
 
 }; // namespace audio

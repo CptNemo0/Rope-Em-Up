@@ -8,6 +8,7 @@ std::map<std::vector<string>, s_ptr<Shader>> shaders;
 std::map<string, s_ptr<tmp::Texture>> textures;
 std::map<string, s_ptr<Font>> fonts;
 std::map<std::tuple<string, string, int>, s_ptr<anim::Animation>> animations;
+std::map<string, s_ptr<audio::AudioBuffer>> sounds;
 
 FT_Library ft;
 
@@ -75,6 +76,17 @@ s_ptr<anim::Animation> get_animation(string anim_path, int anim_number, string m
     s_ptr<anim::Animation> anim = make_shared<anim::Animation>(anim_path, anim_number, get_model(model_path));
     animations[{anim_path, model_path, anim_number}] = anim;
     return anim;
+}
+
+s_ptr<audio::AudioBuffer> get_sound(string path)
+{
+    if (sounds.contains(path))
+    {
+        return sounds[path];
+    }
+    s_ptr<audio::AudioBuffer> sound = audio::AudioManager::i_->LoadSound(path);
+    sounds[path] = sound;
+    return sound;
 }
 
 int init_freetype()

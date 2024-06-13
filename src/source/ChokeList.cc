@@ -25,13 +25,16 @@ void ChokeList::RemoveHealthComponent(std::shared_ptr<components::HealthComponen
 	}
 }
 
-void ChokeList::Choke(float dmg)
+std::unordered_set<HEALTH_TYPE> ChokeList::Choke(float dmg)
 {
+	std::unordered_set<HEALTH_TYPE> set;
 	for (auto& h : health_components_)
 	{
 		h->TakeDamage(dmg);
+		set.insert(h->type_);
 	}
 	RemoveDead();
+	return set;
 }
 
 void ChokeList::RemoveDead()
