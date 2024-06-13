@@ -28,6 +28,7 @@ namespace components
 
 	void HealthComponent::ForceHeal(float heal)
 	{
+		audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/heal.wav"));
 		health_ += heal;
 
 		if (health_ > max_health_)

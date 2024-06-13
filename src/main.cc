@@ -483,8 +483,8 @@ int main()
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
     player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
-    player_1->GetComponent<components::SpellSlotComponent>()->type_ = SPELLS::NOT_A_SPELL;
     player_1->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
+    
     auto emmiter_player_1 = player_1->GetComponent<components::ParticleEmitter>();
     emmiter_player_1->emission_rate_ = 0.25f;
     emmiter_player_1->life_time_ = 0.250f;
@@ -502,7 +502,7 @@ int main()
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
     player_2->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
-    player_2->GetComponent<components::SpellSlotComponent>()->type_ = SPELLS::NOT_A_SPELL;
+    
     player_2->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     auto emmiter_player_2 = player_2->GetComponent<components::ParticleEmitter>();
     emmiter_player_2->emission_rate_ = 0.25f;
@@ -605,9 +605,6 @@ int main()
     minimap_layer->transform_->set_scale(glm::vec3(glm::sqrt(0.5f), glm::sqrt(0.5f), 1.0f));
     minimap_layer->transform_->set_rotation(glm::vec3(0.0f, 0.0f, -45.0f));
     auto minimap = Minimap(minimap_layer);
-
-
-    
 
     auto player_1_hp_bar_border = GameObject::Create();
     player_1_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -757,11 +754,12 @@ int main()
 
         if (!moving_through_room && no_enemies)
         {
-            rg_settings.width = random::RandInt(1, 2);
-            rg_settings.height = random::RandInt(1, 2);
-            rg_settings.enemies = random::RandInt(1, 5);
+            rg_settings.width = random::RandInt(1, 3);
+            rg_settings.height = random::RandInt(1, 3);
+            rg_settings.enemies = random::RandInt(1, 4);
             rg_settings.lamps = random::RandInt(1, 5);
             rg_settings.clutter = random::RandInt(1, 5);
+            rg_settings.barells = random::RandInt(1, 5);
 
             glm::ivec2 current_room_pos = room->position;
             glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
@@ -1108,7 +1106,7 @@ int main()
         
 
 #pragma endregion
-
+        /*
 #pragma region ImGUI
         
         ImGui_ImplOpenGL3_NewFrame();
@@ -1413,7 +1411,7 @@ int main()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
         
         
-#pragma endregion 
+#pragma endregion */
         glfwSwapBuffers(window);
     }
     

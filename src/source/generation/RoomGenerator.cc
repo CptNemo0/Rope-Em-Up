@@ -1051,7 +1051,8 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
             enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, res::get_model("res/models/capsule.obj"), 0, enemy->transform_));
             enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
-            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(5.0f, MONSTER));
+            
+            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(random::RandInt(1, 5), MONSTER));
             enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
             enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
             enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));

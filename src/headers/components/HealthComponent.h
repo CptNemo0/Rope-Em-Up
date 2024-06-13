@@ -7,7 +7,7 @@
 #include "Component.h"
 #include "../GameObject.h"
 #include "../Timer.h"
-
+#include "../audio/AudioManager.h"
 #include "../typedef.h"
 
 enum HEALTH_TYPE
