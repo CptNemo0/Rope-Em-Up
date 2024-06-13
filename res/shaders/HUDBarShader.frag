@@ -10,6 +10,6 @@ uniform float percentage;
 
 void main()
 {
-    vec4 new_color =  ov_texture.x < percentage ? color : vec4(0.1, 0.1, 0.1, 0.1);
+    vec4 new_color =  ov_texture.x < percentage ? color : vec4(1.0, 1.0, 1.0, 0.0);
     of_color = texture(u_texture, ov_texture) * new_color;
 }

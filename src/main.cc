@@ -612,15 +612,27 @@ int main()
 
     
 
-    auto test_hud2 = GameObject::Create(HUD_root);
-    test_hud2->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    test_hud2->transform_->set_scale({0.125f, 0.05f , 0.0f });
-    test_hud2->transform_->set_position({ -0.875f, -0.95f, 0.0 });
+    auto player_1_hp_bar_border = GameObject::Create();
+    player_1_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    player_1_hp_bar_border->transform_->set_scale({0.25f, 0.05f , 0.0f });
+    player_1_hp_bar_border->transform_->set_position({ -0.75f, -0.95f, 0.0 });
 
-    auto test_hud = GameObject::Create(test_hud2);
-    test_hud->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    test_hud->transform_->set_scale({ 0.98f, 0.96f, 0.0f});
-    test_hud->transform_->set_position({ 0.0f, 0.0f, 0.0 });
+    auto player_1_hp_bar = GameObject::Create(player_1_hp_bar_border);
+    player_1_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    player_1_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f});
+    player_1_hp_bar->transform_->set_position({ 0.0f, 0.0f, 0.0 });
+
+
+    auto player_2_hp_bar_border = GameObject::Create();
+    player_2_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    player_2_hp_bar_border->transform_->set_scale({ 0.25f, 0.05f , 0.0f });
+    player_2_hp_bar_border->transform_->set_position({ 0.75f, -0.95f, 0.0 });
+
+    auto player_2_hp_bar = GameObject::Create(player_2_hp_bar_border);
+    player_2_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    player_2_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f });
+    player_2_hp_bar->transform_->set_rotation({ 0.0f, 0.0, 180.0f });
+    player_2_hp_bar->transform_->set_position({ 0.0f, 0.0f, 0.0 });
 
     auto HUDText_root = GameObject::Create();
 
@@ -1029,6 +1041,53 @@ int main()
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
 
+        float p1p = 0.0;
+        float p2p = 0.0;
+        if (player_1 != nullptr)
+        {
+            auto p1hc = player_1->GetComponent<components::HealthComponent>();
+            p1p = p1hc->health_ / p1hc->max_health_;
+        }
+
+        if (p1p < 0.25f)
+        {
+            player_1_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(5.0f, 0.0, 0.0, 1.0f);
+            auto scale = glm::vec3( 0.98f, 0.96f, 0.0f )+ (sinf(glfwGetTime() * (1 / p1p)) * 0.5f + 0.5f) * glm::vec3(0.0f, 1.0f, 0.0f);
+            player_1_hp_bar->transform_->set_scale(scale);
+        }
+        else
+        {
+            player_1_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0, 1.0, 1.0f);
+            player_1_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f });
+        }
+
+        HUDBarShader->Use();
+        HUDBarShader->SetFloat("percentage", p1p);
+        player_1_hp_bar_border->PropagateUpdate();
+
+
+        if (player_2 != nullptr)
+        {
+            auto p2hc = player_2->GetComponent<components::HealthComponent>();
+            p2p = p2hc->health_ / p2hc->max_health_;
+        }
+
+        if (p2p < 0.25f)
+        {
+            player_2_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(5.0f, 0.0, 0.0, 1.0f);
+            auto scale = glm::vec3(0.98f, 0.96f, 0.0f) + (sinf(glfwGetTime() * (1 / p2p)) * 0.5f + 0.5f) * glm::vec3(0.0f, 1.0f, 0.0f);
+            player_2_hp_bar->transform_->set_scale(scale);
+        }
+        else
+        {
+            player_2_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0, 1.0, 1.0f);
+            player_2_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f });
+        }
+
+        HUDBarShader->Use();
+        HUDBarShader->SetFloat("percentage", p2p);
+        player_2_hp_bar_border->PropagateUpdate();
+        
 
         frame++;
         fps += 1.0f / delta_time;
