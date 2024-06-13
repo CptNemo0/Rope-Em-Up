@@ -15,10 +15,13 @@ out mat3 normal_view_matrix;
 out vec3 T;
 out vec3 B;
 out vec3 N;
+out vec4 FragPosLightSpace;
 
 uniform mat4 model_matrix;
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
+uniform mat4 lightSpaceMatrix;
+
 
 uniform bool useBones;
 uniform int numBones;
@@ -95,4 +98,5 @@ void main()
 		B = normalize(vec3(model_matrix * vec4(iv_bitangent, 0.0)));
 		N = normalize(vec3(model_matrix * vec4(iv_normal,    0.0)));
 	}
+	FragPosLightSpace = lightSpaceMatrix * vec4(world_position, 1.0);
 }

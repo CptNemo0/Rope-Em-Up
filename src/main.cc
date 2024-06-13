@@ -529,6 +529,7 @@ int main()
     player_2->AddComponent(make_shared<components::Animator>());
     player_2->GetComponent<components::Animator>()->AddAnimation("Idle", M_anim_idle);
     player_2->GetComponent<components::Animator>()->AddAnimation("Run", M_anim_run);
+    //player_2->GetComponent<components::Animator>()->m_BlendingAnimation = M_anim_idle;
     player_2->GetComponent<components::Animator>()->PlayAnimation("Idle");
 
 #pragma endregion Animations

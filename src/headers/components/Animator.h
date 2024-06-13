@@ -5,6 +5,7 @@
 #include "../animation/Animation.h"
 #include "Component.h"
 #include "../typedef.h"
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace components
 {
@@ -17,7 +18,11 @@ namespace components
 		float m_CurrentTime;
 		float m_DeltaTime;
 
+		float m_BlendingTime;
+		float m_BlendFactor;
+
 	public:
+		s_ptr<anim::Animation> m_BlendingAnimation;
 		Animator(s_ptr<anim::Animation> animation);
 		Animator();
 		~Animator() = default;
@@ -30,7 +35,16 @@ namespace components
 		void AddAnimation(const std::string& name, s_ptr<anim::Animation> animation);
 		void RemoveAnimation(const std::string& name);
 
+		void BlendTwoAnimations(s_ptr<anim::Animation> pLayeredAnimation, float blendFactor);
+		void BlendTwoAnimations(const std::string& pLayeredAnimation, float blendFactor);
+		
 		void CalculateBoneTransform(const anim::AssimpNodeData* node, glm::mat4 parentTransform);
+		void CalculateBlendedBoneTransform(
+			s_ptr<anim::Animation> pAnimationBase, const anim::AssimpNodeData* node,
+			s_ptr<anim::Animation> pAnimationLayer, const anim::AssimpNodeData* nodeLayered,
+			const float currentTimeBase, const float currentTimeLayered,
+			const glm::mat4& parentTransform,
+			const float blendFactor);
 
 		std::vector<glm::mat4> GetFinalBoneMatrices()
 		{
