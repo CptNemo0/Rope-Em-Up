@@ -139,6 +139,9 @@ int main()
     const string kTestSmokeTexturePath = "res/textures/test_smoke.png";
     const string kTrailTexturePath = "res/textures/trail.png";
 
+    const string kHealthBarTexturePath = "res/textures/HealthBar.png";
+    const string kHealthBarBorderTexturePath = "res/textures/HealthBarBorder.png";
+
     const string kHDREquirectangularPath = "res/cubemaps/puresky_2k.hdr";
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
@@ -607,13 +610,17 @@ int main()
     auto minimap = Minimap(minimap_layer);
 
 
-    auto test_hud = GameObject::Create(HUD_root);
-    test_hud->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/test_smoke.png"), HUDBarShader, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
-    //test_hud->transform_->scale_in({ 0.25f, 0.01f, 0.0f }, 0.4f);
-    test_hud->transform_->scale_in({ 2.0f, 2.0f, 0.0f }, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
-    test_hud->transform_->set_rotation({0.0f, 0.0f, 180.0f});
-    test_hud->transform_->set_position({ 0.0f, 0.0f, 0.0 });
+    
 
+    auto test_hud2 = GameObject::Create(HUD_root);
+    test_hud2->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    test_hud2->transform_->set_scale({0.125f, 0.05f , 0.0f });
+    test_hud2->transform_->set_position({ -0.875f, -0.95f, 0.0 });
+
+    auto test_hud = GameObject::Create(test_hud2);
+    test_hud->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    test_hud->transform_->set_scale({ 0.98f, 0.96f, 0.0f});
+    test_hud->transform_->set_position({ 0.0f, 0.0f, 0.0 });
 
     auto HUDText_root = GameObject::Create();
 
@@ -1299,8 +1306,6 @@ int main()
         ImGui::Begin("Player 2 HP");
         ImGui::SliderFloat("Player 2 HP", &(player_2_hp), 0.0f, player_2->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
         ImGui::End();
-
-       
 
         ImGui::Begin("Serialize");
 
