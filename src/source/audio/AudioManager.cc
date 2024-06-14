@@ -214,10 +214,11 @@ const ALuint audio::AudioManager::GetFreeSource()
     }
 }
 
-void audio::AudioManager::PlaySound(const s_ptr<audio::AudioBuffer> buffer)
+void audio::AudioManager::PlaySound(const s_ptr<audio::AudioBuffer> buffer, float volume)
 {
     auto source = GetFreeSource();
     alSourcei(source, AL_BUFFER, buffer->buffer);
+    alSourcef(source, AL_GAIN, volume);
 
     alSourcePlay(source);
     busy_sources_.push_back(source);
