@@ -130,6 +130,9 @@ int main()
     
     const string kHudBarShaderPath = "res/shaders/HUDBarShader.frag";
 
+    const string kFloorVertexShaderPath = "res/shaders/FloorShader.vert";
+    const string kFloorFragmentShaderPath = "res/shaders/FloorShader.frag";
+
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
     const string kHUDTexturePath = "res/textures/placeholder_icon.png";
@@ -235,7 +238,7 @@ int main()
         exit(return_value);
     }
     cout << "GLAD Initialized.\n";
-
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
     utility::InitImGUI(window);
 
     collisions::CollisionManager::Initialize();
@@ -324,6 +327,7 @@ int main()
     auto BloomBlurVerticalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurVerticalShaderPath);
     auto BloomBlurHorizontalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurHorizontalShaderPath);
     auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
+    auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorFragmentShaderPath);
 #pragma endregion Shaders
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -696,6 +700,36 @@ int main()
     }, nullptr, true);
 
 
+    //experiment
+    auto experiment = GameObject::Create();
+    experiment->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
+    const float floor_tile_vertices_data[30]
+    {
+       -8.0f, 0.0f,  8.0f,  0.0f, 1.0f,
+       -8.0f, 0.0f, -8.0f,  0.0f, 0.0f,
+        8.0f, 0.0f, -8.0f,  1.0f, 0.0f,
+
+       -8.0f, 0.0f,  8.0f,  0.0f, 1.0f,
+        8.0f, 0.0f, -8.0f,  1.0f, 0.0f,
+        8.0f, 0.0f,  8.0f,  1.0f, 1.0f
+    };
+
+    static unsigned int floor_time_vao;
+    static unsigned int floor_time_vbo;
+
+    {
+        glGenVertexArrays(1, &floor_time_vao);
+        glGenBuffers(1, &floor_time_vbo);
+        glBindVertexArray(floor_time_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, floor_time_vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(floor_tile_vertices_data), &floor_tile_vertices_data, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 *sizeof(float)));
+        glBindVertexArray(0);
+    }
+
     /////////////////////////////////////////////
     /////////////////////////////////////////////
     // GAME LOOP GAME LOOP GAME LOOP GAME LOOP //
@@ -759,7 +793,7 @@ int main()
             rg_settings.enemies = random::RandInt(1, 4);
             rg_settings.lamps = random::RandInt(1, 5);
             rg_settings.clutter = random::RandInt(1, 5);
-            rg_settings.barells = random::RandInt(1, 5);
+            rg_settings.barells = random::RandInt(1, 2);
 
             glm::ivec2 current_room_pos = room->position;
             glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
@@ -867,7 +901,7 @@ int main()
         glViewport(0, 0, mode->width, mode->height);
 
         auto active_camera = Global::i_->active_camera_;
-
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
 
@@ -875,6 +909,16 @@ int main()
         BackgroundShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        FloorShader->Use();
+        FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
+        FloorShader->SetMatrix4("projection_matrix", projection_matrix);
+        FloorShader->SetVec2("position", glm::vec2(-8.0f, -8.0f));
+        glBindVertexArray(floor_time_vao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         GrassShader->Use();
         GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
@@ -892,6 +936,7 @@ int main()
 
         scene_root->PropagateUpdate();
 
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         //////////////////////////////////
         // Bind buffer - Bind textures - Use Shader - Draw 
 
@@ -1106,7 +1151,7 @@ int main()
         
 
 #pragma endregion
-        /*
+        
 #pragma region ImGUI
         
         ImGui_ImplOpenGL3_NewFrame();
@@ -1346,18 +1391,6 @@ int main()
         }
         ImGui::End();
 
-        static float player_1_hp;
-        static float player_2_hp;
-        player_1_hp = player_1->GetComponent<components::HealthComponent>()->health_;
-        player_2_hp = player_2->GetComponent<components::HealthComponent>()->health_;
-        ImGui::Begin("Player 1 HP");
-        ImGui::SliderFloat("Player 1 HP", &(player_1_hp), 0.0f, player_1->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
-        ImGui::End();
-
-        ImGui::Begin("Player 2 HP");
-        ImGui::SliderFloat("Player 2 HP", &(player_2_hp), 0.0f, player_2->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
-        ImGui::End();
-
         ImGui::Begin("Serialize");
 
         static char filename_buf[32] = "save.json";
@@ -1411,7 +1444,7 @@ int main()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
         
         
-#pragma endregion */
+#pragma endregion 
         glfwSwapBuffers(window);
     }
     
