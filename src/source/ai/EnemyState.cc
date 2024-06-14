@@ -143,6 +143,7 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 	{
 		cout << "ATTACK!!\n";
 		machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
+		//// to implement enemy attack aniamtion
 		assert(machine->current_state_ && PatrolState::Instance());
 		machine->current_state_ = PatrolState::Instance();
 	}

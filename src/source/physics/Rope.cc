@@ -184,6 +184,8 @@ void Rope::ChokeCheck(generation::Room *room)
 		{
 			cout << "CHOKE'EM MOTHAFUCKA!!!!\n";
 			audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
+			///dealing dmg to enemy animation to implement
+
 		}
 		pull_cooldown_ = true;
 	}
