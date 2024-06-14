@@ -145,8 +145,11 @@ s_ptr<GameObject> GameObject::Deserialize(json &j)
 		for (auto &j_comp : j["components"])
 		{
 			auto comp = Component::Deserialize(j_comp, go);
-			comp->active_ = j_comp["active"];
-			go->AddComponent(comp);
+			if (comp != nullptr)
+			{
+				comp->active_ = j_comp["active"];
+				go->AddComponent(comp);
+			}
 		}
 	}
 
