@@ -25,7 +25,7 @@ void main()
 	position_texture = world_position;
 	albedo_texture = texture(albedo_map, uv).rgb;
 	normal_texture = (normal + 1.0) * 0.5;
-	mra_texture = vec3(0.0, texture(roughness_map, uv).r, 0.0);
+	mra_texture = vec3(texture(roughness_map, uv).r, texture(roughness_map, uv).r, 0.0);
 	
 	view_position_texture = vec3(0.0);
 	view_normal_texture = vec3(0.0);

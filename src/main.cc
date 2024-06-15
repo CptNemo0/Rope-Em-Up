@@ -936,11 +936,24 @@ int main()
         cubemap->RenderCube();
         components::FloorRenderer::view_matrix_ = active_camera->GetViewMatrix();
 
+        GrassShader->Use();
+        GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
+        GrassShader->SetMatrix4("projection_matrix", projection_matrix);
+        GrassShader->SetFloat("time", glfwGetTime());
+        GrassShader->SetVec3("pp1", player_1->transform_->get_position());
+        GrassShader->SetVec3("pp2", player_2->transform_->get_position());
+        GrassRendererManager::i_->Draw(GrassShader->get_id());
 
-        /*FloorShader->Use();
+        GBufferPassShader->Use();
+        GBufferPassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
+
+        GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
+        GBufferPassShader->SetInt("numBones", MAX_BONES);
+
+        scene_root->PropagateUpdate();
+
+        FloorShader->Use();
         FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
-
-        
 
         FloorShader->SetInt("height_map", 0);
         glActiveTexture(GL_TEXTURE0);
@@ -960,27 +973,28 @@ int main()
 
         FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         FloorShader->SetMatrix4("projection_matrix", projection_matrix);
-        FloorShader->SetVec2("position", glm::vec2(-8.0f, -8.0f));
+
+        for (int i = 0; i < room->width; i++)
+        {
+            for (int j = 0; j < room->height; j++)
+            {
+                //s_ptr<GameObject> floor = GameObject::Create(room.floors);
+                //floor->transform_->set_position(glm::vec3(-8.0f - i * generation::kModuleSize, 0.0f, -8.0f - j * generation::kModuleSize));
+                //floor->AddComponent(make_shared<components::FloorRenderer>());
+
+                FloorShader->SetVec2("position", glm::vec2(-8.0f - i * generation::kModuleSize, -8.0f - j * generation::kModuleSize));
+
+                glBindVertexArray(floor_tile_vao);
+                glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
+                glBindVertexArray(0);
+            }
+        }
+
+        /*FloorShader->SetVec2("position", glm::vec2(-8.0f, -8.0f));
 
         glBindVertexArray(floor_tile_vao);
         glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);*/
-
-        GrassShader->Use();
-        GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
-        GrassShader->SetMatrix4("projection_matrix", projection_matrix);
-        GrassShader->SetFloat("time", glfwGetTime());
-        GrassShader->SetVec3("pp1", player_1->transform_->get_position());
-        GrassShader->SetVec3("pp2", player_2->transform_->get_position());
-        GrassRendererManager::i_->Draw(GrassShader->get_id());
-
-        GBufferPassShader->Use();
-        GBufferPassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
-
-        GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
-        GBufferPassShader->SetInt("numBones", MAX_BONES);
-
-        scene_root->PropagateUpdate();
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         //////////////////////////////////

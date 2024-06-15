@@ -709,7 +709,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             }
         }
 
-        for (int i = 0; i < room.width; i++)
+        /*for (int i = 0; i < room.width; i++)
         {
             for (int j = 0; j < room.height; j++)
             {
@@ -717,7 +717,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
                 floor->AddComponent(make_shared<components::FloorRenderer>());
             }
-        }
+        }*/
 
         //generate gates
         //up
@@ -927,7 +927,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             }
         }
 
-        for (int i = 0; i < room.width; i++)
+        /*for (int i = 0; i < room.width; i++)
         {
             for (int j = 0; j < room.height; j++)
             {
@@ -936,7 +936,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
                 
             }
-        }
+        }*/
 
         //generate gates
         //up

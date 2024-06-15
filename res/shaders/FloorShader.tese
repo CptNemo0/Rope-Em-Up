@@ -30,7 +30,7 @@ void main()
 
     mat4 translation_matrix = mat4(1.0);
     translation_matrix[3][0] = position.x;
-    translation_matrix[3][1] = 0.1875;
+    translation_matrix[3][1] = 0.0;
     translation_matrix[3][2] = position.y;
     translation_matrix[3][3] = 1.0;
 
@@ -54,7 +54,7 @@ void main()
     tex_coord.y = scaled_p.z;
 
     float height = texture(height_map, tex_coord).y;
-    height = -0.64 * height * height;
+    height = -10.0 * height * height * height * height;
     p += vec4(0.0, height, 0.0, 0.0);
 
     vec4 internal_world_pos = translation_matrix * scale_matrix * p;
