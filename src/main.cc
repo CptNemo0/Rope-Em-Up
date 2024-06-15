@@ -774,8 +774,6 @@ int main()
     string debug_info;
     bool use_ssao = true;
 
-    bool wireframe = false;
-
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -945,8 +943,6 @@ int main()
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
 
-        if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  
         FloorShader->Use();
         FloorShader->SetInt("height_map", 0);
         glActiveTexture(GL_TEXTURE0);
@@ -967,10 +963,10 @@ int main()
         FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         FloorShader->SetMatrix4("projection_matrix", projection_matrix);
         FloorShader->SetVec2("position", glm::vec2(-8.0f, -8.0f));
+
         glBindVertexArray(floor_tile_vao);
         glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
-        if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         GrassShader->Use();
         GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
@@ -1209,33 +1205,6 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        
-
-        ImGui::Begin("Tesselation");
-
-        static int TessLevelOuter0 = 10;
-        static int TessLevelOuter1 = 10;
-        static int TessLevelOuter2 = 10;
-        static int TessLevelOuter3 = 10;
-        static int TessLevelInner0 = 10;
-        static int TessLevelInner1 = 10;
-
-        ImGui::SliderInt("TessLevelOuter0", &TessLevelOuter0, 1, 64);
-        ImGui::SliderInt("TessLevelOuter1", &TessLevelOuter1, 1, 64);
-        ImGui::SliderInt("TessLevelOuter2", &TessLevelOuter2, 1, 64);
-        ImGui::SliderInt("TessLevelOuter3", &TessLevelOuter3, 1, 64);
-        ImGui::SliderInt("TessLevelInner0", &TessLevelInner0, 1, 64);
-        ImGui::SliderInt("TessLevelInner1", &TessLevelInner1, 1, 64);
-
-        FloorShader->Use();
-        FloorShader->SetInt("TessLevelOuter0", TessLevelOuter0);
-        FloorShader->SetInt("TessLevelOuter1", TessLevelOuter1);
-        FloorShader->SetInt("TessLevelOuter2", TessLevelOuter2);
-        FloorShader->SetInt("TessLevelOuter3", TessLevelOuter3);
-        FloorShader->SetInt("TessLevelInner0", TessLevelInner0);
-        FloorShader->SetInt("TessLevelInner1", TessLevelInner1);
-
-        ImGui::Checkbox("wireframe", &wireframe);
 
         ImGui::End();
 
