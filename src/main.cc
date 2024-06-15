@@ -131,6 +131,8 @@ int main()
     const string kHudBarShaderPath = "res/shaders/HUDBarShader.frag";
 
     const string kFloorVertexShaderPath = "res/shaders/FloorShader.vert";
+    const string kFloorTCShaderPath = "res/shaders/FloorShader.tesc";
+    const string kFloorTEShaderPath = "res/shaders/FloorShader.tese";
     const string kFloorFragmentShaderPath = "res/shaders/FloorShader.frag";
 
     const string kGreenTexturePath = "res/textures/green_texture.png";
@@ -327,7 +329,7 @@ int main()
     auto BloomBlurVerticalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurVerticalShaderPath);
     auto BloomBlurHorizontalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurHorizontalShaderPath);
     auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
-    auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorFragmentShaderPath);
+    auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorTCShaderPath, kFloorTEShaderPath, kFloorFragmentShaderPath);
 #pragma endregion Shaders
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -699,11 +701,18 @@ int main()
         minimap.Update(rlg, room);
     }, nullptr, true);
 
-
+    ////////////////////////////////////
+    ////////////////////////////////////
+    ////////////////////////////////////
+    
+    auto floor_height_texture = res::get_texture("res/models/enviroment/floor/floor_height.png");
+    auto floor_normal_texture = res::get_texture("res/models/enviroment/floor/floor_normal.png");
+    auto floor_albedo_texture = res::get_texture("res/models/enviroment/floor/floor_albedo.png");
+    auto floor_roughness_texture = res::get_texture("res/models/enviroment/floor/floor_roughness.png");
     //experiment
     auto experiment = GameObject::Create();
     experiment->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-    const float floor_tile_vertices_data[30]
+    /*const float floor_tile_vertices_data[30]
     {
        -8.0f, 0.0f,  8.0f,  0.0f, 1.0f,
        -8.0f, 0.0f, -8.0f,  0.0f, 0.0f,
@@ -712,23 +721,46 @@ int main()
        -8.0f, 0.0f,  8.0f,  0.0f, 1.0f,
         8.0f, 0.0f, -8.0f,  1.0f, 0.0f,
         8.0f, 0.0f,  8.0f,  1.0f, 1.0f
+    };*/
+
+    const float floor_tile_vertices_data[20]
+    {
+        -1.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+         1.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+         1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
+        -1.0f, 0.0f,  1.0f, 0.0f, 0.0f
     };
 
-    static unsigned int floor_time_vao;
-    static unsigned int floor_time_vbo;
+    const unsigned int floor_tile_indices_data[4]{ 0, 1, 3, 2 };
 
+    static unsigned int floor_tile_vao;
+    static unsigned int floor_tile_vbo;
+    static unsigned int floor_tile_ebo;
     {
-        glGenVertexArrays(1, &floor_time_vao);
-        glGenBuffers(1, &floor_time_vbo);
-        glBindVertexArray(floor_time_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, floor_time_vbo);
+        glGenVertexArrays(1, &floor_tile_vao);
+        glGenBuffers(1, &floor_tile_vbo);
+        glGenBuffers(1, &floor_tile_ebo);
+
+        glBindVertexArray(floor_tile_vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, floor_tile_vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(floor_tile_vertices_data), &floor_tile_vertices_data, GL_STATIC_DRAW);
+        
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floor_tile_ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(floor_tile_indices_data), &floor_tile_indices_data, GL_STATIC_DRAW);
+
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 *sizeof(float)));
         glBindVertexArray(0);
+        
+
     }
+
+    ////////////////////////////////////
+    ////////////////////////////////////
+    ////////////////////////////////////
 
     /////////////////////////////////////////////
     /////////////////////////////////////////////
@@ -741,6 +773,9 @@ int main()
     float fps = 0;
     string debug_info;
     bool use_ssao = true;
+
+    bool wireframe = false;
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -910,15 +945,32 @@ int main()
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  
         FloorShader->Use();
+        FloorShader->SetInt("height_map", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, floor_height_texture->id_);
+
+        FloorShader->SetInt("albedo_map", 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, floor_albedo_texture->id_);
+
+        FloorShader->SetInt("normal_map", 2);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, floor_normal_texture->id_);
+
+        FloorShader->SetInt("roughness_map", 3);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, floor_roughness_texture->id_);
+
         FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         FloorShader->SetMatrix4("projection_matrix", projection_matrix);
         FloorShader->SetVec2("position", glm::vec2(-8.0f, -8.0f));
-        glBindVertexArray(floor_time_vao);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(floor_tile_vao);
+        glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         GrassShader->Use();
         GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
@@ -1157,6 +1209,35 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        
+
+        ImGui::Begin("Tesselation");
+
+        static int TessLevelOuter0 = 10;
+        static int TessLevelOuter1 = 10;
+        static int TessLevelOuter2 = 10;
+        static int TessLevelOuter3 = 10;
+        static int TessLevelInner0 = 10;
+        static int TessLevelInner1 = 10;
+
+        ImGui::SliderInt("TessLevelOuter0", &TessLevelOuter0, 1, 64);
+        ImGui::SliderInt("TessLevelOuter1", &TessLevelOuter1, 1, 64);
+        ImGui::SliderInt("TessLevelOuter2", &TessLevelOuter2, 1, 64);
+        ImGui::SliderInt("TessLevelOuter3", &TessLevelOuter3, 1, 64);
+        ImGui::SliderInt("TessLevelInner0", &TessLevelInner0, 1, 64);
+        ImGui::SliderInt("TessLevelInner1", &TessLevelInner1, 1, 64);
+
+        FloorShader->Use();
+        FloorShader->SetInt("TessLevelOuter0", TessLevelOuter0);
+        FloorShader->SetInt("TessLevelOuter1", TessLevelOuter1);
+        FloorShader->SetInt("TessLevelOuter2", TessLevelOuter2);
+        FloorShader->SetInt("TessLevelOuter3", TessLevelOuter3);
+        FloorShader->SetInt("TessLevelInner0", TessLevelInner0);
+        FloorShader->SetInt("TessLevelInner1", TessLevelInner1);
+
+        ImGui::Checkbox("wireframe", &wireframe);
+
+        ImGui::End();
 
         ImGui::Begin("Postprocessor");
         ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);

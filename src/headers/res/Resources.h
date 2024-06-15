@@ -18,6 +18,7 @@ namespace res
 
     s_ptr<Shader> get_shader(string v_path, string f_path);
     s_ptr<Shader> get_shader(string v_path, string g_path, string f_path);
+    s_ptr<Shader> get_shader(string v_path, string tcs_path, string tes_path, string f_path);
 
     s_ptr<tmp::Texture> get_texture(string path);
 

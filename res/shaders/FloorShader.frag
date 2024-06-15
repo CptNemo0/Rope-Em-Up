@@ -1,4 +1,4 @@
-#version 430  core
+#version 460 core
 layout (location = 0) out vec3 position_texture;
 layout (location = 1) out vec3 albedo_texture;
 layout (location = 2) out vec3 normal_texture;
@@ -13,28 +13,22 @@ in vec2 uv;
 
 uniform sampler2D albedo_map;
 uniform sampler2D normal_map;
-uniform sampler2D metallic_map;
 uniform sampler2D roughness_map;
-uniform sampler2D ao_map;
 
 void main()
 {
 	mat3 TBN = mat3(vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0), vec3(0.0, 1.0, 0.0));
-	float metallic = texture(metallic_map, uv).r;
-	float roughness = texture(roughness_map, uv).r;
-	float ao = texture(ao_map, uv).r;
-	vec3 normal = vec3(0.0, 1.0, 0.0);
-	
-	//normal = normal * 2.0 - 1.0;
+	vec3 normal = texture(normal_map, uv).rgb;
+	normal = normal * 2.0 - 1.0;
 	normal = normalize(TBN * normal);
 
 	position_texture = world_position;
-	albedo_texture = vec3(1.0, 0.0, 0.0);
+	albedo_texture = texture(albedo_map, uv).rgb;
 	normal_texture = (normal + 1.0) * 0.5;
-	mra_texture = vec3(metallic, roughness, ao);
+	mra_texture = vec3(0.0, texture(roughness_map, uv).r, 0.0);
 	
 	view_position_texture = vec3(0.0);
 	view_normal_texture = vec3(0.0);
-	mask_texture = vec3(0.0);
+	mask_texture = vec3(1.0);
 	emissive_texture = vec3(0.0);
 }

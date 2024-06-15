@@ -45,6 +45,17 @@ s_ptr<Shader> get_shader(string v_path, string g_path, string f_path)
     return shader;
 }
 
+s_ptr<Shader> get_shader(string v_path, string tcs_path, string tes_path, string f_path)
+{
+    if (shaders.contains({ v_path, tcs_path, tes_path, f_path }))
+    {
+        return shaders[{v_path, tcs_path, tes_path, f_path}];
+    }
+    s_ptr<Shader> shader = make_shared<Shader>(v_path, tcs_path, tes_path, f_path);
+    shaders[{v_path, tcs_path, tes_path, f_path}] = shader;
+    return shader;
+}
+
 s_ptr<tmp::Texture> get_texture(string path)
 {
     if (textures.contains(path))
