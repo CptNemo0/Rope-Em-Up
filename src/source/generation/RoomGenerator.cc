@@ -322,300 +322,302 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 {
     switch (rgs->generated_rooms)
     {
-    case 1:
-        GenerateFirstRoom(room, rgs, rm);
-        break;
-    case 2:
-    {
-        GenerateSecondRoom(room, rgs, rm);
-    }
-    break;
-    default:
-    {
-        room.is_generated = true;
-
-        room.up_walls_idx.clear();
-        room.left_walls_idx.clear();
-        room.lamp_positions.clear();
-        room.clutter_positions.clear();
-        room.clutter_idx.clear();
-
-        std::random_device rd;
-        std::mt19937 g(rd());
-
-        //generate upper walls
-        room.width = rgs->width;
-        room.height = rgs->height;
-
-        room.up_walls_idx.reserve(rgs->width);
-
-        if ((rm->walls.size() - 1) != 0)
+        case 1:
         {
-            for (int i = 0; i < rgs->width; i++)
+            GenerateFirstRoom(room, rgs, rm);
+            break;
+        }
+        case 2:
+        {
+            GenerateSecondRoom(room, rgs, rm);
+            break;
+        }
+        default:
+        {
+            room.is_generated = true;
+
+            room.up_walls_idx.clear();
+            room.left_walls_idx.clear();
+            room.lamp_positions.clear();
+            room.clutter_positions.clear();
+            room.clutter_idx.clear();
+
+            std::random_device rd;
+            std::mt19937 g(rd());
+
+            //generate upper walls
+            room.width = rgs->width;
+            room.height = rgs->height;
+
+            room.up_walls_idx.reserve(rgs->width);
+
+            if ((rm->walls.size() - 1) != 0)
             {
-                int model_idx = random::RandInt(0, rm->walls.size() - 1);
-                room.up_walls_idx.push_back(model_idx);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < rgs->width; i++)
-            {
-                room.up_walls_idx.push_back(0);
-            }
-        }
-
-
-        //generate left walls
-        room.left_walls_idx.reserve(rgs->height);
-
-        if (rm->walls.size() != 1)
-        {
-            for (int i = 0; i < rgs->height; i++)
-            {
-                int model_idx = random::RandInt(0, rm->walls.size() - 1);
-                room.left_walls_idx.push_back(model_idx);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < rgs->height; i++)
-            {
-                room.left_walls_idx.push_back(0);
-            }
-        }
-
-        //generate gates
-        //up
-
-        int model_idx = 0;
-        assert(rm->gates.size() != 0);
-        assert(room.width != 0);
-        assert(room.height != 0);
-        if (room.up_gate)
-        {
-
-            room.up_gate_idx = random::RandInt(0, rm->gates.size() - 1);
-            room.up_gate_wall = random::RandInt(0, room.width - 1);
-            room.up_gate_pos = glm::vec3(-8.0f - room.up_gate_wall * kModuleSize, 0.0f, 0.0f);
-        }
-
-        //down
-        if (room.down_gate)
-        {
-            room.down_gate_idx = random::RandInt(0, rm->gates.size() - 1);
-            room.down_gate_wall = random::RandInt(0, room.width - 1);
-            room.down_gate_pos = glm::vec3(-8.0f - room.down_gate_wall * kModuleSize, 0.0f, -room.height * kModuleSize);
-        }
-
-        //right
-        if (room.right_gate)
-        {
-            room.right_gate_idx = random::RandInt(0, rm->gates.size() - 1);
-            room.right_gate_wall = random::RandInt(0, room.height - 1);
-            room.right_gate_pos = glm::vec3(-room.width * kModuleSize, 0.0f, -8.0f - room.right_gate_wall * kModuleSize);
-        }
-
-        //left
-        if (room.left_gate)
-        {
-            room.left_gate_idx = random::RandInt(0, rm->gates.size() - 1);
-            room.left_gate_wall = random::RandInt(0, room.height - 1);
-            room.left_gate_pos = glm::vec3(0.0f, 0.0f, -8.0 - room.left_gate_wall * kModuleSize);
-        }
-
-
-        // Lamps
-
-        int lamp_num = rgs->lamps;
-        std::unordered_set<glm::vec3> lamp_set;
-
-        for (int i = 0; i < room.width; i++)
-        {
-            for (int j = 0; j < room.height; j++)
-            {
-                auto pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize);
-                for (int k = 0; k < kLanternPlacement.size(); k++)
+                for (int i = 0; i < rgs->width; i++)
                 {
-                    lamp_set.insert(kLanternPlacement[k] + pos);
+                    int model_idx = random::RandInt(0, rm->walls.size() - 1);
+                    room.up_walls_idx.push_back(model_idx);
                 }
             }
-        }
-
-        // Left top
-        if (lamp_num > 0)
-        {
-            auto left_top = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
-            left_top += kLanternPlacement[0];
-            room.lamp_positions.push_back(left_top);
-            lamp_set.erase(left_top);
-            lamp_num--;
-
-        }
-
-        // Right bot
-        if (lamp_num > 0)
-        {
-            auto right_bot = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
-            right_bot += kLanternPlacement[3];
-            room.lamp_positions.push_back(right_bot);
-            lamp_set.erase(right_bot);
-            lamp_num--;
-        }
-
-        // Right top
-        if (lamp_num > 0)
-        {
-            auto right_top = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
-            right_top += kLanternPlacement[1];
-            room.lamp_positions.push_back(right_top);
-            lamp_set.erase(right_top);
-            lamp_num--;
-        }
-
-        // Left bot
-        if (lamp_num > 0)
-        {
-            auto left_bot = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
-            left_bot += kLanternPlacement[2];
-            room.lamp_positions.push_back(left_bot);
-            lamp_set.erase(left_bot);
-            lamp_num--;
-        }
-
-        // Above 4 - random
-        std::vector<glm::vec3> shuffled_set = std::vector<glm::vec3>(lamp_set.begin(), lamp_set.end());
-        std::shuffle(shuffled_set.begin(), shuffled_set.end(), g);
-
-        if (lamp_num > 0)
-        {
-            for (auto& pos : shuffled_set)
+            else
             {
-                room.lamp_positions.push_back(pos);
+                for (int i = 0; i < rgs->width; i++)
+                {
+                    room.up_walls_idx.push_back(0);
+                }
+            }
+
+
+            //generate left walls
+            room.left_walls_idx.reserve(rgs->height);
+
+            if (rm->walls.size() != 1)
+            {
+                for (int i = 0; i < rgs->height; i++)
+                {
+                    int model_idx = random::RandInt(0, rm->walls.size() - 1);
+                    room.left_walls_idx.push_back(model_idx);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < rgs->height; i++)
+                {
+                    room.left_walls_idx.push_back(0);
+                }
+            }
+
+            //generate gates
+            //up
+
+            int model_idx = 0;
+            assert(rm->gates.size() != 0);
+            assert(room.width != 0);
+            assert(room.height != 0);
+            if (room.up_gate)
+            {
+
+                room.up_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+                room.up_gate_wall = random::RandInt(0, room.width - 1);
+                room.up_gate_pos = glm::vec3(-8.0f - room.up_gate_wall * kModuleSize, 0.0f, 0.0f);
+            }
+
+            //down
+            if (room.down_gate)
+            {
+                room.down_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+                room.down_gate_wall = random::RandInt(0, room.width - 1);
+                room.down_gate_pos = glm::vec3(-8.0f - room.down_gate_wall * kModuleSize, 0.0f, -room.height * kModuleSize);
+            }
+
+            //right
+            if (room.right_gate)
+            {
+                room.right_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+                room.right_gate_wall = random::RandInt(0, room.height - 1);
+                room.right_gate_pos = glm::vec3(-room.width * kModuleSize, 0.0f, -8.0f - room.right_gate_wall * kModuleSize);
+            }
+
+            //left
+            if (room.left_gate)
+            {
+                room.left_gate_idx = random::RandInt(0, rm->gates.size() - 1);
+                room.left_gate_wall = random::RandInt(0, room.height - 1);
+                room.left_gate_pos = glm::vec3(0.0f, 0.0f, -8.0 - room.left_gate_wall * kModuleSize);
+            }
+
+
+            // Lamps
+
+            int lamp_num = rgs->lamps;
+            std::unordered_set<glm::vec3> lamp_set;
+
+            for (int i = 0; i < room.width; i++)
+            {
+                for (int j = 0; j < room.height; j++)
+                {
+                    auto pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize);
+                    for (int k = 0; k < kLanternPlacement.size(); k++)
+                    {
+                        lamp_set.insert(kLanternPlacement[k] + pos);
+                    }
+                }
+            }
+
+            // Left top
+            if (lamp_num > 0)
+            {
+                auto left_top = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+                left_top += kLanternPlacement[0];
+                room.lamp_positions.push_back(left_top);
+                lamp_set.erase(left_top);
                 lamp_num--;
-                if (lamp_num == 0)
-                {
-                    break;
-                }
+
             }
-        }
 
-        // Clutter in corners
-        std::vector<glm::vec3> clutter_vector;
-        std::unordered_set<glm::vec3> clutter_set;
-        for (int i = 0; i < room.width; i++)
-        {
-            auto top_pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
-            auto bot_pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
-
-            for (int i = 0; i < 3; i++)
+            // Right bot
+            if (lamp_num > 0)
             {
-                if (CheckGateProximity(top_pos + kCornerTopLeft[i], room, 2.5f))
-                {
-                    clutter_set.insert(top_pos + kCornerTopLeft[i]);
-                }
-
-                if (CheckGateProximity(top_pos + kCornerTopRight[i], room, 2.5f))
-                {
-                    clutter_set.insert(top_pos + kCornerTopRight[i]);
-                }
-
-                if (CheckGateProximity(bot_pos + kCornerBotLeft[i], room, 2.5f))
-                {
-                    clutter_set.insert(bot_pos + kCornerBotLeft[i]);
-                }
-
-                if (CheckGateProximity(bot_pos + kCornerBotRight[i], room, 2.5f))
-                {
-                    clutter_set.insert(bot_pos + kCornerBotRight[i]);
-                }
+                auto right_bot = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+                right_bot += kLanternPlacement[3];
+                room.lamp_positions.push_back(right_bot);
+                lamp_set.erase(right_bot);
+                lamp_num--;
             }
-        }
-        for (int i = 0; i < room.height; i++)
-        {
-            auto left_pos = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
-            auto right_pos = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
 
-            for (int i = 0; i < 3; i++)
+            // Right top
+            if (lamp_num > 0)
             {
-                if (CheckGateProximity(left_pos + kCornerTopLeft[i], room, 2.5f))
-                {
-                    clutter_set.insert(left_pos + kCornerTopLeft[i]);
-                }
-
-                if (CheckGateProximity(left_pos + kCornerTopLeft[i], room, 2.5f))
-                {
-                    clutter_set.insert(left_pos + kCornerTopLeft[i]);
-                }
-
-                if (CheckGateProximity(left_pos + kCornerBotLeft[i], room, 2.5f))
-                {
-                    clutter_set.insert(left_pos + kCornerBotLeft[i]);
-                }
-
-                if (CheckGateProximity(right_pos + kCornerBotRight[i], room, 2.5f))
-                {
-                    clutter_set.insert(right_pos + kCornerBotRight[i]);
-                }
+                auto right_top = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+                right_top += kLanternPlacement[1];
+                room.lamp_positions.push_back(right_top);
+                lamp_set.erase(right_top);
+                lamp_num--;
             }
-        }
-        clutter_vector = std::vector<glm::vec3>(clutter_set.begin(), clutter_set.end());
-        std::shuffle(clutter_vector.begin(), clutter_vector.end(), g);
 
-
-        assert(rm->clutter.size() > 0);
-        for (int i = 0; i < rgs->clutter && i < clutter_vector.size(); i++)
-        {
-            room.clutter_positions.push_back(clutter_vector[i]);
-            room.clutter_idx.push_back(random::RandInt(0, rm->clutter.size() - 1));
-        }
-
-        //Enemies
-        std::unordered_set<glm::vec3> enemies_set;
-        std::vector<glm::vec3> enemies_positions;
-
-        for (int i = 0; i < room.width; i++)
-        {
-            for (int j = 0; j < room.height; j++)
+            // Left bot
+            if (lamp_num > 0)
             {
-                for (int k = 0; k < kEnemiesPositions.size(); k++)
+                auto left_bot = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+                left_bot += kLanternPlacement[2];
+                room.lamp_positions.push_back(left_bot);
+                lamp_set.erase(left_bot);
+                lamp_num--;
+            }
+
+            // Above 4 - random
+            std::vector<glm::vec3> shuffled_set = std::vector<glm::vec3>(lamp_set.begin(), lamp_set.end());
+            std::shuffle(shuffled_set.begin(), shuffled_set.end(), g);
+
+            if (lamp_num > 0)
+            {
+                for (auto& pos : shuffled_set)
                 {
-                    enemies_set.insert(kEnemiesPositions[k] + (glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize)));
+                    room.lamp_positions.push_back(pos);
+                    lamp_num--;
+                    if (lamp_num == 0)
+                    {
+                        break;
+                    }
                 }
             }
-        }
 
-        enemies_positions = std::vector<glm::vec3>(enemies_set.begin(), enemies_set.end());
-
-        int enemies_positons_size = enemies_positions.size();
-
-        std::shuffle(enemies_positions.begin(), enemies_positions.end(), g);
-
-        if (enemies_positons_size)
-        {
-            for (int i = 0; i < rgs->enemies; i++)
+            // Clutter in corners
+            std::vector<glm::vec3> clutter_vector;
+            std::unordered_set<glm::vec3> clutter_set;
+            for (int i = 0; i < room.width; i++)
             {
-                room.enemies_positions.push_back(enemies_positions[i % enemies_positions.size()]);
-                room.enemies_idx.push_back(random::RandInt(0, -1 + rm->enemies.size()));
+                auto top_pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - 0 * kModuleSize);
+                auto bot_pos = glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (CheckGateProximity(top_pos + kCornerTopLeft[i], room, 2.5f))
+                    {
+                        clutter_set.insert(top_pos + kCornerTopLeft[i]);
+                    }
+
+                    if (CheckGateProximity(top_pos + kCornerTopRight[i], room, 2.5f))
+                    {
+                        clutter_set.insert(top_pos + kCornerTopRight[i]);
+                    }
+
+                    if (CheckGateProximity(bot_pos + kCornerBotLeft[i], room, 2.5f))
+                    {
+                        clutter_set.insert(bot_pos + kCornerBotLeft[i]);
+                    }
+
+                    if (CheckGateProximity(bot_pos + kCornerBotRight[i], room, 2.5f))
+                    {
+                        clutter_set.insert(bot_pos + kCornerBotRight[i]);
+                    }
+                }
             }
-        }
-
-        // barells
-
-        if (rgs->barells)
-        {
-            int rest_positions = enemies_positons_size - rgs->enemies;
-            int barell_fit = rest_positions / rgs->barells;
-            int ceil = barell_fit > 0 ? rgs->barells : rest_positions;
-
-            for (int i = 0; i < ceil; i++)
+            for (int i = 0; i < room.height; i++)
             {
-                room.barells_positions.push_back(enemies_positions[(i + enemies_positons_size - 1) % enemies_positions.size()]);
-                room.barell_idx.push_back(random::RandInt(0, -1 + rm->barrles.size()));
+                auto left_pos = glm::vec3(-8.0f - 0 * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
+                auto right_pos = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - i * kModuleSize);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (CheckGateProximity(left_pos + kCornerTopLeft[i], room, 2.5f))
+                    {
+                        clutter_set.insert(left_pos + kCornerTopLeft[i]);
+                    }
+
+                    if (CheckGateProximity(left_pos + kCornerTopLeft[i], room, 2.5f))
+                    {
+                        clutter_set.insert(left_pos + kCornerTopLeft[i]);
+                    }
+
+                    if (CheckGateProximity(left_pos + kCornerBotLeft[i], room, 2.5f))
+                    {
+                        clutter_set.insert(left_pos + kCornerBotLeft[i]);
+                    }
+
+                    if (CheckGateProximity(right_pos + kCornerBotRight[i], room, 2.5f))
+                    {
+                        clutter_set.insert(right_pos + kCornerBotRight[i]);
+                    }
+                }
             }
-        }   
-    }
-        break;
+            clutter_vector = std::vector<glm::vec3>(clutter_set.begin(), clutter_set.end());
+            std::shuffle(clutter_vector.begin(), clutter_vector.end(), g);
+
+
+            assert(rm->clutter.size() > 0);
+            for (int i = 0; i < rgs->clutter && i < clutter_vector.size(); i++)
+            {
+                room.clutter_positions.push_back(clutter_vector[i]);
+                room.clutter_idx.push_back(random::RandInt(0, rm->clutter.size() - 1));
+            }
+
+            //Enemies
+            std::unordered_set<glm::vec3> enemies_set;
+            std::vector<glm::vec3> enemies_positions;
+
+            for (int i = 0; i < room.width; i++)
+            {
+                for (int j = 0; j < room.height; j++)
+                {
+                    for (int k = 0; k < kEnemiesPositions.size(); k++)
+                    {
+                        enemies_set.insert(kEnemiesPositions[k] + (glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize)));
+                    }
+                }
+            }
+
+            enemies_positions = std::vector<glm::vec3>(enemies_set.begin(), enemies_set.end());
+
+            int enemies_positons_size = enemies_positions.size();
+
+            std::shuffle(enemies_positions.begin(), enemies_positions.end(), g);
+
+            if (enemies_positons_size)
+            {
+                for (int i = 0; i < rgs->enemies; i++)
+                {
+                    room.enemies_positions.push_back(enemies_positions[i % enemies_positions.size()]);
+                    room.enemies_idx.push_back(random::RandInt(0, -1 + rm->enemies.size()));
+                }
+            }
+
+            // barells
+
+            if (rgs->barells)
+            {
+                int rest_positions = enemies_positons_size - rgs->enemies;
+                int barell_fit = rest_positions / rgs->barells;
+                int ceil = barell_fit > 0 ? rgs->barells : rest_positions;
+
+                for (int i = 0; i < ceil; i++)
+                {
+                    room.barells_positions.push_back(enemies_positions[(i + enemies_positons_size - 1) % enemies_positions.size()]);
+                    room.barell_idx.push_back(random::RandInt(0, -1 + rm->barrles.size()));
+                }
+            }   
+            break;
+        }
     }
     
 

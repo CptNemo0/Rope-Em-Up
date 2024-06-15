@@ -69,7 +69,7 @@ public:
     void Update();
     // Returns -1 if no free source available
     const ALuint GetFreeSource();
-    void PlaySound(const s_ptr<AudioBuffer> source);
+    void PlaySound(const s_ptr<AudioBuffer> source, float volume = 1.0f);
 };
 
 }; // namespace audio

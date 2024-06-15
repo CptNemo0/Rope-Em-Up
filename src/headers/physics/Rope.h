@@ -21,10 +21,15 @@
 #include "../Model.h"
 #include "../Shader.h"
 #include "../audio/AudioManager.h"
+#include "../Shuffler.h"
 #include "../typedef.h"
 
 class Rope
 {
+private:
+	void AudioSetup();
+	Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
+
 public:
 	float kDistance = 0.1f;
 

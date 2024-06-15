@@ -1,8 +1,17 @@
 #include "../../headers/physics/Rope.h"
 
+void Rope::AudioSetup()
+{
+	audio_shuffler_.SetData({
+		res::get_sound("res/sounds/tentaclepull1.wav"),
+		res::get_sound("res/sounds/tentaclepull2.wav"),
+		res::get_sound("res/sounds/tentaclepull3.wav")
+	});
+}
+
 Rope::Rope(glm::vec3 start, glm::vec3 dir, int rope_length, float segment_mass, float segment_drag)
 {
-
+	AudioSetup();
 }
 
 Rope::Rope(glm::vec3 start, glm::vec3 end, float segment_mass, float segment_drag, std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader)
@@ -11,6 +20,7 @@ Rope::Rope(glm::vec3 start, glm::vec3 end, float segment_mass, float segment_dra
 	this->segment_mass_ = segment_mass;
 
 	CreateSegments(start, end, scene_root, model, shader);
+	AudioSetup();
 }
 
 void Rope::CreateSegments(glm::vec3 start, glm::vec3 end, std::shared_ptr<GameObject> scene_root, std::shared_ptr<Model> model, std::shared_ptr<Shader> shader)
@@ -173,19 +183,7 @@ void Rope::ChokeCheck(generation::Room *room)
 		if (choked.contains(HEALTH_TYPE::MONSTER))
 		{
 			cout << "CHOKE'EM MOTHAFUCKA!!!!\n";
-			auto num = random::RandInt(1, 3);
-			switch (num)
-			{
-				case 1:
-					audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/tentaclepull1.wav"));
-					break;
-				case 2:
-					audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/tentaclepull2.wav"));
-					break;
-				case 3:
-					audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/tentaclepull3.wav"));
-					break;
-			}
+			audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
 		}
 		pull_cooldown_ = true;
 	}
