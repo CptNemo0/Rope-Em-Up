@@ -68,6 +68,7 @@
 #include "headers/Global.h"
 #include "headers/Bloom.h"
 #include "headers/Minimap.h"
+#include "headers/components/FloorRenderer.h"
 
 int main()
 {
@@ -672,6 +673,10 @@ int main()
     SSAOShader->SetFloat("radius", 0.4);
     SSAOShader->SetFloat("bias", 0.1);
     ssao_buffer.SetKernel(SSAOShader);
+    
+    components::FloorRenderer::Init(FloorShader);
+    FloorShader->Use();
+    FloorShader->SetMatrix4("projection_matrix", projection_matrix);
 
     // cubemap->LoadHDRimg(window, *activeCamera);
 
@@ -709,20 +714,7 @@ int main()
     auto floor_normal_texture = res::get_texture("res/models/enviroment/floor/floor_normal.png");
     auto floor_albedo_texture = res::get_texture("res/models/enviroment/floor/floor_albedo.png");
     auto floor_roughness_texture = res::get_texture("res/models/enviroment/floor/floor_roughness.png");
-    //experiment
-    auto experiment = GameObject::Create();
-    experiment->AddComponent(make_shared<components::MeshRenderer>(simple_floor_model, GBufferPassShader));
-    /*const float floor_tile_vertices_data[30]
-    {
-       -8.0f, 0.0f,  8.0f,  0.0f, 1.0f,
-       -8.0f, 0.0f, -8.0f,  0.0f, 0.0f,
-        8.0f, 0.0f, -8.0f,  1.0f, 0.0f,
-
-       -8.0f, 0.0f,  8.0f,  0.0f, 1.0f,
-        8.0f, 0.0f, -8.0f,  1.0f, 0.0f,
-        8.0f, 0.0f,  8.0f,  1.0f, 1.0f
-    };*/
-
+   
     const float floor_tile_vertices_data[20]
     {
         -1.0f, 0.0f, -1.0f, 1.0f, 1.0f,
@@ -942,8 +934,14 @@ int main()
         BackgroundShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
+        components::FloorRenderer::view_matrix_ = active_camera->GetViewMatrix();
 
-        FloorShader->Use();
+
+        /*FloorShader->Use();
+        FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
+
+        
+
         FloorShader->SetInt("height_map", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floor_height_texture->id_);
@@ -966,7 +964,7 @@ int main()
 
         glBindVertexArray(floor_tile_vao);
         glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        glBindVertexArray(0);*/
 
         GrassShader->Use();
         GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());

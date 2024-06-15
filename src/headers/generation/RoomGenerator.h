@@ -30,6 +30,7 @@
 #include "../components/SpellSlotComponent.h"
 #include "../components/ParticleEmitter.h"
 #include "../components/EnemySizeManager.h"
+#include "../components/FloorRenderer.h"
 #include "../collisions/Collider.h"
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"

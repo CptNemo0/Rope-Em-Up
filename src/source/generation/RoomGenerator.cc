@@ -713,12 +713,9 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             for (int j = 0; j < room.height; j++)
             {
-                if (j != 0 && i != 0)
-                {
-                    s_ptr<GameObject> floor = GameObject::Create(room.floors);
-                    floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-                    floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
-                }
+                s_ptr<GameObject> floor = GameObject::Create(room.floors);
+                floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+                floor->AddComponent(make_shared<components::FloorRenderer>());
             }
         }
 
@@ -934,12 +931,10 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             for (int j = 0; j < room.height; j++)
             {
-                if (!(j == 0 && i == 0))
-                {
-                    s_ptr<GameObject> floor = GameObject::Create(room.floors);
-                    floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-                    floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
-                }
+                s_ptr<GameObject> floor = GameObject::Create(room.floors);
+                floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+                floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
+                
             }
         }
 
