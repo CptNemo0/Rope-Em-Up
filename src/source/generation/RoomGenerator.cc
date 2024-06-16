@@ -640,7 +640,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         for (int i = 0; i < room.width; i++)
         {
             s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
-            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, -0.3f, 0.0f));
             wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
             wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
 
@@ -675,7 +675,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         for (int i = 0; i < room.height; i++)
         {
             s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
-            wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+            wall_left->transform_->set_position(glm::vec3(0.0, -0.3f, -8.0f - i * kModuleSize));
             wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
             wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
 
@@ -711,15 +711,15 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             }
         }
 
-        /*for (int i = 0; i < room.width; i++)
+        for (int i = 0; i < room.width; i++)
         {
             for (int j = 0; j < room.height; j++)
             {
                 s_ptr<GameObject> floor = GameObject::Create(room.floors);
                 floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-                floor->AddComponent(make_shared<components::FloorRenderer>());
+                floor->AddComponent(FloorRendererManager::i_->CreateFloorRenderer());
             }
-        }*/
+        }
 
         //generate gates
         //up
@@ -858,7 +858,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         for (int i = 0; i < room.width; i++)
         {
             s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
-            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, -0.3f, 0.0f));
             wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
             wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
 
@@ -893,7 +893,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         for (int i = 0; i < room.height; i++)
         {
             s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
-            wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+            wall_left->transform_->set_position(glm::vec3(0.0, -0.3f, -8.0f - i * kModuleSize));
             wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
             wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
 
@@ -929,16 +929,16 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             }
         }
 
-        /*for (int i = 0; i < room.width; i++)
+        for (int i = 0; i < room.width; i++)
         {
             for (int j = 0; j < room.height; j++)
             {
                 s_ptr<GameObject> floor = GameObject::Create(room.floors);
                 floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-                floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
+                floor->AddComponent(FloorRendererManager::i_->CreateFloorRenderer());
                 
             }
-        }*/
+        }
 
         //generate gates
         //up

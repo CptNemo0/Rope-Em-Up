@@ -32,19 +32,10 @@ namespace components
 		static unsigned int floor_tile_vbo_;
 		static unsigned int floor_tile_ebo_;
 
-		static std::shared_ptr<tmp::Texture> floor_height_texture_;
-		static std::shared_ptr<tmp::Texture> floor_normal_texture_;
-		static std::shared_ptr<tmp::Texture> floor_albedo_texture_;
-		static std::shared_ptr<tmp::Texture> floor_roughness_texture_;
-
-		static std::shared_ptr<Shader> shader_;
-
-		static glm::mat4 view_matrix_;
-
 		FloorRenderer() = default;
 		~FloorRenderer() = default;
-		static void Init(std::shared_ptr<Shader> s);
-		void Draw();
+		static void Init();
+		void Draw(std::shared_ptr<Shader> shader);
 		
 		void Start() override;
 

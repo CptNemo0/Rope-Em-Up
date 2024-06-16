@@ -94,7 +94,7 @@ void main()
 {
     mat4 translation_matrix = mat4(1.0);
     translation_matrix[3][0] = world_pos.x;
-    translation_matrix[3][1] = 0.0;
+    translation_matrix[3][1] = -0.3;
     translation_matrix[3][2] = world_pos.y;
     translation_matrix[3][3] = 1.0;
 

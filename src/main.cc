@@ -69,6 +69,7 @@
 #include "headers/Bloom.h"
 #include "headers/Minimap.h"
 #include "headers/components/FloorRenderer.h"
+#include "headers/FloorRendererManager.h"
 
 int main()
 {
@@ -344,7 +345,7 @@ int main()
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     Bloom bloom = Bloom(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
-
+    FloorRendererManager::Initialize(FloorShader);
 #pragma region Lights
     PointLight point_light{};
 
@@ -674,7 +675,6 @@ int main()
     SSAOShader->SetFloat("bias", 0.1);
     ssao_buffer.SetKernel(SSAOShader);
     
-    components::FloorRenderer::Init(FloorShader);
     FloorShader->Use();
     FloorShader->SetMatrix4("projection_matrix", projection_matrix);
 
@@ -712,7 +712,7 @@ int main()
     
     auto floor_height_texture = res::get_texture("res/models/enviroment/floor/floor_height.png");
     auto floor_normal_texture = res::get_texture("res/models/enviroment/floor/floor_normal.png");
-    auto floor_albedo_texture = res::get_texture("res/models/enviroment/floor/floor_albedo.png");
+    auto floor_albedo_texture = res::get_texture("res/models/enviroment/floor/floor_albedo_1.png");
     auto floor_roughness_texture = res::get_texture("res/models/enviroment/floor/floor_roughness.png");
    
     const float floor_tile_vertices_data[20]
@@ -925,7 +925,7 @@ int main()
         glViewport(0, 0, mode->width, mode->height);
 
         auto active_camera = Global::i_->active_camera_;
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
 
@@ -933,8 +933,7 @@ int main()
         BackgroundShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
-        components::FloorRenderer::view_matrix_ = active_camera->GetViewMatrix();
-
+       
         GrassShader->Use();
         GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         GrassShader->SetMatrix4("projection_matrix", projection_matrix);
@@ -950,8 +949,8 @@ int main()
         GBufferPassShader->SetInt("numBones", MAX_BONES);
 
         scene_root->PropagateUpdate();
-
-        FloorShader->Use();
+        FloorRendererManager::i_->Draw();
+        /*FloorShader->Use();
         FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         FloorShader->SetInt("height_map", 0);
@@ -973,29 +972,21 @@ int main()
         FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         FloorShader->SetMatrix4("projection_matrix", projection_matrix);
 
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
         for (int i = 0; i < room->width; i++)
         {
             for (int j = 0; j < room->height; j++)
             {
-                //s_ptr<GameObject> floor = GameObject::Create(room.floors);
-                //floor->transform_->set_position(glm::vec3(-8.0f - i * generation::kModuleSize, 0.0f, -8.0f - j * generation::kModuleSize));
-                //floor->AddComponent(make_shared<components::FloorRenderer>());
-
                 FloorShader->SetVec2("position", glm::vec2(-8.0f - i * generation::kModuleSize, -8.0f - j * generation::kModuleSize));
 
                 glBindVertexArray(floor_tile_vao);
                 glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
                 glBindVertexArray(0);
             }
-        }
+        }*/
 
-        /*FloorShader->SetVec2("position", glm::vec2(-8.0f, -8.0f));
-
-        glBindVertexArray(floor_tile_vao);
-        glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);*/
-
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         //////////////////////////////////
         // Bind buffer - Bind textures - Use Shader - Draw 
 
@@ -1510,6 +1501,7 @@ int main()
         glfwSwapBuffers(window);
     }
     
+    FloorRendererManager::Destroy();
     SpellCaster::Destroy();
     GrassRendererManager::Destroy();
     PlayerStatsManager::Destroy();

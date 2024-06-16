@@ -42,6 +42,7 @@
 #include "../GrassRendererManager.h"
 #include "../typedef.h"
 #include "../Texture.h"
+#include "../FloorRendererManager.h"
 
 namespace generation
 {
