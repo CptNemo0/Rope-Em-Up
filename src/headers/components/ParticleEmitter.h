@@ -56,6 +56,7 @@ public:
 
     s_ptr<tmp::Texture> texture_;
 
+    bool emit_particles_ = true;
     float emission_rate_ = 0.05f;
     glm::ivec2 spawns_per_emission_ = glm::ivec2(1, 1);
     float life_time_ = 1.0f;

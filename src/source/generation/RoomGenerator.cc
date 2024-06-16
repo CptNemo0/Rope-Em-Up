@@ -740,7 +740,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //down
@@ -760,7 +760,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //right
@@ -781,7 +781,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //left
@@ -803,7 +803,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         // generate lamps
@@ -959,7 +959,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //down
@@ -979,7 +979,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //right
@@ -1000,7 +1000,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //left
@@ -1022,7 +1022,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         // generate lamps
