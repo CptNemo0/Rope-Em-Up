@@ -16,6 +16,8 @@ private:
     static std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> component_factory;
 protected:
     Component() = default;
+    bool was_active_ = false;
+    bool halted_ = false;
 public:
     bool dirty_ = true;
     bool active_ = true;
@@ -24,6 +26,9 @@ public:
     virtual void Start() = 0;
     virtual void Update() = 0;
     virtual void Destroy() = 0;
+
+    void Halt();
+    void Continue();
 
     static s_ptr<Component> Deserialize(json &j, s_ptr<GameObject> go);
     virtual json Serialize() { return json(); }

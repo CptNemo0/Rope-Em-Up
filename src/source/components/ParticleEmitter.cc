@@ -41,13 +41,13 @@ void components::ParticleEmitter::Start()
     if (!burst_emitter_)
     {
         emission_timer_ = Timer::AddTimer(emission_rate_, [this]()
+        {
+            if (active_)
             {
-                if (active_)
-                {
-                    this->EmitParticles();
-                }
-            },
-            nullptr, true);
+                this->EmitParticles();
+            }
+        },
+        nullptr, true);
     }
 }
 
@@ -98,7 +98,7 @@ void components::ParticleEmitter::UpdateParticles(float delta_time)
 
 void components::ParticleEmitter::EmitParticles()
 {
-    if (active_)
+    if (active_ && emit_particles_)
     {
         int rand_amount = random::RandInt(spawns_per_emission_.x, spawns_per_emission_.y);
 

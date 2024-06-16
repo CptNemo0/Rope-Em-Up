@@ -109,6 +109,30 @@ void GameObject::Disable()
 	}
 }
 
+void GameObject::Halt()
+{
+	for (auto& component : components_)
+	{
+		component.second->Halt();
+	}
+	for (auto& child : transform_->children_)
+	{
+		child->game_object_->Halt();
+	}
+}
+
+void GameObject::Continue()
+{
+	for (auto& component : components_)
+	{
+		component.second->Continue();
+	}
+	for (auto& child : transform_->children_)
+	{
+		child->game_object_->Continue();
+	}
+}
+
 json GameObject::Serialize()
 {
     json j;
