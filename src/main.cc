@@ -70,7 +70,7 @@
 #include "headers/Minimap.h"
 #include "headers/components/FloorRenderer.h"
 #include "headers/FloorRendererManager.h"
-
+#include "headers/DifficultyManager.h"
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -275,7 +275,7 @@ int main()
     res::init_freetype();
     Global::Initialize();
     input::InputManager::Initialize(window);
-
+    DifficultyManager::Initialize();
 #pragma endregion Initialization
     
 #pragma region CamerasConfiguration
@@ -764,12 +764,12 @@ int main()
 
         if (!moving_through_room && no_enemies)
         {
-            rg_settings.width = random::RandInt(1, 3);
+            /*rg_settings.width = random::RandInt(1, 3);
             rg_settings.height = random::RandInt(1, 3);
             rg_settings.enemies = random::RandInt(1, 4);
             rg_settings.lamps = random::RandInt(1, 5);
             rg_settings.clutter = random::RandInt(1, 5);
-            rg_settings.barells = random::RandInt(1, 2);
+            rg_settings.barells = random::RandInt(1, 2);*/
 
             glm::ivec2 current_room_pos = room->position;
             glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
@@ -777,6 +777,8 @@ int main()
 
             if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
             {
+                DifficultyManager::i_->UpdateHealth(player_1, player_2);
+                DifficultyManager::i_->UpdateSettings(&rg_settings);
                 cout << "GOING THROUGH ROOM";
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
@@ -811,6 +813,9 @@ int main()
                 {
                     postprocessor.transition_vignette_current_time_ += delta_time;
                 }, false);
+
+
+                DifficultyManager::i_->UpdateRoom(room);
             }
         }
        
@@ -1418,6 +1423,7 @@ int main()
         glfwSwapBuffers(window);
     }
     
+    DifficultyManager::Destroy();
     FloorRendererManager::Destroy();
     SpellCaster::Destroy();
     GrassRendererManager::Destroy();
