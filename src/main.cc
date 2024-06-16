@@ -68,6 +68,7 @@
 #include "headers/Global.h"
 #include "headers/Bloom.h"
 #include "headers/Minimap.h"
+#include "headers/rendering/LightsManager.h"
 
 int main()
 {
@@ -642,9 +643,9 @@ int main()
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     LBufferPassShader->Use();
-    LBufferPassShader->SetInt("irradianceMap", 8);
-    LBufferPassShader->SetInt("prefilterMap", 9);
-    LBufferPassShader->SetInt("brdfLUT", 10);
+    LBufferPassShader->SetInt("irradianceMap", 5);
+    LBufferPassShader->SetInt("prefilterMap", 6);
+    LBufferPassShader->SetInt("brdfLUT", 7);
 
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
@@ -667,7 +668,7 @@ int main()
     SSAOShader->SetFloat("bias", 0.1);
     ssao_buffer.SetKernel(SSAOShader);
 
-    // cubemap->LoadHDRimg(window, *activeCamera);
+    //cubemap->LoadHDRimg(window, Global::i_->active_camera_);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     /*int scrWidth, scrHeight;
@@ -1106,7 +1107,7 @@ int main()
         
 
 #pragma endregion
-        /*
+        
 #pragma region ImGUI
         
         ImGui_ImplOpenGL3_NewFrame();
@@ -1411,7 +1412,7 @@ int main()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
         
         
-#pragma endregion */
+#pragma endregion 
         glfwSwapBuffers(window);
     }
     

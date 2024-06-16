@@ -55,5 +55,7 @@ enum SPELLS
 };
 
 #define MAX_BONES 132
+#define MAX_LIGHTS 16
+
 
 #endif // !TYPEDEF_H
