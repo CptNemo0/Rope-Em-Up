@@ -29,7 +29,7 @@ std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Comp
     },
     {   // EnemyAIComponent
         typeid(components::EnemyAIComponent).name(), 
-        [](json &j, s_ptr<GameObject> go) { return ai::EnemyAIManager::i_->CreateEnemyAI(go); } 
+        [](json &j, s_ptr<GameObject> go) { return ai::EnemyAIManager::i_->CreateEnemyAI(go, j); } 
     },
     {   // ExpDropComponent
         typeid(components::ExpDropComponent).name(), 

@@ -62,6 +62,18 @@ std::shared_ptr<components::EnemyAIComponent> ai::EnemyAIManager::CreateEnemyAI(
 	return enemy_ai_component;
 }
 
+s_ptr<components::EnemyAIComponent> ai::EnemyAIManager::CreateEnemyAI(s_ptr<GameObject> game_object, json &j)
+{
+	bool is_passive = j["is_passive"];
+
+    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
+	pbd::PBDManager::i_->CreateFGRRecord(game_object->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
+	auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(game_object, enemy_movement_generator_1, vehicle_template_);
+	auto enemy_ai_component = make_shared<components::EnemyAIComponent>(enemy_state_machine_1, is_passive);
+	enemy_ais_.push_back(enemy_ai_component);
+	return enemy_ai_component;
+}
+
 void ai::EnemyAIManager::UpdateEnemyStateMachine(s_ptr<EnemyStateMachine> machine)
 {
 	if (!players_set)
