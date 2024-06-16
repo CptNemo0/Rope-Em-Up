@@ -24,6 +24,8 @@ namespace components
 		void Update() override;
 		void Destroy() override;
 
+		void DropExp();
+
 		ExpDropComponent(json &j);
 		json Serialize() override;
 	};

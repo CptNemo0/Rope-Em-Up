@@ -26,7 +26,11 @@ void components::SpellSlotComponent::Update()
 
 void components::SpellSlotComponent::Destroy()
 {
-	cout << "Destoying SpellSlotComponent" << endl;
+}
+
+void components::SpellSlotComponent::DropSpell()
+{
+	cout << "Dropping spell" << endl;
 
 	drop::SpellDropArgs args; 
 	args.type_ = type_;

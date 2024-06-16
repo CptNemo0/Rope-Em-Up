@@ -25,6 +25,8 @@ namespace components
 
 		void Destroy() override;
 
+		void DropHp();
+
 		HpDropComponent(json &j);
 		json Serialize() override;
 	};

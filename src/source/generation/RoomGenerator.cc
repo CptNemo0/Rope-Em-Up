@@ -177,6 +177,7 @@ generation::RoomLayoutGenerator::RoomLayoutGenerator(json &j, std::shared_ptr<Ga
         glm::ivec2 position = {j_room["position"][0], j_room["position"][1]};
         rooms.insert(std::make_pair(position, Room(j_room, root)));
     }
+    this->built_rooms_ = j["built_rooms"];
 }
 
 json generation::RoomLayoutGenerator::Serialize()
@@ -186,6 +187,7 @@ json generation::RoomLayoutGenerator::Serialize()
     for (auto &[position, room] : rooms)
     {
         j["rooms"].push_back(room.Serialize());
+        j["built_rooms"] = this->built_rooms_;
     }
 
     return j;

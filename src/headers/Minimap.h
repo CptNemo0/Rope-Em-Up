@@ -13,7 +13,6 @@
 class Minimap
 {
 private:
-    void Rebuild(generation::RoomLayoutGenerator& rlg);
     void ColorRoom(generation::Room &room, generation::Room &current_room, s_ptr<components::HUDRenderer> hud_renderer);
 
     s_ptr<tmp::Texture> finished_texture_;
@@ -32,6 +31,7 @@ public:
     s_ptr<GameObject> current_room_object;
 
     void Update(generation::RoomLayoutGenerator& rlg, generation::Room *current_room);
+    void Rebuild(generation::RoomLayoutGenerator& rlg);
 };
 
 #endif // MINIMAP_H

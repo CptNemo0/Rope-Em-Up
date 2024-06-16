@@ -71,6 +71,8 @@
 #include "headers/components/FloorRenderer.h"
 #include "headers/FloorRendererManager.h"
 #include "headers/DifficultyManager.h"
+#include "headers/SceneManager.h"
+
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -276,6 +278,8 @@ int main()
     Global::Initialize();
     input::InputManager::Initialize(window);
     DifficultyManager::Initialize();
+    SceneManager::Initialize();
+
 #pragma endregion Initialization
     
 #pragma region CamerasConfiguration
@@ -777,8 +781,8 @@ int main()
 
             if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
             {
-                DifficultyManager::i_->UpdateHealth(player_1, player_2);
-                DifficultyManager::i_->UpdateSettings(&rg_settings);
+                // DifficultyManager::i_->UpdateHealth(player_1, player_2);
+                // DifficultyManager::i_->UpdateSettings(&rg_settings);
                 cout << "GOING THROUGH ROOM";
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
@@ -815,7 +819,7 @@ int main()
                 }, false);
 
 
-                DifficultyManager::i_->UpdateRoom(room);
+                // DifficultyManager::i_->UpdateRoom(room);
             }
         }
        
@@ -1399,6 +1403,8 @@ int main()
             room = &rlg.rooms[current_room];
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
+            rg_settings.generated_rooms = rlg.built_rooms_;
+            minimap.Rebuild(rlg);
 
             rope.Deserialize(j["rope"]);
             player_1->Destroy();
@@ -1437,6 +1443,7 @@ int main()
     pbd::PBDManager::Destroy();
     collisions::CollisionManager::Destroy();
     input::InputManager::Destroy();
+    SceneManager::Destroy();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

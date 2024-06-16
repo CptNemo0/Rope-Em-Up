@@ -31,6 +31,7 @@ public:
     void Continue();
 
     static s_ptr<Component> Deserialize(json &j, s_ptr<GameObject> go);
+    static json Serialize(s_ptr<Component> comp);
     virtual json Serialize() { return json(); }
 };
 

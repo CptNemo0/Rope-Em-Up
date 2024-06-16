@@ -39,6 +39,8 @@ namespace components
 		void Update() override;
 		void Destroy() override;
 
+		void DropSpell();
+
 		SpellSlotComponent(json &j);
 		json Serialize() override;
 	};

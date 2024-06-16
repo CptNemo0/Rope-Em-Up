@@ -1,5 +1,9 @@
 #include "../headers/HealthManager.h"
 
+#include "../headers/components/ExpDropComponent.h"
+#include "../headers/components/HpDropComponent.h"
+#include "../headers/components/SpellSlotComponent.h"
+
 HealthManager* HealthManager::i_ = nullptr;
 
 
@@ -58,6 +62,7 @@ void HealthManager::DeathUpdate()
 				where_ = h->gameObject_.lock()->transform_->get_position();
 				what_ = h->type_;
 
+				ManageDeath(h->gameObject_.lock());
 				h->gameObject_.lock()->Destroy();
 			}
 		}
@@ -65,3 +70,16 @@ void HealthManager::DeathUpdate()
 	}
 }
 
+void HealthManager::ManageDeath(s_ptr<GameObject> go)
+{
+	auto hp_comp = go->GetComponent<components::HpDropComponent>();
+	auto exp_comp = go->GetComponent<components::ExpDropComponent>();
+	auto spell_comp = go->GetComponent<components::SpellSlotComponent>();
+
+	if (hp_comp)
+		hp_comp->DropHp();
+	if (exp_comp)
+		exp_comp->DropExp();
+	if (spell_comp)
+		spell_comp->DropSpell();
+}

@@ -76,6 +76,7 @@ void generation::Room::Destroy()
     gates = nullptr;
     floors = nullptr;
     drops = nullptr;
+    barells = nullptr;
 }
 
 generation::Room::Room(json j, s_ptr<GameObject> root)
