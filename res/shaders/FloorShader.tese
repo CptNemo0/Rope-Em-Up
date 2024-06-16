@@ -1,7 +1,7 @@
 // tessellation evaluation shader
 #version 460 core
 
-layout (quads, fractional_odd_spacing, cw) in;
+layout (quads, equal_spacing, cw) in;
 
 in vec2 uv_te[];
 

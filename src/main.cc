@@ -922,11 +922,11 @@ int main()
 #pragma endregion
 
 #pragma region GO Update and Draw
-
+       
         glViewport(0, 0, mode->width, mode->height);
 
         auto active_camera = Global::i_->active_camera_;
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
 
@@ -996,7 +996,7 @@ int main()
         glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);*/
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         //////////////////////////////////
         // Bind buffer - Bind textures - Use Shader - Draw 
 
