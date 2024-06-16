@@ -706,54 +706,6 @@ int main()
         minimap.Update(rlg, room);
     }, nullptr, true);
 
-    ////////////////////////////////////
-    ////////////////////////////////////
-    ////////////////////////////////////
-    
-    auto floor_height_texture = res::get_texture("res/models/enviroment/floor/floor_height.png");
-    auto floor_normal_texture = res::get_texture("res/models/enviroment/floor/floor_normal.png");
-    auto floor_albedo_texture = res::get_texture("res/models/enviroment/floor/floor_albedo_1.png");
-    auto floor_roughness_texture = res::get_texture("res/models/enviroment/floor/floor_roughness.png");
-   
-    const float floor_tile_vertices_data[20]
-    {
-        -1.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-         1.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-         1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
-        -1.0f, 0.0f,  1.0f, 0.0f, 0.0f
-    };
-
-    const unsigned int floor_tile_indices_data[4]{ 0, 1, 3, 2 };
-
-    static unsigned int floor_tile_vao;
-    static unsigned int floor_tile_vbo;
-    static unsigned int floor_tile_ebo;
-    {
-        glGenVertexArrays(1, &floor_tile_vao);
-        glGenBuffers(1, &floor_tile_vbo);
-        glGenBuffers(1, &floor_tile_ebo);
-
-        glBindVertexArray(floor_tile_vao);
-
-        glBindBuffer(GL_ARRAY_BUFFER, floor_tile_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(floor_tile_vertices_data), &floor_tile_vertices_data, GL_STATIC_DRAW);
-        
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floor_tile_ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(floor_tile_indices_data), &floor_tile_indices_data, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 *sizeof(float)));
-        glBindVertexArray(0);
-        
-
-    }
-
-    ////////////////////////////////////
-    ////////////////////////////////////
-    ////////////////////////////////////
-
     /////////////////////////////////////////////
     /////////////////////////////////////////////
     // GAME LOOP GAME LOOP GAME LOOP GAME LOOP //
@@ -942,6 +894,8 @@ int main()
         GrassShader->SetVec3("pp2", player_2->transform_->get_position());
         GrassRendererManager::i_->Draw(GrassShader->get_id());
 
+        FloorRendererManager::i_->Draw();
+
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
@@ -949,44 +903,7 @@ int main()
         GBufferPassShader->SetInt("numBones", MAX_BONES);
 
         scene_root->PropagateUpdate();
-        FloorRendererManager::i_->Draw();
-        /*FloorShader->Use();
-        FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
-        FloorShader->SetInt("height_map", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, floor_height_texture->id_);
-
-        FloorShader->SetInt("albedo_map", 1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, floor_albedo_texture->id_);
-
-        FloorShader->SetInt("normal_map", 2);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, floor_normal_texture->id_);
-
-        FloorShader->SetInt("roughness_map", 3);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, floor_roughness_texture->id_);
-
-        FloorShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
-        FloorShader->SetMatrix4("projection_matrix", projection_matrix);
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        for (int i = 0; i < room->width; i++)
-        {
-            for (int j = 0; j < room->height; j++)
-            {
-                FloorShader->SetVec2("position", glm::vec2(-8.0f - i * generation::kModuleSize, -8.0f - j * generation::kModuleSize));
-
-                glBindVertexArray(floor_tile_vao);
-                glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, 0);
-                glBindVertexArray(0);
-            }
-        }*/
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         //////////////////////////////////
         // Bind buffer - Bind textures - Use Shader - Draw 
 
