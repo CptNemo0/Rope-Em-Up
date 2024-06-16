@@ -79,6 +79,25 @@ std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Comp
     }
 };
 
+void Component::Halt()
+{
+    if (!halted_)
+    {
+        was_active_ = active_;
+        active_ = false;
+        halted_ = true;
+    }
+}
+
+void Component::Continue()
+{
+    if (halted_)
+    {
+        active_ = was_active_;
+        halted_ = false;
+    }
+}
+
 s_ptr<Component> Component::Deserialize(json &j, s_ptr<GameObject> go)
 {
     if (component_factory.contains(j["type"]))

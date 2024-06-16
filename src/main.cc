@@ -806,9 +806,8 @@ int main()
         {
             for (auto& gate : room->gates->transform_->children_)
             {
-                gate->game_object_->GetComponent<components::ParticleEmitter>()->active_ = true;
+                gate->game_object_->GetComponent<components::ParticleEmitter>()->emit_particles_ = true;
             }
-            
         }
 
         if (!moving_through_room && no_enemies)
@@ -1351,17 +1350,18 @@ int main()
             rope.RemoveSegment();   
         }
         ImGui::End();
-        ImGui::Begin("Disable test");
-        static bool cb = true;
-        if (ImGui::Checkbox("Enabled", &cb))
+
+        ImGui::Begin("Halt test");
+        static bool cb = false;
+        if (ImGui::Checkbox("Halted", &cb))
         {
             if (cb)
             {
-                player_1->Enable();
+                scene_root->Halt();
             }
             else
             {
-                player_1->Disable();
+                scene_root->Continue();
             }
         }
         ImGui::End();
