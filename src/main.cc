@@ -781,8 +781,8 @@ int main()
 
             if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
             {
-                // DifficultyManager::i_->UpdateHealth(player_1, player_2);
-                // DifficultyManager::i_->UpdateSettings(&rg_settings);
+                DifficultyManager::i_->UpdateHealth(player_1, player_2);
+                DifficultyManager::i_->UpdateSettings(&rg_settings);
                 cout << "GOING THROUGH ROOM";
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
@@ -819,7 +819,7 @@ int main()
                 }, false);
 
 
-                // DifficultyManager::i_->UpdateRoom(room);
+                DifficultyManager::i_->UpdateRoom(room);
             }
         }
        
