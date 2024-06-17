@@ -584,8 +584,8 @@ int main()
     auto isometricCameraComponent = isometricCamera->GetComponent<components::CameraComponent>();
     auto topDownCameraComponent = topDownCamera->GetComponent<components::CameraComponent>();
     auto DebugCameraComponent = DebugCamera->GetComponent<components::CameraComponent>();
-#pragma endregion Camera
 
+#pragma endregion Camera
 
     auto game_HUD_root = GameObject::Create();
 
