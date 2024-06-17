@@ -1,15 +1,16 @@
 #include "./headers/rendering/LightsManager.h"
 
+
 void LightsManager::RenderFromLightPov(int lightID)
 {
 	DepthShader_->Use();
-	DepthShader_->SetMatrix4("lightSpaceMatrix", lightSpaceMatrix);
+	DepthShader_->SetMatrix4("lightSpaceMatrix", lightSpaceMatrix[lightID]);
+
 
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[lightID]);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 }
 
 void LightsManager::InitCubeShadowMap(int lightID)
@@ -61,23 +62,29 @@ void LightsManager::Initialize()
 	}
 }
 
-void LightsManager::BindCubeShadowMap(s_ptr<Shader> shader)
+void LightsManager::DepthToTexture(glm::vec3 lightPos, int lightID, bool isPointlight)
 {
-	for (unsigned int i = 0; i < MAX_LIGHTS; i++)
+	if (!isPointlight)
 	{
-		glActiveTexture(GL_TEXTURE10 + i);
-		glBindTexture(GL_TEXTURE_2D, cubeShadowMap[i]);
-		shader->SetInt("cube_shadow_maps[" + std::to_string(i) + "]", 10 + i);
+		lightID += MAX_LIGHTS;
 	}
+
+	lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	lightSpaceMatrix[lightID] = lightProjection * lightView;
 }
 
-void LightsManager::BindPlaneShadowMap(s_ptr<Shader> shader)
+void LightsManager::BindCubeShadowMap(s_ptr<Shader> shader, int lightID)
 {
-	for (unsigned int i = 0; i < MAX_LIGHTS; i++)
-	{
-		glActiveTexture(GL_TEXTURE16 + i);
-		glBindTexture(GL_TEXTURE_2D, planeShadowMap[i]);
-		shader->SetInt("plane_shadow_maps[" + std::to_string(i) + "]", 16 + i);
-	}
+
+		glActiveTexture(GL_TEXTURE10 + lightID);
+		glBindTexture(GL_TEXTURE_2D, cubeShadowMap[lightID]);
+		shader->SetInt("cube_shadow_maps[" + std::to_string(lightID) + "]", 10 + lightID);
+}
+
+void LightsManager::BindPlaneShadowMap(s_ptr<Shader> shader, int lightID)
+{
+		glActiveTexture(GL_TEXTURE16 + lightID);
+		glBindTexture(GL_TEXTURE_2D, planeShadowMap[lightID]);
+		shader->SetInt("plane_shadow_maps[" + std::to_string(lightID) + "]", 16 + lightID);
 }
 

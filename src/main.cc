@@ -367,6 +367,12 @@ int main()
 	spot_light.color = spot_light_color;
 	spot_light.intensity = spot_light_intensity;
 
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        LightsManager::i_->InitCubeShadowMap(i);
+		LightsManager::i_->InitPlaneShadowMap(i);
+    }
+
 #pragma endregion Lights
 
 #pragma region Models.
@@ -948,6 +954,8 @@ int main()
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.00f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
+			LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z), i, true);
+            LightsManager::i_->BindCubeShadowMap(LBufferPassShader, i);
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
@@ -964,7 +972,21 @@ int main()
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
         LBufferPassShader->SetBool("slowed_time", postprocessor.slowed_time);
-        
+
+		
+		LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 0);
+        LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 1);
+        LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[0].x, lamp_h, room->lamp_positions[0].z), 0);
+		LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[1].x, lamp_h, room->lamp_positions[1].z), 1);
+		for (int i = 0; i < room->lamp_positions.size(); i++)
+		{
+			LightsManager::i_->RenderFromLightPov(i);
+		}
+        LightsManager::i_->RenderFromLightPov(16);
+        LightsManager::i_->RenderFromLightPov(16 + 1);
+
+
+
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
         

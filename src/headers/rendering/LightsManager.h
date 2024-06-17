@@ -19,9 +19,11 @@ public:
 	float near_plane = 1.0f, far_plane = 7.5f;
 
 
-	glm::mat4 lightProjection;
+	glm::mat4 lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane);
+	//lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+
 	glm::mat4 lightView;
-	glm::mat4 lightSpaceMatrix;
+	glm::mat4 lightSpaceMatrix[2*MAX_LIGHTS];
 
 	LightsManager(s_ptr<Shader> shader);
 	LightsManager() = default;
@@ -32,10 +34,10 @@ public:
 	void InitPlaneShadowMap(int lightID);
 	void Initialize();
 
-	void DepthToTexture(glm::vec3 lightPos, int lightID);
+	void DepthToTexture(glm::vec3 lightPos, int lightID, bool isPointlight = false);
 
-	void BindCubeShadowMap(s_ptr<Shader> shader);
-	void BindPlaneShadowMap(s_ptr<Shader> shader);
+	void BindCubeShadowMap(s_ptr<Shader> shader, int lightID);
+	void BindPlaneShadowMap(s_ptr<Shader> shader, int lightID);
 	
 
 	
