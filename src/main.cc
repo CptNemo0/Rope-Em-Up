@@ -120,6 +120,9 @@ int main()
 
     const string kBasicDefferedLightShaderPath = "res/shaders/BasicDefferedLight.frag";
 
+	const string kShadowDepthVertexShaderPath = "res/shaders/ShadowDepth.vert";
+	const string kShadowDepthFragmentShaderPath = "res/shaders/ShadowDepth.frag";
+
     const string kSSAOVertexShaderPath = "res/shaders/SSAO.vert";
     const string kSSAOFragmentShaderPath = "res/shaders/SSAO.frag";
 
@@ -338,7 +341,10 @@ int main()
     auto BloomBlurHorizontalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurHorizontalShaderPath);
     auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
     auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorTCShaderPath, kFloorTEShaderPath, kFloorFragmentShaderPath);
+	auto ShadowDepthShader = res::get_shader(kShadowDepthVertexShaderPath, kShadowDepthFragmentShaderPath);
+
 #pragma endregion Shaders
+    LightsManager::Initialize(ShadowDepthShader, LBufferPassShader);
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
     auto HUD_texture = res::get_texture(kHUDTexturePath);
@@ -1011,8 +1017,8 @@ int main()
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.00f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
-			LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z), i, true);
-            LightsManager::i_->BindCubeShadowMap(LBufferPassShader, i);
+			//LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z), i, true);
+            //LightsManager::i_->BindCubeShadowMap(LBufferPassShader, i);
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
@@ -1031,7 +1037,7 @@ int main()
         LBufferPassShader->SetBool("slowed_time", postprocessor.slowed_time);
 
 		
-		LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 0);
+		/*LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 0);
         LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 1);
         LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[0].x, lamp_h, room->lamp_positions[0].z), 0);
 		LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[1].x, lamp_h, room->lamp_positions[1].z), 1);
@@ -1040,7 +1046,7 @@ int main()
 			LightsManager::i_->RenderFromLightPov(i);
 		}
         LightsManager::i_->RenderFromLightPov(16);
-        LightsManager::i_->RenderFromLightPov(16 + 1);
+        LightsManager::i_->RenderFromLightPov(16 + 1);*/
 
 
 

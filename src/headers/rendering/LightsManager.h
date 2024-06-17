@@ -14,8 +14,8 @@ public:
 	unsigned int depthMapFBO[MAX_LIGHTS*2];
 	unsigned int planeShadowMap[MAX_LIGHTS];
 	unsigned int cubeShadowMap[MAX_LIGHTS];
-	s_ptr<Shader> DepthShader_;
-	s_ptr<Shader> LightShader_;
+	s_ptr<Shader> depth_shader_;
+	s_ptr<Shader> light_shader_;
 	float near_plane = 1.0f, far_plane = 7.5f;
 
 
@@ -25,14 +25,15 @@ public:
 	glm::mat4 lightView;
 	glm::mat4 lightSpaceMatrix[2*MAX_LIGHTS];
 
-	LightsManager(s_ptr<Shader> shader);
-	LightsManager() = default;
+	LightsManager(s_ptr<Shader> depthShader, s_ptr<Shader> lightShader);
+	~LightsManager() = default;
+	static void Initialize(s_ptr<Shader> depthShader, s_ptr<Shader> lightShader);
 	
 	void RenderFromLightPov(int lightID);
 
 	void InitCubeShadowMap(int lightID);
 	void InitPlaneShadowMap(int lightID);
-	void Initialize();
+	void InitShadowMaps();
 
 	void DepthToTexture(glm::vec3 lightPos, int lightID, bool isPointlight = false);
 

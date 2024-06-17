@@ -1,10 +1,26 @@
 #include "./headers/rendering/LightsManager.h"
 
+LightsManager* LightsManager::i_ = nullptr;
+
+LightsManager::LightsManager(s_ptr<Shader> depthShader, s_ptr<Shader> lightShader)
+{
+	depth_shader_ = depthShader;
+	light_shader_ = lightShader;
+
+}
+
+void LightsManager::Initialize(s_ptr<Shader> depthShader, s_ptr<Shader> lightShader)
+{
+	if (i_ == nullptr)
+	{
+		i_ = new LightsManager(depthShader, lightShader);
+	}
+}
 
 void LightsManager::RenderFromLightPov(int lightID)
 {
-	DepthShader_->Use();
-	DepthShader_->SetMatrix4("lightSpaceMatrix", lightSpaceMatrix[lightID]);
+	depth_shader_->Use();
+	depth_shader_->SetMatrix4("lightSpaceMatrix", lightSpaceMatrix[lightID]);
 
 
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -53,7 +69,7 @@ void LightsManager::InitPlaneShadowMap(int lightID)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void LightsManager::Initialize()
+void LightsManager::InitShadowMaps()
 {
 	for (unsigned int i = 0; i < MAX_LIGHTS; i++)
 	{
