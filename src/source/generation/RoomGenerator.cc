@@ -614,7 +614,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 
                 for (int i = 0; i < ceil; i++)
                 {
-                    room.barells_positions.push_back(enemies_positions[(i + enemies_positons_size - 1) % enemies_positions.size()]);
+                    room.barells_positions.push_back(enemies_positions[(i + rgs->enemies - 1) % enemies_positions.size()]);
                     room.barell_idx.push_back(random::RandInt(0, -1 + rm->barrles.size()));
                 }
             }   

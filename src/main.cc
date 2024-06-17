@@ -810,13 +810,6 @@ int main()
 
         if (!moving_through_room && no_enemies)
         {
-            /*rg_settings.width = random::RandInt(1, 3);
-            rg_settings.height = random::RandInt(1, 3);
-            rg_settings.enemies = random::RandInt(1, 4);
-            rg_settings.lamps = random::RandInt(1, 5);
-            rg_settings.clutter = random::RandInt(1, 5);
-            rg_settings.barells = random::RandInt(1, 2);*/
-
             glm::ivec2 current_room_pos = room->position;
             glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
             glm::ivec2 next_room_pos = current_room_pos + move_direction;
@@ -1238,34 +1231,6 @@ int main()
         }
 
         ImGui::Checkbox("Bloom", &lbuffer.bloom_);
-        ImGui::ColorEdit3("Bloom Color", (float*)&lbuffer.bloom_color_);
-        ImGui::SliderFloat("Bloom Threshold", &lbuffer.bloom_threshold_, 0.0f, 1.0f, "%0.2f");
-
-        ImGui::End();
-
-        ImGui::Begin("Sound");
-        if (ImGui::Button("Play bruh.wav"))
-        {
-            audio::AudioManager::i_->PlaySound(res::get_sound(kBruhPath));
-        }
-        ImGui::End();
-
-        ImGui::Begin("Rope Manager");
-        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 0.999f, "%0.3f");
-        ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
-        if (ImGui::Button("Apply"))
-        {
-            rope.ApplyMass();
-            rope.ApplyDrag();
-        }
-        if (ImGui::Button("Add Segment"))
-        {
-            rope.AddSegment(game_scene_root);
-        }
-        if (ImGui::Button("Remove Segment"))
-        {
-            rope.RemoveSegment();   
-        }
         ImGui::End();
 
         ImGui::Begin("Halt test");
