@@ -62,6 +62,7 @@ public:
     void set_rotation(const glm::vec3& rotation);
     void set_scale(const glm::vec3& scale);
     void scale_in(const glm::vec3& direction, float amount);
+    void scale(const glm::vec3& scale);
 
     void add_position(const glm::vec3& translation);
     void add_rotation(const glm::vec3& rotation);

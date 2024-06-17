@@ -68,6 +68,11 @@
 #include "headers/Global.h"
 #include "headers/Bloom.h"
 #include "headers/Minimap.h"
+#include "headers/components/FloorRenderer.h"
+#include "headers/FloorRendererManager.h"
+#include "headers/DifficultyManager.h"
+#include "headers/SceneManager.h"
+#include "headers/Menu.h"
 #include "headers/rendering/LightsManager.h"
 
 int main()
@@ -130,6 +135,11 @@ int main()
     const string kBloomBlurVerticalShaderPath = "res/shaders/BloomBlurVertical.frag";
     
     const string kHudBarShaderPath = "res/shaders/HUDBarShader.frag";
+
+    const string kFloorVertexShaderPath = "res/shaders/FloorShader.vert";
+    const string kFloorTCShaderPath = "res/shaders/FloorShader.tesc";
+    const string kFloorTEShaderPath = "res/shaders/FloorShader.tese";
+    const string kFloorFragmentShaderPath = "res/shaders/FloorShader.frag";
 
     const string kGreenTexturePath = "res/textures/green_texture.png";
     const string kRedTexturePath = "res/textures/red_texture.png";
@@ -236,7 +246,7 @@ int main()
         exit(return_value);
     }
     cout << "GLAD Initialized.\n";
-
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
     utility::InitImGUI(window);
 
     collisions::CollisionManager::Initialize();
@@ -269,6 +279,8 @@ int main()
     res::init_freetype();
     Global::Initialize();
     input::InputManager::Initialize(window);
+    DifficultyManager::Initialize();
+    SceneManager::Initialize();
 
 #pragma endregion Initialization
     
@@ -325,6 +337,7 @@ int main()
     auto BloomBlurVerticalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurVerticalShaderPath);
     auto BloomBlurHorizontalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurHorizontalShaderPath);
     auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
+    auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorTCShaderPath, kFloorTEShaderPath, kFloorFragmentShaderPath);
 #pragma endregion Shaders
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -338,7 +351,7 @@ int main()
     SSAOBlurBuffer ssao_blur_buffer = SSAOBlurBuffer(mode->height, mode->width);
     Bloom bloom = Bloom(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
-
+    FloorRendererManager::Initialize(FloorShader);
 #pragma region Lights
     PointLight point_light{};
 
@@ -455,8 +468,8 @@ int main()
     
 #pragma endregion Models
     
-    auto scene_root = GameObject::Create();
-    auto room_root = GameObject::Create(scene_root);
+    auto game_scene_root = GameObject::Create();
+    auto room_root = GameObject::Create(game_scene_root);
 
     generation::RoomLayoutGenerator rlg;
     std::deque<w_ptr<GameObject>> room_objects;
@@ -466,22 +479,13 @@ int main()
     rlg.GenerateRooms(rlgs, room_root);
     rlg.GenerateGates();
 
-    for (auto& room : rlg.rooms)
-    {
-        auto room_obj = GameObject::Create(scene_root);
-        room_objects.push_back(room_obj);
-        room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-        room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
-        room_obj->transform_->set_scale(glm::vec3(3.0f));
-    }
-
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     generation::GenerateRoom(*room, &rg_settings, &models);
     generation::BuildRoom(*room, &models, GBufferPassShader, &rlg, trail_texture, ParticleShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);
 
-    auto player_1 = GameObject::Create(scene_root);
+    auto player_1 = GameObject::Create(game_scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_1->transform_->set_scale(glm::vec3(0.01f));
     player_1->AddComponent(make_shared<components::MeshRenderer>(F_player_model, GBufferPassShader));
@@ -500,7 +504,7 @@ int main()
     emmiter_player_1->start_size_ = glm::vec2(0.5f, 1.0f);
     emmiter_player_1->end_size_ = glm::vec2(1.0f, 1.25f);
 
-    auto player_2 = GameObject::Create(scene_root);
+    auto player_2 = GameObject::Create(game_scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->transform_->set_scale(glm::vec3(0.01f));
     player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
@@ -547,7 +551,7 @@ int main()
         player_2->transform_->get_position(),
         0.125f,
         0.97f,
-        scene_root,
+        game_scene_root,
         test_ball_model,
         GBufferPassShader
     );
@@ -557,7 +561,7 @@ int main()
 
     for (int i = 0; i < 20; i++)
     {
-        rope.AddSegment(scene_root);
+        rope.AddSegment(game_scene_root);
     }
 
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
@@ -587,24 +591,24 @@ int main()
     auto isometricCameraComponent = isometricCamera->GetComponent<components::CameraComponent>();
     auto topDownCameraComponent = topDownCamera->GetComponent<components::CameraComponent>();
     auto DebugCameraComponent = DebugCamera->GetComponent<components::CameraComponent>();
+
 #pragma endregion Camera
 
+    auto game_HUD_root = GameObject::Create();
 
-    auto HUD_root = GameObject::Create();
-
-    auto HUD_object = GameObject::Create(HUD_root);
+    auto HUD_object = GameObject::Create(game_HUD_root);
     HUD_object->AddComponent(make_shared<components::HUDRenderer>(HUD_texture, HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 0.1f)));
     HUD_object->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
     HUD_object->transform_->set_position(glm::vec3(-0.75f, -0.75f, 0.0f));
 
-    auto HUD_object2 = GameObject::Create(HUD_root);
+    auto HUD_object2 = GameObject::Create(game_HUD_root);
     HUD_object2->AddComponent(make_shared<components::HUDRenderer>(HUD_texture2, HUDshader));
     HUD_object2->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
     HUD_object2->transform_->set_position(glm::vec3(0.75f, -0.75f, 0.0f));
     HUD_object2->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
 
 
-    auto minimap_object = GameObject::Create(HUD_root);
+    auto minimap_object = GameObject::Create(game_HUD_root);
     minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/color.png"), HUDshader, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f)));
     minimap_object->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.4f);
     minimap_object->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
@@ -635,11 +639,11 @@ int main()
     player_2_hp_bar->transform_->set_rotation({ 0.0f, 0.0, 180.0f });
     player_2_hp_bar->transform_->set_position({ 0.0f, 0.0f, 0.0 });
 
-    auto HUDText_root = GameObject::Create();
+    auto game_HUD_text_root = GameObject::Create();
 
     auto maturasc_font = res::get_font(kFontPath);
 
-    auto HUDText_object = GameObject::Create(HUDText_root);
+    auto HUDText_object = GameObject::Create(game_HUD_text_root);
     HUDText_object->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "TEST", glm::vec3(1.0f)));
     HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
@@ -673,6 +677,9 @@ int main()
     SSAOShader->SetFloat("radius", 0.4);
     SSAOShader->SetFloat("bias", 0.1);
     ssao_buffer.SetKernel(SSAOShader);
+    
+    FloorShader->Use();
+    FloorShader->SetMatrix4("projection_matrix", projection_matrix);
 
     //cubemap->LoadHDRimg(window, Global::i_->active_camera_);
 
@@ -702,6 +709,55 @@ int main()
         minimap.Update(rlg, room);
     }, nullptr, true);
 
+#pragma region Scenes
+
+    // Main game scene
+
+    auto game_scene = make_shared<Scene>();
+    game_scene->scene_root_ = game_scene_root;
+    game_scene->HUD_root_ = game_HUD_root;
+    game_scene->HUD_text_root_ = game_HUD_text_root;
+
+    SceneManager::i_->AddScene("game", game_scene);
+
+    // Menu scene
+
+    auto menu_HUD_root = GameObject::Create();
+
+    auto menu = make_shared<Menu>();
+    input::InputManager::i_->AddObserver(0, menu);
+
+    auto button1 = GameObject::Create(menu_HUD_root);
+    button1->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    button1->transform_->scale_in({0.0f, -1.0f, 0.0f}, 0.5f);
+    button1->transform_->scale({0.5f, 1.0f, 1.0f});
+    button1->transform_->scale(glm::vec3(0.8f));
+    button1->AddComponent(make_shared<components::HUDRenderer>(HUD_texture, HUDshader));
+    menu->layout_[{0, 0}] = make_shared<MenuItem>(button1, []()
+    {
+        SceneManager::i_->SwitchScene("game");
+    });
+
+    auto button2 = GameObject::Create(menu_HUD_root);
+    button2->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    button2->transform_->scale_in({0.0f, 1.0f, 0.0f}, 0.5f);
+    button2->transform_->scale({0.5f, 1.0f, 1.0f});
+    button2->transform_->scale(glm::vec3(0.8f));
+    button2->AddComponent(make_shared<components::HUDRenderer>(HUD_texture2, HUDshader));
+    menu->layout_[{0, 1}] = make_shared<MenuItem>(button2, [&button2]()
+    {
+        button2->transform_->add_rotation(glm::vec3(0.0f, 0.0f, 10.0f));
+    });
+
+    menu->UpdateSelection();
+    auto menu_scene = make_shared<Scene>();
+    menu_scene->HUD_root_ = menu_HUD_root;
+
+    SceneManager::i_->AddScene("menu", menu_scene);
+
+    SceneManager::i_->SwitchScene("menu");
+
+#pragma endregion
 
     /////////////////////////////////////////////
     /////////////////////////////////////////////
@@ -714,6 +770,7 @@ int main()
     float fps = 0;
     string debug_info;
     bool use_ssao = true;
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -754,26 +811,20 @@ int main()
         {
             for (auto& gate : room->gates->transform_->children_)
             {
-                gate->game_object_->GetComponent<components::ParticleEmitter>()->active_ = true;
+                gate->game_object_->GetComponent<components::ParticleEmitter>()->emit_particles_ = true;
             }
-            
         }
 
         if (!moving_through_room && no_enemies)
         {
-            rg_settings.width = random::RandInt(1, 3);
-            rg_settings.height = random::RandInt(1, 3);
-            rg_settings.enemies = random::RandInt(1, 4);
-            rg_settings.lamps = random::RandInt(1, 5);
-            rg_settings.clutter = random::RandInt(1, 5);
-            rg_settings.barells = random::RandInt(1, 5);
-
             glm::ivec2 current_room_pos = room->position;
             glm::ivec2 move_direction = generation::GetMoveDirection(room, player_1, player_2);
             glm::ivec2 next_room_pos = current_room_pos + move_direction;
 
             if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
             {
+                DifficultyManager::i_->UpdateHealth(player_1, player_2);
+                DifficultyManager::i_->UpdateSettings(&rg_settings);
                 cout << "GOING THROUGH ROOM";
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
@@ -808,6 +859,9 @@ int main()
                 {
                     postprocessor.transition_vignette_current_time_ += delta_time;
                 }, false);
+
+
+                DifficultyManager::i_->UpdateRoom(room);
             }
         }
        
@@ -870,11 +924,11 @@ int main()
 #pragma endregion
 
 #pragma region GO Update and Draw
-
+       
         glViewport(0, 0, mode->width, mode->height);
 
         auto active_camera = Global::i_->active_camera_;
-
+        
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
 
@@ -882,7 +936,7 @@ int main()
         BackgroundShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         cubemap->BindEnvCubemap(BackgroundShader);
         cubemap->RenderCube();
-
+       
         GrassShader->Use();
         GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         GrassShader->SetMatrix4("projection_matrix", projection_matrix);
@@ -891,13 +945,16 @@ int main()
         GrassShader->SetVec3("pp2", player_2->transform_->get_position());
         GrassRendererManager::i_->Draw(GrassShader->get_id());
 
+        FloorRendererManager::i_->Draw();
+
         GBufferPassShader->Use();
         GBufferPassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         GBufferPassShader->SetMatrix4("projection_matrix", projection_matrix);
         GBufferPassShader->SetInt("numBones", MAX_BONES);
 
-        scene_root->PropagateUpdate();
+        if (SceneManager::i_->current_scene_->scene_root_)
+            SceneManager::i_->current_scene_->scene_root_->PropagateUpdate();
 
         //////////////////////////////////
         // Bind buffer - Bind textures - Use Shader - Draw 
@@ -1051,10 +1108,15 @@ int main()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         HUDshader->Use();
-        HUD_root->PropagateUpdate();
+        if (SceneManager::i_->current_scene_->HUD_root_)
+            SceneManager::i_->current_scene_->HUD_root_->PropagateUpdate();
         
         HUDTextShader->Use();
         HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
+
+        HUDText_object->GetComponent<components::TextRenderer>()->text_ = debug_info;
+        if (SceneManager::i_->current_scene_->HUD_text_root_)
+            SceneManager::i_->current_scene_->HUD_text_root_->PropagateUpdate();
 
         float p1p = 0.0;
         float p2p = 0.0;
@@ -1113,15 +1175,12 @@ int main()
             fps /= 30.0f;
             frame_time /= 30.0f;
 
-            debug_info = "fps: " + std::to_string(fps) + "\n frame time: " + std::to_string(frame_time);
+            debug_info = "fps: " + std::to_string(fps) + "\nframe time: " + std::to_string(frame_time);
 
             frame = 0;
             fps = 0.0f;
             frame_time = 0.0f;
         }
-
-        HUDText_object->GetComponent<components::TextRenderer>()->text_ = debug_info;
-        HUDText_root->PropagateUpdate();
         
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
@@ -1195,89 +1254,23 @@ int main()
         }
 
         ImGui::Checkbox("Bloom", &lbuffer.bloom_);
-        ImGui::ColorEdit3("Bloom Color", (float*)&lbuffer.bloom_color_);
-        ImGui::SliderFloat("Bloom Threshold", &lbuffer.bloom_threshold_, 0.0f, 1.0f, "%0.2f");
-
         ImGui::End();
 
-        ImGui::Begin("Generation");
-        ImGui::SliderFloat("Angle", &rlgs.angle, 0.0f, 1.0f, "%0.2f");
-        ImGui::SliderFloat("Span", &rlgs.span, 0.0f, 2.0f, "%0.2f");
-        ImGui::SliderInt("Branch division count", &rlgs.branch_division_count, 1, 10);
-        ImGui::SliderFloat("Branch division min length", &rlgs.branch_division_min_length, 1.0f, 10.0f, "%0.2f");
-        ImGui::SliderFloat("Branch division max length", &rlgs.branch_division_max_length, 1.0f, 10.0f, "%0.2f");
-        ImGui::SliderInt("Sub branch count", &rlgs.sub_branch_count, 0, 20);
-        ImGui::SliderFloat("Sub branch span", &rlgs.sub_branch_span, 0.0f, 2.0f, "%0.2f");
-        ImGui::SliderFloat("Sub branch min length", &rlgs.sub_branch_min_length, 1.0f, 10.0f, "%0.2f");
-        ImGui::SliderFloat("Sub branch max length", &rlgs.sub_branch_max_length, 1.0f, 10.0f, "%0.2f");
-        if (ImGui::Button("Generate"))
-        {
-            rlg.GenerateRooms(rlgs, scene_root);
-            rlg.GenerateGates();
-            for (auto &room : room_objects)
-            {
-                room.lock()->Destroy();
-            }
-            room_objects.clear();
-            for (auto &room : rlg.rooms)
-            {
-                auto room_obj = GameObject::Create(scene_root);
-                room_objects.push_back(room_obj);
-                room_obj->AddComponent(make_shared<components::MeshRenderer>(test_ball_model, GBufferPassShader));
-                room_obj->transform_->set_position(glm::vec3(room.first.x, 20.0f, room.first.y));
-                room_obj->transform_->set_scale(glm::vec3(3.0f));
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Clear"))
-        {
-            for (auto &room : room_objects)
-            {
-                room.lock()->Destroy();
-            }
-            room_objects.clear();
-        }
-        ImGui::End();
-
-        ImGui::Begin("Sound");
-        if (ImGui::Button("Play bruh.wav"))
-        {
-            audio::AudioManager::i_->PlaySound(res::get_sound(kBruhPath));
-        }
-        ImGui::End();
-
-        ImGui::Begin("Texture Display");
-        ImGui::Image((void*)(intptr_t)ssao_blur_buffer.texture_, ImVec2(1920.0f * 0.25f, 1080.0f * 0.25f)); // Display the texture with size 256x256
-        ImGui::End();
-
-        ImGui::Begin("Rope Manager");
-        ImGui::SliderFloat("Drag", &rope.segment_drag_, 0.9f, 0.999f, "%0.3f");
-        ImGui::SliderFloat("Mass", &rope.segment_mass_, 0.01f, 1.0f, "%0.3f");
-        if (ImGui::Button("Apply"))
-        {
-            rope.ApplyMass();
-            rope.ApplyDrag();
-        }
-        if (ImGui::Button("Add Segment"))
-        {
-            rope.AddSegment(scene_root);
-        }
-        if (ImGui::Button("Remove Segment"))
-        {
-            rope.RemoveSegment();   
-        }
-        ImGui::End();
-        ImGui::Begin("Disable test");
-        static bool cb = true;
-        if (ImGui::Checkbox("Enabled", &cb))
+        ImGui::Begin("Halt test");
+        static bool cb = false;
+        if (ImGui::Checkbox("Halted", &cb))
         {
             if (cb)
             {
-                player_1->Enable();
+                SceneManager::i_->current_scene_->scene_root_->Halt();
+                SceneManager::i_->current_scene_->HUD_root_->Halt();
+                SceneManager::i_->current_scene_->HUD_text_root_->Halt();
             }
             else
             {
-                player_1->Disable();
+                SceneManager::i_->current_scene_->scene_root_->Continue();
+                SceneManager::i_->current_scene_->HUD_root_->Continue();
+                SceneManager::i_->current_scene_->HUD_text_root_->Continue();
             }
         }
         ImGui::End();
@@ -1369,18 +1362,6 @@ int main()
         }
         ImGui::End();
 
-        static float player_1_hp;
-        static float player_2_hp;
-        player_1_hp = player_1->GetComponent<components::HealthComponent>()->health_;
-        player_2_hp = player_2->GetComponent<components::HealthComponent>()->health_;
-        ImGui::Begin("Player 1 HP");
-        ImGui::SliderFloat("Player 1 HP", &(player_1_hp), 0.0f, player_1->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
-        ImGui::End();
-
-        ImGui::Begin("Player 2 HP");
-        ImGui::SliderFloat("Player 2 HP", &(player_2_hp), 0.0f, player_2->GetComponent<components::HealthComponent>()->max_health_, "%0.1f");
-        ImGui::End();
-
         ImGui::Begin("Serialize");
 
         static char filename_buf[32] = "save.json";
@@ -1414,14 +1395,16 @@ int main()
             room = &rlg.rooms[current_room];
             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
             pbd::PBDManager::i_->set_walls(walls);
+            rg_settings.generated_rooms = rlg.built_rooms_;
+            minimap.Rebuild(rlg);
 
             rope.Deserialize(j["rope"]);
             player_1->Destroy();
             player_2->Destroy();
             *player_1 = *GameObject::Deserialize(j["player_1"]);
             *player_2 = *GameObject::Deserialize(j["player_2"]);
-            scene_root->transform_->AddChild(player_1->transform_);
-            scene_root->transform_->AddChild(player_2->transform_);
+            game_scene_root->transform_->AddChild(player_1->transform_);
+            game_scene_root->transform_->AddChild(player_2->transform_);
             rope.rope_constraints_.pop_back();
             rope.rope_constraints_.pop_front();
             rope.AssignPlayerBegin(player_1);
@@ -1438,6 +1421,8 @@ int main()
         glfwSwapBuffers(window);
     }
     
+    DifficultyManager::Destroy();
+    FloorRendererManager::Destroy();
     SpellCaster::Destroy();
     GrassRendererManager::Destroy();
     PlayerStatsManager::Destroy();
@@ -1450,6 +1435,7 @@ int main()
     pbd::PBDManager::Destroy();
     collisions::CollisionManager::Destroy();
     input::InputManager::Destroy();
+    SceneManager::Destroy();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

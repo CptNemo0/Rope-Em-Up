@@ -18,8 +18,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd ../../../textures/enviroment/floor/floor_albedo.png
-map_Ns ../../../textures/enviroment/floor/floor_roughness.png
-map_Pm ../../../textures/enviroment/floor/floor_metallic.png
-map_Bump -bm 1.000000 ../../../textures/enviroment/floor/floor_normal.png
+map_Kd floor_albedo.png
+map_Ns floor_roughness.png
+map_Pm no_metallic.png
+map_Bump -bm 1.000000 floor_normal.png
 map_Ke no_emission.png

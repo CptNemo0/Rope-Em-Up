@@ -62,6 +62,18 @@ std::shared_ptr<components::EnemyAIComponent> ai::EnemyAIManager::CreateEnemyAI(
 	return enemy_ai_component;
 }
 
+s_ptr<components::EnemyAIComponent> ai::EnemyAIManager::CreateEnemyAI(s_ptr<GameObject> game_object, json &j)
+{
+	bool is_passive = j["is_passive"];
+
+    auto enemy_movement_generator_1 = make_shared<pbd::BasicGenerator>();
+	pbd::PBDManager::i_->CreateFGRRecord(game_object->GetComponent<components::PBDParticle>(), enemy_movement_generator_1);
+	auto enemy_state_machine_1 = make_shared<ai::EnemyStateMachine>(game_object, enemy_movement_generator_1, vehicle_template_);
+	auto enemy_ai_component = make_shared<components::EnemyAIComponent>(enemy_state_machine_1, is_passive);
+	enemy_ais_.push_back(enemy_ai_component);
+	return enemy_ai_component;
+}
+
 void ai::EnemyAIManager::UpdateEnemyStateMachine(s_ptr<EnemyStateMachine> machine)
 {
 	if (!players_set)
@@ -77,26 +89,28 @@ void ai::EnemyAIManager::UpdateEnemyStateMachine(s_ptr<EnemyStateMachine> machin
 	glm::vec3 to_p_2 = player_2_->transform_->get_position() - machine->transfrom_->get_position();
 	float to_p_2_mag2 = glm::length2(to_p_2);
 
+	float health_component = machine->transfrom_->game_object_->GetComponent<components::HealthComponent>()->health_;
+
 	if (to_p_1_mag2 < to_p_2_mag2)
 	{
 		if (to_p_1_mag2 < sense_range_ * sense_range_)
 		{
 			machine->target_player_ = player_1_;
 			machine->in_sense_range_ = (to_p_1_mag2 < sense_range_ * sense_range_);
-			machine->in_attack_range_ = (to_p_1_mag2 < attack_range_ * attack_range_);
+			machine->in_attack_range_ = (to_p_1_mag2 < attack_range_ * attack_range_ * health_component * health_component);
 		}
 		machine->in_sense_range_ = (to_p_1_mag2 < sense_range_ * sense_range_);
-		machine->in_attack_range_ = (to_p_1_mag2 < attack_range_ * attack_range_);
+		machine->in_attack_range_ = (to_p_1_mag2 < attack_range_ * attack_range_ * health_component * health_component);
 	}
 	else
 	{
 		if (to_p_2_mag2 < sense_range_ * sense_range_)
 		{
 			machine->target_player_ = player_2_;
-			machine->in_attack_range_ = (to_p_2_mag2 < attack_range_ * attack_range_);
+			machine->in_attack_range_ = (to_p_2_mag2 < attack_range_ * attack_range_ * health_component * health_component);
 		}
 		machine->in_sense_range_ = (to_p_2_mag2 < sense_range_ * sense_range_);
-		machine->in_attack_range_ = (to_p_2_mag2 < attack_range_ * attack_range_);
+		machine->in_attack_range_ = (to_p_2_mag2 < attack_range_ * attack_range_ * health_component * health_component);
 	}
 
 	machine->pursuit_ = (!(choked_tentacles_ > choke_threshold_) && !(multi_chokes_ > multi_threshold_));
@@ -104,7 +118,6 @@ void ai::EnemyAIManager::UpdateEnemyStateMachine(s_ptr<EnemyStateMachine> machin
 	machine->evasive_manoeuvres_ = ((choked_tentacles_ > choke_threshold_) && (multi_chokes_ > multi_threshold_));
 
 
-	//cout << machine->current_state_->Name() << endl;
 	machine->current_state_->Execute(machine.get());
 }
 

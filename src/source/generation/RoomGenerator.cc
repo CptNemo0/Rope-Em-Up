@@ -177,6 +177,7 @@ generation::RoomLayoutGenerator::RoomLayoutGenerator(json &j, std::shared_ptr<Ga
         glm::ivec2 position = {j_room["position"][0], j_room["position"][1]};
         rooms.insert(std::make_pair(position, Room(j_room, root)));
     }
+    this->built_rooms_ = j["built_rooms"];
 }
 
 json generation::RoomLayoutGenerator::Serialize()
@@ -186,6 +187,7 @@ json generation::RoomLayoutGenerator::Serialize()
     for (auto &[position, room] : rooms)
     {
         j["rooms"].push_back(room.Serialize());
+        j["built_rooms"] = this->built_rooms_;
     }
 
     return j;
@@ -612,7 +614,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 
                 for (int i = 0; i < ceil; i++)
                 {
-                    room.barells_positions.push_back(enemies_positions[(i + enemies_positons_size - 1) % enemies_positions.size()]);
+                    room.barells_positions.push_back(enemies_positions[(i + rgs->enemies - 1) % enemies_positions.size()]);
                     room.barell_idx.push_back(random::RandInt(0, -1 + rm->barrles.size()));
                 }
             }   
@@ -640,7 +642,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         for (int i = 0; i < room.width; i++)
         {
             s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
-            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, -0.3f, 0.0f));
             wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
             wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
 
@@ -675,7 +677,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         for (int i = 0; i < room.height; i++)
         {
             s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
-            wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+            wall_left->transform_->set_position(glm::vec3(0.0, -0.3f, -8.0f - i * kModuleSize));
             wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
             wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
 
@@ -717,7 +719,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             {
                 s_ptr<GameObject> floor = GameObject::Create(room.floors);
                 floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-                floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
+                floor->AddComponent(FloorRendererManager::i_->CreateFloorRenderer());
             }
         }
 
@@ -740,7 +742,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //down
@@ -760,7 +762,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //right
@@ -781,7 +783,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //left
@@ -803,7 +805,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         // generate lamps
@@ -858,7 +860,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         for (int i = 0; i < room.width; i++)
         {
             s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
-            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, 0.0f));
+            wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, -0.3f, 0.0f));
             wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
             wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
 
@@ -893,7 +895,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         for (int i = 0; i < room.height; i++)
         {
             s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
-            wall_left->transform_->set_position(glm::vec3(0.0, 0.0f, -8.0f - i * kModuleSize));
+            wall_left->transform_->set_position(glm::vec3(0.0, -0.3f, -8.0f - i * kModuleSize));
             wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
             wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
 
@@ -935,7 +937,8 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             {
                 s_ptr<GameObject> floor = GameObject::Create(room.floors);
                 floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-                floor->AddComponent(make_shared<components::MeshRenderer>(rm->floors[0], shader));
+                floor->AddComponent(FloorRendererManager::i_->CreateFloorRenderer());
+                
             }
         }
 
@@ -958,7 +961,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //down
@@ -978,7 +981,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //right
@@ -999,7 +1002,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         //left
@@ -1021,7 +1024,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->start_size_ = glm::vec2(1.5f, 2.5f);
             emitter->end_size_ = glm::vec2(0.5f, 1.0f);
             emitter->start_position_displacement_ = 2.0f;
-            emitter->active_ = false;
+            emitter->emit_particles_ = false;
         }
 
         // generate lamps
@@ -1557,7 +1560,7 @@ glm::ivec2 generation::GetMoveDirection(Room* room, std::shared_ptr<GameObject> 
 
         if (p1l < kGateThreshold || p2l < kGateThreshold)
         {
-            cout << "GO RIGHT!!!" << endl;
+            //cout << "GO RIGHT!!!" << endl;
             move_direction = glm::ivec2(-1, 0);
         }
     }
@@ -1568,7 +1571,7 @@ glm::ivec2 generation::GetMoveDirection(Room* room, std::shared_ptr<GameObject> 
 
         if (p1l < kGateThreshold || p2l < kGateThreshold)
         {
-            cout << "GO DOWN!!!" << endl;
+            //cout << "GO DOWN!!!" << endl;
             move_direction = glm::ivec2(0, 1);
         }
     }
@@ -1579,7 +1582,7 @@ glm::ivec2 generation::GetMoveDirection(Room* room, std::shared_ptr<GameObject> 
 
         if (p1l < kGateThreshold || p2l < kGateThreshold)
         {
-            cout << "GO LEFT!!!" << endl;
+            //cout << "GO LEFT!!!" << endl;
             move_direction = glm::ivec2(1, 0);
         }
     }

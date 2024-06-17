@@ -42,8 +42,8 @@ public:
     std::shared_ptr<components::GrassRenderer> CreateRenderer(float radius,  float density);
     std::shared_ptr<components::GrassRenderer> CreateRenderer(json &j);
 
-    void AddRenderer(std::shared_ptr<components::GrassRenderer>);
-    void RemoveRenderer(std::shared_ptr<components::GrassRenderer>);
+    void AddRenderer(std::shared_ptr<components::GrassRenderer> renderer);
+    void RemoveRenderer(std::shared_ptr<components::GrassRenderer> r);
 
     void Draw(unsigned int id);
 };

@@ -109,6 +109,30 @@ void GameObject::Disable()
 	}
 }
 
+void GameObject::Halt()
+{
+	for (auto& component : components_)
+	{
+		component.second->Halt();
+	}
+	for (auto& child : transform_->children_)
+	{
+		child->game_object_->Halt();
+	}
+}
+
+void GameObject::Continue()
+{
+	for (auto& component : components_)
+	{
+		component.second->Continue();
+	}
+	for (auto& child : transform_->children_)
+	{
+		child->game_object_->Continue();
+	}
+}
+
 json GameObject::Serialize()
 {
     json j;
@@ -119,7 +143,7 @@ json GameObject::Serialize()
 	{
 		json j_comp;
 		j_comp["type"] = component.first;
-		j_comp["active"] = component.second->active_;
+		j_comp["properties"] = Component::Serialize(component.second);
 		j_comp["data"] = component.second->Serialize();
 
 		j["components"].push_back(j_comp);
@@ -147,7 +171,6 @@ s_ptr<GameObject> GameObject::Deserialize(json &j)
 			auto comp = Component::Deserialize(j_comp, go);
 			if (comp != nullptr)
 			{
-				comp->active_ = j_comp["active"];
 				go->AddComponent(comp);
 			}
 		}

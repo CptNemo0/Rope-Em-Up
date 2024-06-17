@@ -23,9 +23,12 @@ void ai::IdleState::Execute(EnemyStateMachine* machine)
 {
 	if (machine->rest_timer_ < machine->vehicle_.rest_lenght)
 	{
+		cout << "IDLE" << endl;
 		if (!machine->is_choked_)
 		{
-			machine->rest_timer_ += pbd::kMsPerUpdate;
+			cout << "NOT CHOKED" << endl;
+			cout << machine->rest_timer_ << endl;
+			machine->rest_timer_ += 0.25f;
 		}
 		
 		machine->generator_->direction_ = glm::vec3(0.0f);
@@ -60,7 +63,7 @@ void ai::PatrolState::Execute(EnemyStateMachine* machine)
 	}
 	if (machine->in_attack_range_)
 	{
-
+		machine->current_state_ = OnAlertState::Instance();
 	}
 	else
 	{
@@ -135,18 +138,40 @@ ai::AttackState* ai::AttackState::Instance()
 
 void ai::AttackState::Execute(EnemyStateMachine* machine)
 {
+	float tmp = 10.0f;
 	if (machine->is_choked_)
 	{
 		machine->current_state_ = IdleState::Instance();
 	}
 	else
 	{
-		cout << "ATTACK!!\n";
-		machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
-		//// to implement enemy attack aniamtion
-		assert(machine->current_state_ && PatrolState::Instance());
-		machine->current_state_ = PatrolState::Instance();
+		if (!machine->is_attacking)
+		{
+			machine->is_attacking = true;
+			Timer::AddTimer(0.45f,
+				[machine]
+				{
+					if (machine->in_attack_range_)
+					{
+						cout << "ATTACK!!\n";
+						machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
+						//// to implement enemy attack aniamtion
+
+					}
+					machine->is_attacking = false;
+					assert(machine->current_state_ && PatrolState::Instance());
+					machine->current_state_ = PatrolState::Instance();
+				},
+				[machine](float a)
+				{
+					machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
+					machine->generator_->magnitude_ = machine->generator_->magnitude_ * 0.85f;
+				},
+				false);
+
+		}
 	}
+	
 	
 }
 
@@ -331,4 +356,5 @@ ai::EnemyStateMachine::EnemyStateMachine(s_ptr<GameObject> game_object, s_ptr<pb
 	pursuit_ = false;
 	extrapolation_ = false;
 	evasive_manoeuvres_ = false;
+	is_attacking = false;
 }

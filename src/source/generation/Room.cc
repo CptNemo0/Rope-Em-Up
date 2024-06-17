@@ -76,6 +76,7 @@ void generation::Room::Destroy()
     gates = nullptr;
     floors = nullptr;
     drops = nullptr;
+    barells = nullptr;
 }
 
 generation::Room::Room(json j, s_ptr<GameObject> root)
@@ -97,6 +98,7 @@ generation::Room::Room(json j, s_ptr<GameObject> root)
     room_object->transform_->AddChild(gates->transform_);
     room_object->transform_->AddChild(floors->transform_);
     room_object->transform_->AddChild(drops->transform_);
+    room_object->transform_->AddChild(barells->transform_);
 
     position = {j["position"][0], j["position"][1]};
 

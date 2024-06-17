@@ -1,8 +1,11 @@
 #ifndef MINIMAP_H
 #define MINIMAP_H
 
+
 #include <memory>
 #include <unordered_map>
+#include "glm/glm.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include "GameObject.h"
 #include "generation/RoomGenerator.h"
@@ -13,7 +16,6 @@
 class Minimap
 {
 private:
-    void Rebuild(generation::RoomLayoutGenerator& rlg);
     void ColorRoom(generation::Room &room, generation::Room &current_room, s_ptr<components::HUDRenderer> hud_renderer);
 
     s_ptr<tmp::Texture> finished_texture_;
@@ -32,6 +34,7 @@ public:
     s_ptr<GameObject> current_room_object;
 
     void Update(generation::RoomLayoutGenerator& rlg, generation::Room *current_room);
+    void Rebuild(generation::RoomLayoutGenerator& rlg);
 };
 
 #endif // MINIMAP_H

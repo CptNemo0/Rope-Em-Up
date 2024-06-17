@@ -45,7 +45,8 @@ void components::PlayerController::OnAction(Action action, input::State state)
     {
         case Action::MOVE:
         {
-            direction_ = glm::vec3(state.axis.x, 0.0f, state.axis.y);
+            auto state_axis = glm::rotate(state.axis, glm::radians(Global::i_->active_camera_->yaw_ - 90.0f));
+            direction_ = glm::vec3(state_axis.x, 0.0f, state_axis.y);
             if (glm::length(direction_) <= glm::length(glm::vec3(0.001f)))
             {
                 gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Idle");

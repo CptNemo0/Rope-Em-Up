@@ -1,9 +1,10 @@
 #ifndef ENEMY_AI_COMPONENT
 #define ENEMY_AI_COMPONENT
 
+#include <memory>
+
 #include "Component.h"
 #include "../ai/EnemyState.h"
-#include <memory>
 #include "../collisions/Raycast.h"
 #include "../ChokeList.h"
 
@@ -26,6 +27,8 @@ namespace components
 		void Start() override;
 		void Update() override;
 		void Destroy() override;
+
+		json Serialize() override;
 	};
 }
 

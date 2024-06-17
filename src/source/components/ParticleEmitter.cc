@@ -41,13 +41,13 @@ void components::ParticleEmitter::Start()
     if (!burst_emitter_)
     {
         emission_timer_ = Timer::AddTimer(emission_rate_, [this]()
+        {
+            if (active_)
             {
-                if (active_)
-                {
-                    this->EmitParticles();
-                }
-            },
-            nullptr, true);
+                this->EmitParticles();
+            }
+        },
+        nullptr, true);
     }
 }
 
@@ -98,7 +98,7 @@ void components::ParticleEmitter::UpdateParticles(float delta_time)
 
 void components::ParticleEmitter::EmitParticles()
 {
-    if (active_)
+    if (active_ && emit_particles_)
     {
         int rand_amount = random::RandInt(spawns_per_emission_.x, spawns_per_emission_.y);
 
@@ -168,6 +168,7 @@ components::ParticleEmitter::ParticleEmitter(json &j)
     s_ptr<Shader> shader = res::get_shader(j["shader_paths"][0], j["shader_paths"][1], j["shader_paths"][2]);
 
     this->ParticleEmitter::ParticleEmitter(max_particles, texture, shader);
+    emit_particles_ = j["emit_particles"];
     emission_rate_ = j["emission_rate"];
     spawns_per_emission_ = {j["spawns_per_emission"][0], j["spawns_per_emission"][1]};
     life_time_ = j["life_time"];
@@ -191,6 +192,7 @@ json components::ParticleEmitter::Serialize()
     j["texture_path"] = texture_->path_;
     j["shader_paths"] = {shader_->v_path, shader_->g_path, shader_->f_path};
 
+    j["emit_particles"] = emit_particles_;
     j["emission_rate"] = emission_rate_;
     j["spawns_per_emission"] = {spawns_per_emission_.x, spawns_per_emission_.y};
     j["life_time"] = life_time_;

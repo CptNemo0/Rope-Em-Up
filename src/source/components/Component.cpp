@@ -18,6 +18,8 @@
 #include "../../headers/collisions/CollisionManager.h"
 #include "../../headers/physics/PBD.h"
 #include "../../headers/GrassRendererManager.h"
+#include "../../headers/components/FloorRenderer.h"
+#include "../../headers/FloorRendererManager.h"
 
 std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Component::component_factory = 
 {
@@ -27,7 +29,7 @@ std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Comp
     },
     {   // EnemyAIComponent
         typeid(components::EnemyAIComponent).name(), 
-        [](json &j, s_ptr<GameObject> go) { return ai::EnemyAIManager::i_->CreateEnemyAI(go); } 
+        [](json &j, s_ptr<GameObject> go) { return ai::EnemyAIManager::i_->CreateEnemyAI(go, j); } 
     },
     {   // ExpDropComponent
         typeid(components::ExpDropComponent).name(), 
@@ -76,14 +78,54 @@ std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Comp
     {   // PBDParticle
         typeid(components::PBDParticle).name(), 
         [](json &j, s_ptr<GameObject> go) { return pbd::PBDManager::i_->CreateParticle(j, go); } 
+    },
+    {   // FloorRenderer
+        typeid(components::FloorRenderer).name(), 
+        [](json &j, s_ptr<GameObject> go) { return FloorRendererManager::i_->CreateFloorRenderer(); } 
     }
 };
+
+void Component::Halt()
+{
+    if (!halted_)
+    {
+        was_active_ = active_;
+        active_ = false;
+        halted_ = true;
+    }
+}
+
+void Component::Continue()
+{
+    if (halted_)
+    {
+        active_ = was_active_;
+        halted_ = false;
+    }
+}
 
 s_ptr<Component> Component::Deserialize(json &j, s_ptr<GameObject> go)
 {
     if (component_factory.contains(j["type"]))
     {
-        return component_factory[j["type"]](j["data"], go);
+        auto comp = component_factory[j["type"]](j["data"], go);
+
+        comp->active_ = j["properties"]["active"];
+        comp->halted_ = j["properties"]["halted"];
+        comp->was_active_ = j["properties"]["was_active"];
+
+        return comp;
     }
     return nullptr;
+}
+
+json Component::Serialize(s_ptr<Component> comp)
+{
+    json j;
+
+    j["active"] = comp->active_;
+    j["halted"] = comp->halted_;
+    j["was_active"] = comp->was_active_;
+
+    return j;
 }

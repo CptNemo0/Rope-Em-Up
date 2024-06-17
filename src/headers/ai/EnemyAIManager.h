@@ -96,8 +96,9 @@ namespace ai
 			player_2_ = nullptr;
 		}
 	
-		std::shared_ptr<components::EnemyAIComponent> CreateEnemyAI(std::shared_ptr<GameObject> game_object);
-		std::shared_ptr<components::EnemyAIComponent> CreateEnemyAI(std::shared_ptr<GameObject> game_object, bool is_passive);
+		s_ptr<components::EnemyAIComponent> CreateEnemyAI(std::shared_ptr<GameObject> game_object);
+		s_ptr<components::EnemyAIComponent> CreateEnemyAI(std::shared_ptr<GameObject> game_object, bool is_passive);
+		s_ptr<components::EnemyAIComponent> CreateEnemyAI(s_ptr<GameObject> game_object, json &j);
 		void UpdateEnemyStateMachine(s_ptr<ai::EnemyStateMachine> machine);
 		void RemoveEnemyAI(std::shared_ptr<components::EnemyAIComponent> a);
 	};

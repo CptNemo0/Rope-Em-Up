@@ -30,3 +30,12 @@ void components::EnemyAIComponent::Destroy()
 	cout << "Destroying EnemyAIComponent" << endl;
 
 }
+
+json components::EnemyAIComponent::Serialize()
+{
+	json j;
+
+	j["is_passive"] = is_passive_;
+
+    return j;
+}

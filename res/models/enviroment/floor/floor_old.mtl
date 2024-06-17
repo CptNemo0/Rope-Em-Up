@@ -1,0 +1,25 @@
+# Blender 4.1.1 MTL File: 'enviro.blend'
+# www.blender.org
+
+newmtl floor
+Ns 152.809952
+Ka 0.768182 0.768182 0.768182
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+newmtl full_f
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ../../../textures/enviroment/floor/floor_albedo.png
+map_Ns ../../../textures/enviroment/floor/floor_roughness.png
+map_Pm ../../../textures/enviroment/floor/floor_metallic.png
+map_Bump -bm 1.000000 ../../../textures/enviroment/floor/floor_normal.png
+map_Ke no_emission.png

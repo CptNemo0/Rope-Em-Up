@@ -57,11 +57,6 @@ void PlayerStatsManager::Apply()
 	player_2_->GetComponent<components::PlayerController>()->speed_ = speed_;
 	player_2_->GetComponent<components::PlayerController>()->pull_power_ = pull_power_;
 
-	player_1_->GetComponent<components::HealthComponent>()->max_health_ = max_health_;
-	player_1_->GetComponent<components::HealthComponent>()->health_ = max_health_;
-	player_2_->GetComponent<components::HealthComponent>()->max_health_ = max_health_;
-	player_2_->GetComponent<components::HealthComponent>()->health_ = max_health_;
-
 	p_speed_ = speed_;
 	p_pull_power_ = pull_power_;
 	p_max_health_ = max_health_;

@@ -29,6 +29,7 @@ public:
     void RemoveHealthComponent(std::shared_ptr<components::HealthComponent> h);
 
     void DeathUpdate();
+    void ManageDeath(s_ptr<GameObject> go);
 
     static void Initialize()
     {

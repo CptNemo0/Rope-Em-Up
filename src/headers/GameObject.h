@@ -42,6 +42,10 @@ public:
 	void Enable();
 	void Disable();
 
+	// Temporarily disable
+	void Halt();
+	void Continue();
+
 	void AddComponent(s_ptr<Component> component)
 	{
 		if (component != nullptr)
