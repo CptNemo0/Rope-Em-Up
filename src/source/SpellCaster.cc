@@ -16,7 +16,7 @@ void SpellCaster::QueueUpSpell(std::shared_ptr<components::SpellSlotComponent> s
 		{
 			current_caster_.push_back(s);
 			active_ = false;
-		}
+		}	
 	}
 }
 
