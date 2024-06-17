@@ -1,8 +1,11 @@
 #ifndef MINIMAP_H
 #define MINIMAP_H
 
+
 #include <memory>
 #include <unordered_map>
+#include "glm/glm.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include "GameObject.h"
 #include "generation/RoomGenerator.h"

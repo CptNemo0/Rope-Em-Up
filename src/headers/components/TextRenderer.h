@@ -22,6 +22,7 @@ public:
     string text_;
     glm::vec3 color_;
     s_ptr<Font> font_;
+    unsigned int line_spacing_ = 50;
 
     TextRenderer(s_ptr<Shader> shader, s_ptr<Font> font, string text, glm::vec3 color = glm::vec3(0.0f));
 

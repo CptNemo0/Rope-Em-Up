@@ -34,6 +34,13 @@ void components::TextRenderer::Update()
 
     for (auto c : text_)
     {
+        if (c == '\n')
+        {
+            x = 0;
+            y += line_spacing_;
+            continue;
+        }
+
         auto &glyph = font_->glyphs_[c];
 
         float x_pos = x + glyph.bearing_x;
