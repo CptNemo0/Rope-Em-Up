@@ -133,6 +133,8 @@ namespace ai
 		bool pursuit_;
 		bool extrapolation_;
 		bool evasive_manoeuvres_;
+
+		bool is_attacking;
 	};
 }
 

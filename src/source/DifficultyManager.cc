@@ -19,18 +19,42 @@ void DifficultyManager::UpdateHealth(std::shared_ptr<GameObject> player_1, std::
 	float hp_diff_1 = player_1_hp_ - current_hp_1;
 	float hp_diff_2 = player_2_hp_ - current_hp_2;
 
+	player_1_hp_ = current_hp_1;
+	player_2_hp_ = current_hp_2;
+
 	health_diff_ = hp_diff_1 + hp_diff_2;
 }
 
 void DifficultyManager::UpdateSettings(generation::RoomGenerationSettings* rg_settings)
 {
-	int sign = health_diff_ > 0 ? 1 : -1;
+	int sign = health_diff_ >= 0 ? 1 : -1;
 
-	rg_settings->width += 1;
-	rg_settings->height += 1;
+	if (health_diff_ >= 0)
+	{
+		int a = random::RandInt(0, 1);
 
-	rg_settings->width += sign; 
-	rg_settings->height += sign;
+		if (a)
+		{
+			rg_settings->width += 1;
+		}
+		else
+		{
+			rg_settings->height += 1;
+		}
+	}
+	else
+	{
+		int a = random::RandInt(0, 1);
+
+		if (a)
+		{
+			rg_settings->width -= 1;
+		}
+		else
+		{
+			rg_settings->height -= 1;
+		}
+	}
 
 	if (rg_settings->width < 1) rg_settings->width = 1;
 	if (rg_settings->height < 1) rg_settings->height = 1;
@@ -38,19 +62,18 @@ void DifficultyManager::UpdateSettings(generation::RoomGenerationSettings* rg_se
 	if (rg_settings->width > 5) rg_settings->width = 5;
 	if (rg_settings->height > 5) rg_settings->height = 5;
 
-	rg_settings->enemies += 1;
-
-	if (player_1_hp_ < 50 && player_2_hp_ < 50)
+	if (player_1_hp_ < 50.0f && player_2_hp_ < 50.0f)
 	{
 		rg_settings->barells = 2 + sign;
 		rg_settings->enemies -= 1;
 	}
 	
-	if (player_1_hp_ > 75 || player_2_hp_ > 75)
+	if (player_1_hp_ > 75.0f || player_2_hp_ > 75.0f)
 	{
 		rg_settings->barells--;
 		if (rg_settings->barells < 1) rg_settings->barells = 1;
 		rg_settings->enemies += 2;
+		cout << "AAAAAA" << endl;
 	}
 
 	if (rg_settings->width == 1 && rg_settings->height == 1)
@@ -66,8 +89,8 @@ void DifficultyManager::UpdateSettings(generation::RoomGenerationSettings* rg_se
 	}
 	else if (rg_settings->width > 2 && rg_settings->height > 2)
 	{
-		rg_settings->clutter = random::RandInt(5, 10);
-		rg_settings->lamps = random::RandInt(4, 8);
+		rg_settings->clutter = random::RandInt(8, 15);
+		rg_settings->lamps = random::RandInt(6, 10);
 	}
 
 	if (rg_settings->enemies > 3)
