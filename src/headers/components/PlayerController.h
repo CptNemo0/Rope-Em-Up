@@ -21,12 +21,13 @@ class PlayerController : public Component, public input::InputObserver, public s
 public:
     int gamepadID_;
     int speed_ = 1000;
-    int pull_power_ = 1000;
+    int pull_power_ = 2000;
 
     s_ptr<pbd::BasicGenerator> move_generator_;
     s_ptr<pbd::BasicGenerator> pull_generator_;
-    bool is_pulling_ = false, pulling_cooldown_ = false;
+    bool is_pulling_ = false, pull_lock_ = false, move_lock_ = false;
     glm::vec3 direction_ = glm::vec3(0.0f);
+    glm::vec3 pull_direction_ = glm::vec3(1.0f, 0.0f, 0.0f);
     PlayerController(int gamepadID);
 
     void Start() override;
@@ -34,6 +35,8 @@ public:
     void Destroy() override;
 
     void OnAction(Action action, input::State state) override;
+
+    void PullRope();
 
     PlayerController(json &j);
     json Serialize() override;

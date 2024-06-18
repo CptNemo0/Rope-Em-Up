@@ -179,6 +179,10 @@ void Rope::ChokeCheck(generation::Room *room)
 	s_ptr<components::PlayerController> player_end_controller_ = player_end_->GetComponent<components::PlayerController>();
 	if (!pull_cooldown_ && player_begin_controller_->is_pulling_ && player_end_controller_->is_pulling_)
 	{
+		pull_cooldown_ = true;
+		player_begin_controller_->PullRope();
+		player_end_controller_->PullRope();
+
 		auto choked = ChokeList::i_->Choke(1.0f);
 		if (choked.contains(HEALTH_TYPE::MONSTER))
 		{
@@ -187,11 +191,11 @@ void Rope::ChokeCheck(generation::Room *room)
 			///dealing dmg to enemy animation to implement
 
 		}
-		pull_cooldown_ = true;
-	}
-	if (!player_begin_controller_->is_pulling_ && !player_end_controller_->is_pulling_)
-	{
-		pull_cooldown_ = false;
+
+		Timer::AddTimer(1.0f, [this]()
+		{
+			pull_cooldown_ = false;
+		});
 	}
 }
 

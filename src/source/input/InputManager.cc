@@ -37,13 +37,13 @@ input::InputManager::InputManager(GLFWwindow *window)
         {GLFW_JOYSTICK_1,
         {
             {Action::MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
-            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_A}},
+            {Action::PULL_ROPE, ActionMappingType{.axisType = GamepadAxisType::TRIGGERS}},
             {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}}
         }},
         {GLFW_JOYSTICK_2,
         {
             {Action::MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
-            {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_A}},
+            {Action::PULL_ROPE, ActionMappingType{.axisType = GamepadAxisType::TRIGGERS}},
             {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}}
         }}
     };
@@ -84,10 +84,13 @@ void input::InputManager::UpdateGamepadState(int gamepadID)
             NotifyAction(gamepadID, Action::MOVE, State(new_axis_state));
         }
 
-        auto pull_rope_button = gamepad_mappings[gamepadID][Action::PULL_ROPE].buttonID;
-        if (new_gamepad_state.buttons[pull_rope_button] != old_gamepad_states_[gamepadID].buttons[pull_rope_button])
+        axis_type = static_cast<int>(gamepad_mappings[gamepadID][Action::PULL_ROPE].axisType);
+        new_axis_state = {new_gamepad_state.axes[axis_type], new_gamepad_state.axes[axis_type + 1]};
+        old_axis_state = {old_gamepad_states_[gamepadID].axes[axis_type], old_gamepad_states_[gamepadID].axes[axis_type + 1]};
+
+        if (new_axis_state != old_axis_state)
         {
-            NotifyAction(gamepadID, Action::PULL_ROPE, State{.button = (int)new_gamepad_state.buttons[pull_rope_button]});
+            NotifyAction(gamepadID, Action::PULL_ROPE, State{.axis = new_axis_state});
         }
 
         auto cast_spell_button = gamepad_mappings[gamepadID][Action::CAST_SPELL].buttonID;
@@ -129,7 +132,7 @@ void input::InputManager::UpdateKeyboardState(int gamepadID)
     if (pull_rope_button_state != (int)keyboard_state[pull_rope_button])
     {
         keyboard_state[pull_rope_button] = pull_rope_button_state;
-        NotifyAction(gamepadID, Action::PULL_ROPE, State{.button = pull_rope_button_state});
+        NotifyAction(gamepadID, Action::PULL_ROPE, State{.axis = {pull_rope_button_state, pull_rope_button_state}});
     }
 
     auto& cast_spell_button = keyboard_mappings[gamepadID][Action::CAST_SPELL].buttonID;

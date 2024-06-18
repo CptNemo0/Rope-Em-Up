@@ -5,8 +5,8 @@ enum Action
 {
     // Axis Actions
     MOVE,
-    // Button Actions
     PULL_ROPE,
+    // Button Actions
     CAST_SPELL
 };
 
