@@ -22,10 +22,16 @@ void components::PlayerController::Start()
 
 void components::PlayerController::Update()
 {
-    if (!is_pulling_)
+    move_generator_->direction_ = direction_;
+    if (move_lock_)
     {
-        move_generator_->direction_ = direction_;
+        move_generator_->magnitude_ = 0.0f;
     }
+    else
+    {
+        move_generator_->magnitude_ = speed_;
+    }
+
 }
 
 void components::PlayerController::Destroy()
@@ -54,28 +60,24 @@ void components::PlayerController::OnAction(Action action, input::State state)
             else
             {
                 gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Run");
+                pull_direction_ = glm::normalize(direction_);
 			}
             break;
         }
         case Action::PULL_ROPE:
         {
-            if (state.button && !pulling_cooldown_ && glm::length(move_generator_->direction_) >= 0.01f)
+            if (glm::min(state.axis.x, state.axis.y) >= 0.95f)
             {
-                gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Pull");
-                pulling_cooldown_ = true;
-                Timer::AddTimer(1.0f, [this]()
+                if (!pull_lock_)
                 {
-                    pulling_cooldown_ = false;
-                });
-
-                pull_generator_->direction_ = move_generator_->direction_;
-                pull_generator_->magnitude_ = pull_power_;
-                is_pulling_ = true;
-                Timer::AddTimer(0.25f, [this]()
-                {
-                    pull_generator_->magnitude_ = 0;
-                    is_pulling_ = false;
-                });
+                    gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Pull");
+                    is_pulling_ = true;
+                }
+            }
+            if (glm::max(state.axis.x, state.axis.y) <= 0.05f)
+            {
+                pull_lock_ = false;
+                is_pulling_ = false;
             }
             break;
         }
@@ -86,6 +88,22 @@ void components::PlayerController::OnAction(Action action, input::State state)
             break;
         }
     }
+}
+
+void components::PlayerController::PullRope()
+{
+    is_pulling_ = false;
+    move_lock_ = true;
+    pull_lock_ = true;
+
+    pull_generator_->direction_ = pull_direction_;
+    pull_generator_->magnitude_ = pull_power_;
+
+    Timer::AddTimer(0.25f, [this]()
+    {
+        pull_generator_->magnitude_ = 0;
+        move_lock_ = false;
+    });
 }
 
 components::PlayerController::PlayerController(json &j)
