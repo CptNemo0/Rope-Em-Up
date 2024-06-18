@@ -43,7 +43,7 @@
 #include "../typedef.h"
 #include "../Texture.h"
 #include "../FloorRendererManager.h"
-
+#include "../SkullMinionManager.h"
 namespace generation
 {
     const float kModuleSize = 16.0f;

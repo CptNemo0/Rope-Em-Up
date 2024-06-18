@@ -4,7 +4,9 @@
 #include "components/SpellSlotComponent.h"
 #include <vector>
 #include "typedef.h"
-
+#include "PlayerStatsManager.h"
+#include "SkullMinionManager.h"
+#include "components/ParticleEmitter.h"
 class SpellCaster
 {
 public:

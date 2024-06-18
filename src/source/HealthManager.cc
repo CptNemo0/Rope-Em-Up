@@ -56,21 +56,19 @@ void HealthManager::DeathUpdate()
 
 		if (h->active_)
 		{
-			if (h->health_ <= 0.0)
+			if (h->health_ < 0.0001)
 			{
 				something_died_ = true;
 				where_ = h->gameObject_.lock()->transform_->get_position();
 				what_ = h->type_;
 
-				if (h->type_ == PLAYER)
+				if (what_ == OTHER)
 				{
-					h->gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Death", 5, 1.0f);
+					what_ = OTHER;
 				}
-				else
-				{
-					ManageDeath(h->gameObject_.lock());
-					h->gameObject_.lock()->Destroy();
-				}
+
+				ManageDeath(h->gameObject_.lock());
+				h->gameObject_.lock()->Destroy();
 			}
 		}
 		i++;
@@ -83,10 +81,18 @@ void HealthManager::ManageDeath(s_ptr<GameObject> go)
 	auto exp_comp = go->GetComponent<components::ExpDropComponent>();
 	auto spell_comp = go->GetComponent<components::SpellSlotComponent>();
 
-	if (hp_comp)
+	if (hp_comp != nullptr)
+	{
 		hp_comp->DropHp();
-	if (exp_comp)
+	}
+		
+	if (exp_comp != nullptr)
+	{
 		exp_comp->DropExp();
-	if (spell_comp)
+	}
+		
+	if (spell_comp != nullptr)
+	{
 		spell_comp->DropSpell();
+	}
 }

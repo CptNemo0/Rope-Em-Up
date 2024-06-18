@@ -73,7 +73,11 @@ void GameObject::PropagateDestroy()
 		child->game_object_->PropagateDestroy();
 	}
 	transform_->children_.clear();
-	transform_->game_object_ = nullptr;
+	if (transform_->game_object_)
+	{
+		transform_->game_object_ = nullptr;
+	}
+	
 }
 
 void GameObject::Destroy()

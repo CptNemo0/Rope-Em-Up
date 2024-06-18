@@ -43,7 +43,7 @@ public:
     void RemoveMinion(std::shared_ptr<components::SkullMinion> minion);
 
     void UpdateMinion(std::shared_ptr<components::SkullMinion> minion);
-    //void UpdateMinions();
+    void UpdateMinions();
 };
 
 #endif // !SKULL_MINION_MANAGER_H
