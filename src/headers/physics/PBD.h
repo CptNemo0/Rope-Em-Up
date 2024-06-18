@@ -28,16 +28,20 @@ namespace components
 		glm::vec3 velocity_;
 		glm::vec3 forces_;
 
+		bool rotate_ = true;
 		bool friction_ = false;
 		bool controllable_ = true;
 
-		PBDParticle(float mass, float damping_factor, s_ptr<components::Transform> transform) : 
+		float rotation_offset_ = 0.0f;
+
+		PBDParticle(float mass, float damping_factor, s_ptr<components::Transform> transform, bool rotate) : 
 		mass_(mass), 
 		damping_factor_(damping_factor), 
 		transform_(transform), 
 		inverse_mass_(1.0f/mass), 
 		velocity_(glm::vec3(0.0f)),
-		forces_(glm::vec3(0.0f)) {}
+		forces_(glm::vec3(0.0f)),
+		rotate_(rotate) {}
 
 		void AddForce(glm::vec3 force);
 		void ZeroForces();
@@ -46,6 +50,7 @@ namespace components
 		void UpdateVelocity(float t);
 		void PredictPosition(float t);
 		void UpdatePosition(float t);
+		void UpdateRotation(float t);
 
 		// Inherited via Component
 		void Start() override;
@@ -219,7 +224,7 @@ namespace pbd
 
 		float GetDistanceToClosestWall(s_ptr<components::PBDParticle> p);
 
-		s_ptr<components::PBDParticle> CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform);
+		s_ptr<components::PBDParticle> CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform, bool rotate = true);
 		s_ptr<components::PBDParticle> CreateParticle(json &j, s_ptr<GameObject> go);
 		void CreateFGRRecord(s_ptr<components::PBDParticle> p, s_ptr<pbd::BasicGenerator> g);
 		s_ptr<pbd::RopeConstraint> CreateRopeConstraint(s_ptr<components::PBDParticle> p1, s_ptr<components::PBDParticle> p2, float ml);
@@ -227,6 +232,7 @@ namespace pbd
 		void ResolveContact(const Contact& contact);
 		void ResolveContacts();
 		void UpdatePositions(float t);
+		void UpdateRotations(float t);
 		void GeneratorUpdate();
 	};
 	float Clampf(float v, float max, float min);

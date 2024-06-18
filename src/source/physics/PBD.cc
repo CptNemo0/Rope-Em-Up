@@ -68,13 +68,9 @@ void components::PBDParticle::UpdatePosition(float t)
 	transform_->set_position(transform_->get_predicted_position());
 }
 
-void components::PBDParticle::Start()
+void components::PBDParticle::UpdateRotation(float t)
 {
-}
-
-void components::PBDParticle::Update()
-{
-	if (controllable_)
+	if (controllable_ && rotate_)
 	{
 		auto go = gameObject_.lock();
 		auto current_forward = go->transform_->get_position() - go->transform_->get_previous_position();
@@ -83,8 +79,38 @@ void components::PBDParticle::Update()
 			current_forward = glm::normalize(current_forward);
 		}
 		float angle = glm::degrees(glm::orientedAngle(glm::vec3(0.0f, 0.0f, 1.0f), current_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
-		go->transform_->set_rotation(glm::vec3(0.0f, angle, 0.0f));
+		float target_angle = angle + rotation_offset_;
+		float current_angle = go->transform_->get_rotation().y;
+		   // Normalize angles to the range [0, 360)
+		target_angle = fmod(target_angle, 360.0f);
+		if (target_angle < 0.0f) target_angle += 360.0f;
+
+		current_angle = fmod(current_angle, 360.0f);
+		if (current_angle < 0.0f) current_angle += 360.0f;
+
+		// Calculate the shortest direction to rotate
+		float delta_angle = target_angle - current_angle;
+		if (delta_angle > 180.0f) delta_angle -= 360.0f;
+		if (delta_angle < -180.0f) delta_angle += 360.0f;
+
+		// Interpolate the angle
+		float interpolated_angle = current_angle + delta_angle * 20.0f * t;
+
+		// Normalize the interpolated angle to the range [0, 360)
+		interpolated_angle = fmod(interpolated_angle, 360.0f);
+		if (interpolated_angle < 0.0f) interpolated_angle += 360.0f;
+
+		// Set the rotation
+		go->transform_->set_rotation(glm::vec3(0.0f, interpolated_angle, 0.0f));
 	}
+}
+
+void components::PBDParticle::Start()
+{
+}
+
+void components::PBDParticle::Update()
+{
 }
 
 components::PBDParticle::~PBDParticle()
@@ -106,6 +132,7 @@ json components::PBDParticle::Serialize()
 
 	j["mass"] = mass_;
 	j["damping_factor"] = damping_factor_;
+	j["rotate"] = rotate_;
 
 	return j;
 }
@@ -395,9 +422,9 @@ float pbd::PBDManager::GetDistanceToClosestWall(s_ptr<components::PBDParticle> p
 	return std::max(diff_x, diff_z);
 }
 
-s_ptr<components::PBDParticle> pbd::PBDManager::CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform)
+s_ptr<components::PBDParticle> pbd::PBDManager::CreateParticle(float mass, float damping_factor, s_ptr<components::Transform> transform, bool rotate)
 {
-	auto p = make_shared<components::PBDParticle>(mass, damping_factor, transform);
+	auto p = make_shared<components::PBDParticle>(mass, damping_factor, transform, rotate);
 	particles_.push_back(p);
 	
 	return p;
@@ -407,8 +434,9 @@ s_ptr<components::PBDParticle> pbd::PBDManager::CreateParticle(json &j, s_ptr<Ga
 {
 	float mass = j["mass"];
 	float damping_factor = j["damping_factor"];
+	bool rotate = j["rotate"];
 	auto transform = go->transform_;
-	auto p = make_shared<components::PBDParticle>(mass, damping_factor, transform);
+	auto p = make_shared<components::PBDParticle>(mass, damping_factor, transform, rotate);
 	particles_.push_back(p);
 	
 	return p;
@@ -484,6 +512,17 @@ void pbd::PBDManager::UpdatePositions(float t)
 		if (p->active_)
 		{
 			p->UpdatePosition(t);
+		}
+	}
+}
+
+void pbd::PBDManager::UpdateRotations(float t)
+{
+	for (auto& p : particles_)
+	{
+		if (p->active_)
+		{
+			p->UpdateRotation(t);
 		}
 	}
 }

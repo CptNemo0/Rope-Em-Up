@@ -40,7 +40,7 @@ void Rope::CreateSegments(glm::vec3 start, glm::vec3 end, std::shared_ptr<GameOb
 		rope_segment->transform_->TeleportToPosition(start + player_dir * kDistance * (float)i);
 		rope_segment->AddComponent(make_shared<components::MeshRenderer>(model, shader));
 		rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::ROPE, gPRECISION, model, 0, rope_segment->transform_));
-		rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(segment_mass_, segment_drag_, rope_segment->transform_));
+		rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(segment_mass_, segment_drag_, rope_segment->transform_, false));
 
 		if (i > 0)
 		{
@@ -131,7 +131,7 @@ void Rope::AddSegment(std::shared_ptr<GameObject> scene_root)
 	rope_segment->transform_->TeleportToPosition(new_position);
 	rope_segment->AddComponent(make_shared<components::MeshRenderer>(model_, shader_));
 	rope_segment->AddComponent(collisions::CollisionManager::i_->CreateCollider(2, gPRECISION, model_, 0, rope_segment->transform_));
-	rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(segment_mass_, segment_drag_, rope_segment->transform_));
+	rope_segment->AddComponent(pbd::PBDManager::i_->CreateParticle(segment_mass_, segment_drag_, rope_segment->transform_, false));
 	rope_segments_.push_back(rope_segment);
 
 	auto new_particle = rope_segment->GetComponent<components::PBDParticle>();
@@ -177,11 +177,16 @@ void Rope::ChokeCheck(generation::Room *room)
 {
 	s_ptr<components::PlayerController> player_begin_controller_ = player_begin_->GetComponent<components::PlayerController>();
 	s_ptr<components::PlayerController> player_end_controller_ = player_end_->GetComponent<components::PlayerController>();
+
 	if (!pull_cooldown_ && player_begin_controller_->is_pulling_ && player_end_controller_->is_pulling_)
 	{
+		player_begin_->GetComponent<components::PBDParticle>()->rotation_offset_ = 180.0f;
+		player_end_->GetComponent<components::PBDParticle>()->rotation_offset_ = 180.0f;
+
 		pull_cooldown_ = true;
-		player_begin_controller_->PullRope();
-		player_end_controller_->PullRope();
+
+		player_begin_->GetComponent<components::PlayerController>()->PullRope();
+		player_end_->GetComponent<components::PlayerController>()->PullRope();
 
 		auto choked = ChokeList::i_->Choke(1.0f);
 		if (choked.contains(HEALTH_TYPE::MONSTER))
@@ -189,8 +194,19 @@ void Rope::ChokeCheck(generation::Room *room)
 			cout << "CHOKE'EM MOTHAFUCKA!!!!\n";
 			audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
 			///dealing dmg to enemy animation to implement
-
 		}
+
+		Timer::AddTimer(0.1f, [this]()
+		{
+			player_begin_->GetComponent<components::Animator>()->PlayAnimation("Pull");
+			player_end_->GetComponent<components::Animator>()->PlayAnimation("Pull");
+		});
+
+		Timer::AddTimer(0.5f, [this]()
+		{
+			player_begin_->GetComponent<components::PBDParticle>()->rotation_offset_ = 0.0f;
+			player_end_->GetComponent<components::PBDParticle>()->rotation_offset_ = 0.0f;
+		});
 
 		Timer::AddTimer(1.0f, [this]()
 		{

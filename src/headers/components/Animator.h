@@ -32,6 +32,8 @@ namespace components
 		void PlayAnimation(s_ptr<anim::Animation> pAnimation);
 		void PlayAnimation(const std::string& animationName);
 
+		void SetAnimation(const string& animationName);
+
 		void AddAnimation(const std::string& name, s_ptr<anim::Animation> animation);
 		void RemoveAnimation(const std::string& name);
 

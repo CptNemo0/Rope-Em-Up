@@ -81,7 +81,7 @@ void input::InputManager::UpdateGamepadState(int gamepadID)
 
         if (new_axis_state != old_axis_state)
         {
-            NotifyAction(gamepadID, Action::MOVE, State(new_axis_state));
+            NotifyAction(gamepadID, Action::MOVE, State(-new_axis_state));
         }
 
         axis_type = static_cast<int>(gamepad_mappings[gamepadID][Action::PULL_ROPE].axisType);

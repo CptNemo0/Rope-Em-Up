@@ -725,6 +725,7 @@ int main()
         collisions::CollisionManager::i_->CollisionCheckPBD(pbd::PBDManager::i_->contacts_);
         pbd::PBDManager::i_->ProjectConstraints(fixed_update_rate);
         pbd::PBDManager::i_->UpdatePositions(fixed_update_rate);
+        pbd::PBDManager::i_->UpdateRotations(fixed_update_rate);
         ParticleEmitterManager::i_->Update(fixed_update_rate);
 
     }, nullptr, true);

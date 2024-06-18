@@ -60,12 +60,21 @@ void components::Animator::PlayAnimation(s_ptr<anim::Animation> animation)
 
 void components::Animator::PlayAnimation(const std::string& animationName)
 {
-	if (m_Animations.find(animationName) != m_Animations.end())
+	if (m_Animations.contains(animationName))
 	{
 		m_CurrentAnimation = m_Animations[animationName];
 		m_CurrentTime = 0.0f;
 		/*m_BlendingAnimation = m_Animations[animationName];
 		m_BlendFactor = 0.0f;*/
+	}
+}
+
+void components::Animator::SetAnimation(const string &animationName)
+{
+	if (m_Animations.contains(animationName) && m_CurrentAnimation != m_Animations[animationName])
+	{
+		m_CurrentAnimation = m_Animations[animationName];
+		m_CurrentTime = 0.0f;
 	}
 }
 

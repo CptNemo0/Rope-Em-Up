@@ -30,6 +30,14 @@ void components::PlayerController::Update()
     else
     {
         move_generator_->magnitude_ = speed_;
+        if (glm::length(direction_) > 0.0f)
+        {
+            gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Run");
+        }
+        else
+        {
+            gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Idle");
+        }
     }
 
 }
@@ -53,13 +61,8 @@ void components::PlayerController::OnAction(Action action, input::State state)
         {
             auto state_axis = glm::rotate(state.axis, glm::radians(Global::i_->active_camera_->yaw_ - 90.0f));
             direction_ = glm::vec3(state_axis.x, 0.0f, state_axis.y);
-            if (glm::length(direction_) <= glm::length(glm::vec3(0.001f)))
+            if (glm::length(direction_) > 0.0f)
             {
-                gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Idle");
-            }
-            else
-            {
-                gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Run");
                 pull_direction_ = glm::normalize(direction_);
 			}
             break;
@@ -70,7 +73,6 @@ void components::PlayerController::OnAction(Action action, input::State state)
             {
                 if (!pull_lock_)
                 {
-                    gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Pull");
                     is_pulling_ = true;
                 }
             }
@@ -99,7 +101,7 @@ void components::PlayerController::PullRope()
     pull_generator_->direction_ = pull_direction_;
     pull_generator_->magnitude_ = pull_power_;
 
-    Timer::AddTimer(0.25f, [this]()
+    Timer::AddTimer(0.5f, [this]()
     {
         pull_generator_->magnitude_ = 0;
         move_lock_ = false;
