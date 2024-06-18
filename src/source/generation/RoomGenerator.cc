@@ -1594,6 +1594,7 @@ void generation::ChangeRooms(Room*& room, RoomLayoutGenerator& rlg, RoomGenerati
     room->room_object->Disable();
 
     room = &rlg.rooms[next_room_pos];
+    SkullMinionManager::i_->room_ = &rlg.rooms[next_room_pos];
 
     if (room->is_built)
     {

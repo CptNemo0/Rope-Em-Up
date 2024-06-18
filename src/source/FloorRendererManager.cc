@@ -8,7 +8,7 @@ FloorRendererManager::FloorRendererManager(std::shared_ptr<Shader> shader)
 	shader_ = shader;
     floor_height_texture_ = res::get_texture("res/models/enviroment/floor/floor_height.png");
     floor_normal_texture_ = res::get_texture("res/models/enviroment/floor/floor_normal.png");
-    floor_albedo_texture_ = res::get_texture("res/models/enviroment/floor/floor_albedo.png");
+    floor_albedo_texture_ = res::get_texture("res/models/enviroment/floor/floor_albedo1.png");
     floor_roughness_texture_ = res::get_texture("res/models/enviroment/floor/floor_roughness.png");
 }
 

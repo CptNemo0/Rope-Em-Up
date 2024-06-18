@@ -73,6 +73,7 @@
 #include "headers/DifficultyManager.h"
 #include "headers/SceneManager.h"
 #include "headers/Menu.h"
+#include "headers/SkullMinionManager.h"
 
 int main()
 {
@@ -254,17 +255,23 @@ int main()
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::LAMPS);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::SKULL);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::LAMPS);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::SKULL);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::LAMPS);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::SKULL);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::LAMPS);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::SKULL);
+
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::LAMPS, collisions::LAYERS::SKULL);
 
     pbd::PBDManager::Initialize(pbd_settings);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
@@ -280,7 +287,7 @@ int main()
     input::InputManager::Initialize(window);
     DifficultyManager::Initialize();
     SceneManager::Initialize();
-
+    SkullMinionManager::Initialize();
 #pragma endregion Initialization
     
 #pragma region CamerasConfiguration
@@ -473,6 +480,7 @@ int main()
     rlg.GenerateGates();
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
+    SkullMinionManager::i_->room_ = room;
     generation::GenerateRoom(*room, &rg_settings, &models);
     generation::BuildRoom(*room, &models, GBufferPassShader, &rlg, trail_texture, ParticleShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
@@ -486,7 +494,7 @@ int main()
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
+    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
     player_1->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     
     auto emmiter_player_1 = player_1->GetComponent<components::ParticleEmitter>();
@@ -700,6 +708,7 @@ int main()
     {
         ai::EnemyAIManager::i_->UpdateAI();
         minimap.Update(rlg, room);
+        SkullMinionManager::i_->UpdateMinions();
     }, nullptr, true);
 
 #pragma region Scenes
@@ -818,7 +827,7 @@ int main()
             {
                 DifficultyManager::i_->UpdateHealth(player_1, player_2);
                 DifficultyManager::i_->UpdateSettings(&rg_settings);
-                cout << "GOING THROUGH ROOM";
+                //cout << "GOING THROUGH ROOM";
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
                 auto pc1 = player_1->GetComponent<components::PlayerController>();
@@ -855,6 +864,12 @@ int main()
 
 
                 DifficultyManager::i_->UpdateRoom(room);
+
+                for (auto& minion : SkullMinionManager::i_->minions_)
+                {
+                    minion->health_component_->health_ = -1.0f;
+                }
+
             }
         }
        
@@ -876,7 +891,7 @@ int main()
         static float slowdown_smooth_factor = 0.055f;
         if (HealthManager::i_->something_died_ && HealthManager::i_->what_ == MONSTER)
         {
-            cout << HealthManager::i_->what_ << " " << HealthManager::i_->where_.x << " " << HealthManager::i_->where_.z << endl;
+            //cout << HealthManager::i_->what_ << " " << HealthManager::i_->where_.x << " " << HealthManager::i_->where_.z << endl;
 
             auto ss1 = player_1->GetComponent<components::SpellSlotComponent>()->type_;
             auto ss2 = player_2->GetComponent<components::SpellSlotComponent>()->type_;
@@ -1003,7 +1018,7 @@ int main()
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.00f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
@@ -1398,6 +1413,7 @@ int main()
         glfwSwapBuffers(window);
     }
     
+    SkullMinionManager::Destroy();
     DifficultyManager::Destroy();
     FloorRendererManager::Destroy();
     SpellCaster::Destroy();

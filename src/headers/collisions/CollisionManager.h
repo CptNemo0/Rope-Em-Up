@@ -28,7 +28,8 @@ namespace collisions
         PLAYER,
         ROPE,
         CLUTTER,
-        LAMPS
+        LAMPS,
+        SKULL
     };
 
 	class CollisionManager

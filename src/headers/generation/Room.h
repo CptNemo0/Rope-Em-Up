@@ -20,7 +20,7 @@ namespace generation
         std::shared_ptr<GameObject> floors;
         std::shared_ptr<GameObject> drops;
         std::shared_ptr<GameObject> barells;
-
+        std::shared_ptr<GameObject> minions;
         // Values that will be generated during layout generation
         glm::ivec2 position;
 
