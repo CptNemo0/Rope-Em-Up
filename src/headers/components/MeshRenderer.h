@@ -28,6 +28,7 @@ namespace components
         s_ptr<Transform> transform_;
         s_ptr<Model> model_;
         s_ptr<Shader> shader_;
+		s_ptr<Shader> depth_shader_;
 
         void Start() override;
         void Update() override;

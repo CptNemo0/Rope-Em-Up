@@ -74,6 +74,7 @@
 #include "headers/SceneManager.h"
 #include "headers/Menu.h"
 #include "headers/SkullMinionManager.h"
+#include "headers/rendering/LightsManager.h"
 
 int main()
 {
@@ -119,6 +120,9 @@ int main()
     const string kLBufferFragmentShaderPath = "res/shaders/LBufferPass.frag";
 
     const string kBasicDefferedLightShaderPath = "res/shaders/BasicDefferedLight.frag";
+
+	const string kShadowDepthVertexShaderPath = "res/shaders/ShadowDepth.vert";
+	const string kShadowDepthFragmentShaderPath = "res/shaders/ShadowDepth.frag";
 
     const string kSSAOVertexShaderPath = "res/shaders/SSAO.vert";
     const string kSSAOFragmentShaderPath = "res/shaders/SSAO.frag";
@@ -203,6 +207,7 @@ int main()
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
 
     const string kTentaclPath = "res/enemy/enemy.obj";
+	const string lTentaclFBXPath = "res/enemy/enemy_idles.fbx";
 #pragma endregion Resources Paths
     
 #pragma region CameraSettings
@@ -344,7 +349,10 @@ int main()
     auto BloomBlurHorizontalShader = res::get_shader(kSSAOVertexShaderPath, kBloomBlurHorizontalShaderPath);
     auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
     auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorTCShaderPath, kFloorTEShaderPath, kFloorFragmentShaderPath);
+	auto ShadowDepthShader = res::get_shader(kShadowDepthVertexShaderPath, kShadowDepthFragmentShaderPath);
+
 #pragma endregion Shaders
+    LightsManager::Initialize(ShadowDepthShader, LBufferPassShader);
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
     auto HUD_texture = res::get_texture(kHUDTexturePath);
@@ -386,6 +394,12 @@ int main()
 	spot_light.color = spot_light_color;
 	spot_light.intensity = spot_light_intensity;
 
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        LightsManager::i_->InitCubeShadowMap(i);
+		LightsManager::i_->InitPlaneShadowMap(i);
+    }
+
 #pragma endregion Lights
 
 #pragma region Models.
@@ -397,6 +411,7 @@ int main()
     auto M_player_model = res::get_model(kMalePlayerMeshPath);
     auto debug_model = res::get_model(kDebugMeshPath);
     auto enemy_model = res::get_model(kTentaclPath);
+	auto enemy_fbx_model = res::get_model(lTentaclFBXPath);
     auto wall_model = res::get_model(kWallPath);
     auto module_1_model = res::get_model(kModule1Path);
     auto module_2_model = res::get_model(kModule2Path);
@@ -526,24 +541,55 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
-#pragma region Animations
+    ////testing enemy fbx
+	auto enemy_fbx = GameObject::Create(game_scene_root);
+    enemy_fbx->transform_->set_scale(glm::vec3(2.0f));
+	enemy_fbx->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+	enemy_fbx->transform_->add_position(glm::vec3(2.0f, 0.0f, 2.0f));
+    enemy_fbx->AddComponent(make_shared<components::MeshRenderer>(enemy_fbx_model, GBufferPassShader));
 
-    auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
+#pragma region Animations
+	auto enemy_anim = res::get_animation(lTentaclFBXPath, 0, enemy_fbx_model->path_);
+	enemy_fbx->AddComponent(make_shared<components::Animator>());
+	enemy_fbx->GetComponent<components::Animator>()->AddAnimation("Idle", enemy_anim);
+	enemy_fbx->GetComponent<components::Animator>()->PlayAnimation("Idle");
+
+    auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
+    auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
+	auto F_anim_idle = res::get_animation(kFemalePlayerMeshPath, 2, F_player_model->path_);
+    auto F_anim_pull = res::get_animation(kFemalePlayerMeshPath, 3, F_player_model->path_);
+	auto F_anim_upgrade = res::get_animation(kFemalePlayerMeshPath, 4, F_player_model->path_);
+	auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 5, F_player_model->path_);
 
     player_1->AddComponent(make_shared<components::Animator>());
-    player_1->GetComponent<components::Animator>()->AddAnimation("Run", F_anim_run);
-    player_1->GetComponent<components::Animator>()->PlayAnimation("Run");
+    player_1->GetComponent<components::Animator>()->AddAnimation("Damage", F_anim_gethit);
+	player_1->GetComponent<components::Animator>()->AddAnimation("Death", F_anim_getkilled); 
+	player_1->GetComponent<components::Animator>()->AddAnimation("Idle", F_anim_idle);
+	player_1->GetComponent<components::Animator>()->AddAnimation("Pull", F_anim_pull);
+	player_1->GetComponent<components::Animator>()->AddAnimation("Upgrade", F_anim_upgrade);
+	player_1->GetComponent<components::Animator>()->AddAnimation("Run", F_anim_run);
+
+    player_1->GetComponent<components::Animator>()->PlayAnimation("Idle");
 
 
-    auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
-    auto M_anim_idle = res::get_animation(kMalePlayerMeshPath, 0, M_player_model->path_);
+    auto M_anim_gethit = res::get_animation(kMalePlayerMeshPath, 0, M_player_model->path_);
+    auto M_anim_getkilled = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
+	auto M_anim_idle = res::get_animation(kMalePlayerMeshPath, 2, M_player_model->path_);
+    auto M_anim_pull = res::get_animation(kMalePlayerMeshPath, 3, M_player_model->path_);
+	auto M_anim_upgrade = res::get_animation(kMalePlayerMeshPath, 4, M_player_model->path_);
+	auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 5, M_player_model->path_);
 
     player_2->AddComponent(make_shared<components::Animator>());
-    player_2->GetComponent<components::Animator>()->AddAnimation("Idle", M_anim_idle);
-    player_2->GetComponent<components::Animator>()->AddAnimation("Run", M_anim_run);
-    //player_2->GetComponent<components::Animator>()->m_BlendingAnimation = M_anim_idle;
+    player_2->GetComponent<components::Animator>()->AddAnimation("Damage", M_anim_gethit);
+    player_2->GetComponent<components::Animator>()->AddAnimation("Death", M_anim_getkilled);
+	player_2->GetComponent<components::Animator>()->AddAnimation("Idle", M_anim_idle);
+	player_2->GetComponent<components::Animator>()->AddAnimation("Pull", M_anim_pull);
+	player_2->GetComponent<components::Animator>()->AddAnimation("Upgrade", M_anim_upgrade);
+	player_2->GetComponent<components::Animator>()->AddAnimation("Run", M_anim_run);
+
     player_2->GetComponent<components::Animator>()->PlayAnimation("Idle");
 
+    //player_2->GetComponent<components::Animator>()->m_BlendingAnimation = M_anim_getkilled;
 #pragma endregion Animations
 
     Rope rope = Rope
@@ -654,9 +700,9 @@ int main()
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     LBufferPassShader->Use();
-    LBufferPassShader->SetInt("irradianceMap", 8);
-    LBufferPassShader->SetInt("prefilterMap", 9);
-    LBufferPassShader->SetInt("brdfLUT", 10);
+    LBufferPassShader->SetInt("irradianceMap", 5);
+    LBufferPassShader->SetInt("prefilterMap", 6);
+    LBufferPassShader->SetInt("brdfLUT", 7);
 
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
@@ -682,7 +728,7 @@ int main()
     FloorShader->Use();
     FloorShader->SetMatrix4("projection_matrix", projection_matrix);
 
-    // cubemap->LoadHDRimg(window, *activeCamera);
+    //cubemap->LoadHDRimg(window, Global::i_->active_camera_);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     /*int scrWidth, scrHeight;
@@ -799,6 +845,7 @@ int main()
 
         player_1->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
         player_2->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
+		enemy_fbx->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
         utility::DebugCameraMovement(window, DebugCameraComponent->camera_, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
@@ -1019,6 +1066,9 @@ int main()
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.00f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity + 0.6f * std::sinf(glfwGetTime() * 0.75f));
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
+			//LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z), i, true);
+            //LightsManager::i_->BindCubeShadowMap(LBufferPassShader, i);
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
@@ -1035,7 +1085,21 @@ int main()
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
         LBufferPassShader->SetBool("slowed_time", postprocessor.slowed_time);
-        
+
+		
+		/*LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 0);
+        LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 1);
+        LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[0].x, lamp_h, room->lamp_positions[0].z), 0);
+		LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[1].x, lamp_h, room->lamp_positions[1].z), 1);
+		for (int i = 0; i < room->lamp_positions.size(); i++)
+		{
+			LightsManager::i_->RenderFromLightPov(i);
+		}
+        LightsManager::i_->RenderFromLightPov(16);
+        LightsManager::i_->RenderFromLightPov(16 + 1);*/
+
+
+
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
         

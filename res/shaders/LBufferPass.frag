@@ -15,12 +15,18 @@ uniform sampler2D brdfLUT;//7
 uniform sampler2D mask_texture; //8
 uniform sampler2D emissive_texture; //9
 
+
 uniform vec3 camera_position;
 
 const int MAX_LIGHTS = 16;
 uniform int light_num = 3;
 uniform vec3 light_positions[MAX_LIGHTS];
 uniform vec3 light_colors[MAX_LIGHTS];
+uniform  vec4 frag_pos_light_space;
+uniform float far_plane;
+
+uniform samplerCube cube_shadow_maps[MAX_LIGHTS]; //10
+uniform sampler2D plane_shadow_maps[MAX_LIGHTS]; //10 + 16 = 26
 
 uniform bool slowed_time;
 
@@ -136,7 +142,8 @@ vec3 CalcDirLight(DirLight light, vec3 V, vec3 N, float roughness, float metalli
 	return (kD * albedo / PI + specular) * radiance * NdotL;  
 }
 
-vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
+vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0)
+{
     vec3 L = normalize(light.position - World_position);
 	vec3 H = normalize(V + L);
 	float distance = length(light.position - World_position);
@@ -162,7 +169,8 @@ vec3 CalcPointLight(PointLight light, vec3 World_position, vec3 V, vec3 N, float
 }
 
 
-vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0){
+vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0)
+{
 	vec3 L = normalize (light.position - World_position);
 	vec3 H = normalize(V + L);
 	float distance = length(light.position - World_position);
@@ -190,6 +198,84 @@ vec3 CalcSpotLight(SpotLight light, vec3 World_position, vec3 V, vec3 N, float r
 	float NdotL = max(dot(N, L), 0.0);
 	return (kD * albedo / PI + specular) * radiance * NdotL;
 }
+
+float PlaneShadowCalculation(mat4x4 lightSpaceMatrix, vec3 lightPos, int lighyId, vec3 N, vec3 WordPosition)
+{
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(lightPos, 1.0);
+
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(plane_shadow_maps[lighyId], projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // calculate bias (based on depth map resolution and slope)
+    //vec3 normal = normalize(Normal);
+    vec3 lightDir = normalize(lightPos - WordPosition);
+    float bias = max(0.05 * (1.0 - dot(N, lightDir)), 0.005);
+    // check whether current frag pos is in shadow
+    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    // PCF
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(plane_shadow_maps[lighyId], 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(plane_shadow_maps[lighyId], projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+        }    
+    }
+    shadow /= 9.0;
+    
+    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+        
+    return shadow;
+}
+
+float PointShadowCalculation(vec3 fragPos, vec3 lightPos, samplerCube shadowCubeMap, vec3 N, vec3 WordPosition)
+{
+    // Calculate the vector from the fragment position to the light position
+    vec3 fragToLight = fragPos - lightPos;
+    float currentDepth = length(fragToLight);
+    
+    // Transform the vector to the [0,1] range
+    vec3 projCoords = fragToLight / currentDepth;
+    
+    // Get the closest depth value from the light's perspective
+    //float closestDepth = texture(shadowCubeMap, projCoords).r * far_plane;
+    
+    // Calculate bias to prevent shadow acne
+    float bias = 0.05;
+    
+    // Perform percentage-closer filtering (PCF)
+    float shadow = 0.0;
+    int samples = 20;
+    float offset = 1.0;
+    for(int x = -samples; x < samples; ++x)
+    {
+        for(int y = -samples; y < samples; ++y)
+        {
+            for(int z = -samples; z < samples; ++z)
+            {
+                float pcfDepth = texture(shadowCubeMap, projCoords + vec3(x, y, z) * offset / far_plane).r * far_plane;
+                shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+            }
+        }
+    }
+    shadow /= (samples * samples * samples);
+    
+    // Keep the shadow at 0.0 when outside the far_plane region of the light's frustum
+    if (currentDepth > far_plane)
+        shadow = 0.0;
+    
+    return shadow;
+}
+
 
 
 void main()
