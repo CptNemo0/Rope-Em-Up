@@ -552,7 +552,7 @@ int main()
 	auto enemy_anim = res::get_animation(lTentaclFBXPath, 0, enemy_fbx_model->path_);
 	enemy_fbx->AddComponent(make_shared<components::Animator>());
 	enemy_fbx->GetComponent<components::Animator>()->AddAnimation("Idle", enemy_anim);
-	enemy_fbx->GetComponent<components::Animator>()->PlayAnimation("Idle");
+	enemy_fbx->GetComponent<components::Animator>()->PlayAnimation("Idle", 1, 1.0f);
 
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
     auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
