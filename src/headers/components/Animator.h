@@ -1,11 +1,13 @@
 #pragma once
 #include "nlohmann/json.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include "../res/Resources.h"
 #include "../animation/Animation.h"
 #include "Component.h"
+#include "../Timer.h"
 #include "../typedef.h"
-#include <glm/gtx/matrix_decompose.hpp>
 
 namespace components
 {
@@ -21,6 +23,8 @@ namespace components
 		float m_BlendingTime;
 		float m_BlendFactor;
 
+		int priority_ = 0;
+
 	public:
 		s_ptr<anim::Animation> m_BlendingAnimation;
 		Animator(s_ptr<anim::Animation> animation);
@@ -30,9 +34,9 @@ namespace components
 		void UpdateAnimation(float dt);
 
 		void PlayAnimation(s_ptr<anim::Animation> pAnimation);
-		void PlayAnimation(const std::string& animationName);
+		void PlayAnimation(const std::string& animationName, int priority, float prio_time);
 
-		void SetAnimation(const string& animationName);
+		void SetAnimation(const string& animationName, int priority);
 
 		void AddAnimation(const std::string& name, s_ptr<anim::Animation> animation);
 		void RemoveAnimation(const std::string& name);

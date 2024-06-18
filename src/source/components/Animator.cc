@@ -58,23 +58,30 @@ void components::Animator::PlayAnimation(s_ptr<anim::Animation> animation)
 	m_CurrentTime = 0.0f;
 }
 
-void components::Animator::PlayAnimation(const std::string& animationName)
+void components::Animator::PlayAnimation(const std::string& animationName, int priority, float prio_time)
 {
-	if (m_Animations.contains(animationName))
+	if (m_Animations.contains(animationName) && priority >= priority_)
 	{
 		m_CurrentAnimation = m_Animations[animationName];
 		m_CurrentTime = 0.0f;
 		/*m_BlendingAnimation = m_Animations[animationName];
 		m_BlendFactor = 0.0f;*/
+		priority_ = priority;
+
+		Timer::AddTimer(prio_time, [this]()
+		{
+			priority_ = 0;
+		});
 	}
 }
 
-void components::Animator::SetAnimation(const string &animationName)
+void components::Animator::SetAnimation(const string &animationName, int priority)
 {
-	if (m_Animations.contains(animationName) && m_CurrentAnimation != m_Animations[animationName])
+	if (m_Animations.contains(animationName) && m_CurrentAnimation != m_Animations[animationName] && priority >= priority_)
 	{
 		m_CurrentAnimation = m_Animations[animationName];
 		m_CurrentTime = 0.0f;
+		priority_ = priority;
 	}
 }
 

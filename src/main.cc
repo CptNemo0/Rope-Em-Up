@@ -548,8 +548,6 @@ int main()
 	player_1->GetComponent<components::Animator>()->AddAnimation("Upgrade", F_anim_upgrade);
 	player_1->GetComponent<components::Animator>()->AddAnimation("Run", F_anim_run);
 
-    player_1->GetComponent<components::Animator>()->PlayAnimation("Idle");
-
 
     auto M_anim_gethit = res::get_animation(kMalePlayerMeshPath, 0, M_player_model->path_);
     auto M_anim_getkilled = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
@@ -565,8 +563,6 @@ int main()
 	player_2->GetComponent<components::Animator>()->AddAnimation("Pull", M_anim_pull);
 	player_2->GetComponent<components::Animator>()->AddAnimation("Upgrade", M_anim_upgrade);
 	player_2->GetComponent<components::Animator>()->AddAnimation("Run", M_anim_run);
-
-    player_2->GetComponent<components::Animator>()->PlayAnimation("Idle");
 
     //player_2->GetComponent<components::Animator>()->m_BlendingAnimation = M_anim_getkilled;
 #pragma endregion Animations

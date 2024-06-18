@@ -155,7 +155,7 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 					{
 						cout << "ATTACK!!\n";
 						machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
-						machine->target_player_->GetComponent<components::Animator>()->PlayAnimation("Damage");
+						machine->target_player_->GetComponent<components::Animator>()->PlayAnimation("Damage", 2, 1.0f);
 						//// to implement enemy attack aniamtion
 
 					}

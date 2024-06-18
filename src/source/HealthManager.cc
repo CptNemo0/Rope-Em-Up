@@ -64,7 +64,7 @@ void HealthManager::DeathUpdate()
 
 				if (h->type_ == PLAYER)
 				{
-					h->gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Death");
+					h->gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Death", 5, 1.0f);
 				}
 				else
 				{

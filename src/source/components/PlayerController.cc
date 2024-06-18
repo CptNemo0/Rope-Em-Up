@@ -32,11 +32,11 @@ void components::PlayerController::Update()
         move_generator_->magnitude_ = speed_;
         if (glm::length(direction_) > 0.0f)
         {
-            gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Run");
+            gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Run", 1);
         }
         else
         {
-            gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Idle");
+            gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Idle", 1);
         }
     }
 
