@@ -62,8 +62,15 @@ void HealthManager::DeathUpdate()
 				where_ = h->gameObject_.lock()->transform_->get_position();
 				what_ = h->type_;
 
-				ManageDeath(h->gameObject_.lock());
-				h->gameObject_.lock()->Destroy();
+				if (h->type_ == PLAYER)
+				{
+					h->gameObject_.lock()->GetComponent<components::Animator>()->PlayAnimation("Death");
+				}
+				else
+				{
+					ManageDeath(h->gameObject_.lock());
+					h->gameObject_.lock()->Destroy();
+				}
 			}
 		}
 		i++;

@@ -4,6 +4,8 @@
 #include "../SteeringBehaviors.h"
 #include "EnemyStateMachine.h"
 #include "headers/components/HealthComponent.h"
+#include <headers/components/Animator.h>
+
 namespace ai
 {
 	class EnemyStateMachine;

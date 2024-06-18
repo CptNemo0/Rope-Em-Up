@@ -1,7 +1,7 @@
 #include "./headers/components/Animator.h"
 
 components::Animator::Animator(s_ptr<anim::Animation> animation)
-	: m_CurrentAnimation(animation), m_CurrentTime(0.0f), m_BlendingTime(0.0f), m_BlendFactor(0.5f)
+	: m_CurrentAnimation(animation), m_CurrentTime(0.0f), m_BlendingTime(0.0f), m_BlendFactor(0.0f)
 {
 	m_FinalBoneMatrices.reserve(MAX_BONES);
 
@@ -36,11 +36,19 @@ void components::Animator::UpdateAnimation(float dt)
 		m_BlendingTime += dt;
 		m_BlendingTime = fmod(m_BlendingTime, m_BlendingAnimation->GetDuration());
 		BlendTwoAnimations(m_BlendingAnimation, m_BlendFactor);
-	}
+		m_BlendFactor += dt;
+		if (m_BlendFactor > 1.0f)
+		{
+			m_CurrentAnimation = m_BlendingAnimation;
+			m_CurrentTime = m_BlendingTime;
+			m_BlendingAnimation = nullptr;
+			m_BlendFactor = 0.0f;
+		}
+	}*/
 	if (m_CurrentAnimation)
 	{
 		m_CurrentAnimation->model_->UpdateBoneTransforms(m_FinalBoneMatrices);
-	}*/
+	}
 
 }
 
@@ -56,6 +64,8 @@ void components::Animator::PlayAnimation(const std::string& animationName)
 	{
 		m_CurrentAnimation = m_Animations[animationName];
 		m_CurrentTime = 0.0f;
+		/*m_BlendingAnimation = m_Animations[animationName];
+		m_BlendFactor = 0.0f;*/
 	}
 }
 

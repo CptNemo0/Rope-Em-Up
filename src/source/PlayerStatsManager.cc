@@ -72,6 +72,8 @@ void PlayerStatsManager::LevelUp()
 	exp_ = 0.0f;
 	player_1_->GetComponent<components::HealthComponent>()->health_ = max_health_;
 	player_2_->GetComponent<components::HealthComponent>()->health_ = max_health_;
+	player_1_->GetComponent<components::Animator>()->PlayAnimation("Upgrade");
+	player_2_->GetComponent<components::Animator>()->PlayAnimation("Upgrade");
 }
 
 void PlayerStatsManager::AddExp(float exp)

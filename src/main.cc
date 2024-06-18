@@ -533,22 +533,42 @@ int main()
 
 #pragma region Animations
 
-    auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
+    auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
+    auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
+	auto F_anim_idle = res::get_animation(kFemalePlayerMeshPath, 2, F_player_model->path_);
+    auto F_anim_pull = res::get_animation(kFemalePlayerMeshPath, 3, F_player_model->path_);
+	auto F_anim_upgrade = res::get_animation(kFemalePlayerMeshPath, 4, F_player_model->path_);
+	auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 5, F_player_model->path_);
 
     player_1->AddComponent(make_shared<components::Animator>());
-    player_1->GetComponent<components::Animator>()->AddAnimation("Run", F_anim_run);
-    player_1->GetComponent<components::Animator>()->PlayAnimation("Run");
+    player_1->GetComponent<components::Animator>()->AddAnimation("Damage", F_anim_gethit);
+	player_1->GetComponent<components::Animator>()->AddAnimation("Death", F_anim_getkilled); 
+	player_1->GetComponent<components::Animator>()->AddAnimation("Idle", F_anim_idle);
+	player_1->GetComponent<components::Animator>()->AddAnimation("Pull", F_anim_pull);
+	player_1->GetComponent<components::Animator>()->AddAnimation("Upgrade", F_anim_upgrade);
+	player_1->GetComponent<components::Animator>()->AddAnimation("Run", F_anim_run);
+
+    player_1->GetComponent<components::Animator>()->PlayAnimation("Idle");
 
 
-    auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
-    auto M_anim_idle = res::get_animation(kMalePlayerMeshPath, 0, M_player_model->path_);
+    auto M_anim_gethit = res::get_animation(kMalePlayerMeshPath, 0, M_player_model->path_);
+    auto M_anim_getkilled = res::get_animation(kMalePlayerMeshPath, 1, M_player_model->path_);
+	auto M_anim_idle = res::get_animation(kMalePlayerMeshPath, 2, M_player_model->path_);
+    auto M_anim_pull = res::get_animation(kMalePlayerMeshPath, 3, M_player_model->path_);
+	auto M_anim_upgrade = res::get_animation(kMalePlayerMeshPath, 4, M_player_model->path_);
+	auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 5, M_player_model->path_);
 
     player_2->AddComponent(make_shared<components::Animator>());
-    player_2->GetComponent<components::Animator>()->AddAnimation("Idle", M_anim_idle);
-    player_2->GetComponent<components::Animator>()->AddAnimation("Run", M_anim_run);
-    //player_2->GetComponent<components::Animator>()->m_BlendingAnimation = M_anim_idle;
+    player_2->GetComponent<components::Animator>()->AddAnimation("Damage", M_anim_gethit);
+    player_2->GetComponent<components::Animator>()->AddAnimation("Death", M_anim_getkilled);
+	player_2->GetComponent<components::Animator>()->AddAnimation("Idle", M_anim_idle);
+	player_2->GetComponent<components::Animator>()->AddAnimation("Pull", M_anim_pull);
+	player_2->GetComponent<components::Animator>()->AddAnimation("Upgrade", M_anim_upgrade);
+	player_2->GetComponent<components::Animator>()->AddAnimation("Run", M_anim_run);
+
     player_2->GetComponent<components::Animator>()->PlayAnimation("Idle");
 
+    //player_2->GetComponent<components::Animator>()->m_BlendingAnimation = M_anim_getkilled;
 #pragma endregion Animations
 
     Rope rope = Rope
