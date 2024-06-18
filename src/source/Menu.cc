@@ -50,7 +50,7 @@ void Menu::OnAction(Action action, input::State state)
         }
         case Action::PULL_ROPE:
         {
-            if (state.button)
+            if (glm::min(state.axis.x, state.axis.y) >= 0.95f)
             {
                 if (layout_[current_pos_]->OnPress)
                 {
