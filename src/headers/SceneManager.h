@@ -5,6 +5,8 @@
 #include <functional>
 
 #include "GameObject.h"
+#include "Camera.h"
+#include "global.h"
 #include "typedef.h"
 
 struct Scene
@@ -12,6 +14,7 @@ struct Scene
     s_ptr<GameObject> scene_root_;
     s_ptr<GameObject> HUD_root_;
     s_ptr<GameObject> HUD_text_root_;
+    s_ptr<llr::Camera> camera_;
 
     Scene()
     {
@@ -32,6 +35,7 @@ struct Scene
         scene_root_->Continue();
         HUD_root_->Continue();
         HUD_text_root_->Continue();
+        Global::i_->active_camera_ = camera_;
     }
 
     std::function<void(float)> OnUpdate;
