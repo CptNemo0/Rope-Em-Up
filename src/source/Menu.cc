@@ -4,19 +4,21 @@ void Menu::UpdateSelection()
 {
     if (selection_outline_->transform_->parent_)
     {
+        selection_outline_->transform_->parent_->scale({1.0f / 1.1f, 1.0f / 1.1f, 1.0f});
         selection_outline_->transform_->parent_->RemoveChild(selection_outline_->transform_);
     }
     layout_[current_pos_]->object_->transform_->AddChild(selection_outline_->transform_);
+    selection_outline_->transform_->parent_->scale({1.1f, 1.1f, 1.0f});
 }
 
 Menu::Menu()
 {
-    auto selection_texture_ = res::get_texture("res/textures/active_room.png");
+    auto selection_texture_ = res::get_texture("res/textures/color.png");
     auto HUD_shader = res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag");
 
     selection_outline_ = GameObject::Create();
-    selection_outline_->transform_->set_scale({1.1f, 1.1f, 1.0f});
-    selection_outline_->AddComponent(make_shared<components::HUDRenderer>(selection_texture_, HUD_shader));
+    selection_outline_->transform_->set_scale({0.95f, 0.9f, 1.0f});
+    selection_outline_->AddComponent(make_shared<components::HUDRenderer>(selection_texture_, HUD_shader, glm::vec4(0.0f, 0.0f, 0.0f, 0.15f)));
 }
 
 void Menu::OnAction(Action action, input::State state)

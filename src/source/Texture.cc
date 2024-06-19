@@ -4,6 +4,8 @@
 tmp::Texture::Texture(const string& path)
     : path_(path)
 {
+    stbi_set_flip_vertically_on_load(false);
+
     id_ = 0;
     glGenTextures(1, &id_);
     glBindTexture(GL_TEXTURE_2D, id_);

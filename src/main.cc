@@ -639,13 +639,13 @@ int main()
     DebugCamera->AddComponent(make_shared<components::CameraComponent>(debugCamera));
 
     auto menuCamera = make_shared<llr::Camera>();
-    menuCamera->set_fov(kFov);
+    menuCamera->set_fov(80.0f);
     menuCamera->set_near(kNear);
     menuCamera->set_far(kFar);
     menuCamera->set_aspect_ratio(((float)mode->width / (float)mode->height));
     menuCamera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
     menuCamera->set_pitch(0.0f);
-    menuCamera->set_yaw(180.0f);
+    menuCamera->set_yaw(0.0f);
 
     auto MenuCamera = GameObject::Create(camera_root);
     MenuCamera->AddComponent(make_shared<components::CameraComponent>(menuCamera));
@@ -794,12 +794,18 @@ int main()
     auto menu = make_shared<Menu>();
     input::InputManager::i_->AddObserver(0, menu);
 
+    auto logo = GameObject::Create(menu_HUD_root);
+    logo->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    logo->transform_->scale({0.333f, 0.333f, 1.0f});
+    logo->transform_->set_position({0.0f, 0.666f, 0.0f});
+    logo->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/logo.png"), HUDshader));
+
     auto button1 = GameObject::Create(menu_HUD_root);
     button1->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
-    button1->transform_->scale_in({0.0f, -1.0f, 0.0f}, 0.5f);
-    button1->transform_->scale({0.5f, 1.0f, 1.0f});
-    button1->transform_->scale(glm::vec3(0.8f));
-    button1->AddComponent(make_shared<components::HUDRenderer>(HUD_texture, HUDshader));
+    button1->transform_->scale({3.333f, 1.0f, 1.0f});
+    button1->transform_->scale({0.333f, 0.333f, 1.0f});
+    button1->transform_->scale({0.9f, 0.9f, 1.0f});
+    button1->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/new_game.png"), HUDshader));
     menu->layout_[{0, 0}] = make_shared<MenuItem>(button1, []()
     {
         SceneManager::i_->SwitchScene("game");
@@ -807,10 +813,11 @@ int main()
 
     auto button2 = GameObject::Create(menu_HUD_root);
     button2->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
-    button2->transform_->scale_in({0.0f, 1.0f, 0.0f}, 0.5f);
-    button2->transform_->scale({0.5f, 1.0f, 1.0f});
-    button2->transform_->scale(glm::vec3(0.8f));
-    button2->AddComponent(make_shared<components::HUDRenderer>(HUD_texture2, HUDshader));
+    button2->transform_->scale({3.333f, 1.0f, 1.0f});
+    button2->transform_->scale({0.333f, 0.333f, 1.0f});
+    button2->transform_->scale({0.9f, 0.9f, 1.0f});
+    button2->transform_->set_position({0.0f, -0.666f, 0.0f});
+    button2->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/quit.png"), HUDshader));
     menu->layout_[{0, 1}] = make_shared<MenuItem>(button2, [&button2]()
     {
         button2->transform_->add_rotation(glm::vec3(0.0f, 0.0f, 10.0f));
@@ -1213,53 +1220,55 @@ int main()
         if (SceneManager::i_->current_scene_->HUD_text_root_)
             SceneManager::i_->current_scene_->HUD_text_root_->PropagateUpdate();
 
-        float p1p = 0.0;
-        float p2p = 0.0;
-        if (player_1 != nullptr)
+        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["game"])
         {
-            auto p1hc = player_1->GetComponent<components::HealthComponent>();
-            p1p = p1hc->health_ / p1hc->max_health_;
-        }
+            float p1p = 0.0;
+            float p2p = 0.0;
+            if (player_1 != nullptr)
+            {
+                auto p1hc = player_1->GetComponent<components::HealthComponent>();
+                p1p = p1hc->health_ / p1hc->max_health_;
+            }
 
-        if (p1p < 0.25f)
-        {
-            player_1_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(5.0f, 0.0, 0.0, 1.0f);
-            auto scale = glm::vec3( 0.98f, 0.96f, 0.0f )+ (sinf(glfwGetTime() * (1 / p1p)) * 0.5f + 0.5f) * glm::vec3(0.0f, 1.0f, 0.0f);
-            player_1_hp_bar->transform_->set_scale(scale);
-        }
-        else
-        {
-            player_1_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0, 1.0, 1.0f);
-            player_1_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f });
-        }
+            if (p1p < 0.25f)
+            {
+                player_1_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(5.0f, 0.0, 0.0, 1.0f);
+                auto scale = glm::vec3( 0.98f, 0.96f, 0.0f )+ (sinf(glfwGetTime() * (1 / p1p)) * 0.5f + 0.5f) * glm::vec3(0.0f, 1.0f, 0.0f);
+                player_1_hp_bar->transform_->set_scale(scale);
+            }
+            else
+            {
+                player_1_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0, 1.0, 1.0f);
+                player_1_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f });
+            }
 
-        HUDBarShader->Use();
-        HUDBarShader->SetFloat("percentage", p1p);
-        player_1_hp_bar_border->PropagateUpdate();
+            HUDBarShader->Use();
+            HUDBarShader->SetFloat("percentage", p1p);
+            player_1_hp_bar_border->PropagateUpdate();
 
 
-        if (player_2 != nullptr)
-        {
-            auto p2hc = player_2->GetComponent<components::HealthComponent>();
-            p2p = p2hc->health_ / p2hc->max_health_;
+            if (player_2 != nullptr)
+            {
+                auto p2hc = player_2->GetComponent<components::HealthComponent>();
+                p2p = p2hc->health_ / p2hc->max_health_;
+            }
+
+            if (p2p < 0.25f)
+            {
+                player_2_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(5.0f, 0.0, 0.0, 1.0f);
+                auto scale = glm::vec3(0.98f, 0.96f, 0.0f) + (sinf(glfwGetTime() * (1 / p2p)) * 0.5f + 0.5f) * glm::vec3(0.0f, 1.0f, 0.0f);
+                player_2_hp_bar->transform_->set_scale(scale);
+            }
+            else
+            {
+                player_2_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0, 1.0, 1.0f);
+                player_2_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f });
+            }
+
+            HUDBarShader->Use();
+            HUDBarShader->SetFloat("percentage", p2p);
+            player_2_hp_bar_border->PropagateUpdate();
         }
-
-        if (p2p < 0.25f)
-        {
-            player_2_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(5.0f, 0.0, 0.0, 1.0f);
-            auto scale = glm::vec3(0.98f, 0.96f, 0.0f) + (sinf(glfwGetTime() * (1 / p2p)) * 0.5f + 0.5f) * glm::vec3(0.0f, 1.0f, 0.0f);
-            player_2_hp_bar->transform_->set_scale(scale);
-        }
-        else
-        {
-            player_2_hp_bar->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0, 1.0, 1.0f);
-            player_2_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f });
-        }
-
-        HUDBarShader->Use();
-        HUDBarShader->SetFloat("percentage", p2p);
-        player_2_hp_bar_border->PropagateUpdate();
-        
 
         frame++;
         fps += 1.0f / delta_time;
@@ -1286,241 +1295,241 @@ int main()
         
 #pragma region ImGUI
         
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        // ImGui_ImplOpenGL3_NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
+        // ImGui::NewFrame();
 
-        ImGui::Begin("Postprocessor");
-        ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SliderFloat("Vignete Contrast", &postprocessor.vignete_contrast_, 0.0f, 200.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SliderFloat("Vignete Amount", &postprocessor.vignete_amount_, 0.0f, 0.5f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SliderFloat("Noise Amount", &postprocessor.noise_amount_, 0.0f, 0.5f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::End();
+        // ImGui::Begin("Postprocessor");
+        // ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        // ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        // ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        // ImGui::SliderFloat("Vignete Contrast", &postprocessor.vignete_contrast_, 0.0f, 200.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        // ImGui::SliderFloat("Vignete Amount", &postprocessor.vignete_amount_, 0.0f, 0.5f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        // ImGui::SliderFloat("Noise Amount", &postprocessor.noise_amount_, 0.0f, 0.5f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        // ImGui::End();
 
-        ImGui::Begin("Camera");
-        //chose the camera
-        const char* items[] = { "Isometric", "Top Down", "Debugging" };
-        static int selectedItem = 0;
-        if (ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items)))
-        {
-            switch (selectedItem)
-            {
-                case 0:
-                    Global::i_->active_camera_ = isometricCameraComponent->camera_;
-                    break;
-                case 1:
-                    Global::i_->active_camera_ = topDownCameraComponent->camera_;
-                    break;
-                case 2:
-                    Global::i_->active_camera_ = DebugCameraComponent->camera_;
-                    break;
-            }
-        }
-        switch (selectedItem)
-        {
-        case 0:
-            ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 20.0f, "%.0f");
-            ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, -10.0f, 10.0f, "%.0f");
-            ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, -10.0f, 10.0f, "%.0f");
-            break;
-        case 1:
-            ImGui::SliderFloat("Y", &topDownCameraComponent->height_, 1.0f, 100.0f, "%.2f");
-            break;
-        case 2:
-            break;
-        }
-        ImGui::End();
+        // ImGui::Begin("Camera");
+        // //chose the camera
+        // const char* items[] = { "Isometric", "Top Down", "Debugging" };
+        // static int selectedItem = 0;
+        // if (ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items)))
+        // {
+        //     switch (selectedItem)
+        //     {
+        //         case 0:
+        //             Global::i_->active_camera_ = isometricCameraComponent->camera_;
+        //             break;
+        //         case 1:
+        //             Global::i_->active_camera_ = topDownCameraComponent->camera_;
+        //             break;
+        //         case 2:
+        //             Global::i_->active_camera_ = DebugCameraComponent->camera_;
+        //             break;
+        //     }
+        // }
+        // switch (selectedItem)
+        // {
+        // case 0:
+        //     ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 20.0f, "%.0f");
+        //     ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, -10.0f, 10.0f, "%.0f");
+        //     ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, -10.0f, 10.0f, "%.0f");
+        //     break;
+        // case 1:
+        //     ImGui::SliderFloat("Y", &topDownCameraComponent->height_, 1.0f, 100.0f, "%.2f");
+        //     break;
+        // case 2:
+        //     break;
+        // }
+        // ImGui::End();
 
-        ImGui::Begin("Lights");
-        ImGui::LabelText("Point Light", "Point Light");
-        ImGui::ColorEdit3("Point L Color", (float*)&point_light_color);
-        ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 1000.0f);
-        ImGui::SliderFloat("Height", &lamp_h, 0.0f, 10.0f, "%0.2f");
+        // ImGui::Begin("Lights");
+        // ImGui::LabelText("Point Light", "Point Light");
+        // ImGui::ColorEdit3("Point L Color", (float*)&point_light_color);
+        // ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 1000.0f);
+        // ImGui::SliderFloat("Height", &lamp_h, 0.0f, 10.0f, "%0.2f");
 
-        ImGui::LabelText("Directional Light", "Directional Light");
-        ImGui::ColorEdit3("Dir L Color", (float*)&dir_light_color);
-        ImGui::DragFloat("Dir Light Intensity", &dir_light_intensity, 0.01f, 0.0f, 10.0f);
-        ImGui::DragFloat3(" Dir Light Direction", glm::value_ptr(dir_light_direction), 0.05f, -1.0f, 1.0f);
+        // ImGui::LabelText("Directional Light", "Directional Light");
+        // ImGui::ColorEdit3("Dir L Color", (float*)&dir_light_color);
+        // ImGui::DragFloat("Dir Light Intensity", &dir_light_intensity, 0.01f, 0.0f, 10.0f);
+        // ImGui::DragFloat3(" Dir Light Direction", glm::value_ptr(dir_light_direction), 0.05f, -1.0f, 1.0f);
 
-        ImGui::LabelText("Spot Light", "Spot Light");
-        ImGui::ColorEdit3("Spot L Color", (float*)&spot_light_color);
-        ImGui::DragFloat("Spot L Intensity", &spot_light_intensity, 0.01f, 0.0f, 10.0f);
-        ImGui::DragFloat3("Spot L Position", glm::value_ptr(spot_light_position), 0.05f, -100.0f, 100.0f);
-        ImGui::DragFloat3("Spot L Direction", glm::value_ptr(spot_light_direction), 0.05f, -1.0f, 1.0f);
-        ImGui::DragFloat("Spot L Cut Off", &spot_light_cut_off, 0.01f, 0.0f, 50.0f);
-        ImGui::DragFloat("Spot L Outer Cut Off", &spot_light_outer_cut_off, 0.01f, 0.0f, 50.0f);
+        // ImGui::LabelText("Spot Light", "Spot Light");
+        // ImGui::ColorEdit3("Spot L Color", (float*)&spot_light_color);
+        // ImGui::DragFloat("Spot L Intensity", &spot_light_intensity, 0.01f, 0.0f, 10.0f);
+        // ImGui::DragFloat3("Spot L Position", glm::value_ptr(spot_light_position), 0.05f, -100.0f, 100.0f);
+        // ImGui::DragFloat3("Spot L Direction", glm::value_ptr(spot_light_direction), 0.05f, -1.0f, 1.0f);
+        // ImGui::DragFloat("Spot L Cut Off", &spot_light_cut_off, 0.01f, 0.0f, 50.0f);
+        // ImGui::DragFloat("Spot L Outer Cut Off", &spot_light_outer_cut_off, 0.01f, 0.0f, 50.0f);
 
         
-        if (ImGui::Checkbox("SSAO", &use_ssao))
-        {
-            LBufferPassShader->Use();
-            LBufferPassShader->SetBool("use_ssao", use_ssao);
-        }
+        // if (ImGui::Checkbox("SSAO", &use_ssao))
+        // {
+        //     LBufferPassShader->Use();
+        //     LBufferPassShader->SetBool("use_ssao", use_ssao);
+        // }
 
-        ImGui::Checkbox("Bloom", &lbuffer.bloom_);
-        ImGui::End();
+        // ImGui::Checkbox("Bloom", &lbuffer.bloom_);
+        // ImGui::End();
 
-        ImGui::Begin("Halt test");
-        static bool cb = false;
-        if (ImGui::Checkbox("Halted", &cb))
-        {
-            if (cb)
-            {
-                SceneManager::i_->current_scene_->scene_root_->Halt();
-                SceneManager::i_->current_scene_->HUD_root_->Halt();
-                SceneManager::i_->current_scene_->HUD_text_root_->Halt();
-            }
-            else
-            {
-                SceneManager::i_->current_scene_->scene_root_->Continue();
-                SceneManager::i_->current_scene_->HUD_root_->Continue();
-                SceneManager::i_->current_scene_->HUD_text_root_->Continue();
-            }
-        }
-        ImGui::End();
+        // ImGui::Begin("Halt test");
+        // static bool cb = false;
+        // if (ImGui::Checkbox("Halted", &cb))
+        // {
+        //     if (cb)
+        //     {
+        //         SceneManager::i_->current_scene_->scene_root_->Halt();
+        //         SceneManager::i_->current_scene_->HUD_root_->Halt();
+        //         SceneManager::i_->current_scene_->HUD_text_root_->Halt();
+        //     }
+        //     else
+        //     {
+        //         SceneManager::i_->current_scene_->scene_root_->Continue();
+        //         SceneManager::i_->current_scene_->HUD_root_->Continue();
+        //         SceneManager::i_->current_scene_->HUD_text_root_->Continue();
+        //     }
+        // }
+        // ImGui::End();
 
-        ImGui::Begin("Player Stats Manager");
-        ImGui::SliderFloat("Exp", &(PlayerStatsManager::i_->exp_), 0.0f, 1000.0f, "%0.0f");
-        ImGui::SameLine();
-        if (ImGui::Button("Add Exp"))
-        {
-            PlayerStatsManager::i_->AddExp(100.0f);
-        }
-        ImGui::SliderInt("Unspent Levels", &(PlayerStatsManager::i_->unspent_levels_), 0, 20);
+        // ImGui::Begin("Player Stats Manager");
+        // ImGui::SliderFloat("Exp", &(PlayerStatsManager::i_->exp_), 0.0f, 1000.0f, "%0.0f");
+        // ImGui::SameLine();
+        // if (ImGui::Button("Add Exp"))
+        // {
+        //     PlayerStatsManager::i_->AddExp(100.0f);
+        // }
+        // ImGui::SliderInt("Unspent Levels", &(PlayerStatsManager::i_->unspent_levels_), 0, 20);
 
-        ImGui::SliderFloat("Speed", &(PlayerStatsManager::i_->speed_), 0.0f, 2000.0f, "%0.0f");
-        ImGui::SameLine();
-        if (ImGui::Button("LevelUp Speed"))
-        {
-            PlayerStatsManager::i_->LevelUpSpeed();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("LevelDown Speed"))
-        {
-            PlayerStatsManager::i_->LevelDownSpeed();
-        }
+        // ImGui::SliderFloat("Speed", &(PlayerStatsManager::i_->speed_), 0.0f, 2000.0f, "%0.0f");
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelUp Speed"))
+        // {
+        //     PlayerStatsManager::i_->LevelUpSpeed();
+        // }
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelDown Speed"))
+        // {
+        //     PlayerStatsManager::i_->LevelDownSpeed();
+        // }
 
-        ImGui::SliderFloat("Pull", &(PlayerStatsManager::i_->pull_power_), 0.0f, 3000.0f, "%0.0f");
-        ImGui::SameLine();
-        if (ImGui::Button("LevelUp Pull"))
-        {
-            PlayerStatsManager::i_->LevelUpPull();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("LevelDown Pull"))
-        {
-            PlayerStatsManager::i_->LevelDownPull();
-        }
+        // ImGui::SliderFloat("Pull", &(PlayerStatsManager::i_->pull_power_), 0.0f, 3000.0f, "%0.0f");
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelUp Pull"))
+        // {
+        //     PlayerStatsManager::i_->LevelUpPull();
+        // }
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelDown Pull"))
+        // {
+        //     PlayerStatsManager::i_->LevelDownPull();
+        // }
 
-        ImGui::SliderFloat("Intertia", &(PlayerStatsManager::i_->rope_drag_), 0.0f, 1.0f, "%0.5f");
-        ImGui::SameLine();
-        if (ImGui::Button("LevelUp Intertia"))
-        {
-            PlayerStatsManager::i_->LevelUpDrag();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("LevelDown Intertia"))
-        {
-            PlayerStatsManager::i_->LevelDownDrag();
-        }
+        // ImGui::SliderFloat("Intertia", &(PlayerStatsManager::i_->rope_drag_), 0.0f, 1.0f, "%0.5f");
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelUp Intertia"))
+        // {
+        //     PlayerStatsManager::i_->LevelUpDrag();
+        // }
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelDown Intertia"))
+        // {
+        //     PlayerStatsManager::i_->LevelDownDrag();
+        // }
 
-        ImGui::SliderFloat("Rope weight", &(PlayerStatsManager::i_->rope_weight_), 0.0f, 1.0f, "%0.5f");
-        ImGui::SameLine();
-        if (ImGui::Button("LevelUp Weight"))
-        {
-            PlayerStatsManager::i_->LevelUpWeight();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("LevelDown Weight"))
-        {
-            PlayerStatsManager::i_->LevelDownWeight();
-        }
+        // ImGui::SliderFloat("Rope weight", &(PlayerStatsManager::i_->rope_weight_), 0.0f, 1.0f, "%0.5f");
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelUp Weight"))
+        // {
+        //     PlayerStatsManager::i_->LevelUpWeight();
+        // }
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelDown Weight"))
+        // {
+        //     PlayerStatsManager::i_->LevelDownWeight();
+        // }
 
-        ImGui::SliderFloat("Max Health", &(PlayerStatsManager::i_->max_health_), 0.0f, 1000.0f, "%0.1f");
-        ImGui::SameLine();
-        if (ImGui::Button("LevelUp Health"))
-        {
-            PlayerStatsManager::i_->LevelUpHealth();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("LevelDown Health"))
-        {
-            PlayerStatsManager::i_->LevelDownHealth();
-        }
+        // ImGui::SliderFloat("Max Health", &(PlayerStatsManager::i_->max_health_), 0.0f, 1000.0f, "%0.1f");
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelUp Health"))
+        // {
+        //     PlayerStatsManager::i_->LevelUpHealth();
+        // }
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelDown Health"))
+        // {
+        //     PlayerStatsManager::i_->LevelDownHealth();
+        // }
 
-        ImGui::SliderInt("Segment number", &(PlayerStatsManager::i_->segments_num_), 0, 100);
-        ImGui::SameLine();
-        if (ImGui::Button("LevelUp Segment number"))
-        {
-            PlayerStatsManager::i_->LevelUpSegments();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("LevelDown Segment number"))
-        {
-            PlayerStatsManager::i_->LevelDownSegments();
-        }
+        // ImGui::SliderInt("Segment number", &(PlayerStatsManager::i_->segments_num_), 0, 100);
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelUp Segment number"))
+        // {
+        //     PlayerStatsManager::i_->LevelUpSegments();
+        // }
+        // ImGui::SameLine();
+        // if (ImGui::Button("LevelDown Segment number"))
+        // {
+        //     PlayerStatsManager::i_->LevelDownSegments();
+        // }
 
-        if (ImGui::Button("Apply Level"))
-        {
-            PlayerStatsManager::i_->Apply();
-        }
-        ImGui::End();
+        // if (ImGui::Button("Apply Level"))
+        // {
+        //     PlayerStatsManager::i_->Apply();
+        // }
+        // ImGui::End();
 
-        ImGui::Begin("Serialize");
+        // ImGui::Begin("Serialize");
 
-        static char filename_buf[32] = "save.json";
-        ImGui::InputText("File", filename_buf, 32);
+        // static char filename_buf[32] = "save.json";
+        // ImGui::InputText("File", filename_buf, 32);
 
-        if (ImGui::Button("Serialize"))
-        {
-            json j = rlg.Serialize();
-            j["rope"] = rope.Serialize();
-            j["player_1"] = player_1->Serialize();
-            j["player_2"] = player_2->Serialize();
+        // if (ImGui::Button("Serialize"))
+        // {
+        //     json j = rlg.Serialize();
+        //     j["rope"] = rope.Serialize();
+        //     j["player_1"] = player_1->Serialize();
+        //     j["player_2"] = player_2->Serialize();
 
-            j["current_room"] = { room->position.x, room->position.y };
+        //     j["current_room"] = { room->position.x, room->position.y };
             
-            std::ofstream save_file;
-            save_file.open(filename_buf);
-            save_file << j.dump();
-            save_file.close();
-        }
+        //     std::ofstream save_file;
+        //     save_file.open(filename_buf);
+        //     save_file << j.dump();
+        //     save_file.close();
+        // }
 
-        if (ImGui::Button("Deserialize"))
-        {
-            std::ifstream save_file;
-            save_file.open(filename_buf);
-            json j = json::parse(save_file);
-            save_file.close();
+        // if (ImGui::Button("Deserialize"))
+        // {
+        //     std::ifstream save_file;
+        //     save_file.open(filename_buf);
+        //     json j = json::parse(save_file);
+        //     save_file.close();
 
-            rlg.Destroy();
-            rlg = generation::RoomLayoutGenerator(j, room_root);
-            glm::ivec2 current_room = { j["current_room"][0], j["current_room"][1] };
-            room = &rlg.rooms[current_room];
-            pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
-            pbd::PBDManager::i_->set_walls(walls);
-            rg_settings.generated_rooms = rlg.built_rooms_;
-            minimap.Rebuild(rlg);
+        //     rlg.Destroy();
+        //     rlg = generation::RoomLayoutGenerator(j, room_root);
+        //     glm::ivec2 current_room = { j["current_room"][0], j["current_room"][1] };
+        //     room = &rlg.rooms[current_room];
+        //     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+        //     pbd::PBDManager::i_->set_walls(walls);
+        //     rg_settings.generated_rooms = rlg.built_rooms_;
+        //     minimap.Rebuild(rlg);
 
-            rope.Deserialize(j["rope"]);
-            player_1->Destroy();
-            player_2->Destroy();
-            *player_1 = *GameObject::Deserialize(j["player_1"]);
-            *player_2 = *GameObject::Deserialize(j["player_2"]);
-            game_scene_root->transform_->AddChild(player_1->transform_);
-            game_scene_root->transform_->AddChild(player_2->transform_);
-            rope.rope_constraints_.pop_back();
-            rope.rope_constraints_.pop_front();
-            rope.AssignPlayerBegin(player_1);
-            rope.AssignPlayerEnd(player_2);
-        }
+        //     rope.Deserialize(j["rope"]);
+        //     player_1->Destroy();
+        //     player_2->Destroy();
+        //     *player_1 = *GameObject::Deserialize(j["player_1"]);
+        //     *player_2 = *GameObject::Deserialize(j["player_2"]);
+        //     game_scene_root->transform_->AddChild(player_1->transform_);
+        //     game_scene_root->transform_->AddChild(player_2->transform_);
+        //     rope.rope_constraints_.pop_back();
+        //     rope.rope_constraints_.pop_front();
+        //     rope.AssignPlayerBegin(player_1);
+        //     rope.AssignPlayerEnd(player_2);
+        // }
 
-        ImGui::End();
+        // ImGui::End();
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
+        // ImGui::Render();
+        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
         
         
 #pragma endregion 
