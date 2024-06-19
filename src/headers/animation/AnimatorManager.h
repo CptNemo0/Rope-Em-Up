@@ -18,7 +18,7 @@ namespace anim
 		std::deque<std::shared_ptr<components::Animator>> aniamtor_components_;
 		float delta_time;
 		s_ptr<components::Animator> CreateAnimatorComponent();
-		s_ptr<components::Animator> AddAnimatorComponent(s_ptr<components::Animator> animator);
+		void AddAnimatorComponent(s_ptr<components::Animator> animator);
 		void RemoveAnimatorComponent(s_ptr<components::Animator> animator);
 
 		void Update(float dt);
