@@ -1,26 +1,30 @@
 #include "./headers/animation/AnimatorManager.h"
 
-AnimatorManager::AnimatorManager()
+anim::AnimatorManager* anim::AnimatorManager::i_ = nullptr;
+
+anim::AnimatorManager::AnimatorManager()
 {
 	aniamtor_components_ = std::deque<std::shared_ptr<components::Animator>>();
 }
 
-AnimatorManager::~AnimatorManager()
+anim::AnimatorManager::~AnimatorManager()
 {
 }
 
-s_ptr<components::Animator> AnimatorManager::CreateAnimatorComponent()
+s_ptr<components::Animator> anim::AnimatorManager::CreateAnimatorComponent()
 {
 	auto anim = std::make_shared<components::Animator>();
-
+	AddAnimatorComponent(anim);
+	return anim;
 }
 
-s_ptr<components::Animator> AnimatorManager::AddAnimatorComponent(s_ptr<components::Animator> animator)
+s_ptr<components::Animator> anim::AnimatorManager::AddAnimatorComponent(s_ptr<components::Animator> animator)
 {
 	aniamtor_components_.push_back(animator);
+	
 }
 
-s_ptr<components::Animator> AnimatorManager::RemoveAnimatorComponent(s_ptr<components::Animator> animator)
+void anim::AnimatorManager::RemoveAnimatorComponent(s_ptr<components::Animator> animator)
 {
 	auto a = std::find(aniamtor_components_.begin(), aniamtor_components_.end(), animator);
 	if (a != aniamtor_components_.end())
@@ -30,7 +34,7 @@ s_ptr<components::Animator> AnimatorManager::RemoveAnimatorComponent(s_ptr<compo
 	}
 }
 
-void AnimatorManager::Update(float dt)
+void anim::AnimatorManager::Update(float dt)
 {
 	delta_time = dt;
 	for (auto& a : aniamtor_components_)

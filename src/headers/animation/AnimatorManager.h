@@ -2,42 +2,45 @@
 
 #include ".././typedef.h"
 #include <headers/components/Animator.h>
-
-class AnimatorManager
+namespace anim
 {
-public:
-	static AnimatorManager* i_;
-
-	std::vector<s_ptr<components::Animator>> animators_;
-private:
-	AnimatorManager();
-	~AnimatorManager();
-
-public:
-	std::deque<std::shared_ptr<components::Animator>> aniamtor_components_;
-	float delta_time;
-	s_ptr<components::Animator> CreateAnimatorComponent();
-	s_ptr<components::Animator> AddAnimatorComponent(s_ptr<components::Animator> animator);
-	s_ptr<components::Animator> RemoveAnimatorComponent(s_ptr<components::Animator> animator);
-
-	void Update(float dt);
-
-	static void Initialize()
+	class AnimatorManager
 	{
-		if (i_ == nullptr)
-		{
-			i_ = new AnimatorManager();
-		}
-	}
+	public:
+		static AnimatorManager* i_;
 
-	static void Destroy()
-	{
-		if (i_ != nullptr)
-		{
-			delete i_;
-			i_ = nullptr;
-		}
-	}
+		std::vector<s_ptr<components::Animator>> animators_;
+	private:
+		AnimatorManager();
+		~AnimatorManager();
 
-};
+	public:
+		std::deque<std::shared_ptr<components::Animator>> aniamtor_components_;
+		float delta_time;
+		s_ptr<components::Animator> CreateAnimatorComponent();
+		s_ptr<components::Animator> AddAnimatorComponent(s_ptr<components::Animator> animator);
+		void RemoveAnimatorComponent(s_ptr<components::Animator> animator);
+
+		void Update(float dt);
+
+		static void Initialize()
+		{
+			if (i_ == nullptr)
+			{
+				i_ = new AnimatorManager();
+			}
+		}
+
+		static void Destroy()
+		{
+			if (i_ != nullptr)
+			{
+				delete i_;
+				i_ = nullptr;
+			}
+		}
+
+	};
+}
+
 

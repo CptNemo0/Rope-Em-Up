@@ -57,6 +57,7 @@
 #include "headers/ChokeList.h"
 #include "headers/parsing/file_read.h"
 #include "headers/components/Animator.h"
+#include "headers/animation/AnimatorManager.h"
 #include "headers/generation/Room.h"
 #include "headers/drop/DropManager.h"
 #include "headers/drop/SpellDropQueue.h"
@@ -295,6 +296,8 @@ int main()
     DifficultyManager::Initialize();
     SceneManager::Initialize();
     SkullMinionManager::Initialize();
+	anim::AnimatorManager::Initialize();
+
 #pragma endregion Initialization
     
 #pragma region CamerasConfiguration
@@ -565,7 +568,7 @@ int main()
 	auto F_anim_upgrade = res::get_animation(kFemalePlayerMeshPath, 4, F_player_model->path_);
 	auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 5, F_player_model->path_);
 
-    player_1->AddComponent(make_shared<components::Animator>());
+    player_1->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
     player_1->GetComponent<components::Animator>()->AddAnimation("Damage", F_anim_gethit);
 	player_1->GetComponent<components::Animator>()->AddAnimation("Death", F_anim_getkilled); 
 	player_1->GetComponent<components::Animator>()->AddAnimation("Idle", F_anim_idle);
@@ -581,7 +584,7 @@ int main()
 	auto M_anim_upgrade = res::get_animation(kMalePlayerMeshPath, 4, M_player_model->path_);
 	auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 5, M_player_model->path_);
 
-    player_2->AddComponent(make_shared<components::Animator>());
+    player_2->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
     player_2->GetComponent<components::Animator>()->AddAnimation("Damage", M_anim_gethit);
     player_2->GetComponent<components::Animator>()->AddAnimation("Death", M_anim_getkilled);
 	player_2->GetComponent<components::Animator>()->AddAnimation("Idle", M_anim_idle);
@@ -859,9 +862,10 @@ int main()
         previous_time = current_time;
     
         Timer::Update(delta_time);
-        player_1->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
+        /*player_1->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
         player_2->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
-        enemy_fbx->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
+        enemy_fbx->GetComponent<components::Animator>()->SetDeltaTime(delta_time);*/
+		anim::AnimatorManager::i_->Update(delta_time);
         utility::DebugCameraMovement(window, DebugCameraComponent->camera_, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
