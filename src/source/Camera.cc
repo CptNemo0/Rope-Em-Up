@@ -57,6 +57,7 @@ void components::CameraComponent::Update()
 {
 	if (target1_ == nullptr || target2_ == nullptr)
 	{
+		camera_->UpdateDirectionVectors();
 		camera_->view_matrix_ = glm::lookAt(camera_->position_, camera_->position_ + camera_->front_, camera_->up_);
 	}
 	else

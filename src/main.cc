@@ -156,6 +156,7 @@ int main()
     const string kHealthBarBorderTexturePath = "res/textures/HealthBarBorder.png";
 
     const string kHDREquirectangularPath = "res/cubemaps/puresky_2k.hdr";
+    const string kHDRMenuCubemap = "res/cubemaps/menu.hdr";
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kCapsuleMeshPath = "res/models/capsule.obj";
@@ -355,6 +356,8 @@ int main()
     LightsManager::Initialize(ShadowDepthShader, LBufferPassShader);
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
+    auto menu_cubemap = make_shared<HDRCubemap>(kHDRMenuCubemap, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
+    
     auto HUD_texture = res::get_texture(kHUDTexturePath);
     auto HUD_texture2 = res::get_texture(kHUDTexturePath2);
     auto Smoke_texture = res::get_texture(kTestSmokeTexturePath);
@@ -546,7 +549,7 @@ int main()
     enemy_fbx->transform_->set_scale(glm::vec3(2.0f));
 	enemy_fbx->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
 	enemy_fbx->transform_->add_position(glm::vec3(2.0f, 0.0f, 2.0f));
-    enemy_fbx->AddComponent(make_shared<components::MeshRenderer>(enemy_fbx_model, GBufferPassShader));
+    // enemy_fbx->AddComponent(make_shared<components::MeshRenderer>(enemy_fbx_model, GBufferPassShader));
 
 #pragma region Animations
 	auto enemy_anim = res::get_animation(lTentaclFBXPath, 0, enemy_fbx_model->path_);
@@ -622,6 +625,7 @@ int main()
     isometricCameraComp->distanceZ_ = -10.0f;
     isometricCameraComp->height_ = 15.0f;
 
+
     auto topDownCamera = GameObject::Create(camera_root);
     topDownCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     topDownCamera->AddComponent(make_shared<components::CameraComponent>(player_1, player_2, topCamera));
@@ -630,6 +634,17 @@ int main()
     DebugCamera->transform_->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
     DebugCamera->AddComponent(make_shared<components::CameraComponent>(debugCamera));
 
+    auto menuCamera = make_shared<llr::Camera>();
+    menuCamera->set_fov(kFov);
+    menuCamera->set_near(kNear);
+    menuCamera->set_far(kFar);
+    menuCamera->set_aspect_ratio(((float)mode->width / (float)mode->height));
+    menuCamera->set_position(glm::vec3(0.0f, 20.0f, 0.0f));
+    menuCamera->set_pitch(0.0f);
+    menuCamera->set_yaw(180.0f);
+
+    auto MenuCamera = GameObject::Create(camera_root);
+    MenuCamera->AddComponent(make_shared<components::CameraComponent>(menuCamera));
 
     auto isometricCameraComponent = isometricCamera->GetComponent<components::CameraComponent>();
     auto topDownCameraComponent = topDownCamera->GetComponent<components::CameraComponent>();
@@ -709,9 +724,6 @@ int main()
     ParticleShader->Use();
     ParticleShader->SetMatrix4("projection_matrix", projection_matrix);
 
-    BackgroundShader->Use();
-    BackgroundShader->SetMatrix4("projection_matrix", projection_matrix);
-
     SSAOShader->Use();
     SSAOShader->SetMatrix4("projection_matrix", projection_matrix);
     SSAOShader->SetInt("height", mode->height);
@@ -724,7 +736,8 @@ int main()
     FloorShader->Use();
     FloorShader->SetMatrix4("projection_matrix", projection_matrix);
 
-    //cubemap->LoadHDRimg(window, Global::i_->active_camera_);
+    cubemap->LoadHDRimg(window, nullptr);
+    menu_cubemap->LoadHDRimg(window, nullptr);
 
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     /*int scrWidth, scrHeight;
@@ -732,8 +745,10 @@ int main()
     glViewport(0, 0, scrWidth, scrHeight);*/
 
     float fixed_update_rate = pbd::kMsPerUpdate;
-    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, &fixed_update_rate, &player_1, &player_2, &camera_root]()
+    Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, &fixed_update_rate, &player_1, &player_2, &camera_root, &menuCamera]()
     {
+        menuCamera->yaw_ += 0.05f;
+        menuCamera->pitch_ = 10.0f * glm::sin(menuCamera->yaw_ * 0.1f);
         camera_root->PropagateUpdate();
         pbd::PBDManager::i_->GeneratorUpdate();
         pbd::PBDManager::i_->Integration(fixed_update_rate);
@@ -762,6 +777,7 @@ int main()
     game_scene->scene_root_ = game_scene_root;
     game_scene->HUD_root_ = game_HUD_root;
     game_scene->HUD_text_root_ = game_HUD_text_root;
+    game_scene->camera_ = camera;
 
     SceneManager::i_->AddScene("game", game_scene);
 
@@ -797,6 +813,7 @@ int main()
     menu->UpdateSelection();
     auto menu_scene = make_shared<Scene>();
     menu_scene->HUD_root_ = menu_HUD_root;
+    menu_scene->camera_ = menuCamera;
 
     SceneManager::i_->AddScene("menu", menu_scene);
 
@@ -984,10 +1001,22 @@ int main()
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
 
+        projection_matrix = glm::perspective(glm::radians(active_camera->get_fov()), active_camera->get_aspect_ratio(), active_camera->get_near(), active_camera->get_far());
+
         BackgroundShader->Use();
         BackgroundShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
-        cubemap->BindEnvCubemap(BackgroundShader);
-        cubemap->RenderCube();
+        BackgroundShader->SetMatrix4("projection_matrix", projection_matrix);
+
+        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["game"])
+        {
+            cubemap->BindEnvCubemap(BackgroundShader);
+            cubemap->RenderCube();
+        }
+        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["menu"])
+        {
+            menu_cubemap->BindEnvCubemap(BackgroundShader);
+            menu_cubemap->RenderCube();
+        }
        
         GrassShader->Use();
         GrassShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
@@ -1043,8 +1072,17 @@ int main()
         LBufferPassShader->Use();
         LBufferPassShader->SetBool("use_ssao", use_ssao);
         gbuffer.BindTextures(LBufferPassShader);
-        cubemap->BindIrradianceMap(LBufferPassShader);
-        cubemap->BindIBLmaps(LBufferPassShader);
+
+        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["game"])
+        {
+            cubemap->BindIrradianceMap(LBufferPassShader);
+            cubemap->BindIBLmaps(LBufferPassShader);
+        }
+        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["menu"])
+        {
+            menu_cubemap->BindIrradianceMap(LBufferPassShader);
+            menu_cubemap->BindIBLmaps(LBufferPassShader);
+        }
 
         glActiveTexture(GL_TEXTURE4);
         LBufferPassShader->SetInt("ssao_texture", 4);
@@ -1261,21 +1299,32 @@ int main()
         //chose the camera
         const char* items[] = { "Isometric", "Top Down", "Debugging" };
         static int selectedItem = 0;
-        ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items));
+        if (ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items)))
+        {
+            switch (selectedItem)
+            {
+                case 0:
+                    Global::i_->active_camera_ = isometricCameraComponent->camera_;
+                    break;
+                case 1:
+                    Global::i_->active_camera_ = topDownCameraComponent->camera_;
+                    break;
+                case 2:
+                    Global::i_->active_camera_ = DebugCameraComponent->camera_;
+                    break;
+            }
+        }
         switch (selectedItem)
         {
         case 0:
-            Global::i_->active_camera_ = isometricCameraComponent->camera_;
             ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 20.0f, "%.0f");
             ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, -10.0f, 10.0f, "%.0f");
             ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, -10.0f, 10.0f, "%.0f");
             break;
         case 1:
-            Global::i_->active_camera_ = topDownCameraComponent->camera_;
             ImGui::SliderFloat("Y", &topDownCameraComponent->height_, 1.0f, 100.0f, "%.2f");
             break;
         case 2:
-            Global::i_->active_camera_ = DebugCameraComponent->camera_;
             break;
         }
         ImGui::End();
