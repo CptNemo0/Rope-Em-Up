@@ -13,12 +13,12 @@ void Menu::UpdateSelection()
 
 Menu::Menu()
 {
-    auto selection_texture_ = res::get_texture("res/textures/color.png");
+    auto selection_texture_ = res::get_texture("res/textures/menu_select.png");
     auto HUD_shader = res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag");
 
     selection_outline_ = GameObject::Create();
     selection_outline_->transform_->set_scale({0.95f, 0.9f, 1.0f});
-    selection_outline_->AddComponent(make_shared<components::HUDRenderer>(selection_texture_, HUD_shader, glm::vec4(0.0f, 0.0f, 0.0f, 0.15f)));
+    selection_outline_->AddComponent(make_shared<components::HUDRenderer>(selection_texture_, HUD_shader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
 }
 
 void Menu::OnAction(Action action, input::State state)

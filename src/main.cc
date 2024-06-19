@@ -751,7 +751,7 @@ int main()
     float fixed_update_rate = pbd::kMsPerUpdate;
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, &fixed_update_rate, &player_1, &player_2, &camera_root, &menuCamera]()
     {
-        menuCamera->yaw_ += 0.05f;
+        menuCamera->yaw_ += 0.02f;
         menuCamera->pitch_ = 10.0f * glm::sin(menuCamera->yaw_ * 0.1f);
         camera_root->PropagateUpdate();
         pbd::PBDManager::i_->GeneratorUpdate();
