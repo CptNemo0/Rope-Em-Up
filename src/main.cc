@@ -557,7 +557,7 @@ int main()
 
 #pragma region Animations
 	auto enemy_anim = res::get_animation(kTentaclIdlePath, 2, enemy_fbx_model->path_);
-	enemy_fbx->AddComponent(make_shared<components::Animator>());
+	enemy_fbx->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
 	enemy_fbx->GetComponent<components::Animator>()->AddAnimation("Idle", enemy_anim);
 	enemy_fbx->GetComponent<components::Animator>()->PlayAnimation("Idle", 1, 1.0f);
 
@@ -862,9 +862,7 @@ int main()
         previous_time = current_time;
     
         Timer::Update(delta_time);
-        /*player_1->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
-        player_2->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
-        enemy_fbx->GetComponent<components::Animator>()->SetDeltaTime(delta_time);*/
+        enemy_fbx->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
 		anim::AnimatorManager::i_->Update(delta_time);
         utility::DebugCameraMovement(window, DebugCameraComponent->camera_, delta_time);
         input::InputManager::i_->Update();
