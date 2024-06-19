@@ -14,6 +14,13 @@ private:
 	~AnimatorManager();
 
 public:
+	std::deque<std::shared_ptr<components::Animator>> aniamtor_components_;
+	float delta_time;
+	s_ptr<components::Animator> CreateAnimatorComponent();
+	s_ptr<components::Animator> AddAnimatorComponent(s_ptr<components::Animator> animator);
+	s_ptr<components::Animator> RemoveAnimatorComponent(s_ptr<components::Animator> animator);
+
+	void Update(float dt);
 
 	static void Initialize()
 	{
