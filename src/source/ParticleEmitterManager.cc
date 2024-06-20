@@ -19,7 +19,10 @@ void ParticleEmitterManager::Update(float delta_time)
 
 void ParticleEmitterManager::RemoveEmitter(s_ptr<components::ParticleEmitter> emitter)
 {
-    emitters_.erase(std::find(emitters_.begin(), emitters_.end(), emitter));
+    if (emitters_.size() > 0)
+    {
+        emitters_.erase(std::find(emitters_.begin(), emitters_.end(), emitter));
+    }
 }
 
 void ParticleEmitterManager::Draw()

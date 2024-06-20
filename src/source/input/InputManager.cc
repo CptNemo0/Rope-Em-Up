@@ -157,9 +157,13 @@ void input::InputManager::RemoveObserver(int gamepadID, s_ptr<InputObserver> obs
 
 void input::InputManager::NotifyAction(int gamepadID, Action action, State state)
 {
-    for (auto &observer : observers_[gamepadID])
+    for (int i = 0; i < observers_[gamepadID].size(); i++)
     {
-        observer->OnAction(action, state);
+        auto observer = observers_[gamepadID].at(i);
+        if (observer)
+        {
+            observer->OnAction(action, state);
+        }
     }
 }
 
