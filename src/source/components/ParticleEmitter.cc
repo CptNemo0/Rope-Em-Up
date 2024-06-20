@@ -113,7 +113,10 @@ void components::ParticleEmitter::EmitParticles()
             particle.velocity = start_velocity_ + glm::vec3(random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
                                                             random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
                                                             random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_));
-            particle.rotation_angle = random::RandFloat(0.0f, glm::two_pi<float>());
+            if (random_rotation_)
+                particle.rotation_angle = random::RandFloat(0.0f, glm::two_pi<float>());
+            else
+                particle.rotation_angle = 0.0f;
             particle.id_ = current_id_++;
             particles_.push_back(particle);
         }
@@ -135,7 +138,10 @@ void components::ParticleEmitter::Burst(int amount)
             particle.velocity = start_velocity_ + glm::vec3(random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
                 random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
                 random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_));
-            particle.rotation_angle = 0.0f;
+            if (random_rotation_)
+                particle.rotation_angle = random::RandFloat(0.0f, glm::two_pi<float>());
+            else
+                particle.rotation_angle = 0.0f;
             particle.id_ = current_id_++;
             particles_.push_back(particle);
         }

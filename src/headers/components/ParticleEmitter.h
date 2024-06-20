@@ -69,6 +69,7 @@ public:
     glm::vec3 start_velocity_ = glm::vec3(0.0f, 0.0f, 0.0f);
     float start_velocity_displacement_ = 0.0f;
     glm::vec3 start_acceleration_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    bool random_rotation_ = true;
 
     bool burst_emitter_;
 
