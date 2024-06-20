@@ -33,7 +33,7 @@ void SpellCaster::Cast()
 		break;
 	case SKULL_MINION:
 	{
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 10; i++)
 		{
 			auto minion = GameObject::Create(SkullMinionManager::i_->room_->minions);
 
@@ -42,10 +42,10 @@ void SpellCaster::Cast()
 			glm::vec3 a = PlayerStatsManager::i_->player_1_->transform_->get_position();
 			glm::vec3 b = PlayerStatsManager::i_->player_2_->transform_->get_position();
 
-			glm::vec3 center = a + b * 0.5f;
+			glm::vec3 center = (a + b) * 0.5f;
 
-			float offset_x = random::RandFloat(2.0f, 3.0f);
-			float offset_z = random::RandFloat(2.0f, 3.0f);
+			float offset_x = random::RandFloat(0.0f, 1.0f) * (random::RandFloat(0.0f, 1.0f) > 0.5f ? -1.0 : 1.0);
+			float offset_z = random::RandFloat(0.0f, 1.0f) * (random::RandFloat(0.0f, 1.0f) > 0.5f ? -1.0 : 1.0);
 
 			glm::vec3 position = glm::vec3(offset_x, 0.0, offset_z) + center;
 
