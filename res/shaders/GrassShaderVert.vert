@@ -3,17 +3,11 @@ layout (location = 0) in vec3 local_position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 tx;
 layout (location = 3) in vec2 world_pos;
-layout (location = 4) in vec3 tangent;
-layout (location = 5) in vec3 bitangent;
 
 out vec3 out_world_position;
-out vec3 out_view_position;
 out vec2 out_uv;
-out mat3 out_normal_world_matrix;
-out mat3 out_normal_view_matrix;
-out vec3 T;
-out vec3 B;
 out vec3 N;
+
 uniform mat4 projection_matrix;
 uniform mat4 view_matrix;
 
@@ -98,10 +92,11 @@ void main()
     translation_matrix[3][2] = world_pos.y;
     translation_matrix[3][3] = 1.0;
 
-    float rothash = cnoise(2 * world_pos.xy);
+    float rothash = (cnoise(world_pos.xy + world_pos.xy + gl_InstanceID) - 0.5) * PI;
 
-    float cos_angle = cos(rothash);
     float sin_angle = sin(rothash);
+    float cos_angle = sqrt(1.0 - (sin_angle * sin_angle));
+  
 
     mat4 rotation_matrix_y = mat4(
         vec4(cos_angle, 0.0, -sin_angle, 0.0),
@@ -111,7 +106,7 @@ void main()
     );
 
     float pos_hash = cnoise(world_pos.xy);
-    float scale_hash = ((pos_hash * 0.75) + 0.25);
+    float scale_hash = ((pos_hash * 0.4) + 0.6);
 
     float pp1l = length(pp1 - vec3(world_pos.x, 0, world_pos.y));
     float pp2l = length(pp2 - vec3(world_pos.x, 0, world_pos.y));
@@ -121,39 +116,33 @@ void main()
 
     mat4 scale_matrix = mat4(1.0);
     scale_matrix[0][0] = 1.0;
-    scale_matrix[1][1] = 2.0 * scale_hash * pp1l * pp2l;
+    scale_matrix[1][1] = 4.0 * scale_hash * pp1l * pp2l;
     scale_matrix[2][2] = 1.0;    
    
     //zakrzywienie 
    
-    float wind = sin(cnoise(world_pos + time * 0.2) * 2.0 - 1.0) * 1.0 * pos_hash;
+    float wind = sin(cnoise(world_pos + time * 0.2) * 0.4 - 0.2);
+    
+    float final = rothash * local_position.y * local_position.y * 10.0 * scale_hash + wind;
 
-    cos_angle = cos(wind);
-    sin_angle = sin(wind);
-
+    sin_angle = sin(final);
+    cos_angle = sqrt(1.0 - (sin_angle * sin_angle));
+    
     mat4 rotation_matrix_x = mat4(
         vec4(1.0, 0.0, 0.0, 0.0),
-        vec4(1.0, cos_angle, -sin_angle, 0.0),
-        vec4(1.0, sin_angle,  cos_angle, 0.0),
+        vec4(0.0, cos_angle, -sin_angle, 0.0),
+        vec4(0.0, sin_angle,  cos_angle, 0.0),
         vec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    mat4 model_matrix = translation_matrix * rotation_matrix_y * rotation_matrix_x * scale_matrix;
+    mat4 model_matrix = translation_matrix *  rotation_matrix_y * rotation_matrix_x *  scale_matrix;
     
     vec4 world_position = (model_matrix * vec4(local_position, 1.0));
-    vec4 view_position = (view_matrix * world_position);
-
     out_world_position = world_position.xyz;
-    out_view_position = view_position.xyz;
-
+    
     out_uv = tx;
 
-    out_normal_world_matrix = transpose(inverse(mat3(model_matrix)));
-    out_normal_view_matrix = transpose(inverse(mat3(view_matrix * model_matrix)));
-
-    gl_Position = projection_matrix * view_position;
-
-    T = normalize(vec3(model_matrix * vec4(tangent,   0.0)));
-    B = normalize(vec3(model_matrix * vec4(bitangent, 0.0)));
-	N = normalize(vec3(model_matrix * vec4(normal,    0.0)));
+    gl_Position = projection_matrix * view_matrix * world_position;
+    vec3 internal_N = normalize(transpose(inverse(mat3(model_matrix))) * normal);
+    N = internal_N;
 }
