@@ -161,8 +161,8 @@ int main()
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kCapsuleMeshPath = "res/models/capsule.obj";
-    const string kFemalePlayerMeshPath = "res/players/female/kobieta_poprawa_riga.fbx";
-    const string kMalePlayerMeshPath = "res/players/male/player_M_Test_2.fbx";
+    const string kFemalePlayerMeshPath = "res/players/female/kobieta.fbx";
+    const string kMalePlayerMeshPath = "res/players/male/facet.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/ball.obj";
