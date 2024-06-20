@@ -208,7 +208,7 @@ int main()
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
 
-    const string kTentaclPath = "res/enemy/enemy.obj";
+    const string kTentaclPath = "res/enemy/enemy_dt.fbx";
 	const string kTentaclIdlePath = "res/enemy/enemy_idles.fbx";
 	const string kTentsclDeathPath = "res/enemy/enemy_deaths.fbx";
 #pragma endregion Resources Paths
@@ -548,18 +548,8 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
-    ////testing enemy fbx
-	auto enemy_fbx = GameObject::Create(game_scene_root);
-    enemy_fbx->transform_->set_scale(glm::vec3(0.01f));
-	enemy_fbx->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-	enemy_fbx->transform_->add_position(glm::vec3(2.0f, 0.0f, 2.0f));
-    // enemy_fbx->AddComponent(make_shared<components::MeshRenderer>(enemy_fbx_model, GBufferPassShader));
-
 #pragma region Animations
-	auto enemy_anim = res::get_animation(kTentaclIdlePath, 2, enemy_fbx_model->path_);
-	enemy_fbx->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
-	enemy_fbx->GetComponent<components::Animator>()->AddAnimation("Idle", enemy_anim);
-	enemy_fbx->GetComponent<components::Animator>()->PlayAnimation("Idle", 1, 1.0f);
+
 
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
     auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);

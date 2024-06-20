@@ -1,4 +1,5 @@
 ﻿#include "../../headers/generation/RoomGenerator.h"
+#include <headers/animation/AnimatorManager.h>
 
 //std::deque<w_ptr<GameObject>> generation::Room::room_parts = std::deque<w_ptr<GameObject>>();
 //std::vector<w_ptr<GameObject>> generation::Room::enemies = std::vector<w_ptr<GameObject>>();
@@ -852,6 +853,13 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
 
             auto enemy_mesh = GameObject::Create(enemy);
             enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+            enemy_mesh->transform_->set_scale(glm::vec3(0.01f));
+
+
+            enemy_mesh->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
+            auto enemy_anim = res::get_animation("res/enemy/enemy_idles.fbx", 1, rm->enemies[room.enemies_idx[i]]->path_);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle", enemy_anim);
+            enemy_mesh->GetComponent<components::Animator>()->PlayAnimation("Idle", 1, 1.0f);
         }
     }
         break;
@@ -1065,6 +1073,13 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
 
             auto enemy_mesh = GameObject::Create(enemy);
             enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+            enemy_mesh->transform_->set_scale(glm::vec3(0.01f));
+
+
+            enemy_mesh->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
+            auto enemy_anim = res::get_animation("res/enemy/enemy_idles.fbx", 2, rm->enemies[room.enemies_idx[i]]->path_);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle", enemy_anim);
+            enemy_mesh->GetComponent<components::Animator>()->PlayAnimation("Idle", 1, 1.0f);
         }
 
         //generate barells
