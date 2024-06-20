@@ -161,8 +161,8 @@ int main()
 
     const string kCubeMeshPath = "res/models/cube_2.obj";
     const string kCapsuleMeshPath = "res/models/capsule.obj";
-    const string kFemalePlayerMeshPath = "res/players/female/kobieta_poprawa_riga.fbx";
-    const string kMalePlayerMeshPath = "res/players/male/player_M_Test_2.fbx";
+    const string kFemalePlayerMeshPath = "res/players/female/kobieta.fbx";
+    const string kMalePlayerMeshPath = "res/players/male/facet.fbx";
     const string kDebugMeshPath = "res/models/debug_thingy.obj";
     const string kEnemyMeshPath = "res/models/enemy.obj";
     const string kTestPath = "res/models/ball.obj";
@@ -476,6 +476,7 @@ int main()
     
 
     GrassRendererManager::Initialize(grass_model);
+    
 
     // Spell Drops
     auto place_holder_drop_model = res::get_model(kDebugMeshPath);
@@ -599,7 +600,7 @@ int main()
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 50; i++)
     {
         rope.AddSegment(game_scene_root);
     }
@@ -607,7 +608,8 @@ int main()
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     PlayerStatsManager::Initialize(&rope, player_1, player_2);
 
-
+    auto test_grass = GameObject::Create();
+    //test_grass->AddComponent(GrassRendererManager::i_->CreateRenderer(walls.up_left_, walls.down_right_, 700));
 #pragma region Camera
     auto camera_root = GameObject::Create();
 

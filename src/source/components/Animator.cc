@@ -31,11 +31,11 @@ void components::Animator::UpdateAnimation(float dt)
 		m_CurrentAnimation->model_->UpdateBoneTransforms(m_FinalBoneMatrices);
 	}
 
-	/*if (m_BlendingAnimation)
+	if (m_BlendingAnimation)
 	{
 		m_BlendingTime += dt;
 		m_BlendingTime = fmod(m_BlendingTime, m_BlendingAnimation->GetDuration());
-		BlendTwoAnimations(m_BlendingAnimation, m_BlendFactor);
+		BlendTwoAnimations(m_BlendingAnimation, m_BlendFactor * m_DeltaTime);
 		m_BlendFactor += dt;
 		if (m_BlendFactor > 1.0f)
 		{
@@ -44,7 +44,7 @@ void components::Animator::UpdateAnimation(float dt)
 			m_BlendingAnimation = nullptr;
 			m_BlendFactor = 0.0f;
 		}
-	}*/
+	}
 	if (m_CurrentAnimation)
 	{
 		m_CurrentAnimation->model_->UpdateBoneTransforms(m_FinalBoneMatrices);
