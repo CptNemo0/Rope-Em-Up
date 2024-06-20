@@ -101,11 +101,11 @@ void SkullMinionManager::UpdateMinion(std::shared_ptr<components::SkullMinion> m
         {
             //follow
             cout << "minion follow" << endl;
-            glm::vec3 follow_point = minion->target_->transform_->get_position() * 0.9f + 0.1f * (minion->target_->transform_->get_forward() * 1.5f);
+            glm::vec3 follow_point = minion->target_->transform_->get_position();
             glm::vec3 direction = glm::normalize(follow_point - minion_position);
 
             minion->generator_->direction_ = direction;
-            minion->generator_->magnitude_ = 100.0f;
+            minion->generator_->magnitude_ = 140.0f;
         }
     }
 }
