@@ -18,7 +18,7 @@ s_ptr<components::Animator> anim::AnimatorManager::CreateAnimatorComponent()
 	return anim;
 }
 
-s_ptr<components::Animator> anim::AnimatorManager::AddAnimatorComponent(s_ptr<components::Animator> animator)
+void anim::AnimatorManager::AddAnimatorComponent(s_ptr<components::Animator> animator)
 {
 	aniamtor_components_.push_back(animator);
 	

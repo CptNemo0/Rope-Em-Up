@@ -208,7 +208,7 @@ int main()
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
 
-    const string kTentaclPath = "res/enemy/enemy.obj";
+    const string kTentaclPath = "res/enemy/enemy_dt.fbx";
 	const string kTentaclIdlePath = "res/enemy/enemy_idles.fbx";
 	const string kTentsclDeathPath = "res/enemy/enemy_deaths.fbx";
 #pragma endregion Resources Paths
@@ -549,18 +549,8 @@ int main()
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
-    ////testing enemy fbx
-	auto enemy_fbx = GameObject::Create(game_scene_root);
-    enemy_fbx->transform_->set_scale(glm::vec3(0.01f));
-	enemy_fbx->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
-	enemy_fbx->transform_->add_position(glm::vec3(2.0f, 0.0f, 2.0f));
-    // enemy_fbx->AddComponent(make_shared<components::MeshRenderer>(enemy_fbx_model, GBufferPassShader));
-
 #pragma region Animations
-	auto enemy_anim = res::get_animation(kTentaclIdlePath, 2, enemy_fbx_model->path_);
-	enemy_fbx->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
-	enemy_fbx->GetComponent<components::Animator>()->AddAnimation("Idle", enemy_anim);
-	enemy_fbx->GetComponent<components::Animator>()->PlayAnimation("Idle", 1, 1.0f);
+
 
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
     auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
@@ -753,7 +743,7 @@ int main()
     float fixed_update_rate = pbd::kMsPerUpdate;
     Timer::Timer fixed_update_timer = Timer::CreateTimer(1.0f / 120.0f, [&fixed_update_timer, &fixed_update_rate, &player_1, &player_2, &camera_root, &menuCamera]()
     {
-        menuCamera->yaw_ += 0.05f;
+        menuCamera->yaw_ += 0.02f;
         menuCamera->pitch_ = 10.0f * glm::sin(menuCamera->yaw_ * 0.1f);
         camera_root->PropagateUpdate();
         pbd::PBDManager::i_->GeneratorUpdate();
@@ -765,8 +755,6 @@ int main()
         pbd::PBDManager::i_->UpdatePositions(fixed_update_rate);
         pbd::PBDManager::i_->UpdateRotations(fixed_update_rate);
         ParticleEmitterManager::i_->Update(fixed_update_rate);
-        /*player_1->GetComponent<components::Animator>()->SetDeltaTime(fixed_update_rate);
-        player_2->GetComponent<components::Animator>()->SetDeltaTime(fixed_update_rate);*/
 
     }, nullptr, true);
 
@@ -871,7 +859,7 @@ int main()
         previous_time = current_time;
     
         Timer::Update(delta_time);
-        enemy_fbx->GetComponent<components::Animator>()->SetDeltaTime(delta_time);
+
 		anim::AnimatorManager::i_->Update(delta_time);
         utility::DebugCameraMovement(window, DebugCameraComponent->camera_, delta_time);
         input::InputManager::i_->Update();
@@ -1295,6 +1283,8 @@ int main()
 
 #pragma endregion
         
+#ifdef _DEBUG
+
 #pragma region ImGUI
         
          ImGui_ImplOpenGL3_NewFrame();
@@ -1533,8 +1523,9 @@ int main()
          ImGui::Render();
          ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
         
-        
 #pragma endregion 
+#endif
+
         glfwSwapBuffers(window);
     }
     

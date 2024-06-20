@@ -13,8 +13,8 @@ void main()
     vec3 envColor = texture(environmentMap, World_position).rgb;
     
     // HDR tonemap and gamma correct
-    envColor = envColor / (envColor + vec3(1.0));
-    envColor = pow(envColor, vec3(1.0/2.2)); 
+    //envColor = envColor / (envColor + vec3(1.0));
+    //envColor = pow(envColor, vec3(1.0/2.2)); 
     
     albedo_texture = envColor;
     mask_texture = vec3(0.0);
