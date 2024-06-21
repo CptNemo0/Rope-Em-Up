@@ -20,6 +20,7 @@ struct MenuItem
 
     s_ptr<GameObject> object_;
     std::function<void()> OnPress;
+    bool enabled_ = true;
 };
 
 class Menu : public input::InputObserver

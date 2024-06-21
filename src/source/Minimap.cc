@@ -5,9 +5,10 @@ Minimap::Minimap(s_ptr<GameObject> root)
     shader_ = res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag");
     texture_ = res::get_texture("res/textures/color.png");
 
-    finished_texture_ = res::get_texture("res/textures/finished_room.png");
-    unfinished_texture_ = res::get_texture("res/textures/unfinished_room.png");
-    discovered_texture_ = res::get_texture("res/textures/discovered_room.png");
+    finished_texture_ = res::get_texture("res/textures/done.png");
+    unfinished_texture_ = res::get_texture("res/textures/notdone.png");
+    discovered_texture_ = res::get_texture("res/textures/walkingby.png");
+    empty_texture_ = res::get_texture("res/textures/empty.png");
     current_texture_ = res::get_texture("res/textures/active_room.png");
 
     this->root_ = root;
@@ -44,7 +45,7 @@ void Minimap::Rebuild(generation::RoomLayoutGenerator &rlg)
     glm::ivec2 top_right = glm::ivec2(-9999999, -9999999);
 
     current_room_object = GameObject::Create();
-    current_room_object->AddComponent(make_shared<components::HUDRenderer>(current_texture_, shader_));
+    current_room_object->AddComponent(make_shared<components::HUDRenderer>(current_texture_, shader_, glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
     current_room_object->transform_->set_scale({1.1f, 1.1f, 1.0f});
 
     for (auto &[pos, room] : rlg.rooms)
@@ -86,13 +87,20 @@ void Minimap::ColorRoom(generation::Room &room, generation::Room &current_room, 
 {
     if (room.is_generated)
     {
-        if (room.enemies->transform_->children_.size() > 0)
+        if (current_room.position == room.position)
         {
-            hud_renderer->texture_ = unfinished_texture_;
+            if (room.enemies->transform_->children_.size() > 0)
+            {
+                hud_renderer->texture_ = unfinished_texture_;
+            }
+            else
+            {
+                hud_renderer->texture_ = finished_texture_;
+            }
         }
         else
         {
-            hud_renderer->texture_ = finished_texture_;
+            hud_renderer->texture_ = empty_texture_;
         }
     }
     else

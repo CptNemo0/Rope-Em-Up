@@ -22,6 +22,7 @@ private:
     s_ptr<tmp::Texture> unfinished_texture_;
     s_ptr<tmp::Texture> discovered_texture_;
     s_ptr<tmp::Texture> current_texture_;
+    s_ptr<tmp::Texture> empty_texture_;
 
     float segment_scale = 1.0f;
 public:

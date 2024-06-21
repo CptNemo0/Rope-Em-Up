@@ -650,31 +650,32 @@ int main()
 
     auto game_HUD_root = GameObject::Create();
 
-    auto HUD_object = GameObject::Create(game_HUD_root);
-    HUD_object->AddComponent(make_shared<components::HUDRenderer>(HUD_texture, HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 0.1f)));
-    HUD_object->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
-    HUD_object->transform_->set_position(glm::vec3(-0.75f, -0.75f, 0.0f));
+    auto man_HUD = GameObject::Create(game_HUD_root);
+    man_HUD->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/man_healtbar.png"), HUDshader));
+    man_HUD->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.35f);
+    man_HUD->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
 
-    auto HUD_object2 = GameObject::Create(game_HUD_root);
-    HUD_object2->AddComponent(make_shared<components::HUDRenderer>(HUD_texture2, HUDshader));
-    HUD_object2->transform_->set_scale(glm::vec3(0.25f, 0.25f, 1.0f));
-    HUD_object2->transform_->set_position(glm::vec3(0.75f, -0.75f, 0.0f));
-    HUD_object2->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
-
+    auto woman_HUD = GameObject::Create(game_HUD_root);
+    woman_HUD->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/woman_healtbar.png"), HUDshader));
+    woman_HUD->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.35f);
+    woman_HUD->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
 
     auto minimap_object = GameObject::Create(game_HUD_root);
-    minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/color.png"), HUDshader, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f)));
+    minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minimap.png"), HUDshader));
     minimap_object->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.4f);
     minimap_object->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
     auto minimap_layer = GameObject::Create(minimap_object);
     minimap_layer->transform_->set_scale(glm::vec3(glm::sqrt(0.5f), glm::sqrt(0.5f), 1.0f));
+    minimap_layer->transform_->scale({0.9f, 0.9f, 1.0f});
     minimap_layer->transform_->set_rotation(glm::vec3(0.0f, 0.0f, -45.0f));
     auto minimap = Minimap(minimap_layer);
 
     auto player_1_hp_bar_border = GameObject::Create();
     player_1_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    player_1_hp_bar_border->transform_->set_scale({0.25f, 0.05f , 0.0f });
-    player_1_hp_bar_border->transform_->set_position({ -0.75f, -0.95f, 0.0 });
+    player_1_hp_bar_border->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.029f);
+    player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+    player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 10.0f);
+    player_1_hp_bar_border->transform_->add_position({0.03f, 0.071f, 0.0f});
 
     auto player_1_hp_bar = GameObject::Create(player_1_hp_bar_border);
     player_1_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -684,8 +685,10 @@ int main()
 
     auto player_2_hp_bar_border = GameObject::Create();
     player_2_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    player_2_hp_bar_border->transform_->set_scale({ 0.25f, 0.05f , 0.0f });
-    player_2_hp_bar_border->transform_->set_position({ 0.75f, -0.95f, 0.0 });
+    player_2_hp_bar_border->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.029f);
+    player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+    player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 10.0f);
+    player_2_hp_bar_border->transform_->add_position({-0.03f, 0.071f, 0.0f});
 
     auto player_2_hp_bar = GameObject::Create(player_2_hp_bar_border);
     player_2_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -787,36 +790,91 @@ int main()
     auto logo = GameObject::Create(menu_HUD_root);
     logo->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
     logo->transform_->scale({0.333f, 0.333f, 1.0f});
-    logo->transform_->set_position({0.0f, 0.666f, 0.0f});
+    logo->transform_->set_position({0.0f, 0.5f, 0.0f});
     logo->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/logo.png"), HUDshader));
 
-    auto button1 = GameObject::Create(menu_HUD_root);
-    button1->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
-    button1->transform_->scale({3.333f, 1.0f, 1.0f});
-    button1->transform_->scale({0.333f, 0.333f, 1.0f});
-    button1->transform_->scale({0.9f, 0.9f, 1.0f});
-    button1->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/new_game.png"), HUDshader));
-    menu->layout_[{0, 0}] = make_shared<MenuItem>(button1, []()
+    auto new_game_button = GameObject::Create(menu_HUD_root);
+    new_game_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    new_game_button->transform_->scale({3.333f, 1.0f, 1.0f});
+    new_game_button->transform_->scale({0.333f, 0.333f, 1.0f});
+    new_game_button->transform_->scale({0.5f, 0.5f, 1.0f});
+    new_game_button->transform_->set_position({0.0f, -0.05f, 0.0f});
+    new_game_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/new_game.png"), HUDshader));
+    menu->layout_[{0, 0}] = make_shared<MenuItem>(new_game_button, []()
     {
         SceneManager::i_->SwitchScene("game");
     });
 
-    auto button2 = GameObject::Create(menu_HUD_root);
-    button2->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
-    button2->transform_->scale({3.333f, 1.0f, 1.0f});
-    button2->transform_->scale({0.333f, 0.333f, 1.0f});
-    button2->transform_->scale({0.9f, 0.9f, 1.0f});
-    button2->transform_->set_position({0.0f, -0.666f, 0.0f});
-    button2->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/quit.png"), HUDshader));
-    menu->layout_[{0, 1}] = make_shared<MenuItem>(button2, [&button2]()
+    auto continue_button = GameObject::Create(menu_HUD_root);
+    continue_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    continue_button->transform_->scale({3.333f, 1.0f, 1.0f});
+    continue_button->transform_->scale({0.333f, 0.333f, 1.0f});
+    continue_button->transform_->scale({0.5f, 0.5f, 1.0f});
+    continue_button->transform_->set_position({0.0f, -0.4f, 0.0f});
+    continue_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/continue.png"), HUDshader));
+    menu->layout_[{0, 1}] = make_shared<MenuItem>(continue_button, [&rlg, &room_root, &room, &rg_settings, &minimap, &rope, &player_1, &player_2, &game_scene_root]()
     {
-        button2->transform_->add_rotation(glm::vec3(0.0f, 0.0f, 10.0f));
+        SceneManager::i_->SwitchScene("game");
+
+        std::ifstream save_file;
+        save_file.open("save.json");
+        json j = json::parse(save_file);
+        save_file.close();
+
+        rlg.Destroy();
+        rlg = generation::RoomLayoutGenerator(j, room_root);
+        glm::ivec2 current_room = { j["current_room"][0], j["current_room"][1] };
+        room = &rlg.rooms[current_room];
+        pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
+        pbd::PBDManager::i_->set_walls(walls);
+        rg_settings.generated_rooms = rlg.built_rooms_;
+        minimap.Rebuild(rlg);
+
+        rope.Deserialize(j["rope"]);
+        player_1->Destroy();
+        player_2->Destroy();
+        *player_1 = *GameObject::Deserialize(j["player_1"]);
+        *player_2 = *GameObject::Deserialize(j["player_2"]);
+        game_scene_root->transform_->AddChild(player_1->transform_);
+        game_scene_root->transform_->AddChild(player_2->transform_);
+        rope.rope_constraints_.pop_back();
+        rope.rope_constraints_.pop_front();
+        rope.AssignPlayerBegin(player_1);
+        rope.AssignPlayerEnd(player_2);
+    });
+
+    auto quit_button = GameObject::Create(menu_HUD_root);
+    quit_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    quit_button->transform_->scale({3.333f, 1.0f, 1.0f});
+    quit_button->transform_->scale({0.333f, 0.333f, 1.0f});
+    quit_button->transform_->scale({0.5f, 0.5f, 1.0f});
+    quit_button->transform_->set_position({0.0f, -0.75f, 0.0f});
+    quit_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/quit.png"), HUDshader));
+    menu->layout_[{0, 2}] = make_shared<MenuItem>(quit_button, [&quit_button]()
+    {
+        quit_button->transform_->add_rotation(glm::vec3(0.0f, 0.0f, 10.0f));
     });
 
     menu->UpdateSelection();
+
     auto menu_scene = make_shared<Scene>();
     menu_scene->HUD_root_ = menu_HUD_root;
+    menu_scene->menu_ = menu;
     menu_scene->camera_ = menuCamera;
+    menu_scene->OnStart = [&menu]()
+    {
+        std::ifstream file;
+        file.open("save.json");
+        if (file.is_open())
+        {
+            menu->layout_[{0, 1}]->enabled_ = true;
+        }
+        else
+        {
+            menu->layout_[{0, 1}]->enabled_ = false;
+        }
+        file.close();
+    };
 
     SceneManager::i_->AddScene("menu", menu_scene);
 
@@ -1198,17 +1256,6 @@ int main()
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
-        HUDshader->Use();
-        if (SceneManager::i_->current_scene_->HUD_root_)
-            SceneManager::i_->current_scene_->HUD_root_->PropagateUpdate();
-        
-        HUDTextShader->Use();
-        HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
-
-        HUDText_object->GetComponent<components::TextRenderer>()->text_ = debug_info;
-        if (SceneManager::i_->current_scene_->HUD_text_root_)
-            SceneManager::i_->current_scene_->HUD_text_root_->PropagateUpdate();
 
         if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["game"])
         {
@@ -1260,6 +1307,17 @@ int main()
             player_2_hp_bar_border->PropagateUpdate();
         }
 
+        HUDshader->Use();
+        if (SceneManager::i_->current_scene_->HUD_root_)
+            SceneManager::i_->current_scene_->HUD_root_->PropagateUpdate();
+        
+        HUDTextShader->Use();
+        HUDTextShader->SetMatrix4("projection_matrix", ortho_matrix);
+
+        HUDText_object->GetComponent<components::TextRenderer>()->text_ = debug_info;
+        if (SceneManager::i_->current_scene_->HUD_text_root_)
+            SceneManager::i_->current_scene_->HUD_text_root_->PropagateUpdate();
+
         frame++;
         fps += 1.0f / delta_time;
         frame_time += delta_time;
@@ -1283,7 +1341,7 @@ int main()
 
 #pragma endregion
         
-#ifdef _DEBUG
+#ifdef _DEBUG 
 
 #pragma region ImGUI
         

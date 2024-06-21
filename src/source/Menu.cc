@@ -38,9 +38,22 @@ void Menu::OnAction(Action action, input::State state)
             if (move_dir != glm::ivec2(0))
             {
                 move_lock_ = true;
-                if (layout_.contains(current_pos_ + move_dir))
+                glm::ivec2 next_pos = current_pos_;
+                while (true)
                 {
-                    current_pos_ += move_dir;
+                    if (layout_.contains(next_pos + move_dir))
+                    {
+                        next_pos += move_dir;
+                        if (!layout_[next_pos]->enabled_)
+                            continue;
+                        else
+                        {
+                            current_pos_ = next_pos;
+                            break;
+                        }
+                    }
+                    else
+                        break;
                 }
             }
             else

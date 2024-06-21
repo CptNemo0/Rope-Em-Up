@@ -5,6 +5,7 @@
 #include <functional>
 
 #include "GameObject.h"
+#include "Menu.h"
 #include "Camera.h"
 #include "global.h"
 #include "typedef.h"
@@ -14,6 +15,7 @@ struct Scene
     s_ptr<GameObject> scene_root_;
     s_ptr<GameObject> HUD_root_;
     s_ptr<GameObject> HUD_text_root_;
+    s_ptr<Menu> menu_ = nullptr;
     s_ptr<llr::Camera> camera_;
 
     Scene()
@@ -28,6 +30,10 @@ struct Scene
         scene_root_->Halt();
         HUD_root_->Halt();
         HUD_text_root_->Halt();
+        if (menu_)
+        {
+            menu_->active_ = false;
+        }
     }
 
     void Continue()
@@ -36,6 +42,10 @@ struct Scene
         HUD_root_->Continue();
         HUD_text_root_->Continue();
         Global::i_->active_camera_ = camera_;
+        if (menu_)
+        {
+            menu_->active_ = true;
+        }
     }
 
     std::function<void(float)> OnUpdate;
