@@ -100,6 +100,11 @@ s_ptr<audio::AudioBuffer> get_sound(string path)
     return sound;
 }
 
+std::map<string, s_ptr<audio::AudioBuffer>> &get_all_sounds()
+{
+    return sounds;
+}
+
 int init_freetype()
 {
     if (FT_Init_FreeType(&ft))

@@ -1,5 +1,7 @@
 #include "../../headers/audio/AudioManager.h"
 
+#include "../../headers/res/Resources.h"
+
 audio::AudioManager *audio::AudioManager::i_ = nullptr;
 
 char *audio::AudioManager::LoadWAV(const string path, s_ptr<AudioBuffer> audio_buffer)
@@ -141,14 +143,13 @@ audio::AudioManager::~AudioManager()
         alSourceStop(source);
         alDeleteSources(1, &source);
     }
-    // TODO: fix
-    // for (auto &sound : sounds_)
-    // {
-    //     for (auto &audio_buffer : sound.second)
-    //     {
-    //         alDeleteBuffers(1, &audio_buffer.buffer);
-    //     }
-    // }
+
+    auto sounds = res::get_all_sounds();
+    for (auto &sound : sounds)
+    {
+        alDeleteBuffers(1, &sound.second->buffer);
+    }
+
     alcDestroyContext(context_);
     alcCloseDevice(device_);
 }

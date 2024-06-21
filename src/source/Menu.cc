@@ -11,6 +11,24 @@ void Menu::UpdateSelection()
     selection_outline_->transform_->parent_->scale({1.1f, 1.1f, 1.0f});
 }
 
+void Menu::Disable()
+{
+    active_ = false;
+    for (auto &item : layout_)
+    {
+        item.second->object_->Disable();
+    }
+}
+
+void Menu::Enable()
+{
+    active_ = true;
+    for (auto &item : layout_)
+    {
+        item.second->object_->Enable();
+    }
+}
+
 Menu::Menu()
 {
     auto selection_texture_ = res::get_texture("res/textures/menu_select.png");

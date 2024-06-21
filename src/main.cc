@@ -758,7 +758,7 @@ int main()
         pbd::PBDManager::i_->UpdatePositions(fixed_update_rate);
         pbd::PBDManager::i_->UpdateRotations(fixed_update_rate);
         ParticleEmitterManager::i_->Update(fixed_update_rate);
-        anim::AnimatorManager::i_->Update(fixed_update_rate);
+        anim::AnimatorManager::i_->Update(2.0f * fixed_update_rate);
 
     }, nullptr, true);
 
@@ -772,7 +772,7 @@ int main()
 
 #pragma region Scenes
 
-    // Main game scene
+    // MAIN GAME SCENE - MAIN GAME SCENE
 
     auto game_scene = make_shared<Scene>();
     game_scene->scene_root_ = game_scene_root;
@@ -782,7 +782,7 @@ int main()
 
     SceneManager::i_->AddScene("game", game_scene);
 
-    // Menu scene
+    // MENU SCENE - MENU SCENE
 
     auto menu_HUD_root = GameObject::Create();
 
@@ -852,18 +852,21 @@ int main()
     quit_button->transform_->scale({0.5f, 0.5f, 1.0f});
     quit_button->transform_->set_position({0.0f, -0.75f, 0.0f});
     quit_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/quit.png"), HUDshader));
-    menu->layout_[{0, 2}] = make_shared<MenuItem>(quit_button, [&quit_button]()
+    menu->layout_[{0, 2}] = make_shared<MenuItem>(quit_button, [&window]()
     {
-        quit_button->transform_->add_rotation(glm::vec3(0.0f, 0.0f, 10.0f));
+        glfwSetWindowShouldClose(window, true);
     });
 
     menu->UpdateSelection();
 
     auto menu_scene = make_shared<Scene>();
     menu_scene->HUD_root_ = menu_HUD_root;
-    menu_scene->menu_ = menu;
+
+    menu_scene->menus_["main_menu"] = menu;
+    menu_scene->SwitchMenu("main_menu");
+
     menu_scene->camera_ = menuCamera;
-    menu_scene->OnStart = [&menu]()
+    menu_scene->OnStart = [&menu, &menuCamera]()
     {
         std::ifstream file;
         file.open("save.json");
@@ -876,11 +879,65 @@ int main()
             menu->layout_[{0, 1}]->enabled_ = false;
         }
         file.close();
+
+        menuCamera->pitch_ = 0.0f;
+        menuCamera->yaw_ = 0.0f;
+
+        menu->current_pos_ = {0, 0};
+        menu->UpdateSelection();
     };
 
-    SceneManager::i_->AddScene("menu", menu_scene);
+    SceneManager::i_->AddScene("main_menu", menu_scene);
 
-    SceneManager::i_->SwitchScene("menu");
+    // PAUSE MENU SCENE - PASUE MENU SCENE
+
+    auto pause_menu_HUD_root = GameObject::Create();
+
+    auto pause_menu = make_shared<Menu>();
+    input::InputManager::i_->AddObserver(0, pause_menu);
+
+    auto pause_continue_button = GameObject::Create(pause_menu_HUD_root);
+    pause_continue_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    pause_continue_button->transform_->scale({3.333f, 1.0f, 1.0f});
+    pause_continue_button->transform_->scale({0.333f, 0.333f, 1.0f});
+    pause_continue_button->transform_->scale({0.5f, 0.5f, 1.0f});
+    pause_continue_button->transform_->set_position({0.0f, -0.05f, 0.0f});
+    pause_continue_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/continue.png"), HUDshader));
+    pause_menu->layout_[{0, 0}] = make_shared<MenuItem>(pause_continue_button, []()
+    {
+        SceneManager::i_->SwitchScene("game");
+    });
+
+    auto pause_quit_button = GameObject::Create(pause_menu_HUD_root);
+    pause_quit_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    pause_quit_button->transform_->scale({3.333f, 1.0f, 1.0f});
+    pause_quit_button->transform_->scale({0.333f, 0.333f, 1.0f});
+    pause_quit_button->transform_->scale({0.5f, 0.5f, 1.0f});
+    pause_quit_button->transform_->set_position({0.0f, -0.4f, 0.0f});
+    pause_quit_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/quit.png"), HUDshader));
+    pause_menu->layout_[{0, 1}] = make_shared<MenuItem>(pause_quit_button, []()
+    {
+        SceneManager::i_->SwitchScene("main_menu");
+    });
+
+    pause_menu->UpdateSelection();
+
+    auto pause_menu_scene = make_shared<Scene>();
+    pause_menu_scene->HUD_root_ = pause_menu_HUD_root;
+
+    pause_menu_scene->menus_["pause_menu"] = pause_menu;
+    pause_menu_scene->SwitchMenu("pause_menu");
+
+    pause_menu_scene->camera_ = menuCamera;
+    pause_menu_scene->OnStart = [&pause_menu]()
+    {
+        pause_menu->current_pos_ = {0, 0};
+        pause_menu->UpdateSelection();
+    };
+
+    SceneManager::i_->AddScene("pause_menu", pause_menu_scene);
+
+    SceneManager::i_->SwitchScene("main_menu");
 
 #pragma endregion
 
@@ -1099,7 +1156,7 @@ int main()
             cubemap->BindEnvCubemap(BackgroundShader);
             cubemap->RenderCube();
         }
-        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["menu"])
+        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["main_menu"])
         {
             menu_cubemap->BindEnvCubemap(BackgroundShader);
             menu_cubemap->RenderCube();
@@ -1165,7 +1222,7 @@ int main()
             cubemap->BindIrradianceMap(LBufferPassShader);
             cubemap->BindIBLmaps(LBufferPassShader);
         }
-        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["menu"])
+        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["main_menu"])
         {
             menu_cubemap->BindIrradianceMap(LBufferPassShader);
             menu_cubemap->BindIBLmaps(LBufferPassShader);

@@ -1,5 +1,7 @@
 #include "../../headers/components/PlayerController.h"
 #include "../../headers/SpellCaster.h"
+#include "../../headers/SceneManager.h"
+
 components::PlayerController::PlayerController(int gamepadID)
 {
     this->gamepadID_ = gamepadID;
@@ -85,9 +87,19 @@ void components::PlayerController::OnAction(Action action, input::State state)
         }
         case Action::CAST_SPELL:
         {
-            cout << "AAAAAAAAAAAA" << endl;
-            SpellCaster::i_->QueueUpSpell(gameObject_.lock()->GetComponent<components::SpellSlotComponent>());
-            break;
+            if (state.button)
+            {
+                cout << "AAAAAAAAAAAA" << endl;
+                SpellCaster::i_->QueueUpSpell(gameObject_.lock()->GetComponent<components::SpellSlotComponent>());
+                break;
+            }
+        }
+        case Action::PAUSE_GAME:
+        {
+            if (state.button)
+            {
+                SceneManager::i_->SwitchScene("pause_menu");
+            }
         }
     }
 }
