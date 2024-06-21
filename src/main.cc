@@ -758,7 +758,7 @@ int main()
         pbd::PBDManager::i_->UpdatePositions(fixed_update_rate);
         pbd::PBDManager::i_->UpdateRotations(fixed_update_rate);
         ParticleEmitterManager::i_->Update(fixed_update_rate);
-        anim::AnimatorManager::i_->Update(fixed_update_rate);
+        anim::AnimatorManager::i_->Update(2.0f * fixed_update_rate);
 
     }, nullptr, true);
 
