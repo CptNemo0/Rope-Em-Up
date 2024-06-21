@@ -851,9 +851,9 @@ int main()
     quit_button->transform_->scale({0.5f, 0.5f, 1.0f});
     quit_button->transform_->set_position({0.0f, -0.75f, 0.0f});
     quit_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/quit.png"), HUDshader));
-    menu->layout_[{0, 2}] = make_shared<MenuItem>(quit_button, [&quit_button]()
+    menu->layout_[{0, 2}] = make_shared<MenuItem>(quit_button, [&window]()
     {
-        quit_button->transform_->add_rotation(glm::vec3(0.0f, 0.0f, 10.0f));
+        glfwSetWindowShouldClose(window, true);
     });
 
     menu->UpdateSelection();
