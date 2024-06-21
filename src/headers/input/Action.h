@@ -5,9 +5,16 @@ enum Action
 {
     // Axis Actions
     MOVE,
-    PULL_ROPE,
+    MENU_MOVE,
+    AXIS_END,   // <- this must stay at the end of axis actions
+
     // Button Actions
-    CAST_SPELL
+    CAST_SPELL,
+    MENU_CLICK,
+    BUTTON_END, // <- this must stay at the end of button actions
+
+    // Custom
+    PULL_ROPE
 };
 
 #endif // !ACTION_H

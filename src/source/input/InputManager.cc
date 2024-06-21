@@ -22,13 +22,17 @@ input::InputManager::InputManager(GLFWwindow *window)
         {
             {Action::MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_I, GLFW_KEY_K, GLFW_KEY_J, GLFW_KEY_L}}},
             {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_U}},
-            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_KEY_O} }
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_KEY_O} },
+            {Action::MENU_MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT}}},
+            {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_KEY_ENTER}}
         }},
         {GLFW_JOYSTICK_2,
         {
             {Action::MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_T, GLFW_KEY_G, GLFW_KEY_F, GLFW_KEY_H}}},
             {Action::PULL_ROPE, ActionMappingType{.buttonID = GLFW_KEY_Y}},
-            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_KEY_R} }
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_KEY_R}},
+            {Action::MENU_MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT}}},
+            {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_KEY_ENTER}}
         }}
     };
 
@@ -38,13 +42,17 @@ input::InputManager::InputManager(GLFWwindow *window)
         {
             {Action::MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
             {Action::PULL_ROPE, ActionMappingType{.axisType = GamepadAxisType::TRIGGERS}},
-            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}}
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
+            {Action::MENU_MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
+            {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}}
         }},
         {GLFW_JOYSTICK_2,
         {
             {Action::MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
             {Action::PULL_ROPE, ActionMappingType{.axisType = GamepadAxisType::TRIGGERS}},
-            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}}
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
+            {Action::MENU_MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
+            {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}}
         }}
     };
 }
@@ -66,81 +74,115 @@ void input::InputManager::UpdateGamepadState(int gamepadID)
     GLFWgamepadstate new_gamepad_state;
     if (glfwGetGamepadState(gamepadID, &new_gamepad_state))
     {
-        int axis_type = static_cast<int>(gamepad_mappings[gamepadID][Action::MOVE].axisType);
-        glm::vec2 new_axis_state(new_gamepad_state.axes[axis_type], new_gamepad_state.axes[axis_type + 1]);
-        glm::vec2 old_axis_state(old_gamepad_states_[gamepadID].axes[axis_type], old_gamepad_states_[gamepadID].axes[axis_type + 1]);
-
-        if (glm::length(new_axis_state) < deadzone_)
+        // AXIS ACTIONS
+        for (int action_i = Action::MOVE; action_i < Action::AXIS_END; action_i++)
         {
-            new_axis_state = glm::vec2(0.0f);
-        }
-        if (glm::length(old_axis_state) < deadzone_)
-        {
-            old_axis_state = glm::vec2(0.0f);
-        }
+            Action action = static_cast<Action>(action_i);
 
-        if (new_axis_state != old_axis_state)
-        {
-            NotifyAction(gamepadID, Action::MOVE, State(-new_axis_state));
-        }
+            int axis_type = static_cast<int>(gamepad_mappings[gamepadID][action].axisType);
+            glm::vec2 new_axis_state(new_gamepad_state.axes[axis_type], new_gamepad_state.axes[axis_type + 1]);
+            glm::vec2 old_axis_state(old_gamepad_states_[gamepadID].axes[axis_type], old_gamepad_states_[gamepadID].axes[axis_type + 1]);
 
-        axis_type = static_cast<int>(gamepad_mappings[gamepadID][Action::PULL_ROPE].axisType);
-        new_axis_state = {new_gamepad_state.axes[axis_type], new_gamepad_state.axes[axis_type + 1]};
-        old_axis_state = {old_gamepad_states_[gamepadID].axes[axis_type], old_gamepad_states_[gamepadID].axes[axis_type + 1]};
+            if (glm::length(new_axis_state) < deadzone_)
+            {
+                new_axis_state = glm::vec2(0.0f);
+            }
+            if (glm::length(old_axis_state) < deadzone_)
+            {
+                old_axis_state = glm::vec2(0.0f);
+            }
 
-        if (new_axis_state != old_axis_state)
-        {
-            NotifyAction(gamepadID, Action::PULL_ROPE, State{.axis = new_axis_state});
+            if (new_axis_state != old_axis_state)
+            {
+                NotifyAction(gamepadID, action, State(-new_axis_state));
+            }
         }
 
-        auto cast_spell_button = gamepad_mappings[gamepadID][Action::CAST_SPELL].buttonID;
-        if (new_gamepad_state.buttons[cast_spell_button] != old_gamepad_states_[gamepadID].buttons[cast_spell_button])
+        // BUTTONS ACTIONS
+        for (int action_i = Action::CAST_SPELL; action_i < Action::BUTTON_END; action_i++)
         {
-            NotifyAction(gamepadID, Action::CAST_SPELL, State{ .button = (int)new_gamepad_state.buttons[cast_spell_button] });
+            Action action = static_cast<Action>(action_i);
+
+            auto action_button = gamepad_mappings[gamepadID][action].buttonID;
+            if (new_gamepad_state.buttons[action_button] != old_gamepad_states_[gamepadID].buttons[action_button])
+            {
+                NotifyAction(gamepadID, action, State{ .button = (int)new_gamepad_state.buttons[action_button] });
+            }
         }
 
+        // CUSTOM ACTIONS
+        {
+            // PULL ROPE
+            int axis_type = static_cast<int>(gamepad_mappings[gamepadID][Action::PULL_ROPE].axisType);
+            glm::vec2 new_axis_state = {new_gamepad_state.axes[axis_type], new_gamepad_state.axes[axis_type + 1]};
+            glm::vec2 old_axis_state = {old_gamepad_states_[gamepadID].axes[axis_type], old_gamepad_states_[gamepadID].axes[axis_type + 1]};
+
+            if (new_axis_state != old_axis_state)
+            {
+                NotifyAction(gamepadID, Action::PULL_ROPE, State{.axis = new_axis_state});
+            }
+        }
+
+        // STATE RESET
         old_gamepad_states_[gamepadID] = new_gamepad_state;
     }
 }
 
 void input::InputManager::UpdateKeyboardState(int gamepadID)
 {
-    auto &move_action_buttons = keyboard_mappings[gamepadID][Action::MOVE].buttonIDs;
-    glm::vec2 axis_state(0.0f);
-    bool key_state_changed = false;
-    for (int i = 0; i < 4; i++)
+    // AXIS ACTIONS
+    for (int action_i = Action::MOVE; action_i < Action::AXIS_END; action_i++)
     {
-        bool key_state = glfwGetKey(window_, move_action_buttons[i]);
-        if (keyboard_state[move_action_buttons[i]] != key_state)
+        Action action = static_cast<Action>(action_i);
+
+        auto &action_buttons = keyboard_mappings[gamepadID][action].buttonIDs;
+        glm::vec2 axis_state(0.0f);
+        bool key_state_changed = false;
+        for (int i = 0; i < 4; i++)
         {
-            keyboard_state[move_action_buttons[i]] = key_state;
-            key_state_changed = true;
+            bool key_state = glfwGetKey(window_, action_buttons[i]);
+            if (keyboard_state[action_buttons[i]] != key_state)
+            {
+                keyboard_state[action_buttons[i]] = key_state;
+                key_state_changed = true;
+            }
+            if (key_state)
+            {
+                axis_state += axis_directions[i];
+            }
         }
-        if (key_state)
+        if (key_state_changed)
         {
-            axis_state += axis_directions[i];
+            axis_state = SafeNormalize(axis_state);
+            NotifyAction(gamepadID, action, State(axis_state));
         }
-    }
-    if (key_state_changed)
-    {
-        axis_state = SafeNormalize(axis_state);
-        NotifyAction(gamepadID, Action::MOVE, State(axis_state));
     }
 
-    auto &pull_rope_button = keyboard_mappings[gamepadID][Action::PULL_ROPE].buttonID;
-    int pull_rope_button_state = glfwGetKey(window_, pull_rope_button);
-    if (pull_rope_button_state != (int)keyboard_state[pull_rope_button])
+    // BUTTON ACTIONS
+    for (int action_i = Action::CAST_SPELL; action_i < Action::BUTTON_END; action_i++)
     {
-        keyboard_state[pull_rope_button] = pull_rope_button_state;
-        NotifyAction(gamepadID, Action::PULL_ROPE, State{.axis = {pull_rope_button_state, pull_rope_button_state}});
+        Action action = static_cast<Action>(action_i);
+
+        auto& action_button = keyboard_mappings[gamepadID][action].buttonID;
+        int action_button_state = glfwGetKey(window_, action_button);
+        if (action_button_state != (int)keyboard_state[action_button])
+        {
+            keyboard_state[action_button] = action_button_state;
+            NotifyAction(gamepadID, action, State{ .button = action_button_state });
+        }
     }
 
-    auto& cast_spell_button = keyboard_mappings[gamepadID][Action::CAST_SPELL].buttonID;
-    int cast_spell_button_state = glfwGetKey(window_, cast_spell_button);
-    if (cast_spell_button_state != (int)keyboard_state[cast_spell_button])
+    // CUSTOM ACTIONS
     {
-        keyboard_state[cast_spell_button] = cast_spell_button_state;
-        NotifyAction(gamepadID, Action::CAST_SPELL, State{ .button = cast_spell_button_state });
+        Action action = Action::PULL_ROPE;
+
+        auto &action_button = keyboard_mappings[gamepadID][action].buttonID;
+        int action_button_state = glfwGetKey(window_, action_button);
+        if (action_button_state != (int)keyboard_state[action_button])
+        {
+            keyboard_state[action_button] = action_button_state;
+            NotifyAction(gamepadID, action, State{.axis = {action_button_state, action_button_state}});
+        }
     }
 }
 

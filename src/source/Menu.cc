@@ -29,7 +29,7 @@ void Menu::OnAction(Action action, input::State state)
     }
     switch (action)
     {
-        case Action::MOVE:
+        case Action::MENU_MOVE:
         {
             static float scale = glm::sqrt(2) * 0.5f;
             glm::ivec2 move_dir = {glm::round(state.axis.x), glm::round(state.axis.y)};
@@ -63,9 +63,9 @@ void Menu::OnAction(Action action, input::State state)
             UpdateSelection();
             break;
         }
-        case Action::PULL_ROPE:
+        case Action::MENU_CLICK:
         {
-            if (glm::min(state.axis.x, state.axis.y) >= 0.95f)
+            if (state.button)
             {
                 if (layout_[current_pos_]->OnPress)
                 {
