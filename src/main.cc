@@ -675,7 +675,7 @@ int main()
     player_1_hp_bar_border->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.029f);
     player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
     player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 10.0f);
-    player_1_hp_bar_border->transform_->add_position({0.03f, 0.071f, 0.0f});
+    player_1_hp_bar_border->transform_->add_position({0.05f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
 
     auto player_1_hp_bar = GameObject::Create(player_1_hp_bar_border);
     player_1_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -688,7 +688,7 @@ int main()
     player_2_hp_bar_border->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.029f);
     player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
     player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 10.0f);
-    player_2_hp_bar_border->transform_->add_position({-0.03f, 0.071f, 0.0f});
+    player_2_hp_bar_border->transform_->add_position({-0.05f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
 
     auto player_2_hp_bar = GameObject::Create(player_2_hp_bar_border);
     player_2_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
