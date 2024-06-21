@@ -758,6 +758,7 @@ int main()
         pbd::PBDManager::i_->UpdatePositions(fixed_update_rate);
         pbd::PBDManager::i_->UpdateRotations(fixed_update_rate);
         ParticleEmitterManager::i_->Update(fixed_update_rate);
+        anim::AnimatorManager::i_->Update(fixed_update_rate);
 
     }, nullptr, true);
 
@@ -918,7 +919,6 @@ int main()
     
         Timer::Update(delta_time);
 
-		anim::AnimatorManager::i_->Update(delta_time);
         utility::DebugCameraMovement(window, DebugCameraComponent->camera_, delta_time);
         input::InputManager::i_->Update();
         audio::AudioManager::i_->Update();
