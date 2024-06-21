@@ -764,6 +764,7 @@ int main()
 
     Timer::Timer slow_fixed_update_timer = Timer::CreateTimer(1.0f / 4.0f, [&rlg, &room, &minimap]
     {
+        HealthManager::i_->DeathUpdate();
         ai::EnemyAIManager::i_->UpdateAI();
         minimap.Update(rlg, room);
         SkullMinionManager::i_->UpdateMinions();
@@ -1053,6 +1054,33 @@ int main()
 
 #pragma region GO Update and Draw
        
+        float avg_distance = 0.0f;
+        for (int i = 0; i < rope.rope_constraints_.size(); i++)
+        {
+            avg_distance += glm::distance2(rope.rope_constraints_[i]->p1_->transform_->get_position(), rope.rope_constraints_[i]->p2_->transform_->get_position());
+        }
+        avg_distance /= (float)(rope.rope_constraints_.size());
+        
+        float rope_color = 0.0f;
+        float max_distance = 0.338507f;
+        float coef = avg_distance / rope.rope_constraints_[0]->max_distance_;
+
+        static float max_coef = 0.0f;
+        if (coef > max_coef)
+        {
+            max_coef = coef;
+            cout << coef << endl;
+        }
+
+        rope_color = coef / max_distance;
+
+        
+        for (int i = 0; i < rope.rope_segments_.size(); i++)
+        {
+            rope.rope_segments_[i]->GetComponent<components::MeshRenderer>()->color_ = glm::vec3(rope_color * rope_color, (1.0f - rope_color), 0.0f);
+        }
+
+
         glViewport(0, 0, mode->width, mode->height);
 
         auto active_camera = Global::i_->active_camera_;

@@ -73,7 +73,7 @@ void DifficultyManager::UpdateSettings(generation::RoomGenerationSettings* rg_se
 		rg_settings->barells--;
 		if (rg_settings->barells < 1) rg_settings->barells = 1;
 		rg_settings->enemies += 2;
-		cout << "AAAAAA" << endl;
+		//cout << "AAAAAA" << endl;
 	}
 
 	if (rg_settings->width == 1 && rg_settings->height == 1)
@@ -85,7 +85,7 @@ void DifficultyManager::UpdateSettings(generation::RoomGenerationSettings* rg_se
 	else if(rg_settings->width > 1 || rg_settings->height > 1)
 	{
 		rg_settings->clutter = random::RandInt(2, 5);
-		rg_settings->lamps = random::RandInt(2, 5);
+		rg_settings->lamps = random::RandInt(4, 7);
 	}
 	else if (rg_settings->width > 2 && rg_settings->height > 2)
 	{

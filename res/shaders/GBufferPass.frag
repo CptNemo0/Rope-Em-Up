@@ -24,6 +24,8 @@ uniform sampler2D roughness_map;
 uniform sampler2D ao_map;
 uniform sampler2D emission_map;
 
+uniform vec3 in_color;
+
 out vec4 color;
 
 
@@ -39,7 +41,7 @@ void main()
 	normal = normalize(TBN * normal);
 
 	position_texture = world_position;
-	albedo_texture = texture(albedo_map, uv).rgb;
+	albedo_texture = texture(albedo_map, uv).rgb * in_color;
 	normal_texture = (normal + 1.0) * 0.5;
 	mra_texture = vec3(metallic, roughness, ao);
 	

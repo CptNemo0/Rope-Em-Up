@@ -30,6 +30,8 @@ namespace components
         s_ptr<Shader> shader_;
 		s_ptr<Shader> depth_shader_;
 
+        glm::vec3 color_;
+
         void Start() override;
         void Update() override;
         void Destroy() override {}

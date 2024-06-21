@@ -4,6 +4,7 @@ components::MeshRenderer::MeshRenderer(s_ptr<Model> model, s_ptr<Shader> shader)
 {
 	this->model_ = model;
 	this->shader_ = shader;
+	this->color_ = glm::vec3(1.0f, 1.0f, 1.0f);
 }
 
 void components::MeshRenderer::Start()
@@ -14,6 +15,7 @@ void components::MeshRenderer::Start()
 void components::MeshRenderer::Update()
 {
     shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
+	shader_->SetVec3("in_color", color_);
 	if (model_->m_BoneCounter > 0)
 	{
 		shader_->SetBool("useBones", true);
@@ -28,6 +30,7 @@ void components::MeshRenderer::Update()
 void components::MeshRenderer::Render(s_ptr<Shader> shader)
 {
 	shader->SetMatrix4("model_matrix", transform_->get_model_matrix());
+	shader->SetVec3("in_color", color_);
 	model_->Draw(shader);
 }
 
