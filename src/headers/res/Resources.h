@@ -27,6 +27,7 @@ namespace res
     s_ptr<anim::Animation> get_animation(string anim_path, int anim_number, string model_path);
 
     s_ptr<audio::AudioBuffer> get_sound(string path);
+    std::map<string, s_ptr<audio::AudioBuffer>> &get_all_sounds();
 
     int init_freetype();
 };
