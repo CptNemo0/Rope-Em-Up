@@ -4,6 +4,11 @@ SceneManager *SceneManager::i_ = nullptr;
 
 void SceneManager::SwitchScene(string scene_name)
 {
+    if (!scenes_.contains(scene_name))
+    {
+        cout << "Scene \"" << scene_name << "\", doesn't exist\n";
+        return;
+    }
     if (current_scene_)
     {
         current_scene_->Halt();

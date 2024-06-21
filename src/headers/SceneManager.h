@@ -12,11 +12,17 @@
 
 struct Scene
 {
+private:
+    string current_menu_;
+public:
     s_ptr<GameObject> scene_root_;
     s_ptr<GameObject> HUD_root_;
     s_ptr<GameObject> HUD_text_root_;
-    s_ptr<Menu> menu_ = nullptr;
+    std::unordered_map<string, s_ptr<Menu>> menus_;
     s_ptr<llr::Camera> camera_;
+
+    std::function<void(float)> OnUpdate;
+    std::function<void()> OnStart;
 
     Scene()
     {
@@ -30,9 +36,9 @@ struct Scene
         scene_root_->Halt();
         HUD_root_->Halt();
         HUD_text_root_->Halt();
-        if (menu_)
+        for (auto &menu : menus_)
         {
-            menu_->active_ = false;
+            menu.second->Disable();
         }
     }
 
@@ -42,14 +48,21 @@ struct Scene
         HUD_root_->Continue();
         HUD_text_root_->Continue();
         Global::i_->active_camera_ = camera_;
-        if (menu_)
+        if (menus_.contains(current_menu_))
         {
-            menu_->active_ = true;
+            menus_[current_menu_]->Enable();
         }
     }
 
-    std::function<void(float)> OnUpdate;
-    std::function<void()> OnStart;
+    void SwitchMenu(string menu_name)
+    {
+        if (menus_.contains(current_menu_))
+        {
+            menus_[current_menu_]->Disable();
+        }
+        current_menu_ = menu_name;
+        menus_[current_menu_]->Enable();
+    }
 };
 
 class SceneManager
