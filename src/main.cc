@@ -208,7 +208,7 @@ int main()
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
 
-    const string kTentaclPath = "res/enemy/enemy_dt.fbx";
+    const string kTentaclPath = "res/enemy/enemy_changed.fbx";
 	const string kTentaclIdlePath = "res/enemy/enemy_idles.fbx";
 	const string kTentsclDeathPath = "res/enemy/enemy_deaths.fbx";
 #pragma endregion Resources Paths
@@ -550,7 +550,6 @@ int main()
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 
 #pragma region Animations
-
 
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
     auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
