@@ -5,6 +5,7 @@
 #include "../GameObject.h"
 #include "Transform.h"
 #include "HealthComponent.h"
+#include "../components/Animator.h"
 #include <memory>
 #include <glm/glm.hpp>
 
@@ -24,6 +25,7 @@ namespace components
 
 		std::shared_ptr<HealthComponent> health_component_;
 		std::shared_ptr<GameObject> model_;
+		std::shared_ptr<components::Animator> animator;
 		int last_health_;
 
 		// Inherited via Component

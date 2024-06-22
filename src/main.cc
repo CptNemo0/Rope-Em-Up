@@ -209,7 +209,7 @@ int main()
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
 
-    const string kTentaclPath = "res/enemy/enemy_dt.fbx";
+    const string kTentaclPath = "res/enemy/enemy_changed.fbx";
 	const string kTentaclIdlePath = "res/enemy/enemy_idles.fbx";
 	const string kTentsclDeathPath = "res/enemy/enemy_deaths.fbx";
 #pragma endregion Resources Paths
