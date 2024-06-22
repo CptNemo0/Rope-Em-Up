@@ -37,7 +37,7 @@ void components::TextRenderer::Update()
         if (c == '\n')
         {
             x = 0;
-            y += line_spacing_;
+            y -= line_spacing_;
             continue;
         }
 
