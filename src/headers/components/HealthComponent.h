@@ -5,6 +5,7 @@
 
 #include "../res/Resources.h"
 #include "Component.h"
+#include "../components/Animator.h"
 #include "../GameObject.h"
 #include "../Timer.h"
 #include "../audio/AudioManager.h"

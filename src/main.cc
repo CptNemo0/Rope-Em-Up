@@ -16,6 +16,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/vector_angle.hpp"
 #include "stb_easy_font.h"
+
 #include "headers/typedef.h"
 #include "headers/Camera.h"
 #include "headers/collisions/Collider.h"
@@ -208,7 +209,7 @@ int main()
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
 
-    const string kTentaclPath = "res/enemy/enemy_dt.fbx";
+    const string kTentaclPath = "res/enemy/enemy_changed.fbx";
 	const string kTentaclIdlePath = "res/enemy/enemy_idles.fbx";
 	const string kTentsclDeathPath = "res/enemy/enemy_deaths.fbx";
 #pragma endregion Resources Paths
@@ -331,6 +332,55 @@ int main()
 
 #pragma endregion CamerasConfiguration
 
+#pragma region LoadingScreen
+
+auto loading_root = GameObject::Create();
+loading_root->transform_->set_scale({0.25f, 0.25f, 1.0f});
+loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+
+auto loading_dot = GameObject::Create(loading_root);
+loading_dot->transform_->set_scale({0.1f, 0.1f, 1.0f});
+loading_dot->transform_->set_position({-1.0f, -3.0f, 0.0f});
+loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/loading_dot.png"), res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag")));
+
+{
+    auto logo_texture = res::get_texture("res/textures/loading_screen.png");
+    auto text_texture = res::get_texture("res/textures/loading_text.png");
+    auto hud_shader = res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag");
+
+    auto logo = GameObject::Create(loading_root);
+    logo->transform_->set_position({0.0f, 1.0f, 0.0f});
+    logo->AddComponent(make_shared<components::HUDRenderer>(logo_texture, hud_shader));
+
+    auto text = GameObject::Create(loading_root);
+    text->transform_->scale({2.0f, 1.0f, 1.0f});
+    text->transform_->set_position({0.0f, -1.0f, 0.0f});
+    text->AddComponent(make_shared<components::HUDRenderer>(text_texture, hud_shader));
+
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glViewport(0, 0, mode->width, mode->height);
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    logo->PropagateUpdate();
+    text->PropagateUpdate();
+
+    glfwSwapBuffers(window);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    logo->PropagateUpdate();
+    text->PropagateUpdate();
+
+    logo->Destroy();
+    text->Destroy();
+}
+
+#pragma endregion Loading Screen
+
 #pragma region Shaders
     auto HUDshader = res::get_shader(kHUDVertexShaderPath, kHUDFragmentShaderPath);
     auto HUDTextShader = res::get_shader(kHUDTextVertexShaderPath, kHUDTextFragmentShaderPath);
@@ -428,6 +478,11 @@ int main()
     auto lamp_model = res::get_model(kLampPath);
     auto lamp_c_model = res::get_model(kLampCPath);
 
+    loading_dot->PropagateUpdate();
+    glfwSwapBuffers(window);
+    loading_dot->PropagateUpdate();
+    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
+
     auto bone_model = res::get_model(kBonePath);
     auto leafs_model = res::get_model(kLeafsPath);
     auto box_model = res::get_model(kBoxPath);
@@ -440,6 +495,11 @@ int main()
 
     auto grass_model = res::get_model(kGrassPath);
 
+    loading_dot->PropagateUpdate();
+    glfwSwapBuffers(window);
+    loading_dot->PropagateUpdate();
+    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
+
     // Main modules
     auto mod1_model = res::get_model(kMod1Path);
     auto mod2_model = res::get_model(kMod2Path);
@@ -448,6 +508,11 @@ int main()
     auto mod5_model = res::get_model(kMod5Path);
     auto mod6_model = res::get_model(kMod6Path);
     auto mod7_model = res::get_model(kMod7Path);
+
+    loading_dot->PropagateUpdate();
+    glfwSwapBuffers(window);
+    loading_dot->PropagateUpdate();
+    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     auto barell_model = res::get_model(kBarellPath);
 
@@ -551,13 +616,17 @@ int main()
 
 #pragma region Animations
 
-
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
     auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
 	auto F_anim_idle = res::get_animation(kFemalePlayerMeshPath, 2, F_player_model->path_);
     auto F_anim_pull = res::get_animation(kFemalePlayerMeshPath, 3, F_player_model->path_);
 	auto F_anim_upgrade = res::get_animation(kFemalePlayerMeshPath, 4, F_player_model->path_);
 	auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 5, F_player_model->path_);
+
+    loading_dot->PropagateUpdate();
+    glfwSwapBuffers(window);
+    loading_dot->PropagateUpdate();
+    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     player_1->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
     player_1->GetComponent<components::Animator>()->AddAnimation("Damage", F_anim_gethit);
@@ -574,6 +643,11 @@ int main()
     auto M_anim_pull = res::get_animation(kMalePlayerMeshPath, 3, M_player_model->path_);
 	auto M_anim_upgrade = res::get_animation(kMalePlayerMeshPath, 4, M_player_model->path_);
 	auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 5, M_player_model->path_);
+
+    loading_dot->PropagateUpdate();
+    glfwSwapBuffers(window);
+    loading_dot->PropagateUpdate();
+    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     player_2->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
     player_2->GetComponent<components::Animator>()->AddAnimation("Damage", M_anim_gethit);
