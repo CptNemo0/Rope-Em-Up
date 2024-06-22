@@ -1,10 +1,11 @@
 #include "../headers/ChokeIndicator.h"
 ChokeIndicator* ChokeIndicator::i_ = nullptr;
 
-ChokeIndicator::ChokeIndicator(std::shared_ptr<components::PlayerController> controller_1, std::shared_ptr<components::PlayerController> controller_2)
+ChokeIndicator::ChokeIndicator(std::shared_ptr<components::PlayerController> controller_1, std::shared_ptr<components::PlayerController> controller_2, Rope *rope)
 {
 	controller_1_ = controller_1;
 	controller_2_ = controller_2;
+	rope_ = rope;
 
 	indicator_0_ = res::get_texture("res/indicators/blank.png");
 	indicator_1_ = res::get_texture("res/indicators/left_choke.png");
@@ -12,14 +13,14 @@ ChokeIndicator::ChokeIndicator(std::shared_ptr<components::PlayerController> con
 	indicator_3_ = res::get_texture("res/indicators/choking.png");
 
 	renderer_ = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_root_);
-	renderer_->AddComponent(std::make_shared<components::HUDRenderer>(indicator_0_, res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag")));		
+	renderer_->AddComponent(std::make_shared<components::HUDRenderer>(indicator_0_, res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag"), glm::vec4(1.0f, 1.0f, 1.0f, 0.1f)));		
 }
 
 void ChokeIndicator::Update(float delta_time)
 {
 	if (!choking_)
 	{
-		if (controller_1_->is_pulling_ && controller_2_->is_pulling_)
+		if (rope_->pull_cooldown_)
 		{
 			choking_ = true;
 			timer_ = 0.0f;
@@ -40,15 +41,15 @@ void ChokeIndicator::Update(float delta_time)
 	}
 	else
 	{
-		timer_ += delta_time;
-		float transparency = (1.0 - timer_);
+		timer_ += 0.25f * delta_time;
+		float transparency = (0.25f - timer_);
 		renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, transparency);
 		
 
 		if (transparency < 0.001f)
 		{
 			choking_ = false;
-			renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+			renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.1f);
 			renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_0_;
 		}
 	}

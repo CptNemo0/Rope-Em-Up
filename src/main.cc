@@ -1021,7 +1021,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     SceneManager::i_->SwitchScene("main_menu");
 
     TutorialManager::i_->Init();
-    ChokeIndicator::Initialize(player_1->GetComponent<components::PlayerController>(), player_2->GetComponent<components::PlayerController>());
+    ChokeIndicator::Initialize(player_1->GetComponent<components::PlayerController>(), player_2->GetComponent<components::PlayerController>(), &rope);
 
 #pragma endregion
 
