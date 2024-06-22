@@ -954,10 +954,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         if (file.is_open())
         {
             menu->layout_[{0, 1}]->enabled_ = true;
+            menu->layout_[{0, 1}]->object_->GetComponent<components::HUDRenderer>()->color_ = {1.0f, 1.0f, 1.0f, 1.0f};
         }
         else
         {
             menu->layout_[{0, 1}]->enabled_ = false;
+            menu->layout_[{0, 1}]->object_->GetComponent<components::HUDRenderer>()->color_ = {1.0f, 1.0f, 1.0f, 0.5f};
         }
         file.close();
 
