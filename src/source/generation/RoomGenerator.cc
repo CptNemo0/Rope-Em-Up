@@ -1081,8 +1081,8 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy->transform_->TeleportToPosition(room.enemies_positions[i]);
             enemy->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, res::get_model("res/models/capsule.obj"), 0, enemy->transform_));
             enemy->AddComponent(pbd::PBDManager::i_->CreateParticle(3.0f, 0.88f, enemy->transform_));
-            
-            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(random::RandInt(1, 5), MONSTER));
+            float hp = random::RandInt(1, 5);
+            enemy->AddComponent(HealthManager::i_->CreateHealthComponent(hp, MONSTER));
             enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy));
             enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
             enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));
@@ -1114,6 +1114,11 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", enemy_death_3);
             enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", enemy_death_4);
             enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", enemy_death_5);
+
+            auto enemy_state_display = GameObject::Create(enemy);
+            enemy_state_display->AddComponent(make_shared<components::MeshRenderer>(res::get_model("res/models/simple_floor.obj"), shader));
+            enemy_state_display->transform_->set_scale(glm::vec3(0.1f));
+            enemy_state_display->transform_->add_position(glm::vec3(0.0, hp + 0.5f, 0.0));
         }
 
         //generate barells
