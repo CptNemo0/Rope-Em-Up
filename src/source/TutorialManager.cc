@@ -14,16 +14,16 @@ void TutorialManager::Init()
 	auto movement_tutorial = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_text_root_);
 	string movement_tutorial_info = "Use the left stick to move your characters.";
 	movement_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), movement_tutorial_info, glm::vec3(1.0f)));
-	movement_tutorial->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
-	movement_tutorial->transform_->set_position(glm::vec3(1920.0f * 0.5f, 1080.0f * 0.5f, 0.0f));
+	movement_tutorial->transform_->set_scale(glm::vec3(0.75f, 0.75f, 1.0f));
+	movement_tutorial->transform_->set_position(glm::vec3(495.0f, 250.0f, 0.0f));
 	movement_tutorial->Disable();
 	tutorial_map[1] = movement_tutorial;
 
 	auto choke_tutorial = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_text_root_);
-	string choke_tutorial_info = "than pull triggers of your gamepads at the same time to choke.\nWrap an enemy with the rope,";
+	string choke_tutorial_info = "               Wrap an enemy with the rope,\nthan pull triggers of your gamepads at the same time to choke.";
 	choke_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), choke_tutorial_info, glm::vec3(1.0f)));
-	choke_tutorial->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
-	choke_tutorial->transform_->set_position(glm::vec3(1920.0f * 0.5f, 1080.0f * 0.5f, 0.0f));
+	choke_tutorial->transform_->set_scale(glm::vec3(0.65f, 0.65f, 1.0f));
+	choke_tutorial->transform_->set_position(glm::vec3(375.0f, 250.0f, 0.0f));
 	choke_tutorial->Disable();
 	tutorial_map[2] = choke_tutorial;
 }
