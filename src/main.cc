@@ -153,7 +153,7 @@ int main()
     const string kHUDTexturePath = "res/textures/placeholder_icon.png";
     const string kHUDTexturePath2 = "res/textures/staly_elmnt.png";
     const string kTestSmokeTexturePath = "res/textures/test_smoke.png";
-    const string kTrailTexturePath = "res/textures/trail.png";
+    const string kTrailTexturePath = "res/particles/prints.png";
 
     const string kHealthBarTexturePath = "res/textures/HealthBar.png";
     const string kHealthBarBorderTexturePath = "res/textures/HealthBarBorder.png";

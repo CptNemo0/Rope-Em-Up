@@ -75,17 +75,22 @@ void PlayerStatsManager::LevelUp()
 	player_1_->GetComponent<components::Animator>()->PlayAnimation("Upgrade", 4, 1.0f);
 	player_2_->GetComponent<components::Animator>()->PlayAnimation("Upgrade", 4, 1.0f);
 
-	glm::vec3 dir1 = glm::normalize(player_1_->transform_->get_position() - player_1_->transform_->get_previous_position());
-	glm::vec3 dir2 = glm::normalize(player_2_->transform_->get_position() - player_2_->transform_->get_previous_position());
+	
 	auto tex = res::get_texture("res/particles/levelup.png");
 	auto e1 = player_1_->GetComponent<components::ParticleEmitter>();
 	auto e2 = player_2_->GetComponent<components::ParticleEmitter>();
 	e1->texture_ = tex;
-	e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f) + dir1;
+	e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+	e1->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	e1->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+
 	e2->texture_ = tex;
-	e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f) + dir2;
-	e1->Burst(5);
-	e2->Burst(5);
+	e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+	e2->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	e2->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+
+	e1->Burst(10);
+	e2->Burst(10);
 }
 
 void PlayerStatsManager::AddExp(float exp)
@@ -96,19 +101,29 @@ void PlayerStatsManager::AddExp(float exp)
 	{
 		LevelUp();
 	}
+	else
+	{
+		glm::vec3 dir1 = glm::normalize(player_1_->transform_->get_position() - player_1_->transform_->get_previous_position());
+		glm::vec3 dir2 = glm::normalize(player_2_->transform_->get_position() - player_2_->transform_->get_previous_position());
+		auto tex = res::get_texture("res/particles/xp.png");
+		auto e1 = player_1_->GetComponent<components::ParticleEmitter>();
+		auto e2 = player_2_->GetComponent<components::ParticleEmitter>();
 
+		e1->texture_ = tex;
+		e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+		e1->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		e1->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
 
-	glm::vec3 dir1 = glm::normalize(player_1_->transform_->get_position() - player_1_->transform_->get_previous_position());
-	glm::vec3 dir2 = glm::normalize(player_2_->transform_->get_position() - player_2_->transform_->get_previous_position());
-	auto tex = res::get_texture("res/particles/xp.png");
-	auto e1 = player_1_->GetComponent<components::ParticleEmitter>();
-	auto e2 = player_2_->GetComponent<components::ParticleEmitter>();
-	e1->texture_ = tex;
-	e1->start_acceleration_ = glm::vec3(0.0f, 100.0f, 0.0f) + dir1;
-	e2->texture_ = tex;
-	e2->start_acceleration_ = glm::vec3(0.0f, 100.0f, 0.0f) + dir2;
-	e1->Burst(10);
-	e2->Burst(10);
+		e2->texture_ = tex;
+		e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+		e2->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		e2->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+
+		e1->Burst(10);
+		e2->Burst(10);
+	}
+
+	
 }
 
 void PlayerStatsManager::LevelUpSpeed()

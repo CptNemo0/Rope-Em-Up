@@ -45,7 +45,10 @@ namespace components
 			auto tex = res::get_texture("res/particles/hp.png");
 			emmiter->texture_ = tex;
 			emmiter->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+			emmiter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			emmiter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
 			emmiter->Burst(5);
+			
 		}
 	}
 
