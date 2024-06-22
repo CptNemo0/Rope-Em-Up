@@ -161,6 +161,7 @@ namespace generation
         std::deque<Room> rooms_ordered;
 
         int built_rooms_ = 0;
+        int rooms_traversed_ = 0;
 
         RoomLayoutGenerator() = default;
         void GenerateRooms(const RoomLayoutGenerationSettings& settings, std::shared_ptr<GameObject> root);

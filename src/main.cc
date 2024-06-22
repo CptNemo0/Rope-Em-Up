@@ -77,6 +77,7 @@
 #include "headers/Menu.h"
 #include "headers/SkullMinionManager.h"
 #include "headers/rendering/LightsManager.h"
+#include "headers/TutorialManager.h"
 
 int main()
 {
@@ -298,6 +299,7 @@ int main()
     SceneManager::Initialize();
     SkullMinionManager::Initialize();
 	anim::AnimatorManager::Initialize();
+    TutorialManager::Initialize(mode);
 
 #pragma endregion Initialization
     
@@ -567,6 +569,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     rlg.GenerateRooms(rlgs, room_root);
     rlg.GenerateGates();
 
+    TutorialManager::i_->rlg_ = &rlg;
+
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     SkullMinionManager::i_->room_ = room;
     generation::GenerateRoom(*room, &rg_settings, &models);
@@ -575,7 +579,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     pbd::PBDManager::i_->set_walls(walls);
 
     auto player_1 = GameObject::Create(game_scene_root);
-    player_1->transform_->TeleportToPosition(glm::vec3(-0.5 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_1->transform_->TeleportToPosition(glm::vec3(-0.75 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_1->transform_->set_scale(glm::vec3(0.01f));
     player_1->AddComponent(make_shared<components::MeshRenderer>(F_player_model, GBufferPassShader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, F_player_model, 0, player_1->transform_));
@@ -594,7 +598,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     emmiter_player_1->end_size_ = glm::vec2(1.0f, 1.25f);
 
     auto player_2 = GameObject::Create(game_scene_root);
-    player_2->transform_->TeleportToPosition(glm::vec3(-0.7 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
+    player_2->transform_->TeleportToPosition(glm::vec3(-1.25 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->transform_->set_scale(glm::vec3(0.01f));
     player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_2->transform_));
@@ -674,10 +678,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     rope.AssignPlayerBegin(player_1);
     rope.AssignPlayerEnd(player_2);
 
-    for (int i = 0; i < 50; i++)
+    /*for (int i = 0; i < 10; i++)
     {
         rope.AddSegment(game_scene_root);
-    }
+    }*/
 
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     PlayerStatsManager::Initialize(&rope, player_1, player_2);
@@ -769,7 +773,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_2_hp_bar->transform_->set_scale({ 0.98f, 0.96f, 0.0f });
     player_2_hp_bar->transform_->set_rotation({ 0.0f, 0.0, 180.0f });
     player_2_hp_bar->transform_->set_position({ 0.0f, 0.0f, 0.0 });
-
+    
     auto game_HUD_text_root = GameObject::Create();
 
     auto maturasc_font = res::get_font(kFontPath);
@@ -1013,6 +1017,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     SceneManager::i_->SwitchScene("main_menu");
 
+    TutorialManager::i_->Init();
+
 #pragma endregion
 
     /////////////////////////////////////////////
@@ -1116,7 +1122,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 
                 DifficultyManager::i_->UpdateRoom(room);
-
+                
                 for (auto& minion : SkullMinionManager::i_->minions_)
                 {
                     minion->health_component_->health_ = -1.0f;
@@ -1128,7 +1134,9 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 #pragma endregion
 
 #pragma region Collisions and Physics
-  
+        TutorialManager::i_->Update();
+        cout << rlg.built_rooms_ << endl;
+
         rope.ChokeCheck(room);
         Timer::UpdateTimer(fixed_update_timer, delta_time);
         Timer::UpdateTimer(slow_fixed_update_timer, delta_time);
@@ -1200,7 +1208,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         if (coef > max_coef)
         {
             max_coef = coef;
-            cout << coef << endl;
         }
 
         rope_color = coef / max_distance;
@@ -1745,7 +1752,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
         glfwSwapBuffers(window);
     }
-    
+
+    TutorialManager::Destroy();
     SkullMinionManager::Destroy();
     DifficultyManager::Destroy();
     FloorRendererManager::Destroy();

@@ -878,8 +878,8 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
 			enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", enemy_death_4);
 			enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", enemy_death_5);
         }
-    }
         break;
+    }
     default:
     {
         for (int i = 0; i < room.width; i++)
@@ -1129,8 +1129,10 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             barell->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(barell, true));
             
         }
-    }
+    
         break;
+    }
+        
     }
 
     rlg->built_rooms_++;
@@ -1478,16 +1480,6 @@ void generation::GenerateSecondRoom(Room& room, RoomGenerationSettings* rgs, Roo
 
     }
 
-    // Right bot
-    if (lamp_num > 0)
-    {
-        auto right_bot = glm::vec3(-8.0f - (room.width - 1) * kModuleSize, 0.0f, -8.0f - (room.height - 1) * kModuleSize);
-        right_bot += kLanternPlacement[3];
-        room.lamp_positions.push_back(right_bot);
-        lamp_set.erase(right_bot);
-        lamp_num--;
-    }
-
     // Right top
     if (lamp_num > 0)
     {
@@ -1580,7 +1572,7 @@ void generation::GenerateSecondRoom(Room& room, RoomGenerationSettings* rgs, Roo
     }
 
     //Enemies
-    room.enemies_positions.push_back(glm::vec3(-8.0f, 0.0f, -8.0f));
+    room.enemies_positions.push_back(glm::vec3(-16.0f, 0.0f, -8.0f));
     room.enemies_idx.push_back(random::RandInt(0, -1 + rm->enemies.size()));
 
     room.barells_positions.push_back(glm::vec3(-24.0f, 0.0f, -8.0f));
@@ -1643,6 +1635,8 @@ void generation::ChangeRooms(Room*& room, RoomLayoutGenerator& rlg, RoomGenerati
     room->room_object->Disable();
 
     room = &rlg.rooms[next_room_pos];
+    rlg.rooms_traversed_++;
+
     SkullMinionManager::i_->room_ = &rlg.rooms[next_room_pos];
 
     if (room->is_built)

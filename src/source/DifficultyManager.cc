@@ -98,11 +98,11 @@ void DifficultyManager::UpdateSettings(generation::RoomGenerationSettings* rg_se
 		rg_settings->barells = rg_settings->enemies - 3;
 	}
 
-	cout<<"rg_settings->enemies " << rg_settings->enemies << std::endl;
+	/*cout << "rg_settings->enemies " << rg_settings->enemies << std::endl;
 	cout<<"rg_settings->lamps   " <<rg_settings->lamps <<endl;
 	cout<<"rg_settings->clutter " <<rg_settings->clutter <<endl;
 	cout<<"rg_settings->barells " <<rg_settings->barells <<endl;
 	cout<<"rg_settings->width   " <<rg_settings->width <<endl;
-	cout<<"rg_settings->height  " <<rg_settings->height <<endl;
+	cout<<"rg_settings->height  " <<rg_settings->height <<endl;*/
 }
 
