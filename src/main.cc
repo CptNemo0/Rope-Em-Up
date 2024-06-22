@@ -78,7 +78,7 @@
 #include "headers/SkullMinionManager.h"
 #include "headers/rendering/LightsManager.h"
 #include "headers/TutorialManager.h"
-
+#include "headers/ChokeIndicator.h"
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -621,7 +621,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     emmiter_player_2->end_size_ = glm::vec2(1.0f, 1.0f);
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
-
+    
 #pragma region Animations
 
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
@@ -689,7 +689,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     ai::EnemyAIManager::SetPlayers(player_1, player_2);
     PlayerStatsManager::Initialize(&rope, player_1, player_2);
-
     auto test_grass = GameObject::Create();
     //test_grass->AddComponent(GrassRendererManager::i_->CreateRenderer(walls.up_left_, walls.down_right_, 700));
 #pragma region Camera
@@ -1022,6 +1021,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     SceneManager::i_->SwitchScene("main_menu");
 
     TutorialManager::i_->Init();
+    ChokeIndicator::Initialize(player_1->GetComponent<components::PlayerController>(), player_2->GetComponent<components::PlayerController>());
 
 #pragma endregion
 
@@ -1139,7 +1139,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 #pragma region Collisions and Physics
         TutorialManager::i_->Update();
-        cout << rlg.built_rooms_ << endl;
+        ChokeIndicator::i_->Update(delta_time);
+        
 
         rope.ChokeCheck(room);
         Timer::UpdateTimer(fixed_update_timer, delta_time);
@@ -1197,7 +1198,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 #pragma region GO Update and Draw
        
-        float avg_distance = 0.0f;
+       /* float avg_distance = 0.0f;
         for (int i = 0; i < rope.rope_constraints_.size(); i++)
         {
             avg_distance += glm::distance2(rope.rope_constraints_[i]->p1_->transform_->get_position(), rope.rope_constraints_[i]->p2_->transform_->get_position());
@@ -1220,7 +1221,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         for (int i = 0; i < rope.rope_segments_.size(); i++)
         {
             rope.rope_segments_[i]->GetComponent<components::MeshRenderer>()->color_ = glm::vec3(rope_color * rope_color, (1.0f - rope_color), 0.0f);
-        }
+        }*/
 
 
         glViewport(0, 0, mode->width, mode->height);
@@ -1475,6 +1476,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             HUDBarShader->Use();
             HUDBarShader->SetFloat("percentage", p2p);
             player_2_hp_bar_border->PropagateUpdate();
+
+
         }
 
         HUDshader->Use();
@@ -1757,6 +1760,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         glfwSwapBuffers(window);
     }
 
+    ChokeIndicator::Destroy();
     TutorialManager::Destroy();
     SkullMinionManager::Destroy();
     DifficultyManager::Destroy();
