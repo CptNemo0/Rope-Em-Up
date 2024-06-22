@@ -55,3 +55,6 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX)
 endif()
+
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "RopeEmUp")
