@@ -10,6 +10,7 @@
 #include "../Timer.h"
 #include "../audio/AudioManager.h"
 #include "../typedef.h"
+#include "ParticleEmitter.h"
 
 enum HEALTH_TYPE
 {

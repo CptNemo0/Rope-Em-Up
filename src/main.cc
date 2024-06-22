@@ -250,6 +250,10 @@ int main()
     }
     cout << "GLFW Initialized.\n";
 
+    GLFWimage images[1];
+    images[0].pixels = stbi_load("res/textures/logo.png", &images[0].width, &images[0].height, 0, 4); 
+    glfwSetWindowIcon(window, 1, images);
+    stbi_image_free(images[0].pixels);
 
     if (int return_value = utility::InitGlad())
     {
@@ -586,12 +590,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
+    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
     player_1->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     
     auto emmiter_player_1 = player_1->GetComponent<components::ParticleEmitter>();
     emmiter_player_1->emission_rate_ = 0.25f;
-    emmiter_player_1->life_time_ = 0.250f;
+    emmiter_player_1->life_time_ = 0.50f;
     emmiter_player_1->start_position_displacement_ = 1.0f;
     emmiter_player_1->start_acceleration_ = glm::vec3(0.0, 10.0, 0.0);
     emmiter_player_1->start_size_ = glm::vec2(0.5f, 1.0f);
@@ -610,11 +614,11 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_2->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     auto emmiter_player_2 = player_2->GetComponent<components::ParticleEmitter>();
     emmiter_player_2->emission_rate_ = 0.25f;
-    emmiter_player_2->life_time_ = 0.250f;
-    emmiter_player_2->start_position_displacement_ = 1.0f;
+    emmiter_player_2->life_time_ = 1.0f;
+    emmiter_player_2->start_position_displacement_ = 1.5f;
     emmiter_player_2->start_acceleration_ = glm::vec3(0.0, 10.0, 0.0);
-    emmiter_player_2->start_size_ = glm::vec2(0.5f, 1.0f);
-    emmiter_player_2->end_size_ = glm::vec2(1.0f, 1.25f);
+    emmiter_player_2->start_size_ = glm::vec2(1.0f, 1.0f);
+    emmiter_player_2->end_size_ = glm::vec2(1.0f, 1.0f);
 
     std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
 

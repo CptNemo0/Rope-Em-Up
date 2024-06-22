@@ -35,6 +35,18 @@ namespace components
 		{
 			health_ = max_health_;
 		}
+
+
+		auto emmiter = gameObject_.lock()->GetComponent<components::ParticleEmitter>();
+
+		if (emmiter != nullptr)
+		{
+			glm::vec3 dir1 = glm::normalize(gameObject_.lock()->transform_->get_position() - gameObject_.lock()->transform_->get_previous_position());
+			auto tex = res::get_texture("res/particles/hp.png");
+			emmiter->texture_ = tex;
+			emmiter->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+			emmiter->Burst(5);
+		}
 	}
 
 	void HealthComponent::DamageCooldown()

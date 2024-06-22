@@ -842,14 +842,14 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(enemy, true));
             enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
             enemy->AddComponent(std::make_shared<components::EnemySizeManager>());
-            enemy->AddComponent(std::make_shared<components::ParticleEmitter>(100, res::get_texture("res/textures/zzz.png"), particle_shader));
+            enemy->AddComponent(std::make_shared<components::ParticleEmitter>(100, res::get_texture("res/particles/zzz.png"), particle_shader));
             auto emitter = enemy->GetComponent<components::ParticleEmitter>();
             emitter->start_position_ = {0.0f, 5.5f, 0.0f};
             emitter->emission_rate_ = 0.5f;
             emitter->life_time_ = 1.5f;
             emitter->start_acceleration_ = glm::vec3(0.0, 8.0, 0.0);
-            emitter->start_size_ = glm::vec2(1.5f, 2.5f);
-            emitter->end_size_ = glm::vec2(5.0f, 5.0f);
+            emitter->start_size_ = glm::vec2(1.0f, 1.0f);
+            emitter->end_size_ = glm::vec2(1.0f, 1.0f);
 
             auto enemy_mesh = GameObject::Create(enemy);
             enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));

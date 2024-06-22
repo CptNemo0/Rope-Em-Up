@@ -139,7 +139,7 @@ void components::ParticleEmitter::Burst(int amount)
                 random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_),
                 random::RandFloat(-start_velocity_displacement_, start_velocity_displacement_));
             if (random_rotation_)
-                particle.rotation_angle = random::RandFloat(0.0f, glm::two_pi<float>());
+                particle.rotation_angle = 0.0f;// random::RandFloat(0.0f, glm::two_pi<float>());
             else
                 particle.rotation_angle = 0.0f;
             particle.id_ = current_id_++;

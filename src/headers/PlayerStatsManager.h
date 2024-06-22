@@ -33,7 +33,7 @@ public:
     }
 
     const float kLevelUpThreshold = 1000.0f;
-    const float kSpeedLevelUp = 100.0f;
+    const float kSpeedLevelUp = 300.0f;
     const float kPullPowerLevelUp = 100.0f;
     const float kDragLevelUp = 0.0025f;
     const float kWeightLevelUp = -0.0025f;
