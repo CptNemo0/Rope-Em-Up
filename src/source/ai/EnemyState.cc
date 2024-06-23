@@ -21,6 +21,7 @@ ai::IdleState* ai::IdleState::Instance()
 
 void ai::IdleState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->billboard_renderer_ != nullptr)	machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/dizzy.png");
 	if (machine->rest_timer_ < machine->vehicle_.rest_lenght)
 	{
 		cout << "IDLE" << endl;
@@ -103,6 +104,13 @@ ai::OnAlertState* ai::OnAlertState::Instance()
 void ai::OnAlertState::Execute(EnemyStateMachine* machine)
 {
 	if (machine->billboard_renderer_ != nullptr) machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/alert.png");
+	
+	if (machine->was_idle_)
+	{
+		audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/alert.wav"));
+		machine->was_idle_ = false;
+	}
+	
 	if (machine->is_choked_)
 	{
 		machine->current_state_ = IdleState::Instance();
@@ -164,8 +172,8 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 
 					}
 					machine->is_attacking = false;
-					assert(machine->current_state_ && PatrolState::Instance());
-					machine->current_state_ = PatrolState::Instance();
+					assert(machine->current_state_ && OnAlertState::Instance());
+					machine->current_state_ = OnAlertState::Instance();
 				},
 				[machine](float a)
 				{

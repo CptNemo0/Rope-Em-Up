@@ -7,6 +7,8 @@
 #include <headers/components/Animator.h>
 #include "../components/BillboardRenderer.h"
 #include "../res/Resources.h"
+#include "../audio/AudioManager.h"
+
 namespace ai
 {
 	class EnemyStateMachine;
@@ -118,6 +120,8 @@ namespace ai
 
 		Vehicle vehicle_;
 
+
+
 		s_ptr<components::Transform> transfrom_;
 		s_ptr<components::PBDParticle> partcile_;
 		s_ptr<pbd::BasicGenerator> generator_;
@@ -138,6 +142,8 @@ namespace ai
 		bool evasive_manoeuvres_;
 
 		bool is_attacking;
+
+		bool was_idle_ = true;
 	};
 }
 

@@ -978,7 +978,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.3f;
+            emitter->emission_rate_ = 0.4f;
             emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             emitter->start_size_ = glm::vec2(1.0f, 1.0f);
@@ -998,7 +998,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.3f;
+            emitter->emission_rate_ = 0.5f;
             emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             emitter->start_size_ = glm::vec2(1.0f, 1.0f);
@@ -1019,7 +1019,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.3f;
+            emitter->emission_rate_ = 0.5f;
             emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             emitter->start_size_ = glm::vec2(1.0f, 1.0f);
@@ -1041,7 +1041,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
-            emitter->emission_rate_ = 0.3f;
+            emitter->emission_rate_ = 0.5f;
             emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             emitter->start_size_ = glm::vec2(1.0f, 1.0f);
