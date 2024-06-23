@@ -24,14 +24,14 @@ void ShadowsManager::SetLightSpaceMatrix(glm::vec3 lightPos, int lightID)
 
 void ShadowsManager::SetUpCubeShadowBuffers(int lightID)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[i]);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[lightID]);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 
 	depth_shader_->Use();
 	depth_shader_->SetVec3("lightPos", pointLights[lightID].position);
 	depth_shader_->SetFloat("far_plane", farPlane);
 
-	std::vector<glm::mat4> shadowTransforms = GetShadowTransforms(pointLights[i].position, farPlane);
+	std::vector<glm::mat4> shadowTransforms = GetShadowTransforms(pointLights[lightID].position, farPlane);
 	for (unsigned int j = 0; j < 6; ++j)
 	{
 		depth_shader_->SetMatrix4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
