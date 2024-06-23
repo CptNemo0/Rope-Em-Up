@@ -30,7 +30,8 @@ void components::BillboardRenderer::Draw()
     glBindVertexArray(VAO_);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_);
 
-	assert(transform_->parent_ == nullptr);
+    assert(transform_ != nullptr);
+	assert(transform_->parent_ != nullptr);
 
 	glm::vec3 pos_vec = transform_->parent_->get_global_position() + position_offset_;
 	float pos[3] = {pos_vec.x, pos_vec.y, pos_vec.z};

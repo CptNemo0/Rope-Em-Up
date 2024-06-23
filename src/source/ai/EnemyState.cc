@@ -57,6 +57,7 @@ ai::PatrolState* ai::PatrolState::Instance()
 
 void ai::PatrolState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->billboard_renderer_ != nullptr)	machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/face_with_monocle.png");
 	if (machine->is_choked_)
 	{
 		machine->current_state_ = IdleState::Instance();
@@ -101,6 +102,7 @@ ai::OnAlertState* ai::OnAlertState::Instance()
 
 void ai::OnAlertState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->billboard_renderer_ != nullptr) machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/alert.png");
 	if (machine->is_choked_)
 	{
 		machine->current_state_ = IdleState::Instance();
@@ -138,6 +140,8 @@ ai::AttackState* ai::AttackState::Instance()
 
 void ai::AttackState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->billboard_renderer_ != nullptr) machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/attack.png");
+
 	float tmp = 10.0f;
 	if (machine->is_choked_)
 	{
@@ -187,6 +191,7 @@ ai::PursuitState* ai::PursuitState::Instance()
 
 void ai::PursuitState::Execute(EnemyStateMachine* machine)
 {
+	if (machine->billboard_renderer_ != nullptr) machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/pursuit.png");
 	if (machine->is_choked_)
 	{
 		machine->current_state_ = IdleState::Instance();
@@ -343,7 +348,9 @@ ai::EnemyStateMachine::EnemyStateMachine(s_ptr<GameObject> game_object, s_ptr<pb
 	target_player_ = nullptr;
 	transfrom_ = game_object->transform_;
 	partcile_ = game_object->GetComponent<components::PBDParticle>();
+	
 	generator_ = generator;
+	
 
 	rest_timer_ = 0.0f;
 

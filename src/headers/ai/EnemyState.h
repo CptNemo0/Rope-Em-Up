@@ -5,7 +5,8 @@
 #include "EnemyStateMachine.h"
 #include "headers/components/HealthComponent.h"
 #include <headers/components/Animator.h>
-
+#include "../components/BillboardRenderer.h"
+#include "../res/Resources.h"
 namespace ai
 {
 	class EnemyStateMachine;
@@ -120,7 +121,7 @@ namespace ai
 		s_ptr<components::Transform> transfrom_;
 		s_ptr<components::PBDParticle> partcile_;
 		s_ptr<pbd::BasicGenerator> generator_;
-
+		s_ptr<components::BillboardRenderer> billboard_renderer_;
 		s_ptr<GameObject> target_player_;
 
 		float rest_timer_;
