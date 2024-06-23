@@ -80,7 +80,7 @@
 #include "headers/TutorialManager.h"
 #include "headers/ChokeIndicator.h"
 #include "headers/BillboardRendererManager.h"
-
+#include "headers/PauseMenuTexture.h"
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -414,7 +414,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorTCShaderPath, kFloorTEShaderPath, kFloorFragmentShaderPath);
 	auto ShadowDepthShader = res::get_shader(kShadowDepthVertexShaderPath, kShadowDepthFragmentShaderPath);
     auto BillboardShader = res::get_shader("res/shaders/Billboard.vert", "res/shaders/Billboard.geom", "res/shaders/Billboard.frag");
-
+    auto ScreenShader = res::get_shader("res/shaders/Screen.vert", "res/shaders/Screen.frag");
+    auto CopyShader = res::get_shader("res/shaders/Copy.vert", "res/shaders/Copy.frag");
 #pragma endregion Shaders
     LightsManager::Initialize(ShadowDepthShader, LBufferPassShader);
 
@@ -877,6 +878,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     game_scene->HUD_text_root_ = game_HUD_text_root;
     game_scene->camera_ = camera;
 
+    
+
     SceneManager::i_->AddScene("game", game_scene);
 
     // MENU SCENE - MENU SCENE
@@ -961,7 +964,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     menu_scene->menus_["main_menu"] = menu;
     menu_scene->SwitchMenu("main_menu");
-
+    
     menu_scene->camera_ = menuCamera;
     menu_scene->OnStart = [&menu, &menuCamera]()
     {
@@ -990,11 +993,18 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     // PAUSE MENU SCENE - PASUE MENU SCENE
 
+    PauseMenuTexture pmt = PauseMenuTexture(mode->width, mode->height);
+
     auto pause_menu_HUD_root = GameObject::Create();
 
     auto pause_menu = make_shared<Menu>();
     input::InputManager::i_->AddObserver(0, pause_menu);
 
+    auto pause_menu_background = GameObject::Create(pause_menu_HUD_root);
+    auto pause_menu_background_tex = make_shared<tmp::Texture>();
+    pause_menu_background_tex->id_ = pmt.id_;
+    pause_menu_background->AddComponent(make_shared<components::HUDRenderer>(pause_menu_background_tex, HUDshader, glm::vec4(0.5, 0.5, 0.5, 1.0f)));
+    
     auto pause_continue_button = GameObject::Create(pause_menu_HUD_root);
     pause_continue_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
     pause_continue_button->transform_->scale({3.333f, 1.0f, 1.0f});
@@ -1032,6 +1042,16 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     {
         pause_menu->current_pos_ = {0, 0};
         pause_menu->UpdateSelection();
+    };
+
+    game_scene->OnExit = [&pmt, &CopyShader, &postprocessor]()
+    {   
+        pmt.Bind();
+        CopyShader->Use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, postprocessor.texture_);
+        CopyShader->SetInt("texture_", 0);
+        pmt.Draw();
     };
 
     SceneManager::i_->AddScene("pause_menu", pause_menu_scene);
@@ -1385,7 +1405,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             glViewport(0, 0, mode->width, mode->height);
         }
         
-        
         //////////////////////////////////
 
         // FORWARD PASS - FORWARD PASS - FORWARD PASS - FORWARD PASS
@@ -1414,6 +1433,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         PostprocessingShader->SetInt("bloom_texture", 1);
         postprocessor.Draw();
         //////////////////////////////////
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        ScreenShader->Use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, postprocessor.texture_);
+        ScreenShader->SetInt("texture_", 0);
+        postprocessor.JustDraw();
 
 #pragma endregion
 
@@ -1519,13 +1546,17 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 #pragma endregion
         
-#ifdef _DEBUG 
+//#ifdef _DEBUG 
 
 #pragma region ImGUI
         
          ImGui_ImplOpenGL3_NewFrame();
          ImGui_ImplGlfw_NewFrame();
          ImGui::NewFrame();
+
+         ImGui::Begin("Texture");
+         ImGui::Image((void*)(intptr_t)pmt.id_, ImVec2(160 * 4, 90 * 4));
+         ImGui::End();
 
          ImGui::Begin("Postprocessor");
          ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
@@ -1760,7 +1791,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
          ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
         
 #pragma endregion 
-#endif
+//#endif
 
         glfwSwapBuffers(window);
     }

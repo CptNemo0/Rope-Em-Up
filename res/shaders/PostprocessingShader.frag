@@ -1,7 +1,9 @@
 #version 330 core
+layout (location = 0) out vec4 texture_;
+
 in vec2 if_uv;
 
-out vec4 FragColor;
+//out vec4 FragColor;
 
 uniform sampler2D color_texture;
 uniform sampler2D bloom_texture;
@@ -107,5 +109,5 @@ void main()
     color = vec3(clamp(color, 0.0, 1.0));
     color = apply_vignette(color, transition_vignette_amount);
 
-    FragColor = vec4(color.rgb, 1.0);
+    texture_ = vec4(color.rgb, 1.0);
 } 

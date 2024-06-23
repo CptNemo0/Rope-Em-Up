@@ -12,6 +12,9 @@ namespace ppc
     class Postprocessor
     {
     public:
+        unsigned int fbo_;
+        unsigned int texture_;
+
         int width_;
         int height_;
 
@@ -37,7 +40,7 @@ namespace ppc
         void Bind();
         void Unbind();
         void Draw();
-
+        void JustDraw();
         void Update();
     };
 }
