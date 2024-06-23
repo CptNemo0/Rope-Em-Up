@@ -34,6 +34,12 @@ void components::MeshRenderer::Render(s_ptr<Shader> shader)
 	model_->Draw(shader);
 }
 
+void components::MeshRenderer::RenderDepth(s_ptr<Shader> depth_shader_)
+{
+	depth_shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
+	model_->Draw(depth_shader_);
+}
+
 components::MeshRenderer::MeshRenderer(json &j)
 {
 	auto model = res::get_model(j["model_path"]);
