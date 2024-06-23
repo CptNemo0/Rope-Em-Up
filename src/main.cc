@@ -434,10 +434,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     PointLight point_light{};
 
     float lamp_h = 8.0f;
+	float point_light_ID = 0;
     glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
     float point_light_intensity = 250.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     point_light.color = point_light_color;
+	point_light.ID = point_light_ID;
 
     DirectionalLight directional_light{};
     glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 1.f);
@@ -1814,6 +1816,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     collisions::CollisionManager::Destroy();
     input::InputManager::Destroy();
     SceneManager::Destroy();
+	RenderManager::Destroy();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

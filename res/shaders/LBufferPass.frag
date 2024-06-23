@@ -39,9 +39,12 @@ const float PI = 3.14159265359;
 
 struct DirLight {
     float intensity;
+    vec3 position;
     vec3 direction;
 
     vec3 color;
+    mat4 light_space_matrix;
+    int ID;
 };
 
 struct PointLight {
@@ -53,6 +56,8 @@ struct PointLight {
     float quadratic;
 
     vec3 color;
+    mat4 light_space_matrix;
+    int ID;
 };
 
 struct SpotLight {

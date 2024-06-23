@@ -8,6 +8,7 @@ RenderManager::RenderManager()
 }
 RenderManager::~RenderManager()
 {
+	RenderManager::i_->Destroy();
 }
 
 s_ptr<components::MeshRenderer> RenderManager::CreateMeshRendererComponent(s_ptr<Model> model, s_ptr<Shader> shader)
@@ -35,15 +36,20 @@ void RenderManager::SetUpMeshRenderer()
 {
 	for (auto& mesh : mesh_renderer_components_)
 	{
-		mesh->Start();
+		if (mesh->active_)
+		{
+			mesh->Start();
+		}
 	}
-
 }
 
 void RenderManager::RenderFromLightPOV(s_ptr<Shader> depthShader)
 {
 	for (auto& mesh : mesh_renderer_components_)
 	{
-		mesh->RenderDepth(depthShader);
+		if (mesh->active_)
+		{
+			mesh->Render(depthShader);
+		}
 	}
 }
