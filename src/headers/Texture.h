@@ -26,7 +26,9 @@ namespace tmp
         int height_;
         string path_;
         Texture(const string& path);
+        Texture(int width, int height);
         Texture() = default;
+
     };
 }
 
