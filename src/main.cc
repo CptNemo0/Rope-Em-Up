@@ -872,13 +872,22 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     // MAIN GAME SCENE - MAIN GAME SCENE
 
+    PauseMenuTexture pmt = PauseMenuTexture(mode->width, mode->height);
+
     auto game_scene = make_shared<Scene>();
     game_scene->scene_root_ = game_scene_root;
     game_scene->HUD_root_ = game_HUD_root;
     game_scene->HUD_text_root_ = game_HUD_text_root;
     game_scene->camera_ = camera;
-
-    
+    game_scene->OnExit = [&pmt, &CopyShader, &postprocessor]()
+    {   
+        pmt.Bind();
+        CopyShader->Use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, postprocessor.texture_);
+        CopyShader->SetInt("texture_", 0);
+        pmt.Draw();
+    };
 
     SceneManager::i_->AddScene("game", game_scene);
 
@@ -916,8 +925,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     continue_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/continue.png"), HUDshader));
     menu->layout_[{0, 1}] = make_shared<MenuItem>(continue_button, [&rlg, &room_root, &room, &rg_settings, &minimap, &rope, &player_1, &player_2, &game_scene_root]()
     {
-        SceneManager::i_->SwitchScene("game");
-
         std::ifstream save_file;
         save_file.open("save.json");
         json j = json::parse(save_file);
@@ -943,6 +950,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         rope.rope_constraints_.pop_front();
         rope.AssignPlayerBegin(player_1);
         rope.AssignPlayerEnd(player_2);
+
+        SceneManager::i_->SwitchScene("game");
     });
 
     auto quit_button = GameObject::Create(menu_HUD_root);
@@ -991,9 +1000,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     SceneManager::i_->AddScene("main_menu", menu_scene);
 
-    // PAUSE MENU SCENE - PASUE MENU SCENE
-
-    PauseMenuTexture pmt = PauseMenuTexture(mode->width, mode->height);
+    // PAUSE MENU SCENE - PAUSE MENU SCENE
 
     auto pause_menu_HUD_root = GameObject::Create();
 
@@ -1004,6 +1011,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto pause_menu_background_tex = make_shared<tmp::Texture>();
     pause_menu_background_tex->id_ = pmt.id_;
     pause_menu_background->AddComponent(make_shared<components::HUDRenderer>(pause_menu_background_tex, HUDshader, glm::vec4(0.5, 0.5, 0.5, 1.0f)));
+
+    auto pause_text = GameObject::Create(pause_menu_HUD_root);
+    pause_text->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    pause_text->transform_->scale({2.36, 1.0f, 1.0f});
+    pause_text->transform_->scale({0.333f, 0.333f, 1.0f});
+    pause_text->transform_->scale({0.9f, 0.9f, 1.0f});
+    pause_text->transform_->set_position({0.0f, 0.5f, 0.0f});
+    pause_text->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/pause_text.png"), HUDshader));
     
     auto pause_continue_button = GameObject::Create(pause_menu_HUD_root);
     pause_continue_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
@@ -1017,14 +1032,36 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         SceneManager::i_->SwitchScene("game");
     });
 
+    auto pause_save_button = GameObject::Create(pause_menu_HUD_root);
+    pause_save_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
+    pause_save_button->transform_->scale({3.333f, 1.0f, 1.0f});
+    pause_save_button->transform_->scale({0.333f, 0.333f, 1.0f});
+    pause_save_button->transform_->scale({0.5f, 0.5f, 1.0f});
+    pause_save_button->transform_->set_position({0.0f, -0.4f, 0.0f});
+    pause_save_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/save.png"), HUDshader));
+    pause_menu->layout_[{0, 1}] = make_shared<MenuItem>(pause_save_button, [&rlg, &player_1, &player_2, &rope, &room]()
+    {
+        json j = rlg.Serialize();
+        j["rope"] = rope.Serialize();
+        j["player_1"] = player_1->Serialize();
+        j["player_2"] = player_2->Serialize();
+
+        j["current_room"] = { room->position.x, room->position.y };
+    
+        std::ofstream save_file;
+        save_file.open("save.json");
+        save_file << j.dump();
+        save_file.close();
+    });
+
     auto pause_quit_button = GameObject::Create(pause_menu_HUD_root);
     pause_quit_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
     pause_quit_button->transform_->scale({3.333f, 1.0f, 1.0f});
     pause_quit_button->transform_->scale({0.333f, 0.333f, 1.0f});
     pause_quit_button->transform_->scale({0.5f, 0.5f, 1.0f});
-    pause_quit_button->transform_->set_position({0.0f, -0.4f, 0.0f});
+    pause_quit_button->transform_->set_position({0.0f, -0.75f, 0.0f});
     pause_quit_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/quit.png"), HUDshader));
-    pause_menu->layout_[{0, 1}] = make_shared<MenuItem>(pause_quit_button, []()
+    pause_menu->layout_[{0, 2}] = make_shared<MenuItem>(pause_quit_button, []()
     {
         SceneManager::i_->SwitchScene("main_menu");
     });
@@ -1042,16 +1079,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     {
         pause_menu->current_pos_ = {0, 0};
         pause_menu->UpdateSelection();
-    };
-
-    game_scene->OnExit = [&pmt, &CopyShader, &postprocessor]()
-    {   
-        pmt.Bind();
-        CopyShader->Use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, postprocessor.texture_);
-        CopyShader->SetInt("texture_", 0);
-        pmt.Draw();
     };
 
     SceneManager::i_->AddScene("pause_menu", pause_menu_scene);
