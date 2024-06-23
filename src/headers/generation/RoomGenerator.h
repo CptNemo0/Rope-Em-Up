@@ -31,6 +31,7 @@
 #include "../components/ParticleEmitter.h"
 #include "../components/EnemySizeManager.h"
 #include "../components/FloorRenderer.h"
+#include "../components/BillboardRenderer.h"
 #include "../collisions/Collider.h"
 #include "../collisions/collisions.h"
 #include "../collisions/CollisionManager.h"
@@ -44,6 +45,8 @@
 #include "../Texture.h"
 #include "../FloorRendererManager.h"
 #include "../SkullMinionManager.h"
+#include "../BillboardRendererManager.h"
+
 namespace generation
 {
     const float kModuleSize = 16.0f;

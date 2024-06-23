@@ -1129,9 +1129,9 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", enemy_death_5);
 
             auto enemy_state_display = GameObject::Create(enemy);
-            enemy_state_display->AddComponent(make_shared<components::MeshRenderer>(res::get_model("res/models/simple_floor.obj"), shader));
+            enemy_state_display->AddComponent(BillboardRendererManager::i_->CreateRenderer(res::get_model("res/models/simple_floor.obj"), res::get_texture("res/textures/logo.png")));
             enemy_state_display->transform_->set_scale(glm::vec3(0.1f));
-            enemy_state_display->transform_->add_position(glm::vec3(0.0, hp + 0.5f, 0.0));
+            enemy_state_display->transform_->set_position(glm::vec3(0.0, hp + 1.0f, 0.0));
         }
 
         //generate barells

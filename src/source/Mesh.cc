@@ -109,6 +109,15 @@ void Mesh::Draw(s_ptr<Shader> shader) const
     glActiveTexture(GL_TEXTURE0);
 }
 
+void Mesh::Draw() const
+{
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_);
+    glBindVertexArray(vao_);
+    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices_.size()), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
+}
+
 void Mesh::UpdateTransforms(std::vector<glm::mat4> transforms)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_);
