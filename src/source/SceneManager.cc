@@ -11,6 +11,10 @@ void SceneManager::SwitchScene(string scene_name)
     }
     if (current_scene_)
     {
+        if (current_scene_->OnExit)
+        {
+            current_scene_->OnExit();
+        }
         current_scene_->Halt();
     }
     current_scene_ = scenes_[scene_name];
@@ -26,3 +30,5 @@ void SceneManager::AddScene(string scene_name, s_ptr<Scene> scene)
     scenes_.insert({scene_name, scene});
     scene->Halt();
 }
+
+

@@ -21,8 +21,8 @@ public:
     std::unordered_map<string, s_ptr<Menu>> menus_;
     s_ptr<llr::Camera> camera_;
 
-    std::function<void(float)> OnUpdate;
     std::function<void()> OnStart;
+    std::function<void()> OnExit;
 
     Scene()
     {
@@ -93,6 +93,10 @@ public:
 
     void SwitchScene(string scene_name);
     void AddScene(string scene_name, s_ptr<Scene> scene);
+    inline bool IsScene(string scene_name)
+    {
+        return current_scene_ == scenes_[scene_name];
+    }
 };
 
 #endif // !SCENEMANAGER_H

@@ -1239,12 +1239,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         BackgroundShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
         BackgroundShader->SetMatrix4("projection_matrix", projection_matrix);
 
-        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["game"])
+        if (SceneManager::i_->IsScene("game"))
         {
             cubemap->BindEnvCubemap(BackgroundShader);
             cubemap->RenderCube();
         }
-        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["main_menu"])
+        if (SceneManager::i_->IsScene("main_menu"))
         {
             menu_cubemap->BindEnvCubemap(BackgroundShader);
             menu_cubemap->RenderCube();
@@ -1305,12 +1305,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         LBufferPassShader->SetBool("use_ssao", use_ssao);
         gbuffer.BindTextures(LBufferPassShader);
 
-        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["game"])
+        if (SceneManager::i_->IsScene("game"))
         {
             cubemap->BindIrradianceMap(LBufferPassShader);
             cubemap->BindIBLmaps(LBufferPassShader);
         }
-        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["main_menu"])
+        if (SceneManager::i_->IsScene("main_menu"))
         {
             menu_cubemap->BindIrradianceMap(LBufferPassShader);
             menu_cubemap->BindIBLmaps(LBufferPassShader);
@@ -1430,7 +1430,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["game"])
+        if (SceneManager::i_->IsScene("pause_menu"))
+        {
+
+        }
+
+        if (SceneManager::i_->IsScene("game"))
         {
             float p1p = 0.0;
             float p2p = 0.0;
