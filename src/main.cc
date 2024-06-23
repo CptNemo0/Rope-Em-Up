@@ -413,7 +413,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
     auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorTCShaderPath, kFloorTEShaderPath, kFloorFragmentShaderPath);
 	auto ShadowDepthShader = res::get_shader(kShadowDepthVertexShaderPath, kShadowDepthFragmentShaderPath);
-    auto BillboardShader = res::get_shader("res/shaders/Billboard.vert", "res/shaders/Billboard.frag");
+    auto BillboardShader = res::get_shader("res/shaders/Billboard.vert", "res/shaders/Billboard.geom", "res/shaders/Billboard.frag");
     auto ScreenShader = res::get_shader("res/shaders/Screen.vert", "res/shaders/Screen.frag");
     auto CopyShader = res::get_shader("res/shaders/Copy.vert", "res/shaders/Copy.frag");
 #pragma endregion Shaders
@@ -1420,12 +1420,9 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         ParticleShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
-        
-        BillboardRendererManager::i_->UpdateRenderers();
 
         glDisable(GL_BLEND);
-
-
+        
         // Bind buffer - Bind textures - Use Shader - Draw 
         postprocessor.Bind();
         PostprocessingShader->Use();
@@ -1452,6 +1449,11 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        BillboardShader->Use();
+        BillboardShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
+
+        BillboardRendererManager::i_->UpdateRenderers();
 
         if (SceneManager::i_->IsScene("pause_menu"))
         {

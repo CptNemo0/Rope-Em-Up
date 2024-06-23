@@ -21,7 +21,7 @@ public:
     std::vector<std::shared_ptr<components::BillboardRenderer>> renderers_;
     std::shared_ptr<Shader> shader_;
 
-    std::shared_ptr<components::BillboardRenderer> CreateRenderer(std::shared_ptr<Model> model, std::shared_ptr<tmp::Texture> texture);
+    std::shared_ptr<components::BillboardRenderer> CreateRenderer(s_ptr<tmp::Texture> texture);
     void AddRenderer(std::shared_ptr<components::BillboardRenderer> r);
     void RemoveRenderer(std::shared_ptr<components::BillboardRenderer> r);
     void UpdateRenderers();

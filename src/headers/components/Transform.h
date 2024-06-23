@@ -68,6 +68,7 @@ public:
     void add_rotation(const glm::vec3& rotation);
     void add_scale(const glm::vec3& scale);
     const glm::mat4 get_model_matrix();
+    const glm::mat4 get_local_model_matrix();
     const glm::mat4 get_prediction_matrix() const;
 
     const glm::vec3 get_up() const;
