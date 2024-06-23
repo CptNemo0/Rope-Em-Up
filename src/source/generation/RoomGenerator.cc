@@ -1133,9 +1133,11 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             auto br = BillboardRendererManager::i_->CreateRenderer(res::get_texture("res/textures/quit.png"));
             
             br->position_offset_ = glm::vec3(0.0, hp + 1.0f, 0.0);
-            enemy_state_display->transform_->set_scale(glm::vec3(0.1f));
+            enemy_state_display->transform_->set_scale(glm::vec3(0.025f));
             
             enemy_state_display->AddComponent(br);
+
+            enemy->GetComponent<components::EnemyAIComponent>()->state_machine_->billboard_renderer_ = br;
         }
 
         //generate barells
