@@ -845,11 +845,12 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy->AddComponent(std::make_shared<components::ParticleEmitter>(100, res::get_texture("res/particles/zzz.png"), particle_shader));
             auto emitter = enemy->GetComponent<components::ParticleEmitter>();
             emitter->start_position_ = {0.0f, 5.5f, 0.0f};
-            emitter->emission_rate_ = 0.5f;
+            emitter->emission_rate_ = 1.0f;
             emitter->life_time_ = 1.5f;
             emitter->start_acceleration_ = glm::vec3(0.0, 8.0, 0.0);
             emitter->start_size_ = glm::vec2(1.0f, 1.0f);
             emitter->end_size_ = glm::vec2(1.0f, 1.0f);
+            emitter->random_rotation_ = false;
 
             auto enemy_mesh = GameObject::Create(enemy);
             enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
@@ -1129,9 +1130,12 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", enemy_death_5);
 
             auto enemy_state_display = GameObject::Create(enemy);
-            enemy_state_display->AddComponent(BillboardRendererManager::i_->CreateRenderer(res::get_model("res/models/simple_floor.obj"), res::get_texture("res/textures/logo.png")));
+            auto br = BillboardRendererManager::i_->CreateRenderer(res::get_texture("res/textures/quit.png"));
+            
+            br->position_offset_ = glm::vec3(0.0, hp + 1.0f, 0.0);
             enemy_state_display->transform_->set_scale(glm::vec3(0.1f));
-            enemy_state_display->transform_->set_position(glm::vec3(0.0, hp + 1.0f, 0.0));
+            
+            enemy_state_display->AddComponent(br);
         }
 
         //generate barells
