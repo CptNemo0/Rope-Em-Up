@@ -26,7 +26,7 @@ uniform  vec4 frag_pos_light_space;
 uniform float far_plane;
 
 uniform samplerCube cube_shadow_maps[MAX_LIGHTS]; //10
-uniform sampler2D plane_shadow_maps[MAX_LIGHTS]; //10 + 16 = 26
+uniform sampler2D plane_shadow_maps; //10 + 16 = 26
 
 uniform bool slowed_time;
 
@@ -213,7 +213,7 @@ float PlaneShadowCalculation(mat4x4 lightSpaceMatrix, vec3 lightPos, int lighyId
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(plane_shadow_maps[lighyId], projCoords.xy).r; 
+    float closestDepth = texture(plane_shadow_maps, projCoords.xy).r; 
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // calculate bias (based on depth map resolution and slope)
@@ -224,12 +224,12 @@ float PlaneShadowCalculation(mat4x4 lightSpaceMatrix, vec3 lightPos, int lighyId
     // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
     // PCF
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(plane_shadow_maps[lighyId], 0);
+    vec2 texelSize = 1.0 / textureSize(plane_shadow_maps, 0);
     for(int x = -1; x <= 1; ++x)
     {
         for(int y = -1; y <= 1; ++y)
         {
-            float pcfDepth = texture(plane_shadow_maps[lighyId], projCoords.xy + vec2(x, y) * texelSize).r; 
+            float pcfDepth = texture(plane_shadow_maps, projCoords.xy + vec2(x, y) * texelSize).r; 
             shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
         }    
     }

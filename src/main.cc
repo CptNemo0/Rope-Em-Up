@@ -434,12 +434,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     PointLight point_light{};
 
     float lamp_h = 8.0f;
-	float point_light_ID = 0;
+	float light_ID = 0;
     glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
     float point_light_intensity = 250.0f;
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     point_light.color = point_light_color;
-	point_light.ID = point_light_ID;
+	point_light.ID = light_ID;
 
     DirectionalLight directional_light{};
     glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 1.f);
@@ -1386,11 +1386,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity + 0.6f * std::sinf(glfwGetTime() * 0.75f));
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
+			LBufferPassShader->SetInt("pointLight[" + std::to_string(i) + "].ID", light_ID);
+			light_ID++;
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
         LBufferPassShader->SetVec3("dirLight[0].color", dir_light_color);
         LBufferPassShader->SetFloat("dirLight[0].intensity", dir_light_intensity);
+		LBufferPassShader->SetInt("dirLight[0].ID", light_ID);
         
         LBufferPassShader->SetVec3("spotLight[0].position", spot_light_position);
         LBufferPassShader->SetVec3("spotLight[0].direction", spot_light_direction);
