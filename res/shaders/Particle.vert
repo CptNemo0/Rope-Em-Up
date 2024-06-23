@@ -18,6 +18,6 @@ void main()
 {
     gl_Position = view_matrix * vec4(iv_pos, 1.0);
     ov.size = iv_size;
-    ov.color = iv_color;
+    ov.color = iv_color;    
     ov.rotation = iv_rotation;
 }

@@ -79,6 +79,8 @@
 #include "headers/rendering/LightsManager.h"
 #include "headers/TutorialManager.h"
 #include "headers/ChokeIndicator.h"
+#include "headers/BillboardRendererManager.h"
+
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -304,7 +306,7 @@ int main()
     SkullMinionManager::Initialize();
 	anim::AnimatorManager::Initialize();
     TutorialManager::Initialize(mode);
-
+    BillboardRendererManager::Initialize();
 #pragma endregion Initialization
     
 #pragma region CamerasConfiguration
@@ -411,6 +413,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
     auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorTCShaderPath, kFloorTEShaderPath, kFloorFragmentShaderPath);
 	auto ShadowDepthShader = res::get_shader(kShadowDepthVertexShaderPath, kShadowDepthFragmentShaderPath);
+    auto BillboardShader = res::get_shader("res/shaders/Billboard.vert", "res/shaders/Billboard.frag");
 
 #pragma endregion Shaders
     LightsManager::Initialize(ShadowDepthShader, LBufferPassShader);
@@ -620,8 +623,18 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     emmiter_player_2->start_size_ = glm::vec2(1.0f, 1.0f);
     emmiter_player_2->end_size_ = glm::vec2(1.0f, 1.0f);
 
-    std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};
+ 
+    /*auto test_plane = GameObject::Create(game_scene_root);
+    test_plane->transform_->set_scale(glm::vec3(1.0f));
+    test_plane->transform_->set_position(glm::vec3(-16.0f, 2.0f, -16.0));
+    test_plane->AddComponent(BillboardRendererManager::i_->CreateRenderer(res::get_model("res/models/enviroment/floor/floor.obj"), res::get_texture("res/textures/logo.png")));
     
+    cout << test_plane->transform_->get_up().x << " " << test_plane->transform_->get_up().y << " " << test_plane->transform_->get_up().z << endl;
+    glm::vec3 dir = glm::normalize(Global::i_->active_camera_->get_position() - test_plane->transform_->get_position());
+    cout << dir.x << " " << dir.y << " " << dir.z << endl;
+    cout << Global::i_->active_camera_->get_position().x << " " << Global::i_->active_camera_->get_position().y << " " << Global::i_->active_camera_->get_position().z << endl;
+    std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};*/
+    std::vector<std::shared_ptr<GameObject>> players_vector{ player_1, player_2 };
 #pragma region Animations
 
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
@@ -803,6 +816,9 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     // --------------------------------------------------
     ParticleShader->Use();
     ParticleShader->SetMatrix4("projection_matrix", projection_matrix);
+
+    BillboardShader->Use();
+    BillboardShader->SetMatrix4("projection_matrix", projection_matrix);
 
     SSAOShader->Use();
     SSAOShader->SetMatrix4("projection_matrix", projection_matrix);
@@ -1196,34 +1212,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 #pragma endregion
 
+
+        
+        
+
 #pragma region GO Update and Draw
        
-       /* float avg_distance = 0.0f;
-        for (int i = 0; i < rope.rope_constraints_.size(); i++)
-        {
-            avg_distance += glm::distance2(rope.rope_constraints_[i]->p1_->transform_->get_position(), rope.rope_constraints_[i]->p2_->transform_->get_position());
-        }
-        avg_distance /= (float)(rope.rope_constraints_.size());
-        
-        float rope_color = 0.0f;
-        float max_distance = 0.338507f;
-        float coef = avg_distance / rope.rope_constraints_[0]->max_distance_;
-
-        static float max_coef = 0.0f;
-        if (coef > max_coef)
-        {
-            max_coef = coef;
-        }
-
-        rope_color = coef / max_distance;
-
-        
-        for (int i = 0; i < rope.rope_segments_.size(); i++)
-        {
-            rope.rope_segments_[i]->GetComponent<components::MeshRenderer>()->color_ = glm::vec3(rope_color * rope_color, (1.0f - rope_color), 0.0f);
-        }*/
-
-
         glViewport(0, 0, mode->width, mode->height);
 
         auto active_camera = Global::i_->active_camera_;
@@ -1405,6 +1399,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         ParticleShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
+        
+        BillboardRendererManager::i_->UpdateRenderers();
 
         glDisable(GL_BLEND);
 
@@ -1419,7 +1415,21 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         PostprocessingShader->SetInt("bloom_texture", 1);
         postprocessor.Draw();
         //////////////////////////////////
+        
+        //glm::vec3 A = -1.0f * glm::normalize(Global::i_->active_camera_->get_position() - test_plane->transform_->get_position());
+        //glm::vec3 B = test_plane->transform_->get_up();
 
+        //glm::vec3 axis = glm::cross(A, B);
+        //float angle = acos(glm::dot(A, B));
+        //glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle, axis);
+        //glm::vec3 euler_angles;
+        //euler_angles.y = glm::degrees(asin(rotation_matrix[0][2])); // Pitch (Y-axis rotation)
+        //euler_angles.x = glm::degrees(atan2(-rotation_matrix[1][2], rotation_matrix[2][2])); // Roll (X-axis rotation)
+        //euler_angles.z = glm::degrees(atan2(-rotation_matrix[0][1], rotation_matrix[0][0]));
+
+        //cout << euler_angles.x << " " << euler_angles.y << " " << euler_angles.z << endl;
+
+        //test_plane->transform_->set_rotation(euler_angles);
 #pragma endregion
 
 #pragma region Interface
@@ -1760,6 +1770,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         glfwSwapBuffers(window);
     }
 
+    BillboardRendererManager::Destroy();
     ChokeIndicator::Destroy();
     TutorialManager::Destroy();
     SkullMinionManager::Destroy();
