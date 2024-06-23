@@ -970,10 +970,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         if (file.is_open())
         {
             menu->layout_[{0, 1}]->enabled_ = true;
+            menu->layout_[{0, 1}]->object_->GetComponent<components::HUDRenderer>()->color_ = {1.0f, 1.0f, 1.0f, 1.0f};
         }
         else
         {
             menu->layout_[{0, 1}]->enabled_ = false;
+            menu->layout_[{0, 1}]->object_->GetComponent<components::HUDRenderer>()->color_ = {1.0f, 1.0f, 1.0f, 0.5f};
         }
         file.close();
 
@@ -1037,7 +1039,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     SceneManager::i_->SwitchScene("main_menu");
 
     TutorialManager::i_->Init();
-    ChokeIndicator::Initialize(player_1->GetComponent<components::PlayerController>(), player_2->GetComponent<components::PlayerController>());
+    ChokeIndicator::Initialize(player_1->GetComponent<components::PlayerController>(), player_2->GetComponent<components::PlayerController>(), &rope);
 
 #pragma endregion
 

@@ -1087,6 +1087,19 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy->AddComponent(std::make_shared<components::ExpDropComponent>(250.0f));
             enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::GET_SPELL_FROM_QUEUE));
             enemy->AddComponent(std::make_shared<components::EnemySizeManager>());
+            auto emitter = make_shared<components::ParticleEmitter>(1000, res::get_texture("res/textures/color.png"), particle_shader);
+            emitter->emission_rate_ = 0.01f;
+            emitter->life_time_ = 0.5f;
+            emitter->start_color_ = {0.05f, 0.04f, 0.02f, 1.0f};
+            emitter->end_color_ = {0.05, 0.04f, 0.02f, 0.5f};
+            emitter->spawns_per_emission_ = {5, 10};
+            emitter->start_position_displacement_ = 1.25f;
+            emitter->start_position_ = {0.0f, -0.5f, 0.0f};
+            emitter->start_velocity_ = {0.0f, 1.0f, 0.0f};
+            emitter->start_acceleration_ = {0.0f, -5.0f, 0.0f};
+            emitter->start_size_ = {0.2f, 0.6f};
+            emitter->end_size_ = {0.2f, 0.2f};
+            enemy->AddComponent(emitter);
 
             auto enemy_mesh = GameObject::Create(enemy);
             enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
