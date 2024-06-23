@@ -9,7 +9,7 @@
 
 #include "../GameObject.h"
 #include "../Model.h"
-#include "../components/MeshRenderer.h"
+#include "../rendering/RenderManager.h"
 #include "../components/PlayerController.h"
 
 #include "../collisions/Collisions.h"

@@ -32,6 +32,7 @@ public:
 		Model(string path, bool gamma = false);
 
 		void Draw(s_ptr<Shader> shader) const;
+		void DrawDepth(s_ptr<Shader> shader) const;
 		void processNode(aiNode* node, const aiScene* scene);
 		s_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
 		std::vector <Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);

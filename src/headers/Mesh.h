@@ -33,6 +33,7 @@ public:
 
 	void Init();
 	void Draw(s_ptr<Shader> shader) const;
+	void DrawDepth(s_ptr<Shader> shader) const;
 	void UpdateTransforms(std::vector<glm::mat4> transforms);
 };
 

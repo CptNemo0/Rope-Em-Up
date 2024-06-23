@@ -21,6 +21,12 @@ void Model::Draw(s_ptr<Shader> shader) const
 		meshes_.at(i)->Draw(shader);
 }
 
+void Model::DrawDepth(s_ptr<Shader> shader) const
+{
+	for (unsigned int i = 0; i < meshes_.size(); i++)
+		meshes_.at(i)->DrawDepth(shader);
+}
+
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)

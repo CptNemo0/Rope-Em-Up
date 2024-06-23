@@ -1,21 +1,20 @@
-#ifndef LIGHTSMANAGER
-#define LIGHTSMANAGER
+#ifndef SHADOWSMANAGER
+#define SHADOWSMANAGER
 
 #include "../Lights.h"
 #include "../Shader.h"
 #include "../typedef.h"
 
-class LightsManager
+class ShadowsManager
 {
 public:
-	static LightsManager* i_;
+	static ShadowsManager* i_;
 	const unsigned int SHADOW_WIDTH = 1024;
 	const unsigned int SHADOW_HEIGHT = 1024;
 	unsigned int depthMapFBO[MAX_LIGHTS*2];
 	unsigned int planeShadowMap[MAX_LIGHTS];
 	unsigned int cubeShadowMap[MAX_LIGHTS];
 	s_ptr<Shader> depth_shader_;
-	s_ptr<Shader> light_shader_;
 	float near_plane = 1.0f, far_plane = 7.5f;
 
 
@@ -25,15 +24,15 @@ public:
 	glm::mat4 lightView;
 	glm::mat4 lightSpaceMatrix[2*MAX_LIGHTS];
 
-	LightsManager(s_ptr<Shader> depthShader, s_ptr<Shader> lightShader);
-	~LightsManager() = default;
-	static void Initialize(s_ptr<Shader> depthShader, s_ptr<Shader> lightShader);
+	ShadowsManager(s_ptr<Shader> depthShader);
+	~ShadowsManager() = default;
+	static void Initialize(s_ptr<Shader> depthShader);
 	
 	void RenderFromLightPov(int lightID);
 
 	void InitCubeShadowMap(int lightID);
 	void InitPlaneShadowMap(int lightID);
-	void InitShadowMaps();
+	//void InitShadowMaps(int pointLights, int otherLights);
 
 	void DepthToTexture(glm::vec3 lightPos, int lightID, bool isPointlight = false);
 
@@ -49,4 +48,4 @@ public:
 };
 
 
-#endif // !LIGHTSMANAGER
+#endif // !SHADOWSMANAGER

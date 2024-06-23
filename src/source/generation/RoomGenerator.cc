@@ -645,7 +645,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
             wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, -0.3f, 0.0f));
             wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-            wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+            wall_up->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->walls[room.up_walls_idx[i]], shader));
 
             if (room.up_walls_idx[i] == 1)
             {
@@ -680,7 +680,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
             wall_left->transform_->set_position(glm::vec3(0.0, -0.3f, -8.0f - i * kModuleSize));
             wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-            wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
+            wall_left->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->walls[room.left_walls_idx[i]], shader));
 
             if (room.left_walls_idx[i] == 1)
             {
@@ -731,7 +731,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.up_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
             emitter->emission_rate_ = 0.3f;
@@ -751,7 +751,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.down_gate_pos);
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
             emitter->emission_rate_ = 0.3f;
@@ -772,7 +772,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.right_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
             emitter->emission_rate_ = 0.3f;
@@ -793,8 +793,8 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.left_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
             emitter->emission_rate_ = 0.3f;
@@ -815,7 +815,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             s_ptr<GameObject> lamp = GameObject::Create(room.lamps);
             lamp->transform_->set_position(pos);
-            lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
+            lamp->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->lamps[0], shader));
             lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps_c[0], 0, lamp->transform_));
         }
 
@@ -826,7 +826,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> clutter = GameObject::Create(room.clutter);
             clutter->transform_->set_position(room.clutter_positions[i]);
             clutter->transform_->set_scale(glm::vec3(1.0f, 0.5f, 1.0f));
-            clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
+            clutter->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->clutter[room.clutter_idx[i]], shader));
             clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::CLUTTER, gPRECISION, rm->clutter_c[room.clutter_idx[i]], 0, clutter->transform_));
             clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
         }
@@ -852,7 +852,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             emitter->end_size_ = glm::vec2(1.0f, 1.0f);
 
             auto enemy_mesh = GameObject::Create(enemy);
-            enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+            enemy_mesh->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->enemies[room.enemies_idx[i]], shader));
             enemy_mesh->transform_->set_scale(glm::vec3(0.01f));
 
 
@@ -887,7 +887,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> wall_up = GameObject::Create(room.walls);
             wall_up->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, -0.3f, 0.0f));
             wall_up->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-            wall_up->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.up_walls_idx[i]], shader));
+            wall_up->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->walls[room.up_walls_idx[i]], shader));
 
             if (room.up_walls_idx[i] == 1)
             {
@@ -922,7 +922,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> wall_left = GameObject::Create(room.walls);
             wall_left->transform_->set_position(glm::vec3(0.0, -0.3f, -8.0f - i * kModuleSize));
             wall_left->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-            wall_left->AddComponent(make_shared<components::MeshRenderer>(rm->walls[room.left_walls_idx[i]], shader));
+            wall_left->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->walls[room.left_walls_idx[i]], shader));
 
             if (room.left_walls_idx[i] == 1)
             {
@@ -974,7 +974,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.up_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, 180.0f, 0.0f));
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
             emitter->emission_rate_ = 0.3f;
@@ -994,7 +994,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.down_gate_pos);
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
             emitter->emission_rate_ = 0.3f;
@@ -1015,7 +1015,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.right_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, 90.0f, 0.0f));
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
             emitter->emission_rate_ = 0.3f;
@@ -1036,8 +1036,8 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> gate = GameObject::Create(room.gates);
             gate->transform_->set_position(room.left_gate_pos);
             gate->transform_->set_rotation(glm::vec3(0.0f, -90.0f, 0.0f));
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
-            gate->AddComponent(make_shared<components::MeshRenderer>(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
+            gate->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->gates[0], shader));
             gate->AddComponent(make_shared<components::ParticleEmitter>(500, particle_texture, particle_shader));
             auto emitter = gate->GetComponent<components::ParticleEmitter>();
             emitter->emission_rate_ = 0.3f;
@@ -1058,7 +1058,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             s_ptr<GameObject> lamp = GameObject::Create(room.lamps);
             lamp->transform_->set_position(pos);
-            lamp->AddComponent(make_shared<components::MeshRenderer>(rm->lamps[0], shader));
+            lamp->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->lamps[0], shader));
             lamp->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, rm->lamps_c[0], 0, lamp->transform_));
         }
 
@@ -1069,7 +1069,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             s_ptr<GameObject> clutter = GameObject::Create(room.clutter);
             clutter->transform_->set_position(room.clutter_positions[i]);
             clutter->transform_->set_scale(glm::vec3(1.0f, 0.5f, 1.0f));
-            clutter->AddComponent(make_shared<components::MeshRenderer>(rm->clutter[room.clutter_idx[i]], shader));
+            clutter->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->clutter[room.clutter_idx[i]], shader));
             clutter->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::CLUTTER, gPRECISION, rm->clutter_c[room.clutter_idx[i]], 0, clutter->transform_));
             clutter->GetComponent<components::Collider>()->softness_ = 0.2f;
         }
@@ -1102,7 +1102,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy->AddComponent(emitter);
 
             auto enemy_mesh = GameObject::Create(enemy);
-            enemy_mesh->AddComponent(make_shared<components::MeshRenderer>(rm->enemies[room.enemies_idx[i]], shader));
+            enemy_mesh->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->enemies[room.enemies_idx[i]], shader));
             enemy_mesh->transform_->set_scale(glm::vec3(0.01f));
 
 
@@ -1129,7 +1129,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", enemy_death_5);
 
             auto enemy_state_display = GameObject::Create(enemy);
-            enemy_state_display->AddComponent(make_shared<components::MeshRenderer>(res::get_model("res/models/simple_floor.obj"), shader));
+            enemy_state_display->AddComponent(RenderManager::i_->CreateMeshRendererComponent(res::get_model("res/models/simple_floor.obj"), shader));
             enemy_state_display->transform_->set_scale(glm::vec3(0.1f));
             enemy_state_display->transform_->add_position(glm::vec3(0.0, hp + 0.5f, 0.0));
         }
@@ -1139,7 +1139,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             auto barell = GameObject::Create(room.barells);
             barell->transform_->TeleportToPosition(room.barells_positions[i]);
-            barell->AddComponent(make_shared<components::MeshRenderer>(rm->barrles[room.barell_idx[i]], shader));
+            barell->AddComponent(RenderManager::i_->CreateMeshRendererComponent(rm->barrles[room.barell_idx[i]], shader));
             barell->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::TENTACLE, gPRECISION, rm->barrles[room.barell_idx[i]], 0, barell->transform_));
             barell->AddComponent(pbd::PBDManager::i_->CreateParticle(5.0f, 0.78f, barell->transform_));
             barell->AddComponent(HealthManager::i_->CreateHealthComponent(1.0f, BARELL));

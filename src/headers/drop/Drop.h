@@ -5,7 +5,7 @@
 #include "DropArgs.h"
 #include "../GameObject.h"
 #include "../components/HealthComponent.h"
-#include "../components/MeshRenderer.h"
+#include "../rendering/RenderManager.h"
 #include "../generation/Room.h"
 #include "../PlayerStatsManager.h"
 

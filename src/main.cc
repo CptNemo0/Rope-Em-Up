@@ -76,7 +76,8 @@
 #include "headers/SceneManager.h"
 #include "headers/Menu.h"
 #include "headers/SkullMinionManager.h"
-#include "headers/rendering/LightsManager.h"
+#include "headers/rendering/ShadowsManager.h"
+#include "headers/rendering/RenderManager.h"
 #include "headers/TutorialManager.h"
 #include "headers/ChokeIndicator.h"
 int main()
@@ -304,6 +305,7 @@ int main()
     SkullMinionManager::Initialize();
 	anim::AnimatorManager::Initialize();
     TutorialManager::Initialize(mode);
+	RenderManager::Initialize();
 
 #pragma endregion Initialization
     
@@ -413,7 +415,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 	auto ShadowDepthShader = res::get_shader(kShadowDepthVertexShaderPath, kShadowDepthFragmentShaderPath);
 
 #pragma endregion Shaders
-    LightsManager::Initialize(ShadowDepthShader, LBufferPassShader);
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
     auto menu_cubemap = make_shared<HDRCubemap>(kHDRMenuCubemap, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -456,12 +457,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 	spot_light.direction = spot_light_direction;
 	spot_light.color = spot_light_color;
 	spot_light.intensity = spot_light_intensity;
-
-    for (int i = 0; i < MAX_LIGHTS; i++)
-    {
-        LightsManager::i_->InitCubeShadowMap(i);
-		LightsManager::i_->InitPlaneShadowMap(i);
-    }
 
 #pragma endregion Lights
 
@@ -585,7 +580,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto player_1 = GameObject::Create(game_scene_root);
     player_1->transform_->TeleportToPosition(glm::vec3(-0.75 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_1->transform_->set_scale(glm::vec3(0.01f));
-    player_1->AddComponent(make_shared<components::MeshRenderer>(F_player_model, GBufferPassShader));
+    player_1->AddComponent(RenderManager::i_->CreateMeshRendererComponent(F_player_model, GBufferPassShader));
     player_1->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, F_player_model, 0, player_1->transform_));
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
@@ -604,7 +599,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto player_2 = GameObject::Create(game_scene_root);
     player_2->transform_->TeleportToPosition(glm::vec3(-1.25 * generation::kModuleSize, 0.0f, -1.0 * generation::kModuleSize));
     player_2->transform_->set_scale(glm::vec3(0.01f));
-    player_2->AddComponent(make_shared<components::MeshRenderer>(M_player_model, GBufferPassShader));
+    player_2->AddComponent(RenderManager::i_->CreateMeshRendererComponent(M_player_model, GBufferPassShader));
     player_2->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::PLAYER, gPRECISION, M_player_model, 0, player_2->transform_));
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
@@ -790,10 +785,34 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+    // configure depth map FBO
+    // -----------------------
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    // create depth texture
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     LBufferPassShader->Use();
     LBufferPassShader->SetInt("irradianceMap", 5);
     LBufferPassShader->SetInt("prefilterMap", 6);
     LBufferPassShader->SetInt("brdfLUT", 7);
+	LBufferPassShader->SetInt("shadowMap", 10);
 
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
@@ -1027,6 +1046,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 #pragma endregion
 
+
+
     /////////////////////////////////////////////
     /////////////////////////////////////////////
     // GAME LOOP GAME LOOP GAME LOOP GAME LOOP //
@@ -1200,6 +1221,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 #pragma region GO Update and Draw
        
+        
        /* float avg_distance = 0.0f;
         for (int i = 0; i < rope.rope_constraints_.size(); i++)
         {
@@ -1298,11 +1320,39 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         }
         //////////////////////////////////
         
+        // 1. render depth of scene to texture (from light's perspective)
+        // --------------------------------------------------------------
+        glm::mat4 lightProjection, lightView;
+        glm::mat4 lightSpaceMatrix;
+        float near_plane = 1.0f, far_plane = 7.5f;
+        //lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
+        lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+        lightSpaceMatrix = lightProjection * lightView;
+        // render scene from light's point of view
+        ShadowDepthShader->Use();
+        ShadowDepthShader->SetMatrix4("light_space_matrix", lightSpaceMatrix);
+
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+		//RenderManager::i_->SetUpMeshRenderer();
+        RenderManager::i_->RenderFromLightPOV(ShadowDepthShader);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // reset viewport
+        glViewport(0, 0, mode->width, mode->height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // Bind buffer - Bind textures - Use Shader - Draw 
         lbuffer.Bind();
         LBufferPassShader->Use();
         LBufferPassShader->SetBool("use_ssao", use_ssao);
+		LBufferPassShader->SetMatrix4("light_space_matrix", lightSpaceMatrix);
+        glActiveTexture(GL_TEXTURE10);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+
+
         gbuffer.BindTextures(LBufferPassShader);
 
         if (SceneManager::i_->current_scene_ == SceneManager::i_->scenes_["game"])
@@ -1334,8 +1384,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity + 0.6f * std::sinf(glfwGetTime() * 0.75f));
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
-			//LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z), i, true);
-            //LightsManager::i_->BindCubeShadowMap(LBufferPassShader, i);
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
@@ -1352,20 +1400,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
         LBufferPassShader->SetBool("slowed_time", postprocessor.slowed_time);
-
-		
-		/*LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 0);
-        LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 1);
-        LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[0].x, lamp_h, room->lamp_positions[0].z), 0);
-		LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[1].x, lamp_h, room->lamp_positions[1].z), 1);
-		for (int i = 0; i < room->lamp_positions.size(); i++)
-		{
-			LightsManager::i_->RenderFromLightPov(i);
-		}
-        LightsManager::i_->RenderFromLightPov(16);
-        LightsManager::i_->RenderFromLightPov(16 + 1);*/
-
-
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();

@@ -18,7 +18,7 @@ void drop::SpellDrop::Consume(generation::Room& room)
 	{
 		auto drop = GameObject::Create(room.drops);
 		drop->transform_->TeleportToPosition(args_.position_);
-		drop->AddComponent(std::make_shared<components::MeshRenderer>(args_.mesh, args_.shader));
+		drop->AddComponent(RenderManager::i_->CreateMeshRendererComponent(args_.mesh, args_.shader));
 	}
 }
 

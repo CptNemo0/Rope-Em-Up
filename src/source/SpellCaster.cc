@@ -54,7 +54,7 @@ void SpellCaster::Cast()
 			minion_mesh->transform_->scale(glm::vec3(2.0, 2.0, 2.0));
 			minion_mesh->transform_->TeleportToPosition(glm::vec3(0.0f, 1.5f, 0.0f));
 
-			minion_mesh->AddComponent(make_shared<components::MeshRenderer>(res::get_model("res/skull/skull_f.obj"), res::get_shader("res/shaders/GBufferPass.vert", "res/shaders/GBufferPass.frag")));
+			minion_mesh->AddComponent(RenderManager::i_->CreateMeshRendererComponent(res::get_model("res/skull/skull_f.obj"), res::get_shader("res/shaders/GBufferPass.vert", "res/shaders/GBufferPass.frag")));
 			minion->AddComponent(pbd::PBDManager::i_->CreateParticle(0.25, 0.8, minion->transform_));
 			minion->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::SKULL, 18, res::get_model("res/skull/skull_f.obj"), 0, minion->transform_));
 			minion->AddComponent(HealthManager::i_->CreateHealthComponent(1.0f, HEALTH_TYPE::OTHER));

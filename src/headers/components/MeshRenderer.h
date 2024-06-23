@@ -28,7 +28,8 @@ namespace components
         s_ptr<Transform> transform_;
         s_ptr<Model> model_;
         s_ptr<Shader> shader_;
-		s_ptr<Shader> depth_shader_;
+
+		
 
         glm::vec3 color_;
 
@@ -36,6 +37,7 @@ namespace components
         void Update() override;
         void Destroy() override {}
         void Render(s_ptr<Shader> shader);
+		void RenderDepth(s_ptr<Shader> depth_shader_);
 
         MeshRenderer(json &j);
         json Serialize() override;

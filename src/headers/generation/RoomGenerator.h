@@ -22,7 +22,6 @@
 #include "unordered_set"
 #include "../Model.h"
 #include "../GameObject.h"
-#include "../components/MeshRenderer.h"
 #include "../components/Component.h"
 #include "../components/HealthComponent.h"
 #include "../components/HpDropComponent.h"

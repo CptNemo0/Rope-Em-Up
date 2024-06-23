@@ -9,7 +9,6 @@ namespace anim
 	public:
 		static AnimatorManager* i_;
 
-		std::vector<s_ptr<components::Animator>> animators_;
 	private:
 		AnimatorManager();
 		~AnimatorManager();
