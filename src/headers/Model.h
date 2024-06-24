@@ -28,6 +28,7 @@ public:
 		string directory_;
 		bool gammaCorrection;
 		string path_;
+		int max_bones_ = 0;
 
 		Model(string path, bool gamma = false);
 
@@ -50,7 +51,7 @@ public:
 		void SetVertexBoneDataToDefault(Vertex& vertex);
 		void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
 		void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
-		
+		std::string GetFileType(const std::string& path);
 };
 
 

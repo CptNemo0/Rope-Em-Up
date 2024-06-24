@@ -211,9 +211,10 @@ int main()
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
 
-    const string kTentaclPath = "res/enemy/enemy_changed.fbx";
-	const string kTentaclIdlePath = "res/enemy/enemy_idles.fbx";
-	const string kTentsclDeathPath = "res/enemy/enemy_deaths.fbx";
+    const string kTentaclPath = "res/enemy/enemy_test.fbx";
+	//const string kTentaclobjPath = "res/enemy/enemy.obj";
+
+
 #pragma endregion Resources Paths
     
 #pragma region CameraSettings
@@ -470,7 +471,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto M_player_model = res::get_model(kMalePlayerMeshPath);
     auto debug_model = res::get_model(kDebugMeshPath);
     auto enemy_model = res::get_model(kTentaclPath);
-	auto enemy_fbx_model = res::get_model(kTentaclIdlePath);
     auto wall_model = res::get_model(kWallPath);
     auto module_1_model = res::get_model(kModule1Path);
     auto module_2_model = res::get_model(kModule2Path);

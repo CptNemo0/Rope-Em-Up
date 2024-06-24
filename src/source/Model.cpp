@@ -105,8 +105,16 @@ s_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<Texture> albedoMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_albedo");
     textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
 
-    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    if (GetFileType(this->path_) == "fbx")
+    {
+        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
+        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    }
+    else
+    {
+        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    }
 
     std::vector<Texture> metallicMaps = loadMaterialTextures(material, aiTextureType_METALNESS, "texture_metalic");
     textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
@@ -226,6 +234,25 @@ void Model::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* 
         }
     }
 }
+
+std::string Model::GetFileType(const std::string& path)
+{
+    size_t dotPos = path.find_last_of(".");
+    if (dotPos == std::string::npos)
+        return "unknown";
+
+    std::string extension = path.substr(dotPos + 1);
+    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+    if (extension == "fbx")
+        return "FBX";
+    else if (extension == "obj")
+        return "OBJ";
+    else
+        return "unknown";
+}
+
+
 
 unsigned int TextureFromFile(const char* path, const string& directory)
 {
