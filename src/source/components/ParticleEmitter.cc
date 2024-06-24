@@ -40,7 +40,7 @@ void components::ParticleEmitter::Start()
 
     if (!burst_emitter_)
     {
-        emission_timer_ = Timer::AddTimer(emission_rate_, [this]()
+        emission_timer_id_ = Timer::AddTimer(emission_rate_, [this]()
         {
             if (active_)
             {
@@ -57,7 +57,7 @@ void components::ParticleEmitter::Update()
 
 void components::ParticleEmitter::Destroy()
 {
-    Timer::RemoveTimer(emission_timer_.id);
+    Timer::RemoveTimer(emission_timer_id_);
     ParticleEmitterManager::i_->RemoveEmitter(shared_from_this());
     glDeleteVertexArrays(1, &VAO_);
     glDeleteBuffers(1, &VBO_);

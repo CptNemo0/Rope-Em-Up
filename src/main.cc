@@ -1222,14 +1222,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             {
                 postprocessor.slowed_time = true;
                 SpellCaster::i_->active_ = true;
-                Timer::Timer spell_timer = Timer::AddTimer(cast_time,
+                unsigned int spell_timer_id = Timer::AddTimer(cast_time,
                     [&fixed_update_rate, &postprocessor]()
                     {
                         fixed_update_rate = pbd::kMsPerUpdate;
                         postprocessor.slowed_time = false;
                     },
 
-                    [&fixed_update_rate, &id = spell_timer.id, &window, &postprocessor](float delta_time)
+                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
 

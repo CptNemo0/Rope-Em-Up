@@ -19,11 +19,11 @@ Timer CreateTimer(float delay, std::function<void()> finish_callback, std::funct
     return timer;
 }
 
-Timer AddTimer(float delay, std::function<void()> finish_callback, std::function<void(float)> update_callback, bool loop)
+unsigned int AddTimer(float delay, std::function<void()> finish_callback, std::function<void(float)> update_callback, bool loop)
 {
     Timer timer = CreateTimer(delay, finish_callback, update_callback, loop);
     timers.push_back(timer);
-    return timer;
+    return timer.id;
 }
 
 void RemoveTimer(unsigned int id)
@@ -87,6 +87,19 @@ void Update(float delta_time)
             ids_to_remove.push_back(timer.id);
         }
     }
+}
+
+float GetProgress(unsigned int id)
+{
+    auto it = std::find_if(timers.begin(), timers.end(), [id](const Timer &t){ return t.id == id; });
+    if (it != timers.end())
+    {
+        auto &timer = *it;
+        auto progress = 1.0f - static_cast<float>(timer.expiration_time.count()) / static_cast<float>(timer.delay * 1000000);
+        return progress;
+    }
+    
+    return 0.0f;
 }
 
 } // namespace Timer
