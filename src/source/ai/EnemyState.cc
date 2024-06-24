@@ -197,8 +197,15 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 			hitbox->GetComponent<components::HitboxRenderer>()->percentage_ = 1.0f;
 			machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
 			machine->generator_->magnitude_ = 0.0f;
-
 			machine->partcile_->controllable_ = false;
+
+			lb.y = 0.0f;
+			rb.y = 0.0f;
+			lt.y = 0.0f;
+			rt.y = 0.0f;
+
+			glm::vec3 center = (lb + rt) * 0.5f;
+			float distance = glm::distance(center, rt);
 
 			Timer::Timer timer = Timer::AddTimer(1.0f,
 				[hitbox]

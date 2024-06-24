@@ -5,6 +5,7 @@
 #include "components/HitboxRenderer.h"
 #include "Shader.h"
 #include "global.h"
+#include "collisions/collisions.h"
 class HitboxManager
 {
 public:
@@ -17,6 +18,8 @@ public:
 
     std::deque<std::shared_ptr<components::HitboxRenderer>> renderers_;
     std::shared_ptr<Shader> shader_;
+
+    
 
     std::shared_ptr<components::HitboxRenderer> CreateRenderer(glm::vec3 lb, glm::vec3 rb, glm::vec3 rt, glm::vec3 lt);
     void AddRenderer(std::shared_ptr<components::HitboxRenderer> r);
