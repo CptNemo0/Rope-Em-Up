@@ -76,7 +76,6 @@
 #include "headers/SceneManager.h"
 #include "headers/Menu.h"
 #include "headers/SkullMinionManager.h"
-#include "headers/rendering/LightsManager.h"
 #include "headers/TutorialManager.h"
 #include "headers/ChokeIndicator.h"
 #include "headers/BillboardRendererManager.h"
@@ -422,7 +421,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto HitboxShader = res::get_shader("res/shaders/Hitbox.vert", "res/shaders/Hitbox.frag");
 
 #pragma endregion Shaders
-    LightsManager::Initialize(ShadowDepthShader, LBufferPassShader);
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
     auto menu_cubemap = make_shared<HDRCubemap>(kHDRMenuCubemap, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -465,12 +463,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 	spot_light.direction = spot_light_direction;
 	spot_light.color = spot_light_color;
 	spot_light.intensity = spot_light_intensity;
-
-    for (int i = 0; i < MAX_LIGHTS; i++)
-    {
-        LightsManager::i_->InitCubeShadowMap(i);
-		LightsManager::i_->InitPlaneShadowMap(i);
-    }
 
 #pragma endregion Lights
 
@@ -1237,14 +1229,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             {
                 postprocessor.slowed_time = true;
                 SpellCaster::i_->active_ = true;
-                Timer::Timer spell_timer = Timer::AddTimer(cast_time,
+                unsigned int spell_timer_id = Timer::AddTimer(cast_time,
                     [&fixed_update_rate, &postprocessor]()
                     {
                         fixed_update_rate = pbd::kMsPerUpdate;
                         postprocessor.slowed_time = false;
                     },
 
-                    [&fixed_update_rate, &id = spell_timer.id, &window, &postprocessor](float delta_time)
+                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
 
@@ -1383,8 +1375,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity + 0.6f * std::sinf(glfwGetTime() * 0.75f));
             LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
-			//LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z), i, true);
-            //LightsManager::i_->BindCubeShadowMap(LBufferPassShader, i);
+
         }
 
         LBufferPassShader->SetVec3("dirLight[0].direction", dir_light_direction);
@@ -1401,20 +1392,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
         LBufferPassShader->SetBool("slowed_time", postprocessor.slowed_time);
-
-		
-		/*LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 0);
-        LightsManager::i_->BindPlaneShadowMap(LBufferPassShader, 1);
-        LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[0].x, lamp_h, room->lamp_positions[0].z), 0);
-		LightsManager::i_->DepthToTexture(glm::vec3(room->lamp_positions[1].x, lamp_h, room->lamp_positions[1].z), 1);
-		for (int i = 0; i < room->lamp_positions.size(); i++)
-		{
-			LightsManager::i_->RenderFromLightPov(i);
-		}
-        LightsManager::i_->RenderFromLightPov(16);
-        LightsManager::i_->RenderFromLightPov(16 + 1);*/
-
-
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();

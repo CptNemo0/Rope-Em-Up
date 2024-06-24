@@ -74,7 +74,7 @@ public:
     bool burst_emitter_;
 
     s_ptr<Timer::Timer> emitter_timer_;
-    Timer::Timer emission_timer_;
+    unsigned int emission_timer_id_;
 
     ParticleEmitter(int max_particles, s_ptr<tmp::Texture> texture, s_ptr<Shader> shader, bool burst_emitter = false);
    
