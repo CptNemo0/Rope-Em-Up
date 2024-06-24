@@ -10,6 +10,7 @@
 #include "components/HitboxCollider.h"
 #include "components/HealthComponent.h"
 #include "components/HpDropComponent.h"
+#include <headers/components/Animator.h>
 class HitboxManager
 {
 public:

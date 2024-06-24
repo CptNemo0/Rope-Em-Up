@@ -218,9 +218,13 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 				
 
 			int id = Timer::AddTimer(1.1f,
-				[hitbox]
+				[hitbox, machine]
 				{
 					hitbox->Destroy();
+					machine->is_attacking = false;
+					machine->partcile_->controllable_ = true;
+					assert(machine->current_state_ && OnAlertState::Instance());
+					machine->current_state_ = OnAlertState::Instance();
 				},
 				[hitbox, id](float delta_time)
 				{
@@ -229,29 +233,6 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 					hr->color_ = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f - hr->percentage_);
 					
 				});
-
-			Timer::AddTimer(1.0f,
-				[machine, &hitbox]
-				{
-					if (machine->in_attack_range_)
-					{
-						//cout << "ATTACK!!\n";
-						//machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
-						//machine->target_player_->GetComponent<components::Animator>()->PlayAnimation("Damage", 2, 1.0f);
-						//// to implement enemy attack aniamtion
-
-					}
-					machine->is_attacking = false;
-					machine->partcile_->controllable_ = true;
-					assert(machine->current_state_ && OnAlertState::Instance());
-					machine->current_state_ = OnAlertState::Instance();
-				},
-				[machine](float a)
-				{
-					
-				},
-				false);
-
 		}
 	}
 	
