@@ -223,8 +223,8 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 					hitbox->Destroy();
 					machine->is_attacking = false;
 					machine->partcile_->controllable_ = true;
-					assert(machine->current_state_ && OnAlertState::Instance());
-					machine->current_state_ = OnAlertState::Instance();
+					assert(machine->current_state_ && PatrolState::Instance());
+					machine->current_state_ = PatrolState::Instance();
 				},
 				[hitbox, id](float delta_time)
 				{
