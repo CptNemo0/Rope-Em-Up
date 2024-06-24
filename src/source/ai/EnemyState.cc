@@ -160,25 +160,78 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 		if (!machine->is_attacking)
 		{
 			machine->is_attacking = true;
-			Timer::AddTimer(0.45f,
-				[machine]
+
+			// create hitbox mesh
+			glm::vec3 position = machine->transfrom_->get_global_position();
+			glm::vec3 forward = machine->transfrom_->get_forward();
+			glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+			float width = 1.25f;
+			float length = 0.0f;
+			auto hc = machine->transfrom_->game_object_->GetComponent<components::HealthComponent>();
+
+			if (hc == nullptr)
+			{
+				length = 1.0f;
+			}
+			else
+			{
+				length = hc->health_ * 1.5f;
+			}
+			
+			glm::vec3 length_vec = length * forward;
+
+			glm::vec3 lb = glm::cross(up, forward) * width;
+			glm::vec3 rb = -lb;
+
+			glm::vec3 lt = lb + length_vec;
+			glm::vec3 rt = rb + length_vec;
+
+			lb += position;
+			rb += position;
+			lt += position;
+			rt += position;
+
+			auto hitbox = GameObject::Create(machine->transfrom_->game_object_);
+			hitbox->transform_->TeleportToPosition(position);
+			hitbox->AddComponent(HitboxManager::i_->CreateRenderer(lb, rb, rt, lt));
+			hitbox->GetComponent<components::HitboxRenderer>()->percentage_ = 1.0f;
+			machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
+			machine->generator_->magnitude_ = 0.0f;
+
+			machine->partcile_->controllable_ = false;
+
+			Timer::Timer timer = Timer::AddTimer(1.0f,
+				[hitbox]
+				{
+					hitbox->Destroy();
+				},
+				[hitbox, &timer](float a)
+				{
+					auto hr = hitbox->GetComponent<components::HitboxRenderer>();
+					hr->percentage_ *= 0.99f;
+					hr->color_ = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f - hr->percentage_);
+					
+				});
+
+			Timer::AddTimer(1.0f,
+				[machine, &hitbox]
 				{
 					if (machine->in_attack_range_)
 					{
-						cout << "ATTACK!!\n";
+						//cout << "ATTACK!!\n";
 						machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
 						machine->target_player_->GetComponent<components::Animator>()->PlayAnimation("Damage", 2, 1.0f);
 						//// to implement enemy attack aniamtion
 
 					}
 					machine->is_attacking = false;
+					machine->partcile_->controllable_ = true;
 					assert(machine->current_state_ && OnAlertState::Instance());
 					machine->current_state_ = OnAlertState::Instance();
 				},
 				[machine](float a)
 				{
-					machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
-					machine->generator_->magnitude_ = machine->generator_->magnitude_ * 0.85f;
+					
 				},
 				false);
 

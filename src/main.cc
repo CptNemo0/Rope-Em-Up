@@ -81,6 +81,8 @@
 #include "headers/ChokeIndicator.h"
 #include "headers/BillboardRendererManager.h"
 #include "headers/PauseMenuTexture.h"
+#include "headers/HitboxManager.h"
+
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -307,6 +309,7 @@ int main()
 	anim::AnimatorManager::Initialize();
     TutorialManager::Initialize(mode);
     BillboardRendererManager::Initialize();
+    HitboxManager::Initialize();
 #pragma endregion Initialization
     
 #pragma region CamerasConfiguration
@@ -416,6 +419,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto BillboardShader = res::get_shader("res/shaders/Billboard.vert", "res/shaders/Billboard.geom", "res/shaders/Billboard.frag");
     auto ScreenShader = res::get_shader("res/shaders/Screen.vert", "res/shaders/Screen.frag");
     auto CopyShader = res::get_shader("res/shaders/Copy.vert", "res/shaders/Copy.frag");
+    auto HitboxShader = res::get_shader("res/shaders/Hitbox.vert", "res/shaders/Hitbox.frag");
+
 #pragma endregion Shaders
     LightsManager::Initialize(ShadowDepthShader, LBufferPassShader);
 
@@ -812,6 +817,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
 
+
+    HitboxManager::i_->shader_->SetMatrix4("projection_matrix", projection_matrix);
 
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
@@ -1299,6 +1306,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         GrassShader->SetVec3("pp2", player_2->transform_->get_position());
         GrassRendererManager::i_->Draw(GrassShader->get_id());
 
+        
         FloorRendererManager::i_->Draw();
 
         GBufferPassShader->Use();
@@ -1447,6 +1455,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         ParticleShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
+
+        HitboxShader->Use();
+        HitboxShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
+        HitboxShader->SetMatrix4("projection_matrix", projection_matrix);
+        HitboxManager::i_->Draw();
+
 
         glDisable(GL_BLEND);
         
@@ -1822,7 +1836,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
         glfwSwapBuffers(window);
     }
-
+    HitboxManager::Destroy();
     BillboardRendererManager::Destroy();
     ChokeIndicator::Destroy();
     TutorialManager::Destroy();
