@@ -80,6 +80,8 @@
 #include "headers/ChokeIndicator.h"
 #include "headers/BillboardRendererManager.h"
 #include "headers/PauseMenuTexture.h"
+#include "headers/HitboxManager.h"
+
 int main()
 {
     srand(static_cast <unsigned> (time(0)));
@@ -272,22 +274,37 @@ int main()
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::LAMPS);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::BARREL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::HITBOX);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::LAMPS);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::BARREL);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::HITBOX);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::LAMPS);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::HITBOX);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::BARREL);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::LAMPS);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::HITBOX);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::BARREL);
 
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::LAMPS, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::LAMPS, collisions::LAYERS::HITBOX);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::LAMPS, collisions::LAYERS::BARREL);
+
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::SKULL, collisions::LAYERS::HITBOX);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::SKULL, collisions::LAYERS::BARREL);
+
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::HITBOX, collisions::LAYERS::BARREL);
 
     pbd::PBDManager::Initialize(pbd_settings);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);
@@ -307,6 +324,7 @@ int main()
 	anim::AnimatorManager::Initialize();
     TutorialManager::Initialize(mode);
     BillboardRendererManager::Initialize();
+    HitboxManager::Initialize();
 #pragma endregion Initialization
     
 #pragma region CamerasConfiguration
@@ -416,6 +434,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto BillboardShader = res::get_shader("res/shaders/Billboard.vert", "res/shaders/Billboard.geom", "res/shaders/Billboard.frag");
     auto ScreenShader = res::get_shader("res/shaders/Screen.vert", "res/shaders/Screen.frag");
     auto CopyShader = res::get_shader("res/shaders/Copy.vert", "res/shaders/Copy.frag");
+    auto HitboxShader = res::get_shader("res/shaders/Hitbox.vert", "res/shaders/Hitbox.frag");
+
 #pragma endregion Shaders
 
     auto cubemap = make_shared<HDRCubemap>(kHDREquirectangularPath, BackgroundShader, EquirectangularToCubemapShader, IrradianceShader, PrefilterShader, BRDFShader);
@@ -804,6 +824,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     BackgroundShader->Use();
     BackgroundShader->SetInt("environmentMap", 0);
 
+
+    HitboxManager::i_->shader_->SetMatrix4("projection_matrix", projection_matrix);
 
     // initialize static shader uniforms before rendering
     // --------------------------------------------------
@@ -1222,14 +1244,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             {
                 postprocessor.slowed_time = true;
                 SpellCaster::i_->active_ = true;
-                Timer::Timer spell_timer = Timer::AddTimer(cast_time,
+                unsigned int spell_timer_id = Timer::AddTimer(cast_time,
                     [&fixed_update_rate, &postprocessor]()
                     {
                         fixed_update_rate = pbd::kMsPerUpdate;
                         postprocessor.slowed_time = false;
                     },
 
-                    [&fixed_update_rate, &id = spell_timer.id, &window, &postprocessor](float delta_time)
+                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
 
@@ -1291,6 +1313,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         GrassShader->SetVec3("pp2", player_2->transform_->get_position());
         GrassRendererManager::i_->Draw(GrassShader->get_id());
 
+        
         FloorRendererManager::i_->Draw();
 
         GBufferPassShader->Use();
@@ -1424,6 +1447,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         ParticleShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         ParticleEmitterManager::i_->Draw();
+
+        HitboxShader->Use();
+        HitboxShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
+        HitboxShader->SetMatrix4("projection_matrix", projection_matrix);
+        HitboxManager::i_->Draw();
+
 
         glDisable(GL_BLEND);
         
@@ -1799,7 +1828,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
         glfwSwapBuffers(window);
     }
-
+    HitboxManager::Destroy();
     BillboardRendererManager::Destroy();
     ChokeIndicator::Destroy();
     TutorialManager::Destroy();

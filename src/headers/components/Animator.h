@@ -15,7 +15,7 @@ namespace components
 	{
 	private:
 		std::vector<glm::mat4> m_FinalBoneMatrices;
-		std::map<std::string, s_ptr<anim::Animation>> m_Animations;
+		
 		s_ptr<anim::Animation> m_CurrentAnimation;
 		float m_CurrentTime;
 		float m_DeltaTime;
@@ -26,6 +26,7 @@ namespace components
 		int priority_ = 0;
 
 	public:
+		std::map<std::string, s_ptr<anim::Animation>> m_Animations;
 		s_ptr<anim::Animation> m_BlendingAnimation;
 		Animator(s_ptr<anim::Animation> animation);
 		Animator();

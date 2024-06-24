@@ -15,10 +15,10 @@ namespace components
 {
 	const float floor_tile_vertices_data[20]
     {
-        -1.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-         1.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-         1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
-        -1.0f, 0.0f,  1.0f, 0.0f, 0.0f
+		-1.0f, 0.0f, -1.0f, 1.0f, 1.0f, //lb
+         1.0f, 0.0f, -1.0f, 0.0f, 1.0f, //rb
+         1.0f, 0.0f,  1.0f, 1.0f, 0.0f, //rt
+        -1.0f, 0.0f,  1.0f, 0.0f, 0.0f  //lt
     };
 
 	const unsigned int floor_tile_indices_data[4]{ 0, 1, 3, 2 };

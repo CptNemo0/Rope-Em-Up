@@ -8,7 +8,8 @@
 #include "../components/BillboardRenderer.h"
 #include "../res/Resources.h"
 #include "../audio/AudioManager.h"
-
+#include "../HitboxManager.h"
+#include "../components/HitboxRenderer.h"
 namespace ai
 {
 	class EnemyStateMachine;
