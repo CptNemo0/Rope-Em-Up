@@ -49,7 +49,7 @@ void RenderManager::RenderFromLightPOV(s_ptr<Shader> depthShader)
 	{
 		if (mesh->active_ && !mesh->dirty_)
 		{
-			mesh->Render(depthShader);
+			mesh->RenderDepth(depthShader);
 		}
 	}
 }

@@ -2,21 +2,24 @@
 
 ShadowsManager* ShadowsManager::i_ = nullptr;
 
-ShadowsManager::ShadowsManager(s_ptr<Shader> depthShader)
+ShadowsManager::ShadowsManager(s_ptr<Shader> PointLightDepthShader, s_ptr<Shader> depthShader)
 {
+	pointlight_depth_shader_ = PointLightDepthShader;
 	depth_shader_ = depthShader;
 }
 
-void ShadowsManager::Initialize(s_ptr<Shader> depthShader)
+void ShadowsManager::Initialize(s_ptr<Shader> PointLightDepthShader, s_ptr<Shader> depthShader)
 {
 	if (i_ == nullptr)
 	{
-		i_ = new ShadowsManager(depthShader);
+		i_ = new ShadowsManager(PointLightDepthShader, depthShader);
 	}
 }
 
 void ShadowsManager::SetLightSpaceMatrix(glm::vec3 lightPos, int lightID)
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[lightID]);
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 
 	lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 	lightSpaceMatrix[lightID] = lightProjection * lightView;
@@ -27,14 +30,14 @@ void ShadowsManager::SetUpCubeShadowBuffers(int lightID)
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[lightID]);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 
-	depth_shader_->Use();
-	depth_shader_->SetVec3("lightPos", pointLights[lightID].position);
-	depth_shader_->SetFloat("far_plane", farPlane);
+	pointlight_depth_shader_->Use();
+	pointlight_depth_shader_->SetVec3("lightPos", pointLights[lightID].position);
+	pointlight_depth_shader_->SetFloat("far_plane", farPlane);
 
 	std::vector<glm::mat4> shadowTransforms = GetShadowTransforms(pointLights[lightID].position, farPlane);
 	for (unsigned int j = 0; j < 6; ++j)
 	{
-		depth_shader_->SetMatrix4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
+		pointlight_depth_shader_->SetMatrix4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
 	}
 
 	glClear(GL_DEPTH_BUFFER_BIT);

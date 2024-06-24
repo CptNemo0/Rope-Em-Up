@@ -128,6 +128,10 @@ int main()
 	const string kShadowDepthVertexShaderPath = "res/shaders/ShadowDepth.vert";
 	const string kShadowDepthFragmentShaderPath = "res/shaders/ShadowDepth.frag";
 
+    const string kPointShadowDepthVertexShaderPath = "res/shaders/PointShadowDepth.vert";
+    const string kPointShadowDepthFragmentShaderPath = "res/shaders/PointShadowDepth.frag";
+	const string kPointShadowDepthGeometryShaderPath = "res/shaders/PointShadowDepth.geom";
+
     const string kSSAOVertexShaderPath = "res/shaders/SSAO.vert";
     const string kSSAOFragmentShaderPath = "res/shaders/SSAO.frag";
 
@@ -211,7 +215,7 @@ int main()
     const string kRoomGenerationSettingsInitPath = "res/config/RoomGenerationSettingsInit.ini";
     const string kPBDManagerInitSettingsPath = "res/config/PBDManagerInitSettings.ini";
 
-    const string kTentaclPath = "res/enemy/enemy_changed.fbx";
+    const string kTentaclPath = "res/enemy/enemy_dt.fbx";
 	const string kTentaclIdlePath = "res/enemy/enemy_idles.fbx";
 	const string kTentsclDeathPath = "res/enemy/enemy_deaths.fbx";
 #pragma endregion Resources Paths
@@ -413,6 +417,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto HUDBarShader = res::get_shader(kHUDVertexShaderPath, kHudBarShaderPath);
     auto FloorShader = res::get_shader(kFloorVertexShaderPath, kFloorTCShaderPath, kFloorTEShaderPath, kFloorFragmentShaderPath);
 	auto ShadowDepthShader = res::get_shader(kShadowDepthVertexShaderPath, kShadowDepthFragmentShaderPath);
+	auto PointShadowDepthShader = res::get_shader(kPointShadowDepthVertexShaderPath, kPointShadowDepthGeometryShaderPath, kPointShadowDepthFragmentShaderPath);
 
 #pragma endregion Shaders
 
@@ -430,16 +435,15 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     Bloom bloom = Bloom(mode->height, mode->width);
     ppc::Postprocessor postprocessor = ppc::Postprocessor(mode->width, mode->height, PostprocessingShader);
     FloorRendererManager::Initialize(FloorShader);
+    ShadowsManager::Initialize(PointShadowDepthShader, ShadowDepthShader);
+
 #pragma region Lights
-    PointLight point_light{};
+    PointLight point_light[MAX_LIGHTS]{};
 
     float lamp_h = 8.0f;
 	float light_ID = 0;
     glm::vec3 point_light_color = glm::vec3(1.0f, 1.0f, 0.5f);
     float point_light_intensity = 250.0f;
-    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    point_light.color = point_light_color;
-	point_light.ID = light_ID;
 
     DirectionalLight directional_light{};
     glm::vec3 dir_light_color = glm::vec3(1.0f, 1.0f, 1.f);
@@ -459,7 +463,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 	spot_light.direction = spot_light_direction;
 	spot_light.color = spot_light_color;
 	spot_light.intensity = spot_light_intensity;
-
+    
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        ShadowsManager::i_->InitCubeShadowMap(i);
+    }
+	    ShadowsManager::i_->InitPlaneShadowMap(MAX_LIGHTS);
 #pragma endregion Lights
 
 #pragma region Models.
@@ -788,7 +797,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     // configure depth map FBO
-    // -----------------------
+     // -----------------------
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     unsigned int depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
@@ -814,10 +823,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     LBufferPassShader->SetInt("irradianceMap", 5);
     LBufferPassShader->SetInt("prefilterMap", 6);
     LBufferPassShader->SetInt("brdfLUT", 7);
-	LBufferPassShader->SetInt("shadowMap", 10);
-
-    BackgroundShader->Use();
-    BackgroundShader->SetInt("environmentMap", 0);
+    LBufferPassShader->SetInt("shadowMap", 10);
 
 
     // initialize static shader uniforms before rendering
@@ -1320,40 +1326,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
             glViewport(0, 0, mode->width, mode->height);
         }
-        //////////////////////////////////
-        
-        // 1. render depth of scene to texture (from light's perspective)
-        // --------------------------------------------------------------
-        glm::mat4 lightProjection, lightView;
-        glm::mat4 lightSpaceMatrix;
-        float near_plane = 1.0f, far_plane = 7.5f;
-        //lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
-        lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-        lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-        lightSpaceMatrix = lightProjection * lightView;
-        // render scene from light's point of view
-        ShadowDepthShader->Use();
-        ShadowDepthShader->SetMatrix4("light_space_matrix", lightSpaceMatrix);
-
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT);
-		//RenderManager::i_->SetUpMeshRenderer();
-        RenderManager::i_->RenderFromLightPOV(ShadowDepthShader);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        // reset viewport
-        glViewport(0, 0, mode->width, mode->height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        // Bind buffer - Bind textures - Use Shader - Draw 
-        lbuffer.Bind();
-        LBufferPassShader->Use();
-        LBufferPassShader->SetBool("use_ssao", use_ssao);
-		LBufferPassShader->SetMatrix4("light_space_matrix", lightSpaceMatrix);
-        glActiveTexture(GL_TEXTURE10);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-
 
         gbuffer.BindTextures(LBufferPassShader);
 
@@ -1379,14 +1351,23 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         //LBufferPassShader->SetFloat("intensity", poin 1.0f + 0.6f * std::sinf(glfwGetTime() * 0.75f));
         for (int i = 0; i < room->lamp_positions.size(); i++)
         {
-            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z));
-            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", point_light_color);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", 1.0f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", 0.00f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", 1.0f);
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity + 0.6f * std::sinf(glfwGetTime() * 0.75f));
-            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
+			point_light[i].ID = light_ID;
+			point_light[i].position = glm::vec3(room->lamp_positions[i].x, lamp_h, room->lamp_positions[i].z);
+			point_light[i].color = point_light_color;
+			point_light[i].intensity = point_light_intensity + 0.6f * std::sinf(glfwGetTime() * 0.75f);
+			point_light[i].constant = 1.0f;
+			point_light[i].linear = 0.00f;
+			point_light[i].quadratic = 1.0f;
+
+            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].position", point_light[i].position);
+            LBufferPassShader->SetVec3("pointLight[" + std::to_string(i) + "].color", point_light[i].color);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].constant", point_light[i].constant);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].linear", point_light[i].linear);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].quadratic", point_light[i].quadratic);
+            LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light[i].intensity);
+           // LBufferPassShader->SetFloat("pointLight[" + std::to_string(i) + "].intensity", point_light_intensity);
 			LBufferPassShader->SetInt("pointLight[" + std::to_string(i) + "].ID", light_ID);
+			ShadowsManager::i_->pointLights[i] = point_light[i];
 			light_ID++;
         }
 
@@ -1394,6 +1375,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         LBufferPassShader->SetVec3("dirLight[0].color", dir_light_color);
         LBufferPassShader->SetFloat("dirLight[0].intensity", dir_light_intensity);
 		LBufferPassShader->SetInt("dirLight[0].ID", light_ID);
+
+		ShadowsManager::i_->directionalLight = directional_light;
         
         LBufferPassShader->SetVec3("spotLight[0].position", spot_light_position);
         LBufferPassShader->SetVec3("spotLight[0].direction", spot_light_direction);
@@ -1405,6 +1388,13 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         LBufferPassShader->SetFloat("spotLight[0].linear", 0.09);
         LBufferPassShader->SetFloat("spotLight[0].quadratic", 0.032f);
         LBufferPassShader->SetBool("slowed_time", postprocessor.slowed_time);
+
+
+#pragma region Shadows
+
+
+
+#pragma endregion Shadows
 
         // LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS - LIGHTS
         lbuffer.Draw();
