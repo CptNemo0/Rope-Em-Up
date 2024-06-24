@@ -29,7 +29,9 @@ namespace collisions
         ROPE,
         CLUTTER,
         LAMPS,
-        SKULL
+        SKULL,
+        BARREL,
+        HITBOX
     };
 
 	class CollisionManager

@@ -21,10 +21,13 @@ namespace components
 
     void HpDropComponent::DropHp()
     {
-		cout << "Dropping HP" << endl;
-		drop::FloatDropArgs args = drop::FloatDropArgs(value_);
-		drop::HpDrop drop = drop::HpDrop(args);
-		drop::DropManager::i_->AddHpDrop(drop);
+		if (!damaged_by_tentacle_)
+		{
+			cout << "Dropping HP" << endl;
+			drop::FloatDropArgs args = drop::FloatDropArgs(value_);
+			drop::HpDrop drop = drop::HpDrop(args);
+			drop::DropManager::i_->AddHpDrop(drop);
+		}	
     }
 
     HpDropComponent::HpDropComponent(json &j)

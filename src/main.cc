@@ -273,22 +273,37 @@ int main()
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::LAMPS);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::BARREL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::HITBOX);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::LAMPS);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::TENTACLE, collisions::LAYERS::BARREL);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::PLAYER, collisions::LAYERS::HITBOX);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::ROPE);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::LAMPS);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::HITBOX);
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::ROPE, collisions::LAYERS::BARREL);
 
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::CLUTTER);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::LAMPS);
     collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::HITBOX);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::CLUTTER, collisions::LAYERS::BARREL);
 
     collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::LAMPS, collisions::LAYERS::SKULL);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::LAMPS, collisions::LAYERS::HITBOX);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::LAMPS, collisions::LAYERS::BARREL);
+
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::SKULL, collisions::LAYERS::HITBOX);
+    collisions::CollisionManager::i_->RemoveCollisionBetweenLayers(collisions::LAYERS::SKULL, collisions::LAYERS::BARREL);
+
+    collisions::CollisionManager::i_->AddCollisionBetweenLayers(collisions::LAYERS::HITBOX, collisions::LAYERS::BARREL);
 
     pbd::PBDManager::Initialize(pbd_settings);
     ai::EnemyAIManager::Initialize(enemy_ai_init, enemy_vehicle_template);

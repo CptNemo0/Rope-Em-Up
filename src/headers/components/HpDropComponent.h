@@ -16,7 +16,7 @@ namespace components
 	{
 	public:
 		float value_;
-
+		float damaged_by_tentacle_ = false;
 		HpDropComponent(float value);
 
 		void Start() override;

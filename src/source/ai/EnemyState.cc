@@ -204,18 +204,28 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 			lt.y = 0.0f;
 			rt.y = 0.0f;
 
-			glm::vec3 center = (lb + rt) * 0.5f;
-			float distance = glm::distance(center, rt);
+			hitbox->AddComponent(HitboxManager::i_->CreateCollider(lb, rb, rt, lt, 10.0f));
 
-			Timer::Timer timer = Timer::AddTimer(1.0f,
+			Timer::AddTimer(0.5f,
+				[hitbox]
+				{
+					Timer::AddTimer(0.5f,
+						[hitbox] 
+						{
+							HitboxManager::i_->Check(hitbox->GetComponent<components::HitboxCollider>());
+						});
+				});
+				
+
+			int id = Timer::AddTimer(1.1f,
 				[hitbox]
 				{
 					hitbox->Destroy();
 				},
-				[hitbox, &timer](float a)
+				[hitbox, id](float delta_time)
 				{
 					auto hr = hitbox->GetComponent<components::HitboxRenderer>();
-					hr->percentage_ *= 0.99f;
+					hr->percentage_ -= delta_time;
 					hr->color_ = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f - hr->percentage_);
 					
 				});
@@ -226,8 +236,8 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 					if (machine->in_attack_range_)
 					{
 						//cout << "ATTACK!!\n";
-						machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
-						machine->target_player_->GetComponent<components::Animator>()->PlayAnimation("Damage", 2, 1.0f);
+						//machine->target_player_->GetComponent<components::HealthComponent>()->TakeDamage(5.0f);
+						//machine->target_player_->GetComponent<components::Animator>()->PlayAnimation("Damage", 2, 1.0f);
 						//// to implement enemy attack aniamtion
 
 					}

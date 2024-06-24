@@ -99,7 +99,7 @@ float GetProgress(unsigned int id)
         return progress;
     }
     
-    return 0.0f;
+    return -1.0f;
 }
 
 } // namespace Timer
