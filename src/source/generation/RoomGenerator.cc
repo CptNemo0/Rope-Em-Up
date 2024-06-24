@@ -80,6 +80,16 @@ void generation::RoomLayoutGenerator::GenerateRoomsBetweenPoints(const glm::ivec
     while (current_point != B);
 }
 
+generation::RoomLayoutGenerator::RoomLayoutGenerator()
+{
+    std::vector<bool> data = {true};
+    for (int i = 0; i < 3; i++)
+    {
+        data.push_back(false);
+    }
+    altar_room_shuffler.SetData(data);
+}
+
 void generation::RoomLayoutGenerator::GenerateRooms(const RoomLayoutGenerationSettings &settings, std::shared_ptr<GameObject> root)
 {
     rooms.clear();
@@ -173,6 +183,7 @@ void generation::RoomLayoutGenerator::Destroy()
 
 generation::RoomLayoutGenerator::RoomLayoutGenerator(json &j, std::shared_ptr<GameObject> root)
 {
+    this->RoomLayoutGenerator::RoomLayoutGenerator();
     for (auto &j_room : j["rooms"])
     {
         glm::ivec2 position = {j_room["position"][0], j_room["position"][1]};
@@ -321,7 +332,7 @@ bool generation::CheckGateProximity(glm::vec3 pos, Room& room, float proximity)
     return true;
 }
 
-void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm)
+void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm, RoomLayoutGenerator* rlg)
 {
     switch (rgs->generated_rooms)
     {
@@ -351,6 +362,14 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
             //generate upper walls
             room.width = rgs->width;
             room.height = rgs->height;
+
+            bool is_altar = rlg->altar_room_shuffler.Pop();
+
+            if (is_altar)
+            {
+                room.width = 2;
+                room.height = 2;
+            }
 
             room.up_walls_idx.reserve(rgs->width);
 
@@ -433,6 +452,12 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
             // Lamps
 
             int lamp_num = rgs->lamps;
+
+            if (is_altar)
+            {
+                lamp_num = 4;
+            }
+
             std::unordered_set<glm::vec3> lamp_set;
 
             for (int i = 0; i < room.width; i++)
@@ -605,6 +630,12 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
                 }
             }
 
+            if (is_altar)
+            {
+                room.enemies_positions.clear();
+                room.enemies_idx.clear();
+            }
+
             // barells
 
             if (rgs->barells)
@@ -618,7 +649,14 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
                     room.barells_positions.push_back(enemies_positions[(i + rgs->enemies - 1) % enemies_positions.size()]);
                     room.barell_idx.push_back(random::RandInt(0, -1 + rm->barrles.size()));
                 }
-            }   
+            }
+
+            if (is_altar)
+            {
+                room.barell_idx.clear();
+                room.barells_positions.clear();
+            }
+
             break;
         }
     }
@@ -981,6 +1019,53 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 floor->AddComponent(FloorRendererManager::i_->CreateFloorRenderer());
                 
             }
+        }
+
+        //generate altar
+
+        if (rlg->altar_room_shuffler.GetLast() && rlg->built_rooms_ > 3)
+        {
+            auto altar = GameObject::Create(room.altar);
+            altar->transform_->set_position({-16.0f, 0.0f, -16.0f});
+            altar->transform_->set_scale(glm::vec3(1.5f));
+
+            auto altar_model = res::get_model("res/models/altar/altar.obj");
+            altar->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, altar_model, 0, altar->transform_));
+            altar->AddComponent(make_shared<components::MeshRenderer>(altar_model, shader));
+
+            auto particle_texture = res::get_texture("res/textures/flame_particle.png");
+            auto emitter = make_shared<components::ParticleEmitter>(1000, particle_texture, particle_shader);
+            emitter->emission_rate_ = 0.1f;
+            altar->AddComponent(emitter);
+
+            Timer::AddTimer(1.0f, nullptr, [emitter](float delta_time)
+            {
+                if (emitter->active_)
+                {
+                    static float t = 0.0f;
+                    t += delta_time;
+                    float x = 5.0f * glm::sin(t);
+                    float y = 5.0f * glm::cos(t);
+                    emitter->start_position_ = glm::vec3(x, 1.0f, y);
+                }
+            }, true);
+
+            auto altar_emitter = GameObject::Create(altar);
+            auto emitter2 = make_shared<components::ParticleEmitter>(1000, particle_texture, particle_shader);
+            emitter2->emission_rate_ = 0.1f;
+            altar_emitter->AddComponent(emitter2);
+
+            Timer::AddTimer(1.0f, nullptr, [emitter2](float delta_time)
+            {
+                if (emitter2->active_)
+                {
+                    static float t = 0.0f;
+                    t += delta_time;
+                    float x = -5.0f * glm::sin(t);
+                    float y = -5.0f * glm::cos(t);
+                    emitter2->start_position_ = glm::vec3(x, 1.0f, y);
+                }
+            }, true);
         }
 
         //generate gates
@@ -1701,7 +1786,7 @@ void generation::ChangeRooms(Room*& room, RoomLayoutGenerator& rlg, RoomGenerati
     {
         if (!room->is_generated)
         {
-            generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models);
+            generation::GenerateRoom(rlg.rooms[room->position], &rg_settings, &models, &rlg);
         }
 
         generation::BuildRoom(*room, &models, GBufferPassShader, &rlg, particle_texture, ParticleShader);

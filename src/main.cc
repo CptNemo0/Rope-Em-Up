@@ -593,7 +593,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     SkullMinionManager::i_->room_ = room;
-    generation::GenerateRoom(*room, &rg_settings, &models);
+    generation::GenerateRoom(*room, &rg_settings, &models, &rlg);
     generation::BuildRoom(*room, &models, GBufferPassShader, &rlg, trail_texture, ParticleShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
     pbd::PBDManager::i_->set_walls(walls);

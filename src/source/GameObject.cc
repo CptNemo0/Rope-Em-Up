@@ -48,6 +48,7 @@ void GameObject::ClearComponents()
 {
 	for (auto& component : components_)
 	{
+		component.second->active_ = false;
 		component.second->Destroy();
 	}
 	components_.clear();

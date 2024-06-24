@@ -1,0 +1,47 @@
+# Blender 4.1.1 MTL File: 'enviro_40.blend'
+# www.blender.org
+
+newmtl altar
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd altar/altar_albedo.png
+map_Ke altar/altar_emissive.png
+map_Ns altar/altar_roughness.png
+map_Pm altar/altar_metallic.png
+map_Bump -bm 20.000000 altar/altar_normal.png
+map_Ke no_emission.png
+
+newmtl book
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd book/book_albedo.png
+map_Ke book/book_emissive.png
+map_Ns book/book_roughness.png
+map_Pm book/book_metallic.png
+map_Bump -bm 20.000000 book/book_normal.png
+map_Ke no_emission.png
+
+newmtl cloth
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd cloth/cloth_albedo.png
+map_Ke cloth/cloth_emissive.png
+map_Ns cloth/cloth_roughness.png
+map_Pm cloth/cloth_metallic.png
+map_Bump -bm 20.000000 cloth/cloth_normal.png
+map_Ke no_emission.png

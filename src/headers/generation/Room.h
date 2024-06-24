@@ -21,6 +21,7 @@ namespace generation
         std::shared_ptr<GameObject> drops;
         std::shared_ptr<GameObject> barells;
         std::shared_ptr<GameObject> minions;
+        std::shared_ptr<GameObject> altar;
         // Values that will be generated during layout generation
         glm::ivec2 position;
 
