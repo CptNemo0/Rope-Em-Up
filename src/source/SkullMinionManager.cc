@@ -84,8 +84,11 @@ void SkullMinionManager::UpdateMinion(std::shared_ptr<components::SkullMinion> m
             auto hc = minion->target_->GetComponent<components::HealthComponent>();
             if (hc != nullptr)
             {
-                minion->target_->GetComponent<components::HealthComponent>()->TakeDamage(1.0f);
-                minion->health_component_->TakeDamage(1.0f);
+                if (!hc->damage_cooldown_)
+                {
+                    hc->TakeDamage(1.0f);
+                    minion->health_component_->TakeDamage(1.0f);
+                }
             }
             else
             {
