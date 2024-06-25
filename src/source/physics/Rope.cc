@@ -178,7 +178,7 @@ void Rope::ChokeCheck(generation::Room *room)
 	s_ptr<components::PlayerController> player_begin_controller_ = player_begin_->GetComponent<components::PlayerController>();
 	s_ptr<components::PlayerController> player_end_controller_ = player_end_->GetComponent<components::PlayerController>();
 
-	if (!pull_cooldown_ && player_begin_controller_->is_pulling_ && player_end_controller_->is_pulling_)
+	if (!pull_cooldown_ && player_begin_controller_->is_pulling_ && player_end_controller_->is_pulling_ && player_begin_controller_ != nullptr && player_end_controller_ != nullptr)
 	{
 		player_begin_->GetComponent<components::PBDParticle>()->rotation_offset_ = 180.0f;
 		player_end_->GetComponent<components::PBDParticle>()->rotation_offset_ = 180.0f;

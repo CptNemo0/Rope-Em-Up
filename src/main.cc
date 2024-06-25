@@ -1511,8 +1511,11 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             float p2p = 0.0;
             if (player_1 != nullptr)
             {
-                auto p1hc = player_1->GetComponent<components::HealthComponent>();
-                p1p = p1hc->health_ / p1hc->max_health_;
+                if (auto p1hc = player_1->GetComponent<components::HealthComponent>();p1hc != nullptr)
+                {
+                    p1p = p1hc->health_ / p1hc->max_health_;
+
+                }
             }
 
             if (p1p < 0.25f)
@@ -1534,8 +1537,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
             if (player_2 != nullptr)
             {
-                auto p2hc = player_2->GetComponent<components::HealthComponent>();
-                p2p = p2hc->health_ / p2hc->max_health_;
+
+                if (auto p2hc = player_2->GetComponent<components::HealthComponent>(); p2hc != nullptr) 
+                {
+                    p2p = p2hc->health_ / p2hc->max_health_;
+
+                }
             }
 
             if (p2p < 0.25f)
