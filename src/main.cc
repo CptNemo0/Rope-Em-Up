@@ -1731,7 +1731,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 #pragma endregion
         
-// #ifdef _DEBUG 
+#ifdef _DEBUG 
 
 #pragma region ImGUI
         
@@ -1976,7 +1976,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
          ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
         
 #pragma endregion 
-// #endif
+#endif
 
         glfwSwapBuffers(window);
     }
