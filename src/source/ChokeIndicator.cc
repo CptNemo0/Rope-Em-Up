@@ -41,15 +41,15 @@ void ChokeIndicator::Update(float delta_time)
 	}
 	else
 	{
-		timer_ += 0.25f * delta_time;
-		float transparency = (0.25f - timer_);
+		timer_ += 0.5f * delta_time;
+		float transparency = (0.5f - timer_);
 		renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, transparency);
 		
 
 		if (transparency < 0.001f)
 		{
 			choking_ = false;
-			renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.1f);
+			renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.4f);
 			renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_0_;
 		}
 	}

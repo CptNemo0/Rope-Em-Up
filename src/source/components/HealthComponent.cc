@@ -16,8 +16,8 @@ namespace components
 			return;
 		}
 
-		FroceDamage(damage);
-		DamageCooldown();
+		
+		DamageCooldown(damage);
 	}
 
 	void HealthComponent::FroceDamage(float damage)
@@ -52,12 +52,48 @@ namespace components
 		}
 	}
 
-	void HealthComponent::DamageCooldown()
+	void HealthComponent::DamageCooldown(float dmg)
 	{
 		damage_cooldown_ = true;
-		Timer::AddTimer(1.0f, [this]()
+
+		float delay = 1.0f;
+
+		Timer::AddTimer(delay,
+		[this, dmg]()
 		{
-				damage_cooldown_ = false;
+			damage_cooldown_ = false;
+			this->FroceDamage(dmg);
+		});
+
+
+
+		delay = 0.2f;
+		Timer::AddTimer(0.2f,
+		[this]()
+		{
+			if(this->type_ == PLAYER)
+			{
+				std::shared_ptr<components::MeshRenderer> renderer = this->gameObject_.lock()->GetComponent<components::MeshRenderer>();
+				if (renderer != nullptr)
+				{
+					renderer->color_ = glm::vec3(1.0f);
+				}
+			}
+		},
+		[this, delay](float delta_time)
+		{
+			static float t = 0.0f;
+			float completion = t / delay;
+			if (this->type_ == PLAYER)
+			{
+				std::shared_ptr<components::MeshRenderer> renderer = this->gameObject_.lock()->GetComponent<components::MeshRenderer>();
+				if (renderer != nullptr)
+				{
+					renderer->color_ = glm::vec3(1.0f, 0.0f, 0.0f);
+				}
+			}
+
+			t += delta_time;
 		});
 
 	}

@@ -11,6 +11,7 @@
 #include "../audio/AudioManager.h"
 #include "../typedef.h"
 #include "ParticleEmitter.h"
+#include "MeshRenderer.h"
 
 enum HEALTH_TYPE
 {
@@ -42,7 +43,7 @@ namespace components
 		void FroceDamage(float damage);
 		void ForceHeal(float heal);
 
-		void DamageCooldown();
+		void DamageCooldown(float dmg);
 
 		void Die();
 
