@@ -23,8 +23,20 @@ namespace components
 
 	void HealthComponent::FroceDamage(float damage)
 	{
-		health_ -= damage;
-		
+		if (shield_ > 0.0f)
+		{
+			shield_ -= damage;
+
+			if (shield_ < 0.0f)
+			{
+				health_ += shield_;
+				shield_ = 0.0f;
+			}
+		}
+		else
+		{
+			health_ -= damage;
+		}
 	}
 
 	void HealthComponent::ForceHeal(float heal)
@@ -51,6 +63,11 @@ namespace components
 			emmiter->Burst(5);
 			
 		}
+	}
+
+	void HealthComponent::AddShield(float shield)
+	{
+		shield_ += shield;
 	}
 
 	void HealthComponent::DamageCooldown(float dmg)

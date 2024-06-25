@@ -51,7 +51,9 @@ enum DROP_TYPE
 enum SPELLS
 {
     NOT_A_SPELL,
-    SKULL_MINION
+    SKULL_MINION,
+    LIFE_STEAL,
+    SHIELD
 };
 
 #define MAX_BONES 132
