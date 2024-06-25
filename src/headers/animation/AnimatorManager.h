@@ -8,6 +8,21 @@ namespace anim
 	{
 	public:
 		static AnimatorManager* i_;
+		std::shared_ptr<anim::Animation> enemy_attack_2;
+		std::shared_ptr<anim::Animation> enemy_attack_3;
+		std::shared_ptr<anim::Animation> enemy_attack_4;
+		std::shared_ptr<anim::Animation> enemy_attack_5;
+		std::shared_ptr<anim::Animation> enemy_attack_1;
+		std::shared_ptr<anim::Animation> enemy_death_1;
+		std::shared_ptr<anim::Animation> enemy_death_2;
+		std::shared_ptr<anim::Animation> enemy_death_3;
+		std::shared_ptr<anim::Animation> enemy_death_4;
+		std::shared_ptr<anim::Animation> enemy_death_5;
+		std::shared_ptr<anim::Animation> enemy_idle_1;
+		std::shared_ptr<anim::Animation> enemy_idle_2;
+		std::shared_ptr<anim::Animation> enemy_idle_3;
+		std::shared_ptr<anim::Animation> enemy_idle_4;
+		std::shared_ptr<anim::Animation> enemy_idle_5;
 
 		std::vector<s_ptr<components::Animator>> animators_;
 	private:

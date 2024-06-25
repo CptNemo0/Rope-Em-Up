@@ -6,10 +6,7 @@ void components::EnemySizeManager::Start()
 	model_ = gameObject_.lock()->transform_->children_[0]->game_object_;
 	animator = gameObject_.lock()->transform_->children_[0]->game_object_->GetComponent<components::Animator>();
 	last_health_ = health_component_->health_;
-	//float difference = HAX_ENEMY_HP - health_component_->health_;
-	//auto pos = model_->transform_->get_position();
-	//pos.y = -(difference * 0.8f);
-	//model_->transform_->TeleportToPosition(pos);
+
 	if (health_component_->health_ == 1)
 	{
 		animator->PlayAnimation("Idle_1", 0, 0.0f);
@@ -40,12 +37,6 @@ void components::EnemySizeManager::Update()
 {
 	if (last_health_ > health_component_->health_)
 	{
-		//last_health_ = health_component_->health_;
-		//float difference = HAX_ENEMY_HP - health_component_->health_;
-		//auto pos = model_->transform_->get_position();
-		//pos.y = -(difference * 0.8f);
-		//model_->transform_->TeleportToPosition(pos);
-
 		if (health_component_->health_ == 1)
 		{
 			animator->SetAnimation("Idle_1", 0);
