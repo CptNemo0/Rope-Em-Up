@@ -33,6 +33,7 @@ namespace generation
         bool is_generated = false;
         bool is_built = false;
         bool is_discovered = false;
+        bool is_altar = false;
 
         // Values that will be generated during room generation
 

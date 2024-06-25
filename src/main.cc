@@ -1274,9 +1274,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         drop::DropManager::i_->DropExp();
 
 #pragma endregion
-
-
-        
         
 
 #pragma region GO Update and Draw
@@ -1284,6 +1281,22 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         glViewport(0, 0, mode->width, mode->height);
 
         auto active_camera = Global::i_->active_camera_;
+
+        if (SceneManager::i_->IsScene("game"))
+        {
+            if (room->is_altar)
+            {
+                isometricCameraComponent->distanceX_ = -7.0f;
+                isometricCameraComponent->distanceZ_ = -7.0f;
+                isometricCameraComponent->height_ = 9.0f;
+            }
+            else
+            {
+                isometricCameraComponent->distanceX_ = -10.0f;
+                isometricCameraComponent->distanceZ_ = -10.0f;
+                isometricCameraComponent->height_ = 15.0f;
+            }
+        }
         
         // Bind buffer - Use Shader - Draw 
         gbuffer.Bind();
@@ -1487,11 +1500,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         BillboardShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         BillboardRendererManager::i_->UpdateRenderers();
-
-        if (SceneManager::i_->IsScene("pause_menu"))
-        {
-
-        }
 
         if (SceneManager::i_->IsScene("game"))
         {

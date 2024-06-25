@@ -28,11 +28,11 @@ class Menu : public input::InputObserver
 private:
     bool move_lock_ = false;
     s_ptr<GameObject> selection_outline_;
-    bool active_ = true;
 
 public:
     Menu();
 
+    bool active_ = true;
     glm::ivec2 current_pos_ = {0, 0};
     std::unordered_map<glm::ivec2, s_ptr<MenuItem>> layout_;
     void OnAction(Action action, input::State state);

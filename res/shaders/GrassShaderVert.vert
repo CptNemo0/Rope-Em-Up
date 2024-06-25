@@ -115,13 +115,13 @@ void main()
     pp2l = pp2l < 1.0 ? pp2l : 1.0;
 
     mat4 scale_matrix = mat4(1.0);
-    scale_matrix[0][0] = 1.0;
-    scale_matrix[1][1] = 4.0 * scale_hash * pp1l * pp2l;
-    scale_matrix[2][2] = 1.0;    
+    scale_matrix[0][0] = 3.0;
+    scale_matrix[1][1] = 6.0 * scale_hash * pp1l * pp2l;
+    scale_matrix[2][2] = 3.0;    
    
     //zakrzywienie 
    
-    float wind = sin(cnoise(world_pos + time * 0.2) * 0.4 - 0.2);
+    float wind = sin(cnoise(world_pos + time * 0.2) * 0.6 - 0.2);
     
     float final = rothash * local_position.y * local_position.y * 10.0 * scale_hash + wind;
 

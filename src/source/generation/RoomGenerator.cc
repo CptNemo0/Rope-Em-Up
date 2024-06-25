@@ -1,5 +1,6 @@
 ﻿#include "../../headers/generation/RoomGenerator.h"
 #include <headers/animation/AnimatorManager.h>
+#include "../../headers/components/Altar.h"
 
 //std::deque<w_ptr<GameObject>> generation::Room::room_parts = std::deque<w_ptr<GameObject>>();
 //std::vector<w_ptr<GameObject>> generation::Room::enemies = std::vector<w_ptr<GameObject>>();
@@ -83,10 +84,10 @@ void generation::RoomLayoutGenerator::GenerateRoomsBetweenPoints(const glm::ivec
 generation::RoomLayoutGenerator::RoomLayoutGenerator()
 {
     std::vector<bool> data = {true};
-    for (int i = 0; i < 3; i++)
-    {
-        data.push_back(false);
-    }
+    // for (int i = 0; i < 3; i++)
+    // {
+    //     data.push_back(false);
+    // }
     altar_room_shuffler.SetData(data);
 }
 
@@ -364,8 +365,9 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
             room.height = rgs->height;
 
             bool is_altar = rlg->altar_room_shuffler.Pop();
+            room.is_altar = is_altar;
 
-            if (is_altar)
+            if (room.is_altar)
             {
                 room.width = 2;
                 room.height = 2;
@@ -453,9 +455,9 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
 
             int lamp_num = rgs->lamps;
 
-            if (is_altar)
+            if (room.is_altar)
             {
-                lamp_num = 4;
+                lamp_num = 2;
             }
 
             std::unordered_set<glm::vec3> lamp_set;
@@ -630,7 +632,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
                 }
             }
 
-            if (is_altar)
+            if (room.is_altar)
             {
                 room.enemies_positions.clear();
                 room.enemies_idx.clear();
@@ -651,7 +653,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
                 }
             }
 
-            if (is_altar)
+            if (room.is_altar)
             {
                 room.barell_idx.clear();
                 room.barells_positions.clear();
@@ -691,7 +693,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch2[1];
 
                 auto renderer = GameObject::Create();
-                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
                 room.floors->transform_->AddChild(renderer->transform_);
             }
             else if (room.up_walls_idx[i] == 5)
@@ -699,7 +701,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch6[0];
                 auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch6[1];
                 auto renderer = GameObject::Create();
-                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
                 room.floors->transform_->AddChild(renderer->transform_);
             }
             else if (room.up_walls_idx[i] == 6)
@@ -708,7 +710,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch7[1];
 
                 auto renderer = GameObject::Create();
-                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
                 room.floors->transform_->AddChild(renderer->transform_);
             }
         }
@@ -728,7 +730,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
                 auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
 
-                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
             }
             else if (room.left_walls_idx[i] == 5)
             {
@@ -738,7 +740,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
                 auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
 
-                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
             }
             else if (room.left_walls_idx[i] == 6)
             {
@@ -748,7 +750,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
                 auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
 
-                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
             }
         }
 
@@ -949,7 +951,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch2[1];
 
                 auto renderer = GameObject::Create();
-                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
                 room.floors->transform_->AddChild(renderer->transform_);
             }
             else if (room.up_walls_idx[i] == 5)
@@ -957,7 +959,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto ul = wall_up->transform_->get_model_matrix() * kGrassPatch6[0];
                 auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch6[1];
                 auto renderer = GameObject::Create();
-                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
                 room.floors->transform_->AddChild(renderer->transform_);
             }
             else if (room.up_walls_idx[i] == 6)
@@ -966,7 +968,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto dr = wall_up->transform_->get_model_matrix() * kGrassPatch7[1];
 
                 auto renderer = GameObject::Create();
-                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
                 room.floors->transform_->AddChild(renderer->transform_);
             }
         }
@@ -986,7 +988,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
                 auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
 
-                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
             }
             else if (room.left_walls_idx[i] == 5)
             {
@@ -996,7 +998,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
                 auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
 
-                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
             }
             else if (room.left_walls_idx[i] == 6)
             {
@@ -1006,7 +1008,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 auto ul = glm::vec3(tmp_ul.x, 0.0, tmp_dr.z);
                 auto dr = glm::vec3(tmp_dr.x, 0.0, tmp_ul.z);
 
-                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 65));
+                wall_left->AddComponent(GrassRendererManager::i_->CreateRenderer(ul, dr, 30));
             }
         }
 
@@ -1014,28 +1016,48 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
         {
             for (int j = 0; j < room.height; j++)
             {
-                s_ptr<GameObject> floor = GameObject::Create(room.floors);
-                floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
-                floor->AddComponent(FloorRendererManager::i_->CreateFloorRenderer());
-                
+                if (!room.is_altar)
+                {
+                    s_ptr<GameObject> floor = GameObject::Create(room.floors);
+                    floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+                    floor->AddComponent(FloorRendererManager::i_->CreateFloorRenderer());
+                }
+                else
+                {
+                    s_ptr<GameObject> floor = GameObject::Create(room.floors);
+                    floor->transform_->set_position(glm::vec3(-8.0f - i * kModuleSize, 0.0f, -8.0f - j * kModuleSize));
+                    auto floor_model = res::get_model("res/grass_floor/grass_floor.obj");
+                    floor->AddComponent(make_shared<components::MeshRenderer>(floor_model, shader));
+                }
             }
         }
 
         //generate altar
 
-        if (rlg->altar_room_shuffler.GetLast() && rlg->built_rooms_ > 3)
+        if (room.is_altar)
         {
             auto altar = GameObject::Create(room.altar);
             altar->transform_->set_position({-16.0f, 0.0f, -16.0f});
             altar->transform_->set_scale(glm::vec3(1.5f));
 
             auto altar_model = res::get_model("res/models/altar/altar.obj");
+            altar->transform_->set_rotation({0.0f, 180.0f, 0.0f});
             altar->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::LAMPS, gPRECISION, altar_model, 0, altar->transform_));
             altar->AddComponent(make_shared<components::MeshRenderer>(altar_model, shader));
+            auto altar_texture = res::get_texture("res/textures/press_interact.png");
+
+            auto altar_billboard = GameObject::Create(altar);
+            auto billboard = BillboardRendererManager::i_->CreateRenderer(altar_texture);
+            billboard->position_offset_ = {0.0f, 3.0f, 0.0f};
+            billboard->active_ = false;
+            altar_billboard->AddComponent(billboard);
+            altar_billboard->transform_->set_scale(glm::vec3(0.1f));
+            altar_billboard->AddComponent(make_shared<components::Altar>());
 
             auto particle_texture = res::get_texture("res/textures/flame_particle.png");
             auto emitter = make_shared<components::ParticleEmitter>(1000, particle_texture, particle_shader);
-            emitter->emission_rate_ = 0.1f;
+            emitter->emission_rate_ = 1 / 60.0f;
+            emitter->start_color_ = {1.0f, 1.0f, 1.0f, 0.2f};
             altar->AddComponent(emitter);
 
             Timer::AddTimer(1.0f, nullptr, [emitter](float delta_time)
@@ -1052,7 +1074,8 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
 
             auto altar_emitter = GameObject::Create(altar);
             auto emitter2 = make_shared<components::ParticleEmitter>(1000, particle_texture, particle_shader);
-            emitter2->emission_rate_ = 0.1f;
+            emitter2->emission_rate_ = 1 / 60.0f;
+            emitter2->start_color_ = {1.0f, 1.0f, 1.0f, 0.2f};
             altar_emitter->AddComponent(emitter2);
 
             Timer::AddTimer(1.0f, nullptr, [emitter2](float delta_time)
@@ -1066,6 +1089,10 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                     emitter2->start_position_ = glm::vec3(x, 1.0f, y);
                 }
             }, true);
+
+            auto renderer = GameObject::Create();
+            renderer->AddComponent(GrassRendererManager::i_->CreateRenderer({0.0f, 0.0f, 0.0f}, {-32.0f, 0.0f, -32.0f}, 200.0f));
+            room.floors->transform_->AddChild(renderer->transform_);
         }
 
         //generate gates
