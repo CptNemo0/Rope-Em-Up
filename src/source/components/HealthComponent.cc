@@ -17,7 +17,7 @@ namespace components
 			return;
 		}
 
-		
+		this->FroceDamage(damage);
 		DamageCooldown(damage);
 	}
 
@@ -65,11 +65,9 @@ namespace components
 			if(this != nullptr)
 			{
 				damage_cooldown_ = false;
-				this->FroceDamage(dmg);
+				
 			}
 		});
-
-
 
 		delay = 0.2f;
 		Timer::AddTimer(0.2f,
