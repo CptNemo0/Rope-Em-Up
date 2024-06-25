@@ -228,23 +228,23 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 			{
 				if (health_component_->health_ == 1 && anim->m_Animations.contains("Attack_1"))
 				{
-					anim->PlayAnimation("Attack_1", 1, 3.0f);
+					anim->PlayAnimation("Attack_1", 1, 2.0f);
 				}
 				else if (health_component_->health_ == 2 && anim->m_Animations.contains("Attack_2"))
 				{
-					anim->PlayAnimation("Attack_2", 1, 3.0f);
+					anim->PlayAnimation("Attack_2", 1, 2.0f);
 				}
 				else if (health_component_->health_ == 3 && anim->m_Animations.contains("Attack_3"))
 				{
-					anim->PlayAnimation("Attack_3", 1, 3.0f);
+					anim->PlayAnimation("Attack_3", 1, 2.0f);
 				}
 				else if (health_component_->health_ == 4 && anim->m_Animations.contains("Attack_4"))
 				{
-					anim->PlayAnimation("Attack_4", 1, 3.0f);
+					anim->PlayAnimation("Attack_4", 1, 2.0f);
 				}
 				else if (health_component_->health_ == 5 && anim->m_Animations.contains("Attack_5"))
 				{
-					anim->PlayAnimation("Attack_5", 1, 3.0f);
+					anim->PlayAnimation("Attack_5", 1, 2.0f);
 				}
 				else
 				{

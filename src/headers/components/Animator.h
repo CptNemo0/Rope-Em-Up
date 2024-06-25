@@ -17,6 +17,7 @@ namespace components
 		std::vector<glm::mat4> m_FinalBoneMatrices;
 		
 		s_ptr<anim::Animation> m_CurrentAnimation;
+
 		float m_CurrentTime;
 		float m_DeltaTime;
 
@@ -27,6 +28,7 @@ namespace components
 
 	public:
 		std::map<std::string, s_ptr<anim::Animation>> m_Animations;
+
 		s_ptr<anim::Animation> m_BlendingAnimation;
 		Animator(s_ptr<anim::Animation> animation);
 		Animator();
@@ -41,6 +43,8 @@ namespace components
 
 		void AddAnimation(const std::string& name, s_ptr<anim::Animation> animation);
 		void RemoveAnimation(const std::string& name);
+
+		bool IsAttackAnimation(s_ptr<anim::Animation> animation);
 
 		void BlendTwoAnimations(s_ptr<anim::Animation> pLayeredAnimation, float blendFactor);
 		void BlendTwoAnimations(const std::string& pLayeredAnimation, float blendFactor);
