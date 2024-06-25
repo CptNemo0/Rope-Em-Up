@@ -6,12 +6,25 @@ void components::EnemyAIComponent::CheckChoke()
 	if (collisions::ChokeCheck(gameObject_.lock(), gPRECISION, gPRECISION * collisions::kChokePrecision, collisions::kChokeDistance))
 	{
 		state_machine_->is_choked_ = true;
-		ChokeList::i_->AddHealthComponent(gameObject_.lock()->GetComponent<components::HealthComponent>());
+		if (gameObject_.lock() != nullptr)
+		{
+			if (gameObject_.lock()->GetComponent<components::HealthComponent>() != nullptr)
+			{
+				ChokeList::i_->AddHealthComponent(gameObject_.lock()->GetComponent<components::HealthComponent>());
+			}
+		}
+		
 	}
 	else
 	{
 		state_machine_->is_choked_ = false;
-		ChokeList::i_->RemoveHealthComponent(gameObject_.lock()->GetComponent<components::HealthComponent>());
+		if (gameObject_.lock() != nullptr)
+		{
+			if (gameObject_.lock()->GetComponent<components::HealthComponent>() != nullptr)
+			{
+				ChokeList::i_->RemoveHealthComponent(gameObject_.lock()->GetComponent<components::HealthComponent>());
+			}
+		}
 	}
 }
 

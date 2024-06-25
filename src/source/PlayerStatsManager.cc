@@ -52,10 +52,22 @@ void PlayerStatsManager::Apply()
 		}
 	}
 
-	player_1_->GetComponent<components::PlayerController>()->speed_ = speed_;
-	player_1_->GetComponent<components::PlayerController>()->pull_power_ = pull_power_;
-	player_2_->GetComponent<components::PlayerController>()->speed_ = speed_;
-	player_2_->GetComponent<components::PlayerController>()->pull_power_ = pull_power_;
+	if (player_1_ != nullptr && player_2_ != nullptr)
+	{
+		auto p1 = player_1_->GetComponent<components::PlayerController>();
+		auto p2 = player_1_->GetComponent<components::PlayerController>();
+		if (p1 != nullptr)
+		{
+			p1->speed_ = speed_;
+			p1->pull_power_ = pull_power_;
+		}
+
+		if (p2 != nullptr)
+		{
+			p2->speed_ = speed_;
+			p2->pull_power_ = pull_power_;
+		}
+	}
 
 	p_speed_ = speed_;
 	p_pull_power_ = pull_power_;
@@ -70,27 +82,41 @@ void PlayerStatsManager::LevelUp()
 	level_++;
 	unspent_levels_++;
 	exp_ = 0.0f;
-	player_1_->GetComponent<components::HealthComponent>()->health_ += 0.2f * max_health_;
-	player_2_->GetComponent<components::HealthComponent>()->health_ += 0.2f * max_health_;
-	player_1_->GetComponent<components::Animator>()->PlayAnimation("Upgrade", 4, 1.0f);
-	player_2_->GetComponent<components::Animator>()->PlayAnimation("Upgrade", 4, 1.0f);
 
-	
-	auto tex = res::get_texture("res/particles/levelup.png");
-	auto e1 = player_1_->GetComponent<components::ParticleEmitter>();
-	auto e2 = player_2_->GetComponent<components::ParticleEmitter>();
-	e1->texture_ = tex;
-	e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
-	e1->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	e1->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+	if (player_1_ != nullptr && player_2_ != nullptr)
+	{
+		auto anim1 = player_1_->GetComponent<components::Animator>();
+		auto anim2 = player_2_->GetComponent<components::Animator>();
+		if (anim1 != nullptr)
+		{
+			anim1->PlayAnimation("Upgrade", 4, 1.0f);
+		}
 
-	e2->texture_ = tex;
-	e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
-	e2->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	e2->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+		if (anim2 != nullptr)
+		{
+			anim2->PlayAnimation("Upgrade", 4, 1.0f);
+		}
 
-	e1->Burst(1);
-	e2->Burst(1);
+		auto tex = res::get_texture("res/particles/levelup.png");
+		auto e1 = player_1_->GetComponent<components::ParticleEmitter>();
+		auto e2 = player_2_->GetComponent<components::ParticleEmitter>();
+
+		if (e1 != nullptr && e2 != nullptr)
+		{
+			e1->texture_ = tex;
+			e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+			e1->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			e1->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+
+			e2->texture_ = tex;
+			e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+			e2->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			e2->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+
+			e1->Burst(1);
+			e2->Burst(1);
+		}	
+	}
 }
 
 void PlayerStatsManager::AddExp(float exp)
@@ -109,21 +135,22 @@ void PlayerStatsManager::AddExp(float exp)
 		auto e1 = player_1_->GetComponent<components::ParticleEmitter>();
 		auto e2 = player_2_->GetComponent<components::ParticleEmitter>();
 
-		e1->texture_ = tex;
-		e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
-		e1->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		e1->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+		if (e1 != nullptr && e2 != nullptr)
+		{
+			e1->texture_ = tex;
+			e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+			e1->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			e1->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
 
-		e2->texture_ = tex;
-		e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
-		e2->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		e2->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+			e2->texture_ = tex;
+			e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
+			e2->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			e2->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
 
-		e1->Burst(10);
-		e2->Burst(10);
+			e1->Burst(10);
+			e2->Burst(10);
+		}
 	}
-
-	
 }
 
 void PlayerStatsManager::LevelUpSpeed()

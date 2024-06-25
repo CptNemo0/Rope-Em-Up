@@ -159,6 +159,10 @@ void collisions::CollisionManager::CollisionCheckPBD(std::vector<pbd::Contact>& 
                     are_colliding = ConvexHullCheckFaster(a->np_collider_, b->np_collider_);
                     if (are_colliding)
                     {
+                        if (a->gameObject_.lock() == nullptr || b->gameObject_.lock() == nullptr)
+                        {
+                            continue;
+                        }
                         auto particle_a = a->gameObject_.lock()->GetComponent<components::PBDParticle>();
                         auto particle_b = b->gameObject_.lock()->GetComponent<components::PBDParticle>();
 
