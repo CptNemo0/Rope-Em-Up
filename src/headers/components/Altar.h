@@ -19,6 +19,8 @@ private:
 
     bool is_near_ = false;
 
+    unsigned int timer_id_1_, timer_id_2_;
+
 public:
     void Start() override;
     void Update() override;

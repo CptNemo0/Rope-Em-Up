@@ -1094,6 +1094,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     pause_menu_scene->camera_ = menuCamera;
     pause_menu_scene->OnStart = [&pause_menu]()
     {
+        pause_menu->current_pos_ = {0, 0};
+        pause_menu->UpdateSelection();
         return;
     };
 

@@ -22,6 +22,7 @@ public:
     std::shared_ptr<Shader> shader_;
 
     std::shared_ptr<components::BillboardRenderer> CreateRenderer(s_ptr<tmp::Texture> texture);
+    std::shared_ptr<components::BillboardRenderer> CreateRenderer(json &j);
     void AddRenderer(std::shared_ptr<components::BillboardRenderer> r);
     void RemoveRenderer(std::shared_ptr<components::BillboardRenderer> r);
     void UpdateRenderers();

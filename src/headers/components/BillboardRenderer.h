@@ -27,6 +27,8 @@ namespace components
 		void Update() override;
 		void Destroy() override;
 
+		json Serialize() override;
+
 		void Draw();
 	};
 }

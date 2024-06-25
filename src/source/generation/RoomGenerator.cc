@@ -1055,40 +1055,19 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
             altar_billboard->AddComponent(make_shared<components::Altar>());
 
             auto particle_texture = res::get_texture("res/textures/flame_particle.png");
+            auto particle_shader = res::get_shader("res/shaders/Particle.vert", "res/shaders/Particle.geom", "res/shaders/Particle.frag");
+            
+            auto altar_emitter = GameObject::Create(altar);
             auto emitter = make_shared<components::ParticleEmitter>(1000, particle_texture, particle_shader);
             emitter->emission_rate_ = 1 / 60.0f;
             emitter->start_color_ = {1.0f, 1.0f, 1.0f, 0.2f};
-            altar->AddComponent(emitter);
+            altar_emitter->AddComponent(emitter);
 
-            Timer::AddTimer(1.0f, nullptr, [emitter](float delta_time)
-            {
-                if (emitter->active_)
-                {
-                    static float t = 0.0f;
-                    t += delta_time;
-                    float x = 5.0f * glm::sin(t);
-                    float y = 5.0f * glm::cos(t);
-                    emitter->start_position_ = glm::vec3(x, 1.0f, y);
-                }
-            }, true);
-
-            auto altar_emitter = GameObject::Create(altar);
+            auto altar_emitter2 = GameObject::Create(altar);
             auto emitter2 = make_shared<components::ParticleEmitter>(1000, particle_texture, particle_shader);
             emitter2->emission_rate_ = 1 / 60.0f;
             emitter2->start_color_ = {1.0f, 1.0f, 1.0f, 0.2f};
-            altar_emitter->AddComponent(emitter2);
-
-            Timer::AddTimer(1.0f, nullptr, [emitter2](float delta_time)
-            {
-                if (emitter2->active_)
-                {
-                    static float t = 0.0f;
-                    t += delta_time;
-                    float x = -5.0f * glm::sin(t);
-                    float y = -5.0f * glm::cos(t);
-                    emitter2->start_position_ = glm::vec3(x, 1.0f, y);
-                }
-            }, true);
+            altar_emitter2->AddComponent(emitter2);
 
             auto renderer = GameObject::Create();
             renderer->AddComponent(GrassRendererManager::i_->CreateRenderer({0.0f, 0.0f, 0.0f}, {-32.0f, 0.0f, -32.0f}, 200.0f));
