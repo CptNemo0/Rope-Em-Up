@@ -24,11 +24,11 @@ void ai::IdleState::Execute(EnemyStateMachine* machine)
 	if (machine->billboard_renderer_ != nullptr)	machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/dizzy.png");
 	if (machine->rest_timer_ < machine->vehicle_.rest_lenght)
 	{
-		cout << "IDLE" << endl;
+		//cout << "IDLE" << endl;
 		if (!machine->is_choked_)
 		{
-			cout << "NOT CHOKED" << endl;
-			cout << machine->rest_timer_ << endl;
+			//cout << "NOT CHOKED" << endl;
+			//cout << machine->rest_timer_ << endl;
 			machine->rest_timer_ += 0.25f;
 		}
 		
@@ -167,7 +167,13 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 			glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 			float width = 1.25f;
 			float length = 0.0f;
-			auto hc = machine->transfrom_->game_object_->GetComponent<components::HealthComponent>();
+
+			std::shared_ptr<components::HealthComponent> hc = nullptr;
+
+			if (machine != nullptr && machine->transfrom_ != nullptr && machine->transfrom_->game_object_ != nullptr)
+			{
+				hc = machine->transfrom_->game_object_->GetComponent<components::HealthComponent>();
+			}
 
 			if (hc == nullptr)
 			{
@@ -191,13 +197,21 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 			lt += position;
 			rt += position;
 
-			auto hitbox = GameObject::Create(machine->transfrom_->game_object_);
-			hitbox->transform_->TeleportToPosition(position);
-			hitbox->AddComponent(HitboxManager::i_->CreateRenderer(lb, rb, rt, lt));
-			hitbox->GetComponent<components::HitboxRenderer>()->percentage_ = 1.0f;
-			machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
-			machine->generator_->magnitude_ = 0.0f;
-			machine->partcile_->controllable_ = false;
+
+			std::shared_ptr<GameObject> hitbox;
+
+			if (machine != nullptr && machine->transfrom_->game_object_ != nullptr)
+			{
+				hitbox = GameObject::Create(machine->transfrom_->game_object_);
+				hitbox->transform_->TeleportToPosition(position);
+				hitbox->AddComponent(HitboxManager::i_->CreateRenderer(lb, rb, rt, lt));
+				hitbox->GetComponent<components::HitboxRenderer>()->percentage_ = 1.0f;
+				machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
+				machine->generator_->magnitude_ = 0.0f;
+				machine->partcile_->controllable_ = false;
+			}
+
+			
 
 			lb.y = 0.0f;
 			rb.y = 0.0f;
@@ -212,7 +226,13 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 					Timer::AddTimer(0.5f,
 						[hitbox] 
 						{
-							HitboxManager::i_->Check(hitbox->GetComponent<components::HitboxCollider>());
+							if (hitbox != nullptr)
+							{
+								if (auto hc = hitbox->GetComponent<components::HitboxCollider>(); hc != nullptr)
+								{
+									HitboxManager::i_->Check(hc);
+								}
+							}
 						});
 				});
 				
@@ -220,18 +240,30 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 			int id = Timer::AddTimer(1.1f,
 				[hitbox, machine]
 				{
-					hitbox->Destroy();
-					machine->is_attacking = false;
-					machine->partcile_->controllable_ = true;
-					assert(machine->current_state_ && PatrolState::Instance());
-					machine->current_state_ = PatrolState::Instance();
+					if (hitbox != nullptr)
+					{
+						hitbox->Destroy();
+						if (machine != nullptr)
+						{
+							machine->is_attacking = false;
+							machine->partcile_->controllable_ = true;
+							assert(machine->current_state_ && PatrolState::Instance());
+							machine->current_state_ = PatrolState::Instance();
+						}	
+					}
+					
 				},
 				[hitbox, id](float delta_time)
 				{
-					auto hr = hitbox->GetComponent<components::HitboxRenderer>();
-					hr->percentage_ -= delta_time;
-					hr->color_ = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f - hr->percentage_);
-					
+					if (hitbox != nullptr)
+					{
+						auto hr = hitbox->GetComponent<components::HitboxRenderer>();
+						if (hr != nullptr)
+						{
+							hr->percentage_ -= delta_time;
+							hr->color_ = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f - hr->percentage_);
+						}
+					}
 				});
 		}
 	}
@@ -405,11 +437,20 @@ ai::EnemyStateMachine::EnemyStateMachine(s_ptr<GameObject> game_object, s_ptr<pb
 	vehicle_ = vehicle;
 
 	target_player_ = nullptr;
-	transfrom_ = game_object->transform_;
-	partcile_ = game_object->GetComponent<components::PBDParticle>();
-	
-	generator_ = generator;
-	
+	if (game_object != nullptr)
+	{
+		if (game_object->transform_ != nullptr)
+		{
+			transfrom_ = game_object->transform_;
+		}
+
+		if (auto p = game_object->GetComponent<components::PBDParticle>())
+		{
+			partcile_ = p;
+		}
+	}
+
+	generator_ = generator;	
 
 	rest_timer_ = 0.0f;
 

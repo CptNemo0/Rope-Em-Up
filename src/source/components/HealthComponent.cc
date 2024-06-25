@@ -1,5 +1,6 @@
 #include "../../headers/components/HealthComponent.h"
 #include "../../headers/HealthManager.h"
+#include "../../headers/ChokeList.h"
 namespace components
 {
 	//fraction should be from 0.0 do 1.0
@@ -16,8 +17,8 @@ namespace components
 			return;
 		}
 
-		FroceDamage(damage);
-		DamageCooldown();
+		
+		DamageCooldown(damage);
 	}
 
 	void HealthComponent::FroceDamage(float damage)
@@ -52,12 +53,64 @@ namespace components
 		}
 	}
 
-	void HealthComponent::DamageCooldown()
+	void HealthComponent::DamageCooldown(float dmg)
 	{
 		damage_cooldown_ = true;
-		Timer::AddTimer(1.0f, [this]()
+
+		float delay = 1.0f;
+
+		Timer::AddTimer(delay,
+		[this, dmg]()
 		{
+			if(this != nullptr)
+			{
 				damage_cooldown_ = false;
+				this->FroceDamage(dmg);
+			}
+		});
+
+
+
+		delay = 0.2f;
+		Timer::AddTimer(0.2f,
+		[this]()
+		{
+			if(this != nullptr)
+			{
+				if (this->type_ == PLAYER)
+				{
+					if (this->gameObject_.lock() != nullptr)
+					{
+						std::shared_ptr<components::MeshRenderer> renderer = this->gameObject_.lock()->GetComponent<components::MeshRenderer>();
+						if (renderer != nullptr)
+						{
+							renderer->color_ = glm::vec3(1.0f);
+						}
+					}	
+				}
+			}
+			
+		},
+		[this, delay](float delta_time)
+		{
+			static float t = 0.0f;
+			float completion = t / delay;
+			if (this->type_ == PLAYER)
+			{
+				if (this != nullptr)
+				{
+					if (this->gameObject_.lock() != nullptr)
+					{
+						std::shared_ptr<components::MeshRenderer> renderer = this->gameObject_.lock()->GetComponent<components::MeshRenderer>();
+						if (renderer != nullptr)
+						{
+							renderer->color_ = glm::vec3(1.0f, 0.0f, 0.0f);
+						}
+					}
+				}
+			}
+
+			t += delta_time;
 		});
 
 	}
@@ -72,6 +125,7 @@ namespace components
 
 	void HealthComponent::Destroy()
 	{
+		ChokeList::i_->RemoveHealthComponent(shared_from_this());
 		HealthManager::i_->RemoveHealthComponent(shared_from_this());
 		std::cout << "Destroying HealthCompoent" << std::endl;
 	}

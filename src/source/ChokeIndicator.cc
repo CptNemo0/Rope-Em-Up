@@ -24,33 +24,69 @@ void ChokeIndicator::Update(float delta_time)
 		{
 			choking_ = true;
 			timer_ = 0.0f;
-			renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_3_;
+			if (renderer_ != nullptr)
+			{
+				if (renderer_->GetComponent<components::HUDRenderer>() != nullptr)
+				{
+					renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_3_;
+				}
+			}
+			
 		}
 		else if (controller_1_->is_pulling_ && !controller_2_->is_pulling_)
 		{
-			renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_1_;
+			if (renderer_ != nullptr)
+			{
+				if (renderer_->GetComponent<components::HUDRenderer>() != nullptr)
+				{
+					renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_1_;
+				}
+			}
 		}
 		else if (!controller_1_->is_pulling_ && controller_2_->is_pulling_)
 		{
-			renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_2_;
+			if (renderer_ != nullptr)
+			{
+				if (renderer_->GetComponent<components::HUDRenderer>() != nullptr)
+				{
+					renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_2_;
+				}
+			}
 		}
 		else
 		{
-			renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_0_;
+			if (renderer_ != nullptr)
+			{
+				if (renderer_->GetComponent<components::HUDRenderer>() != nullptr)
+				{
+					renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_0_;
+				}
+			}
 		}
 	}
 	else
 	{
-		timer_ += 0.25f * delta_time;
-		float transparency = (0.25f - timer_);
-		renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, transparency);
+		timer_ += 0.5f * delta_time;
+		float transparency = (0.5f - timer_);
+		if (renderer_ != nullptr)
+		{
+			if (renderer_->GetComponent<components::HUDRenderer>() != nullptr)
+			{
+				renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, transparency);
+			}
+		}
 		
-
 		if (transparency < 0.001f)
 		{
 			choking_ = false;
-			renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.1f);
-			renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_0_;
+			if (renderer_ != nullptr)
+			{
+				if (renderer_->GetComponent<components::HUDRenderer>() != nullptr)
+				{
+					renderer_->GetComponent<components::HUDRenderer>()->color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.4f);
+					renderer_->GetComponent<components::HUDRenderer>()->texture_ = indicator_0_;
+				}
+			}
 		}
 	}
 }

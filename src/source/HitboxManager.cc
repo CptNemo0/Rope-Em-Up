@@ -117,6 +117,10 @@ void HitboxManager::Check(std::shared_ptr<components::HitboxCollider> hitbox)
 {
 	for (auto& collider : collisions::CollisionManager::i_->colliders_)
 	{
+		if (collider == nullptr)
+		{
+			continue;
+		}
 		if (collider->active_)
 		{
 			if (collisions::CollisionManager::i_->LayerCheck(hitbox->layer_, collider->layer_))
