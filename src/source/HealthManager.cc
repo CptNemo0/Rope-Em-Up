@@ -10,6 +10,8 @@ HealthManager* HealthManager::i_ = nullptr;
 HealthManager::HealthManager()
 {
 	health_components_ = std::deque<std::shared_ptr<components::HealthComponent>>();
+	shield_model_ = res::get_model("res/shield/shield.obj");
+	shield_shader_ = res::get_shader("res/shaders/Shield.vert", "res/shaders/Shield.frag");
 }
 
 std::shared_ptr<components::HealthComponent> HealthManager::CreateHealthComponent(float health, HEALTH_TYPE type)
@@ -94,5 +96,19 @@ void HealthManager::ManageDeath(s_ptr<GameObject> go)
 	if (spell_comp != nullptr)
 	{
 		spell_comp->DropSpell();
+	}
+}
+
+void HealthManager::DrawShields()
+{
+	for (auto& hc : health_components_)
+	{
+		if (hc->shield_ > 0.0f)
+		{
+			glm::vec3 position = hc->gameObject_.lock()->transform_->get_global_position();
+			shield_shader_->SetVec3("position", position + glm::vec3(0.0f, 1.5f, 0.0f));
+			shield_shader_->SetFloat("transparency", 0.25f);
+			shield_model_->Draw();
+		}
 	}
 }

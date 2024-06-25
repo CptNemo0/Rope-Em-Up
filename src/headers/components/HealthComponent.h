@@ -31,6 +31,7 @@ namespace components
 
 		float max_health_;
 		float health_;
+		float shield_ = 0.0f;
 
 		bool damage_cooldown_ = false;
 		HEALTH_TYPE type_;
@@ -42,6 +43,7 @@ namespace components
 		void TakeDamage(float damage);
 		void FroceDamage(float damage);
 		void ForceHeal(float heal);
+		void AddShield(float shield);
 
 		void DamageCooldown(float dmg);
 
