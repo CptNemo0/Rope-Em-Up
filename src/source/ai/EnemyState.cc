@@ -209,13 +209,7 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 				machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
 				machine->generator_->magnitude_ = 0.0f;
 				machine->partcile_->controllable_ = false;
-				if (auto anim = machine->transfrom_->game_object_->transform_->children_[0]->game_object_->GetComponent<components::Animator>(); anim != nullptr)
-				{
-					if (anim->m_Animations.contains("Attack_3"))
-					{
-						anim->SetAnimation("Attack_3", 1);
-					}
-				}
+				
 			}
 
 			
@@ -227,9 +221,41 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 
 			hitbox->AddComponent(HitboxManager::i_->CreateCollider(lb, rb, rt, lt, 10.0f));
 
+			auto anim = machine->transfrom_->game_object_->transform_->children_[0]->game_object_->GetComponent<components::Animator>();
+			auto health_component_ = machine->transfrom_->game_object_->GetComponent<components::HealthComponent>();
+
+			if (  anim != nullptr && health_component_ != nullptr)
+			{
+				if (health_component_->health_ == 1 && anim->m_Animations.contains("Attack_1"))
+				{
+					anim->PlayAnimation("Attack_1", 1, 3.0f);
+				}
+				else if (health_component_->health_ == 2 && anim->m_Animations.contains("Attack_2"))
+				{
+					anim->PlayAnimation("Attack_2", 1, 3.0f);
+				}
+				else if (health_component_->health_ == 3 && anim->m_Animations.contains("Attack_3"))
+				{
+					anim->PlayAnimation("Attack_3", 1, 3.0f);
+				}
+				else if (health_component_->health_ == 4 && anim->m_Animations.contains("Attack_4"))
+				{
+					anim->PlayAnimation("Attack_4", 1, 3.0f);
+				}
+				else if (health_component_->health_ == 5 && anim->m_Animations.contains("Attack_5"))
+				{
+					anim->PlayAnimation("Attack_5", 1, 3.0f);
+				}
+				else
+				{
+					anim->PlayAnimation("Idle_1", 0, 0.0f);
+				}
+			}
+
 			Timer::AddTimer(0.5f,
 				[hitbox]
 				{
+
 					Timer::AddTimer(0.5f,
 						[hitbox] 
 						{

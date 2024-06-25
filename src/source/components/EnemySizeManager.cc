@@ -12,27 +12,27 @@ void components::EnemySizeManager::Start()
 	//model_->transform_->TeleportToPosition(pos);
 	if (health_component_->health_ == 1)
 	{
-		animator->SetAnimation("Idle_1", 0);
+		animator->PlayAnimation("Idle_1", 0, 0.0f);
 	}
 	else if (health_component_->health_ == 2)
 	{
-		animator->SetAnimation("Idle_2", 0);
+		animator->PlayAnimation("Idle_2", 0, 0.0f);
 	}
 	else if (health_component_->health_ == 3)
 	{
-		animator->SetAnimation("Idle_3", 0);
+		animator->PlayAnimation("Idle_3", 0, 0.0f);
 	}
 	else if (health_component_->health_ == 4)
 	{
-		animator->SetAnimation("Idle_4", 0);
+		animator->PlayAnimation("Idle_4", 0, 0.0f);
 	}
 	else if (health_component_->health_ == 5)
 	{
-		animator->SetAnimation("Idle_5", 0);
+		animator->PlayAnimation("Idle_5", 0, 0.0f);
 	}
 	else
 	{
-		animator->SetAnimation("Idle_1", 0);
+		animator->PlayAnimation("Idle_1", 0, 0.0f);
 	}
 }
 
