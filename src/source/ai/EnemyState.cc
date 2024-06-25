@@ -209,6 +209,13 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 				machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
 				machine->generator_->magnitude_ = 0.0f;
 				machine->partcile_->controllable_ = false;
+				if (auto anim = machine->transfrom_->game_object_->transform_->children_[0]->game_object_->GetComponent<components::Animator>(); anim != nullptr)
+				{
+					if (anim->m_Animations.contains("Attack_3"))
+					{
+						anim->SetAnimation("Attack_3", 1);
+					}
+				}
 			}
 
 			
