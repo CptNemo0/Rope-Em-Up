@@ -8,6 +8,6 @@ uniform mat4 projection_matrix;
 
 void main()
 {
-    gl_Position = projection_matrix * model_matrix * vec4(iv_vertex.xy, 0.0, 1.0);
+    gl_Position = model_matrix * vec4(iv_vertex.xy, 0.0, 1.0);
     ov_texcoords = iv_vertex.zw;
 }  

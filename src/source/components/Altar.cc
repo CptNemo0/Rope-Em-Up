@@ -48,6 +48,7 @@ void components::Altar::OnAction(Action action, input::State state)
             {
                 player_1->GetComponent<components::PlayerController>()->active_ = false;
                 player_2->GetComponent<components::PlayerController>()->active_ = false;
+                SceneManager::i_->current_scene_->SwitchMenu("altar");
             }
             break;
         }

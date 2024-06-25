@@ -16,12 +16,20 @@ void SceneManager::SwitchScene(string scene_name)
             current_scene_->OnExit();
         }
         current_scene_->Halt();
+        if (current_scene_->menus_.contains(current_scene_->current_menu_))
+        {
+            current_scene_->menus_[current_scene_->current_menu_]->Disable();
+        }
     }
     current_scene_ = scenes_[scene_name];
     current_scene_->Continue();
     if (current_scene_->OnStart)
     {
         current_scene_->OnStart();
+    }
+    if (current_scene_->menus_.contains(current_scene_->current_menu_))
+    {
+        current_scene_->menus_[current_scene_->current_menu_]->Enable();
     }
 }
 

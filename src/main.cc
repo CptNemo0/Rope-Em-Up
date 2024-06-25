@@ -809,8 +809,9 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     auto HUDText_object = GameObject::Create(game_HUD_text_root);
     HUDText_object->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "TEST", glm::vec3(1.0f)));
-    HUDText_object->transform_->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
-    HUDText_object->transform_->set_position(glm::vec3(50.0f, 900.0f, 0.0f));
+    HUDText_object->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
+    HUDText_object->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+    HUDText_object->transform_->set_position(glm::vec3(-1.0f, 0.94f, 0.0f));
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -1044,6 +1045,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     pause_menu->layout_[{0, 0}] = make_shared<MenuItem>(pause_continue_button, []()
     {
         SceneManager::i_->SwitchScene("game");
+        return;
     });
 
     auto pause_save_button = GameObject::Create(pause_menu_HUD_root);
@@ -1081,6 +1083,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     });
 
     pause_menu->UpdateSelection();
+    pause_menu->Disable();
 
     auto pause_menu_scene = make_shared<Scene>();
     pause_menu_scene->HUD_root_ = pause_menu_HUD_root;
@@ -1091,11 +1094,150 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     pause_menu_scene->camera_ = menuCamera;
     pause_menu_scene->OnStart = [&pause_menu]()
     {
-        pause_menu->current_pos_ = {0, 0};
-        pause_menu->UpdateSelection();
+        return;
     };
 
+
     SceneManager::i_->AddScene("pause_menu", pause_menu_scene);
+
+    auto altar_menu = make_shared<Menu>();
+    input::InputManager::i_->AddObserver(0, altar_menu);
+
+    auto altar_container = GameObject::Create(game_HUD_root);
+    auto altar_background_tex = res::get_texture("res/textures/color.png");
+    altar_container->transform_->set_scale(glm::vec3(1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f));
+    altar_container->transform_->scale({0.7f, 0.7f, 1.0f});
+
+    auto altar_text_container = GameObject::Create(game_HUD_text_root);
+    altar_text_container->transform_->set_scale(glm::vec3(1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f));
+    altar_text_container->transform_->scale({0.7f, 0.7f, 1.0f});
+
+    auto altar_background = GameObject::Create(altar_container);
+    altar_background->AddComponent(make_shared<components::HUDRenderer>(altar_background_tex, HUDshader, glm::vec4(0.0, 0.0, 0.0, 0.6f)));
+    altar_background->transform_->set_scale({1.4f, 1.0f, 1.0f});
+    altar_menu->layout_[{-10, -10}] = make_shared<MenuItem>(altar_background, [](){});
+
+    auto unspent_levels_text = GameObject::Create(altar_text_container);
+    unspent_levels_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "Unspent levels: ", glm::vec3(1.0f)));
+    unspent_levels_text->transform_->set_scale({0.003f, 0.003f, 1.0f});
+    unspent_levels_text->transform_->add_position({-0.8f, 0.0f, 0.0f});
+    altar_menu->layout_[{-10, 46354}] = make_shared<MenuItem>(unspent_levels_text, [](){});
+
+    auto unspent_levels = GameObject::Create(altar_text_container);
+    unspent_levels->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "0", glm::vec3(1.0f, 0.8f, 0.0f)));
+    unspent_levels->transform_->set_scale({0.004f, 0.004f, 1.0f});
+    unspent_levels->transform_->add_position({0.6f, 0.0f, 0.0f});
+    altar_menu->layout_[{-10, 463254}] = make_shared<MenuItem>(unspent_levels, [](){});
+
+    auto player_text = GameObject::Create(altar_text_container);
+    player_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "Player:", glm::vec3(1.0f)));
+    player_text->transform_->set_scale({0.005f, 0.005f, 1.0f});
+    player_text->transform_->add_position({-1.3f, 0.72f, 0.0f});
+    altar_menu->layout_[{-10, 0}] = make_shared<MenuItem>(player_text, [](){});
+
+    auto player_level_text = GameObject::Create(altar_text_container);
+    player_level_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "0", glm::vec3(1.0f, 0.8f, 0.0f)));
+    player_level_text->transform_->set_scale({0.006f, 0.006f, 1.0f});
+    player_level_text->transform_->add_position({0.0f, 0.72f, 0.0f});
+    altar_menu->layout_[{-10, 435}] = make_shared<MenuItem>(player_level_text, [](){});
+
+    auto player_plus = GameObject::Create(altar_container);
+    player_plus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/plus_button.png"), HUDshader));
+    player_plus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
+    player_plus->transform_->add_position({0.0f, 0.0f, 0.0f});
+    player_plus->transform_->scale({0.9f, 0.9f, 1.0f});
+    altar_menu->layout_[{0, 0}] = make_shared<MenuItem>(player_plus, [&unspent_levels, &player_level_text]()
+    {
+        PlayerStatsManager::i_->LevelUpPlayer();
+        unspent_levels->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->unspent_levels_);
+        player_level_text->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->player_level_);
+    });
+
+    auto player_minus = GameObject::Create(altar_container);
+    player_minus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minus_button.png"), HUDshader));
+    player_minus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
+    player_minus->transform_->add_position({0.4f, 0.0f, 0.0f});
+    player_minus->transform_->scale({0.9f, 0.9f, 1.0f});
+    altar_menu->layout_[{1, 0}] = make_shared<MenuItem>(player_minus, [&unspent_levels, &player_level_text]()
+    {
+        PlayerStatsManager::i_->LevelDownPlayer();
+        unspent_levels->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->unspent_levels_);
+        player_level_text->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->player_level_);
+    });
+
+    auto rope_text = GameObject::Create(altar_text_container);
+    rope_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "Rope:", glm::vec3(1.0f)));
+    rope_text->transform_->set_scale({0.005f, 0.005f, 1.0f});
+    rope_text->transform_->add_position({-1.3f, 0.32f, 0.0f});
+    altar_menu->layout_[{-10, 1}] = make_shared<MenuItem>(rope_text, [](){});
+
+    auto rope_level_text = GameObject::Create(altar_text_container);
+    rope_level_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "0", glm::vec3(1.0f, 0.8f, 0.0f)));
+    rope_level_text->transform_->set_scale({0.006f, 0.006f, 1.0f});
+    rope_level_text->transform_->add_position({0.0f, 0.32f, 0.0f});
+    altar_menu->layout_[{-10, 4354}] = make_shared<MenuItem>(rope_level_text, [](){});
+
+    auto rope_plus = GameObject::Create(altar_container);
+    rope_plus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/plus_button.png"), HUDshader));
+    rope_plus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
+    rope_plus->transform_->add_position({0.0f, -0.4f, 0.0f});
+    rope_plus->transform_->scale({0.9f, 0.9f, 1.0f});
+    altar_menu->layout_[{0, 1}] = make_shared<MenuItem>(rope_plus, [&unspent_levels, &rope_level_text]()
+    {
+        PlayerStatsManager::i_->LevelUpRope();
+        unspent_levels->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->unspent_levels_);
+        rope_level_text->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->rope_level_);
+    });
+
+    auto rope_minus = GameObject::Create(altar_container);
+    rope_minus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minus_button.png"), HUDshader));
+    rope_minus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
+    rope_minus->transform_->add_position({0.4f, -0.4f, 0.0f});
+    rope_minus->transform_->scale({0.9f, 0.9f, 1.0f});
+    altar_menu->layout_[{1, 1}] = make_shared<MenuItem>(rope_minus, [&unspent_levels, &rope_level_text]()
+    {
+        PlayerStatsManager::i_->LevelDownRope();
+        unspent_levels->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->unspent_levels_);
+        rope_level_text->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->rope_level_);
+    });
+
+    auto apply_button = GameObject::Create(altar_container);
+    apply_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/button_apply.png"), HUDshader));
+    apply_button->transform_->add_position({0.0f, -0.4f, 0.0f});
+    apply_button->transform_->scale({2.0f, 1.0f, 1.0f});
+    apply_button->transform_->scale({0.2f, 0.2f, 1.0f});
+    altar_menu->layout_[{0, 2}] = make_shared<MenuItem>(apply_button, []()
+    {
+        PlayerStatsManager::i_->Apply();
+    });
+
+    auto back_button = GameObject::Create(altar_container);
+    back_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/button_back.png"), HUDshader));
+    back_button->transform_->add_position({0.0f, -0.8f, 0.0f});
+    back_button->transform_->scale({2.0f, 1.0f, 1.0f});
+    back_button->transform_->scale({0.1f, 0.1f, 1.0f});
+    altar_menu->layout_[{0, 3}] = make_shared<MenuItem>(back_button, []()
+    {
+        SceneManager::i_->current_scene_->SwitchMenu("");
+        PlayerStatsManager::i_->player_1_->GetComponent<components::PlayerController>()->active_ = true;
+        PlayerStatsManager::i_->player_2_->GetComponent<components::PlayerController>()->active_ = true;
+    });
+
+    altar_menu->OnStart = [&unspent_levels, &player_level_text, &rope_level_text]()
+    {
+        unspent_levels->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->unspent_levels_);
+        player_level_text->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->player_level_);
+        rope_level_text->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->rope_level_);
+    };
+
+    for (int i = 0; i < 20; i++)
+    {
+        PlayerStatsManager::i_->AddExp(1000.0f);
+    }
+
+    altar_menu->UpdateSelection();
+    altar_menu->Disable();
+    game_scene->menus_["altar"] = altar_menu;
 
     SceneManager::i_->SwitchScene("main_menu");
 
@@ -1587,7 +1729,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 #pragma endregion
         
-#ifdef _DEBUG 
+// #ifdef _DEBUG 
 
 #pragma region ImGUI
         
@@ -1832,7 +1974,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
          ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
         
 #pragma endregion 
-#endif
+// #endif
 
         glfwSwapBuffers(window);
     }

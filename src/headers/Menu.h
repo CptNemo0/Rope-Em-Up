@@ -21,6 +21,8 @@ struct MenuItem
     s_ptr<GameObject> object_;
     std::function<void()> OnPress;
     bool enabled_ = true;
+    bool lock_ = false;
+    float progress_ = 0.0f;
 };
 
 class Menu : public input::InputObserver
@@ -31,6 +33,8 @@ private:
 
 public:
     Menu();
+
+    std::function<void()> OnStart;
 
     bool active_ = true;
     glm::ivec2 current_pos_ = {0, 0};
