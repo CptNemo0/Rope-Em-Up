@@ -24,11 +24,11 @@ void ai::IdleState::Execute(EnemyStateMachine* machine)
 	if (machine->billboard_renderer_ != nullptr)	machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/dizzy.png");
 	if (machine->rest_timer_ < machine->vehicle_.rest_lenght)
 	{
-		cout << "IDLE" << endl;
+		//cout << "IDLE" << endl;
 		if (!machine->is_choked_)
 		{
-			cout << "NOT CHOKED" << endl;
-			cout << machine->rest_timer_ << endl;
+			//cout << "NOT CHOKED" << endl;
+			//cout << machine->rest_timer_ << endl;
 			machine->rest_timer_ += 0.25f;
 		}
 		
@@ -197,13 +197,21 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 			lt += position;
 			rt += position;
 
-			auto hitbox = GameObject::Create(machine->transfrom_->game_object_);
-			hitbox->transform_->TeleportToPosition(position);
-			hitbox->AddComponent(HitboxManager::i_->CreateRenderer(lb, rb, rt, lt));
-			hitbox->GetComponent<components::HitboxRenderer>()->percentage_ = 1.0f;
-			machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
-			machine->generator_->magnitude_ = 0.0f;
-			machine->partcile_->controllable_ = false;
+
+			std::shared_ptr<GameObject> hitbox;
+
+			if (machine != nullptr && machine->transfrom_->game_object_ != nullptr)
+			{
+				hitbox = GameObject::Create(machine->transfrom_->game_object_);
+				hitbox->transform_->TeleportToPosition(position);
+				hitbox->AddComponent(HitboxManager::i_->CreateRenderer(lb, rb, rt, lt));
+				hitbox->GetComponent<components::HitboxRenderer>()->percentage_ = 1.0f;
+				machine->generator_->direction_ = glm::normalize(machine->target_player_->transform_->get_position() - machine->transfrom_->get_position());
+				machine->generator_->magnitude_ = 0.0f;
+				machine->partcile_->controllable_ = false;
+			}
+
+			
 
 			lb.y = 0.0f;
 			rb.y = 0.0f;
