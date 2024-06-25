@@ -100,6 +100,12 @@ void components::PlayerController::OnAction(Action action, input::State state)
             {
                 SceneManager::i_->SwitchScene("pause_menu");
             }
+            break;
+        }
+        case Action::INTERACT:
+        {
+            cout << "INTERACT!!!" << endl;
+            break;
         }
     }
 }

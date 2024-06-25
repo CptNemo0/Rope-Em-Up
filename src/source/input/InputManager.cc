@@ -26,6 +26,7 @@ input::InputManager::InputManager(GLFWwindow *window)
             {Action::MENU_MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT}}},
             {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_KEY_ENTER}},
             {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_KEY_BACKSPACE}},
+            {Action::INTERACT, ActionMappingType{.buttonID = GLFW_KEY_P}}
         }},
         {GLFW_JOYSTICK_2,
         {
@@ -34,7 +35,8 @@ input::InputManager::InputManager(GLFWwindow *window)
             {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_KEY_R}},
             {Action::MENU_MOVE, ActionMappingType{.buttonIDs = {GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT}}},
             {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_KEY_ENTER}},
-            {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_KEY_ESCAPE}}
+            {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_KEY_ESCAPE}},
+            {Action::INTERACT, ActionMappingType{.buttonID = GLFW_KEY_E}}
         }}
     };
 
@@ -47,7 +49,8 @@ input::InputManager::InputManager(GLFWwindow *window)
             {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
             {Action::MENU_MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
             {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
-            {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_START}}
+            {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_START}},
+            {Action::INTERACT, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_SQUARE}}
         }},
         {GLFW_JOYSTICK_2,
         {
@@ -56,7 +59,8 @@ input::InputManager::InputManager(GLFWwindow *window)
             {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
             {Action::MENU_MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
             {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
-            {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_START}}
+            {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_START}},
+            {Action::INTERACT, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_SQUARE}}
         }}
     };
 }

@@ -17,14 +17,26 @@ namespace components
 			return;
 		}
 
-		
+		this->FroceDamage(damage);
 		DamageCooldown(damage);
 	}
 
 	void HealthComponent::FroceDamage(float damage)
 	{
-		health_ -= damage;
-		
+		if (shield_ > 0.0f)
+		{
+			shield_ -= damage;
+
+			if (shield_ < 0.0f)
+			{
+				health_ += shield_;
+				shield_ = 0.0f;
+			}
+		}
+		else
+		{
+			health_ -= damage;
+		}
 	}
 
 	void HealthComponent::ForceHeal(float heal)
@@ -53,6 +65,11 @@ namespace components
 		}
 	}
 
+	void HealthComponent::AddShield(float shield)
+	{
+		shield_ += shield;
+	}
+
 	void HealthComponent::DamageCooldown(float dmg)
 	{
 		damage_cooldown_ = true;
@@ -65,11 +82,9 @@ namespace components
 			if(this != nullptr)
 			{
 				damage_cooldown_ = false;
-				this->FroceDamage(dmg);
+				
 			}
 		});
-
-
 
 		delay = 0.2f;
 		Timer::AddTimer(0.2f,

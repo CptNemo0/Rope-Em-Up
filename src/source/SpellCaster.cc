@@ -33,7 +33,7 @@ void SpellCaster::Cast()
 		break;
 	case SKULL_MINION:
 	{
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < caster->spell_levels[spell]; i++)
 		{
 			auto minion = GameObject::Create(SkullMinionManager::i_->room_->minions);
 
@@ -61,7 +61,7 @@ void SpellCaster::Cast()
 			minion->AddComponent(SkullMinionManager::i_->CreateSkullMinion(minion));
 
 			minion_mesh->AddComponent(std::make_shared<components::ParticleEmitter>(500, res::get_texture("res/textures/flame_particle.png"), res::get_shader("res/shaders/Particle.vert", "res/shaders/Particle.geom", "res/shaders/Particle.frag")));
-			auto emitter = minion_mesh->GetComponent<components::ParticleEmitter>();
+			auto emitter = minion_mesh->GetComponent<components::ParticleEmitter>();	
 			emitter->emission_rate_ = 0.2f;
 			emitter->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 			emitter->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
@@ -73,11 +73,48 @@ void SpellCaster::Cast()
 			emitter->start_position_displacement_ = 1.0f;
 			emitter->emit_particles_ = true;
 		}
-		
+		break;
+	}
+	case LIFE_STEAL:
+	{
+		if (PlayerStatsManager::i_->player_1_ != nullptr)
+		{
+			if (auto hc = PlayerStatsManager::i_->player_1_->GetComponent<components::HealthComponent>(); hc != nullptr)
+			{
+				hc->ForceHeal(caster->spell_levels[spell] * 2.0f);
+			}
+		}
+
+		if (PlayerStatsManager::i_->player_2_ != nullptr)
+		{
+			if (auto hc = PlayerStatsManager::i_->player_2_->GetComponent<components::HealthComponent>(); hc != nullptr)
+			{
+				hc->ForceHeal(caster->spell_levels[spell] * 2.0f);
+			}
+		}
+		break;
+	}
+	case SHIELD:
+	{
+		if (PlayerStatsManager::i_->player_1_ != nullptr)
+		{
+			if (auto hc = PlayerStatsManager::i_->player_1_->GetComponent<components::HealthComponent>(); hc != nullptr)
+			{
+				hc->shield_ = caster->spell_levels[spell] * 2.0f;
+			}
+		}
+
+		if (PlayerStatsManager::i_->player_2_ != nullptr)
+		{
+			if (auto hc = PlayerStatsManager::i_->player_2_->GetComponent<components::HealthComponent>(); hc != nullptr)
+			{
+				hc->shield_ = caster->spell_levels[spell] * 2.0f;
+			}
+		}
+		break;
 	}
 		
 		
-		break;
 	default:
 		break;
 	}

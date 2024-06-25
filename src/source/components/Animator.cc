@@ -21,6 +21,11 @@ components::Animator::Animator()
 
 void components::Animator::UpdateAnimation(float dt)
 {
+	if (m_CurrentAnimation && IsAttackAnimation(m_CurrentAnimation))
+	{
+		dt *= 2; // Speed up the delta time for attack animations
+	}
+
 	m_CurrentTime += dt;
 
 	if (m_CurrentAnimation)
@@ -94,6 +99,19 @@ void components::Animator::RemoveAnimation(const std::string& name)
 {
 	if (m_Animations.find(name) != m_Animations.end())
 		m_Animations.erase(name);
+}
+
+bool components::Animator::IsAttackAnimation(s_ptr<anim::Animation> animation)
+{
+	if (animation == m_Animations["Attack_1"] || 
+		animation == m_Animations["Attack_2"] || 
+		animation == m_Animations["Attack_3"] || 
+		animation == m_Animations["Attack_4"] || 
+		animation == m_Animations["Attack_5"])
+		return true;
+	else
+		return false;
+
 }
 
 void components::Animator::BlendTwoAnimations(const std::string& pLayeredAnimation, float blendFactor)

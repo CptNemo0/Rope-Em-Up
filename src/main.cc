@@ -435,6 +435,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto ScreenShader = res::get_shader("res/shaders/Screen.vert", "res/shaders/Screen.frag");
     auto CopyShader = res::get_shader("res/shaders/Copy.vert", "res/shaders/Copy.frag");
     auto HitboxShader = res::get_shader("res/shaders/Hitbox.vert", "res/shaders/Hitbox.frag");
+    auto ShieldShader = res::get_shader("res/shaders/Shield.vert", "res/shaders/Shield.frag");
 
 #pragma endregion Shaders
 
@@ -569,11 +570,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto place_holder_drop_model = res::get_model(kDebugMeshPath);
 
     drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
+    drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
+    drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
+    drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
     drop::SpellDropQueue::i_->shader = GBufferPassShader;
     
     for (int i = 0; i < 1000; i++)
     {
-        drop::SpellDropQueue::i_->queue_.push(SPELLS::SKULL_MINION);
+        drop::SpellDropQueue::i_->queue_.push(SPELLS::LIFE_STEAL);
     }
     
 #pragma endregion Models
@@ -625,7 +629,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_2->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
+    player_2->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
     
     player_2->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     auto emmiter_player_2 = player_2->GetComponent<components::ParticleEmitter>();
@@ -847,6 +851,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     
     FloorShader->Use();
     FloorShader->SetMatrix4("projection_matrix", projection_matrix);
+
+    ShieldShader->Use();
+    ShieldShader->SetMatrix4("projection_matrix", projection_matrix);
+
 
     cubemap->LoadHDRimg(window, nullptr);
     menu_cubemap->LoadHDRimg(window, nullptr);
@@ -1610,7 +1618,11 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         HitboxShader->SetMatrix4("projection_matrix", projection_matrix);
         HitboxManager::i_->Draw();
 
-
+        ShieldShader->Use();
+        ShieldShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
+        ShieldShader->SetMatrix4("projection_matrix", projection_matrix);
+        ShieldShader->SetFloat("timer", glfwGetTime());
+        HealthManager::i_->DrawShields();
         glDisable(GL_BLEND);
         
         // Bind buffer - Bind textures - Use Shader - Draw 
@@ -1651,8 +1663,11 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             float p2p = 0.0;
             if (player_1 != nullptr)
             {
-                auto p1hc = player_1->GetComponent<components::HealthComponent>();
-                p1p = p1hc->health_ / p1hc->max_health_;
+                if (auto p1hc = player_1->GetComponent<components::HealthComponent>();p1hc != nullptr)
+                {
+                    p1p = p1hc->health_ / p1hc->max_health_;
+
+                }
             }
 
             if (p1p < 0.25f)
@@ -1674,8 +1689,12 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
             if (player_2 != nullptr)
             {
-                auto p2hc = player_2->GetComponent<components::HealthComponent>();
-                p2p = p2hc->health_ / p2hc->max_health_;
+
+                if (auto p2hc = player_2->GetComponent<components::HealthComponent>(); p2hc != nullptr) 
+                {
+                    p2p = p2hc->health_ / p2hc->max_health_;
+
+                }
             }
 
             if (p2p < 0.25f)

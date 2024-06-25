@@ -9,6 +9,10 @@
 #include "typedef.h"
 #include "glm/glm.hpp"
 
+#include "glad/glad.h"
+#include "Model.h"
+#include "Shader.h"
+
 class HealthManager
 {
 public:
@@ -22,6 +26,8 @@ public:
     bool something_died_;
     glm::vec3 where_;
     HEALTH_TYPE what_;
+    std::shared_ptr<Model> shield_model_;
+    std::shared_ptr<Shader> shield_shader_;
 
     std::shared_ptr<components::HealthComponent> CreateHealthComponent(float health, HEALTH_TYPE type);
     std::shared_ptr<components::HealthComponent> CreateHealthComponent(json &j);
@@ -30,6 +36,8 @@ public:
 
     void DeathUpdate();
     void ManageDeath(s_ptr<GameObject> go);
+
+    void DrawShields();
 
     static void Initialize()
     {
