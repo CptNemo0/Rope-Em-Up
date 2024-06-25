@@ -12,6 +12,7 @@ enum Action
     CAST_SPELL,
     MENU_CLICK,
     PAUSE_GAME,
+    INTERACT,
     BUTTON_END, // <- this must stay at the end of button actions
 
     // Custom
