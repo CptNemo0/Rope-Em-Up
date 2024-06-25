@@ -24,7 +24,6 @@ void SpellCaster::Cast()
 {
 	auto caster = current_caster_[0];
 	auto spell = caster->type_;
-	int level = caster->spell_levels[spell];
 	caster->spell_levels[spell]++;
 	caster->type_ = NOT_A_SPELL;
 
@@ -34,7 +33,7 @@ void SpellCaster::Cast()
 		break;
 	case SKULL_MINION:
 	{
-		for (int i = 0; i < level; i++)
+		for (int i = 0; i < caster->spell_levels[spell]; i++)
 		{
 			auto minion = GameObject::Create(SkullMinionManager::i_->room_->minions);
 
@@ -78,7 +77,21 @@ void SpellCaster::Cast()
 	}
 	case LIFE_STEAL:
 	{
+		if (PlayerStatsManager::i_->player_1_ != nullptr)
+		{
+			if (auto hc = PlayerStatsManager::i_->player_1_->GetComponent<components::HealthComponent>(); hc != nullptr)
+			{
+				hc->ForceHeal(caster->spell_levels[spell] * 2.0f);
+			}
+		}
 
+		if (PlayerStatsManager::i_->player_2_ != nullptr)
+		{
+			if (auto hc = PlayerStatsManager::i_->player_2_->GetComponent<components::HealthComponent>(); hc != nullptr)
+			{
+				hc->ForceHeal(caster->spell_levels[spell] * 2.0f);
+			}
+		}
 		break;
 	}
 	case SHIELD:
@@ -87,7 +100,7 @@ void SpellCaster::Cast()
 		{
 			if (auto hc = PlayerStatsManager::i_->player_1_->GetComponent<components::HealthComponent>(); hc != nullptr)
 			{
-				hc->shield_ = level + 1;
+				hc->shield_ = caster->spell_levels[spell] * 2.0f;
 			}
 		}
 
@@ -95,7 +108,7 @@ void SpellCaster::Cast()
 		{
 			if (auto hc = PlayerStatsManager::i_->player_2_->GetComponent<components::HealthComponent>(); hc != nullptr)
 			{
-				hc->shield_ = level + 1;
+				hc->shield_ = caster->spell_levels[spell] * 2.0f;
 			}
 		}
 		break;

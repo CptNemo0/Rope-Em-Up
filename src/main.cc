@@ -577,7 +577,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     
     for (int i = 0; i < 1000; i++)
     {
-        drop::SpellDropQueue::i_->queue_.push(SPELLS::SHIELD);
+        drop::SpellDropQueue::i_->queue_.push(SPELLS::LIFE_STEAL);
     }
     
 #pragma endregion Models
