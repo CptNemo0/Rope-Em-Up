@@ -11,7 +11,7 @@
 
 namespace components
 {
-	class Animator : public Component
+	class Animator : public Component, public std::enable_shared_from_this<Animator>
 	{
 	private:
 		std::vector<glm::mat4> m_FinalBoneMatrices;
@@ -68,8 +68,8 @@ namespace components
 		}
 
 		void Start() override {}
-		void Update() override { UpdateAnimation(m_DeltaTime); }
-		void Destroy() override {}
+		void Update() override {}
+		void Destroy() override;
 
 		Animator(json &j);
 		json Serialize() override;

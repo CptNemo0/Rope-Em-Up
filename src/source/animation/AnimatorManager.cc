@@ -56,6 +56,6 @@ void anim::AnimatorManager::Update(float dt)
 	delta_time = dt;
 	for (auto& a : aniamtor_components_)
 	{
-		a->SetDeltaTime(dt);
+		a->UpdateAnimation(dt);
 	}
 }

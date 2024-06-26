@@ -785,10 +785,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     auto player_1_hp_bar_border = GameObject::Create();
     player_1_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    player_1_hp_bar_border->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.029f);
+    player_1_hp_bar_border->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.045f);
     player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
-    player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 10.0f);
-    player_1_hp_bar_border->transform_->add_position({0.05f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
+    player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 6.5f);
+    player_1_hp_bar_border->transform_->add_position({0.055f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
 
     auto player_1_hp_bar = GameObject::Create(player_1_hp_bar_border);
     player_1_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -798,10 +798,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     auto player_2_hp_bar_border = GameObject::Create();
     player_2_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    player_2_hp_bar_border->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.029f);
+    player_2_hp_bar_border->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.045f);
     player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
-    player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 10.0f);
-    player_2_hp_bar_border->transform_->add_position({-0.05f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
+    player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 6.5f);
+    player_2_hp_bar_border->transform_->add_position({-0.055f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
 
     auto player_2_hp_bar = GameObject::Create(player_2_hp_bar_border);
     player_2_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -1116,17 +1116,18 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     input::InputManager::i_->AddObserver(0, altar_menu);
 
     auto altar_container = GameObject::Create(game_HUD_root);
-    auto altar_background_tex = res::get_texture("res/textures/color.png");
     altar_container->transform_->set_scale(glm::vec3(1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f));
-    altar_container->transform_->scale({0.7f, 0.7f, 1.0f});
+    altar_container->transform_->scale({0.6f, 0.6f, 1.0f});
 
     auto altar_text_container = GameObject::Create(game_HUD_text_root);
     altar_text_container->transform_->set_scale(glm::vec3(1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f));
-    altar_text_container->transform_->scale({0.7f, 0.7f, 1.0f});
+    altar_text_container->transform_->scale({0.6f, 0.6f, 1.0f});
 
+    auto altar_background_tex = res::get_texture("res/textures/ramka.png");
     auto altar_background = GameObject::Create(altar_container);
-    altar_background->AddComponent(make_shared<components::HUDRenderer>(altar_background_tex, HUDshader, glm::vec4(0.0, 0.0, 0.0, 0.6f)));
+    altar_background->AddComponent(make_shared<components::HUDRenderer>(altar_background_tex, HUDshader));
     altar_background->transform_->set_scale({1.4f, 1.0f, 1.0f});
+    altar_background->transform_->scale({1.2f, 1.2f, 1.0f});
     altar_menu->layout_[{-10, -10}] = make_shared<MenuItem>(altar_background, [](){});
 
     auto unspent_levels_text = GameObject::Create(altar_text_container);
@@ -1156,7 +1157,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto player_plus = GameObject::Create(altar_container);
     player_plus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/plus_button.png"), HUDshader));
     player_plus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
-    player_plus->transform_->add_position({0.0f, 0.0f, 0.0f});
+    player_plus->transform_->add_position({-0.1f, 0.0f, 0.0f});
     player_plus->transform_->scale({0.9f, 0.9f, 1.0f});
     altar_menu->layout_[{0, 0}] = make_shared<MenuItem>(player_plus, [&unspent_levels, &player_level_text]()
     {
@@ -1168,7 +1169,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto player_minus = GameObject::Create(altar_container);
     player_minus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minus_button.png"), HUDshader));
     player_minus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
-    player_minus->transform_->add_position({0.4f, 0.0f, 0.0f});
+    player_minus->transform_->add_position({0.3f, 0.0f, 0.0f});
     player_minus->transform_->scale({0.9f, 0.9f, 1.0f});
     altar_menu->layout_[{1, 0}] = make_shared<MenuItem>(player_minus, [&unspent_levels, &player_level_text]()
     {
@@ -1192,7 +1193,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto rope_plus = GameObject::Create(altar_container);
     rope_plus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/plus_button.png"), HUDshader));
     rope_plus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
-    rope_plus->transform_->add_position({0.0f, -0.4f, 0.0f});
+    rope_plus->transform_->add_position({-0.1f, -0.4f, 0.0f});
     rope_plus->transform_->scale({0.9f, 0.9f, 1.0f});
     altar_menu->layout_[{0, 1}] = make_shared<MenuItem>(rope_plus, [&unspent_levels, &rope_level_text]()
     {
@@ -1204,7 +1205,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto rope_minus = GameObject::Create(altar_container);
     rope_minus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minus_button.png"), HUDshader));
     rope_minus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
-    rope_minus->transform_->add_position({0.4f, -0.4f, 0.0f});
+    rope_minus->transform_->add_position({0.3f, -0.4f, 0.0f});
     rope_minus->transform_->scale({0.9f, 0.9f, 1.0f});
     altar_menu->layout_[{1, 1}] = make_shared<MenuItem>(rope_minus, [&unspent_levels, &rope_level_text]()
     {
@@ -1216,8 +1217,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto apply_button = GameObject::Create(altar_container);
     apply_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/button_apply.png"), HUDshader));
     apply_button->transform_->add_position({0.0f, -0.4f, 0.0f});
-    apply_button->transform_->scale({2.0f, 1.0f, 1.0f});
-    apply_button->transform_->scale({0.2f, 0.2f, 1.0f});
+    apply_button->transform_->scale({2.52f, 1.0f, 1.0f});
+    apply_button->transform_->scale({0.3f, 0.3f, 1.0f});
     altar_menu->layout_[{0, 2}] = make_shared<MenuItem>(apply_button, []()
     {
         PlayerStatsManager::i_->Apply();
@@ -1226,8 +1227,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto back_button = GameObject::Create(altar_container);
     back_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/button_back.png"), HUDshader));
     back_button->transform_->add_position({0.0f, -0.8f, 0.0f});
-    back_button->transform_->scale({2.0f, 1.0f, 1.0f});
-    back_button->transform_->scale({0.1f, 0.1f, 1.0f});
+    back_button->transform_->scale({2.52f, 1.0f, 1.0f});
+    back_button->transform_->scale({0.15f, 0.15f, 1.0f});
     altar_menu->layout_[{0, 3}] = make_shared<MenuItem>(back_button, []()
     {
         SceneManager::i_->current_scene_->SwitchMenu("");
