@@ -55,4 +55,12 @@ void components::BillboardRenderer::Destroy()
 	BillboardRendererManager::i_->RemoveRenderer(shared_from_this());
 }
 
+json components::BillboardRenderer::Serialize()
+{
+    json j;
 
+    j["texture"] = texture_->path_;
+    j["position_offset"] = {position_offset_.x, position_offset_.y, position_offset_.z};
+
+    return j;
+}

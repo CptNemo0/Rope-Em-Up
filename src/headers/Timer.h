@@ -37,8 +37,6 @@ namespace Timer
 
     bool UpdateTimer(Timer &timer, float delta_time);
     void Update(float delta_time);
-
-    float GetProgress(unsigned int id);
 };
 
 #endif // TIMER_H

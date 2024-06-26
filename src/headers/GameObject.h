@@ -20,6 +20,7 @@ class GameObject : public std::enable_shared_from_this<GameObject>
 private:
 	std::unordered_map<string, s_ptr<Component>> components_;
 	bool dirty_ = true;
+	bool destroyed_ = false;
 
 	void Update();
 	void StartNewComponents();

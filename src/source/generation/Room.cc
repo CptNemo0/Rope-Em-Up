@@ -41,6 +41,7 @@ generation::Room::Room(glm::ivec2 position, std::shared_ptr<GameObject> root)
     drops = GameObject::Create(room_object);
     barells = GameObject::Create(room_object);
     minions = GameObject::Create(room_object);
+    altar = GameObject::Create(room_object);
 
     up_gate = false;
     right_gate = false;
@@ -78,6 +79,7 @@ void generation::Room::Destroy()
     floors = nullptr;
     drops = nullptr;
     barells = nullptr;
+    altar = nullptr;
 }
 
 generation::Room::Room(json j, s_ptr<GameObject> root)
@@ -91,6 +93,7 @@ generation::Room::Room(json j, s_ptr<GameObject> root)
     floors = GameObject::Deserialize(j["floors_root"]);
     drops = GameObject::Deserialize(j["drops_root"]);
     barells = GameObject::Deserialize(j["barells_root"]);
+    altar = GameObject::Deserialize(j["altar_root"]);
 
     room_object->transform_->AddChild(enemies->transform_);
     room_object->transform_->AddChild(clutter->transform_);
@@ -100,6 +103,7 @@ generation::Room::Room(json j, s_ptr<GameObject> root)
     room_object->transform_->AddChild(floors->transform_);
     room_object->transform_->AddChild(drops->transform_);
     room_object->transform_->AddChild(barells->transform_);
+    room_object->transform_->AddChild(altar->transform_);
 
     position = {j["position"][0], j["position"][1]};
 
@@ -111,6 +115,7 @@ generation::Room::Room(json j, s_ptr<GameObject> root)
     is_generated = j["is_generated"];
     is_built = j["is_built"];
     is_discovered = j["is_discovered"];
+    is_altar = j["is_altar"];
 
     width = j["width"];
     height = j["height"];
@@ -189,6 +194,7 @@ json generation::Room::Serialize()
     j["floors_root"] = floors->Serialize();
     j["drops_root"] = drops->Serialize();
     j["barells_root"] = barells->Serialize();
+    j["altar_root"] = altar->Serialize();
 
     j["position"] = {position.x, position.y};
     j["up_gate"] = up_gate;
@@ -199,6 +205,7 @@ json generation::Room::Serialize()
     j["is_generated"] = is_generated;
     j["is_built"] = is_built;
     j["is_discovered"] = is_discovered;
+    j["is_altar"] = is_altar;
 
     j["width"] = width;
     j["height"] = height;

@@ -46,6 +46,7 @@
 #include "../FloorRendererManager.h"
 #include "../SkullMinionManager.h"
 #include "../BillboardRendererManager.h"
+#include "../Shuffler.h"
 
 namespace generation
 {
@@ -162,11 +163,12 @@ namespace generation
     public:
         std::unordered_map<glm::ivec2, Room> rooms;
         std::deque<Room> rooms_ordered;
+        Shuffler<bool> altar_room_shuffler;
 
         int built_rooms_ = 0;
         int rooms_traversed_ = 0;
 
-        RoomLayoutGenerator() = default;
+        RoomLayoutGenerator();
         void GenerateRooms(const RoomLayoutGenerationSettings& settings, std::shared_ptr<GameObject> root);
         void GenerateGates();
         void AddRoom(glm::ivec2 position, std::shared_ptr<GameObject> root);
@@ -216,7 +218,7 @@ namespace generation
 
     bool CheckGateProximity(glm::vec3 pos, Room& room, float proximity);
 
-    void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
+    void GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm, RoomLayoutGenerator* rlg);
 
     void GenerateFirstRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 

@@ -50,6 +50,8 @@ public:
     float rope_weight_;
     float max_health_;
     int segments_num_;
+    int player_level_ = 0;
+    int rope_level_ = 0;
     
     float p_speed_;
     float p_pull_power_;
@@ -58,6 +60,9 @@ public:
     float p_max_health_;
     int p_segments_num_;
 
+    int p_player_level_ = 0;
+    int p_rope_level_ = 0;
+
     float exp_;
     int level_;
     int unspent_levels_;
@@ -65,6 +70,12 @@ public:
     void Apply();
     void LevelUp();
     void AddExp(float exp);
+
+    void LevelUpPlayer();
+    void LevelDownPlayer();
+
+    void LevelUpRope();
+    void LevelDownRope();
 
     void LevelUpSpeed();
     void LevelDownSpeed();

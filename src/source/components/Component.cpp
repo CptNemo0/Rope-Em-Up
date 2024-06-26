@@ -20,6 +20,8 @@
 #include "../../headers/GrassRendererManager.h"
 #include "../../headers/components/FloorRenderer.h"
 #include "../../headers/FloorRendererManager.h"
+#include "../../headers/components/Altar.h"
+#include "../../headers/BillboardRendererManager.h"
 
 std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Component::component_factory = 
 {
@@ -82,6 +84,15 @@ std::map<string, std::function<s_ptr<Component>(json&, s_ptr<GameObject>)>> Comp
     {   // FloorRenderer
         typeid(components::FloorRenderer).name(), 
         [](json &j, s_ptr<GameObject> go) { return FloorRendererManager::i_->CreateFloorRenderer(); } 
+    },
+    {   // Altar
+        typeid(components::Altar).name(), 
+        [](json &j, s_ptr<GameObject> go) { return make_shared<components::Altar>(); }
+    },
+    {   // BillboardRenderer
+        typeid(components::BillboardRenderer).name(), 
+        [](json &j, s_ptr<GameObject> go) { return BillboardRendererManager::i_->CreateRenderer(j); } 
+    
     }
 };
 
