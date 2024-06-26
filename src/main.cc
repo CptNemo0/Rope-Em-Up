@@ -371,7 +371,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 {
     auto logo_texture = res::get_texture("res/textures/loading_screen.png");
-    auto text_texture = res::get_texture("res/textures/loading_text.png");
+    auto text_texture = res::get_texture("res/textures/game_is_loading.png");
     auto hud_shader = res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag");
 
     auto logo = GameObject::Create(loading_root);
@@ -379,7 +379,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     logo->AddComponent(make_shared<components::HUDRenderer>(logo_texture, hud_shader));
 
     auto text = GameObject::Create(loading_root);
-    text->transform_->scale({2.0f, 1.0f, 1.0f});
+    text->transform_->scale({ 6.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.6f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f });
     text->transform_->set_position({0.0f, -1.0f, 0.0f});
     text->AddComponent(make_shared<components::HUDRenderer>(text_texture, hud_shader));
 
@@ -923,11 +923,13 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto menu = make_shared<Menu>();
     input::InputManager::i_->AddObserver(0, menu);
 
-    auto logo = GameObject::Create(menu_HUD_root);
-    logo->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
-    logo->transform_->scale({0.333f, 0.333f, 1.0f});
-    logo->transform_->set_position({0.0f, 0.5f, 0.0f});
-    logo->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/logo.png"), HUDshader));
+    auto background = GameObject::Create(menu_HUD_root);
+    background->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/color.png"), HUDshader, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f)));
+
+    auto banner = GameObject::Create(menu_HUD_root);
+    banner->transform_->scale({1.5f / Global::i_->active_camera_->get_aspect_ratio(), 0.4f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f});
+    banner->transform_->set_position({0.0f, 0.5f, 0.0f});
+    banner->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/napis_menu.png"), HUDshader));
 
     auto new_game_button = GameObject::Create(menu_HUD_root);
     new_game_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
