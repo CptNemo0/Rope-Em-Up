@@ -570,14 +570,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto place_holder_drop_model = res::get_model(kDebugMeshPath);
 
     drop::SpellDropQueue::i_->drop_meshes.push_back(res::get_model("res/skull_upgrade/skull_upgrade.obj"));
+    drop::SpellDropQueue::i_->drop_meshes.push_back(res::get_model("res/ls_upgrade/ls_upgrade.obj"));
     drop::SpellDropQueue::i_->drop_meshes.push_back(res::get_model("res/shield_upgrade/shield_upgrade.obj"));
-    drop::SpellDropQueue::i_->drop_meshes.push_back(res::get_model("res/shield_upgrade/shield_upgrade.obj"));
-    drop::SpellDropQueue::i_->drop_meshes.push_back(res::get_model("res/shield_upgrade/shield_upgrade.obj"));
+    
     drop::SpellDropQueue::i_->shader = GBufferPassShader;
     
     for (int i = 0; i < 1000; i++)
     {
-        drop::SpellDropQueue::i_->queue_.push(SPELLS::SHIELD);
+        drop::SpellDropQueue::i_->queue_.push(SPELLS(random::RandInt(0, 3)));
     }
     
 #pragma endregion Models

@@ -1455,7 +1455,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::NO_SPELL));
                 if (i == 0)
                 {
-                    enemy->GetComponent<components::SpellSlotComponent>()->type_ = SHIELD;
+                    enemy->GetComponent<components::SpellSlotComponent>()->type_ = SKULL_MINION;
                 }
             
                 enemy->AddComponent(std::make_shared<components::EnemySizeManager>());
@@ -1507,6 +1507,22 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 enemy_state_display->AddComponent(br);
 
                 enemy->GetComponent<components::EnemyAIComponent>()->state_machine_->billboard_renderer_ = br;
+
+                if (i > 0)
+                {
+                    enemy->GetComponent<components::EnemyAIComponent>()->active_ = false;
+
+                    Timer::AddTimer(3.0f, [enemy] 
+                        {
+                            if (enemy != nullptr)
+                            {
+                                if (enemy->GetComponent<components::EnemyAIComponent>() != nullptr)
+                                {
+                                    enemy->GetComponent<components::EnemyAIComponent>()->active_ = true;
+                                }
+                            }
+                        });
+                }
             }
 
             break;
