@@ -612,7 +612,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
+    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
     player_1->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     
     auto emmiter_player_1 = player_1->GetComponent<components::ParticleEmitter>();
@@ -642,17 +642,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     emmiter_player_2->start_size_ = glm::vec2(1.0f, 1.0f);
     emmiter_player_2->end_size_ = glm::vec2(1.0f, 1.0f);
 
- 
-    /*auto test_plane = GameObject::Create(game_scene_root);
-    test_plane->transform_->set_scale(glm::vec3(1.0f));
-    test_plane->transform_->set_position(glm::vec3(-16.0f, 2.0f, -16.0));
-    test_plane->AddComponent(BillboardRendererManager::i_->CreateRenderer(res::get_model("res/models/enviroment/floor/floor.obj"), res::get_texture("res/textures/logo.png")));
-    
-    cout << test_plane->transform_->get_up().x << " " << test_plane->transform_->get_up().y << " " << test_plane->transform_->get_up().z << endl;
-    glm::vec3 dir = glm::normalize(Global::i_->active_camera_->get_position() - test_plane->transform_->get_position());
-    cout << dir.x << " " << dir.y << " " << dir.z << endl;
-    cout << Global::i_->active_camera_->get_position().x << " " << Global::i_->active_camera_->get_position().y << " " << Global::i_->active_camera_->get_position().z << endl;
-    std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};*/
     std::vector<std::shared_ptr<GameObject>> players_vector{ player_1, player_2 };
 #pragma region Animations
 

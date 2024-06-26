@@ -119,7 +119,10 @@ void ai::OnAlertState::Execute(EnemyStateMachine* machine)
 	
 	if (machine->was_idle_)
 	{
-		audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/alert.wav"));
+		Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
+		audio_shuffler_.SetData({ res::get_sound("res/sounds/alert1.wav"), res::get_sound("res/sounds/alert2.wav"), res::get_sound("res/sounds/alert3.wav") });
+
+		audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
 		machine->was_idle_ = false;
 	}
 	
@@ -287,6 +290,10 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 								if (auto hc = hitbox->GetComponent<components::HitboxCollider>(); hc != nullptr)
 								{
 									HitboxManager::i_->Check(hc);
+									Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
+									audio_shuffler_.SetData({ res::get_sound("res/sounds/obslizgly1.wav"), res::get_sound("res/sounds/obslizgly2.wav"), res::get_sound("res/sounds/obslizgly3.wav") });
+
+									audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
 								}
 							}
 						});

@@ -69,6 +69,14 @@ void HealthManager::DeathUpdate()
 					what_ = OTHER;
 				}
 
+				if (what_ == BARELL)
+				{
+					Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
+					audio_shuffler_.SetData({ res::get_sound("res/sounds/barrel1.wav"), res::get_sound("res/sounds/barrel2.wav"), res::get_sound("res/sounds/barrel3.wav") });
+
+					audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
+				}
+
 				ManageDeath(h->gameObject_.lock());
 				h->gameObject_.lock()->Destroy();
 			}

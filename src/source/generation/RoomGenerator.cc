@@ -1214,6 +1214,20 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 enemy->GetComponent<components::EnemyAIComponent>()->state_machine_->billboard_renderer_ = br;
             }
 
+            //generate barells
+            for (int i = 0; i < room.barells_positions.size(); i++)
+            {
+                auto barell = GameObject::Create(room.barells);
+                barell->transform_->TeleportToPosition(room.barells_positions[i]);
+                barell->AddComponent(make_shared<components::MeshRenderer>(rm->barrles[room.barell_idx[i]], shader));
+                barell->AddComponent(collisions::CollisionManager::i_->CreateCollider(collisions::LAYERS::BARREL, gPRECISION, rm->barrles[room.barell_idx[i]], 0, barell->transform_));
+                barell->AddComponent(pbd::PBDManager::i_->CreateParticle(5.0f, 0.78f, barell->transform_));
+                barell->AddComponent(HealthManager::i_->CreateHealthComponent(1.0f, BARELL));
+                barell->AddComponent(std::make_shared<components::HpDropComponent>(10.0f));
+                barell->AddComponent(ai::EnemyAIManager::i_->CreateEnemyAI(barell, true));
+
+            }
+
             break;
         }
         case 3:
