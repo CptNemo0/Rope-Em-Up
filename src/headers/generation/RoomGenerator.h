@@ -224,6 +224,10 @@ namespace generation
 
     void GenerateSecondRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
 
+    void GenerateThirdRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
+
+    void GenerateFourthRoom(Room& room, RoomGenerationSettings* rgs, RoomModels* rm);
+
     void BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, RoomLayoutGenerator* rlg, s_ptr<tmp::Texture> particle_texture, s_ptr<Shader> particle_shader);
 
     glm::ivec2 GetMoveDirection(Room* room, std::shared_ptr<GameObject> player_1, std::shared_ptr<GameObject> player_2);

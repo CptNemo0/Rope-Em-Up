@@ -1316,7 +1316,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
             {
                 DifficultyManager::i_->UpdateHealth(player_1, player_2);
-                DifficultyManager::i_->UpdateSettings(&rg_settings);
+                if (rlg.built_rooms_ > 3)
+                {
+                    DifficultyManager::i_->UpdateSettings(&rg_settings);
+                }
                 //cout << "GOING THROUGH ROOM";
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
