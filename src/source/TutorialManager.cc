@@ -36,7 +36,7 @@ void TutorialManager::Init()
 	spell_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), spell_tutorial_info, glm::vec3(1.0f)));
 	spell_tutorial->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
 	spell_tutorial->transform_->scale_in({ 1.0f, 0.0f, 0.0f }, 1.0f / aspect_ratio);
-	spell_tutorial->transform_->set_position(glm::vec3(-0.36f, -0.75f, 0.0f));
+	spell_tutorial->transform_->set_position(glm::vec3(-0.55f, -0.75f, 0.0f));
 	spell_tutorial->Disable();
 	tutorial_map[4] = spell_tutorial;
 
