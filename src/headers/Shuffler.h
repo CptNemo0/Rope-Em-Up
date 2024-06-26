@@ -25,6 +25,7 @@ public:
         std::shuffle(data_.begin(), data_.end(), random::get_random_device());
     }
     T Pop();
+    T GetLast();
 };
 
 template <typename T>
@@ -37,6 +38,16 @@ inline T Shuffler<T>::Pop()
     }
 
     return data_[index_++];
+}
+
+template <typename T>
+inline T Shuffler<T>::GetLast()
+{
+    if (index_ == 0)
+    {
+        return data_[data_.size() - 1];
+    }
+    return data_[index_ - 1];
 }
 
 #endif // SHUFFLER_H

@@ -47,8 +47,8 @@ namespace utility
         mode = (GLFWvidmode*)glfwGetVideoMode(monitor);
 
         // SET CUSTOM RESOLUTION
-        // mode->width = 800;
-        // mode->height = 800;
+        mode->width = 1600;
+        mode->height = 900;
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

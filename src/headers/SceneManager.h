@@ -12,9 +12,7 @@
 
 struct Scene
 {
-private:
     string current_menu_;
-public:
     s_ptr<GameObject> scene_root_;
     s_ptr<GameObject> HUD_root_;
     s_ptr<GameObject> HUD_text_root_;
@@ -61,7 +59,14 @@ public:
             menus_[current_menu_]->Disable();
         }
         current_menu_ = menu_name;
-        menus_[current_menu_]->Enable();
+        if (menus_.contains(current_menu_))
+        {
+            menus_[current_menu_]->Enable();
+            if (menus_[current_menu_]->OnStart)
+            {
+                menus_[current_menu_]->OnStart();
+            }
+        }
     }
 };
 
