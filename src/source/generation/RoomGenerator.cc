@@ -1455,7 +1455,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 enemy->AddComponent(std::make_shared<components::SpellSlotComponent>(components::NO_SPELL));
                 if (i == 0)
                 {
-                    enemy->GetComponent<components::SpellSlotComponent>()->type_ = SKULL_MINION;
+                    enemy->GetComponent<components::SpellSlotComponent>()->type_ = SHIELD;
                 }
             
                 enemy->AddComponent(std::make_shared<components::EnemySizeManager>());
