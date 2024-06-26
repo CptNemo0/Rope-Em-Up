@@ -40,23 +40,23 @@ namespace components
 				auto animator = gameObject_.lock()->transform_->children_[0]->game_object_->GetComponent<components::Animator>();
 				if (health_ == 1)
 				{
-					animator->PlayAnimation("Death_1", 2, 1.0f);
+					animator->PlayAnimation("Death_1", 2, 0.9f);
 				}
 				else if (health_ == 2)
 				{
-					animator->PlayAnimation("Death_2", 2, 1.0f);
+					animator->PlayAnimation("Death_2", 2, 0.9f);
 				}
 				else if (health_ == 3)
 				{
-					animator->PlayAnimation("Death_3", 2, 1.0f);
+					animator->PlayAnimation("Death_3", 2, 0.9f);
 				}
 				else if (health_ == 4)
 				{
-					animator->PlayAnimation("Death_4", 2, 1.0f);
+					animator->PlayAnimation("Death_4", 2, 0.9f);
 				}
 				else if (health_ == 5)
 				{
-					animator->PlayAnimation("Death_5", 2, 1.0f);
+					animator->PlayAnimation("Death_5", 2, 0.9f);
 				}
 			}
 

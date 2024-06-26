@@ -253,23 +253,23 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 			{
 				if (health_component_->health_ == 1 && anim->m_Animations.contains("Attack_1"))
 				{
-					anim->PlayAnimation("Attack_1", 1, 2.5f);
+					anim->PlayAnimation("Attack_1", 3, 2.9f);
 				}
 				else if (health_component_->health_ == 2 && anim->m_Animations.contains("Attack_2"))
 				{
-					anim->PlayAnimation("Attack_2", 1, 2.5f);
+					anim->PlayAnimation("Attack_2", 3, 2.9f);
 				}
 				else if (health_component_->health_ == 3 && anim->m_Animations.contains("Attack_3"))
 				{
-					anim->PlayAnimation("Attack_3", 1, 2.5f);
+					anim->PlayAnimation("Attack_3", 3, 2.9);
 				}
 				else if (health_component_->health_ == 4 && anim->m_Animations.contains("Attack_4"))
 				{
-					anim->PlayAnimation("Attack_4", 1, 2.5f);
+					anim->PlayAnimation("Attack_4", 3, 2.9);
 				}
 				else if (health_component_->health_ == 5 && anim->m_Animations.contains("Attack_5"))
 				{
-					anim->PlayAnimation("Attack_5", 1, 2.5f);
+					anim->PlayAnimation("Attack_5", 3, 2.9);
 				}
 				else
 				{
@@ -277,8 +277,7 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 				}
 			}
 
-
-			Timer::AddTimer(0.5f,
+			Timer::AddTimer(0.35f,
 				[hitbox]
 				{
 

@@ -756,10 +756,20 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     man_HUD->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.35f);
     man_HUD->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
 
+    auto man_slot = GameObject::Create(game_HUD_root);
+    man_slot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/upgrade_icons/empty_black_bg.png"), HUDshader));
+    man_slot->transform_->set_scale({ 0.15f / Global::i_->active_camera_->get_aspect_ratio(), 0.15f, 0.0f });
+    man_slot->transform_->add_position({ 0.805, -0.2, 0.0 });
+
     auto woman_HUD = GameObject::Create(game_HUD_root);
     woman_HUD->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/woman_healtbar.png"), HUDshader));
     woman_HUD->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.35f);
     woman_HUD->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+
+    auto woman_slot = GameObject::Create(game_HUD_root);
+    woman_slot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/upgrade_icons/empty_black_bg.png"), HUDshader));
+    woman_slot->transform_->set_scale({ 0.15f / Global::i_->active_camera_->get_aspect_ratio(), 0.15f, 0.0f });
+    woman_slot->transform_->add_position({-0.8025f, -0.2, 0.0});
 
     auto minimap_object = GameObject::Create(game_HUD_root);
     minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minimap.png"), HUDshader));
@@ -797,6 +807,19 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_2_hp_bar->transform_->set_rotation({ 0.0f, 0.0, 180.0f });
     player_2_hp_bar->transform_->set_position({ 0.0f, 0.0f, 0.0 });
     
+    auto spell_timer_border = GameObject::Create();
+    spell_timer_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/bar.png"), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    spell_timer_border->transform_->set_scale({ 0.65f / Global::i_->active_camera_->get_aspect_ratio(), 0.10f, 1.0f });
+    spell_timer_border->transform_->set_position({ 0.0f, -0.2f, 0.0 });
+
+    auto spell_bar = GameObject::Create(spell_timer_border);
+    spell_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    spell_bar->transform_->set_scale({ 0.81, 0.515f, 1.0f });
+    spell_bar->transform_->set_position({ 0.0f, 0.25f, 0.0 });
+
+    spell_timer_border->Disable();
+    spell_bar->Disable();
+    
     auto game_HUD_text_root = GameObject::Create();
 
     auto maturasc_font = res::get_font(kFontPath);
@@ -806,6 +829,13 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     HUDText_object->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
     HUDText_object->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
     HUDText_object->transform_->set_position(glm::vec3(-1.0f, 0.94f, 0.0f));
+
+    auto spell_timer_text = GameObject::Create(game_HUD_text_root);
+    spell_timer_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "X to SPELL!!!", glm::vec3(1.0f)));
+    spell_timer_text->transform_->set_scale(glm::vec3(0.002f, 0.002f, 0.001f));
+    spell_timer_text->transform_->add_position({-0.33f, 0.2f, 0.0f });
+
+    spell_timer_text->Disable();
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -1371,11 +1401,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         
         // glfwGetKey(window, GLFW_KEY_SPACE
         // HealthManager::i_->something_died_
-        HUDBarShader->Use();
-        HUDBarShader->SetFloat("percentage", std::cosf(glfwGetTime() ) * 0.5f + 0.5f);
-
+       
         static float cast_time = 2.0f;
         static float slowdown_smooth_factor = 0.055f;
+        static float time_stop_completion_percentage = 0.0f;
         if (HealthManager::i_->something_died_ && HealthManager::i_->what_ == MONSTER)
         {
             auto ss1 = player_1->GetComponent<components::SpellSlotComponent>()->type_;
@@ -1385,23 +1414,31 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             {
                 postprocessor.slowed_time = true;
                 SpellCaster::i_->active_ = true;
+                time_stop_completion_percentage = 0.0f;
+                spell_timer_border->Enable();
+                spell_timer_text->Enable();
                 unsigned int spell_timer_id = Timer::AddTimer(cast_time,
-                    [&fixed_update_rate, &postprocessor]()
+                    [&fixed_update_rate, &postprocessor, &spell_timer_border, &spell_timer_text]()
                     {
                         fixed_update_rate = pbd::kMsPerUpdate;
                         postprocessor.slowed_time = false;
+                        spell_timer_border->Disable();
+                        spell_timer_text->Disable();
                     },
 
-                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor](float delta_time)
+                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor, &HUDBarShader, &spell_timer_border, &spell_timer_text](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
-
+                        time_stop_completion_percentage += delta_time;
                         if (!SpellCaster::i_->active_)
                         {
+                            
                             fixed_update_rate = pbd::kMsPerUpdate;
                             postprocessor.slowed_time = false;
                             SpellCaster::i_->Cast();
                             Timer::RemoveTimer(id);
+                            spell_timer_border->Disable();
+                            spell_timer_text->Disable();
                         }
 
                     },
@@ -1648,6 +1685,64 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
         BillboardRendererManager::i_->UpdateRenderers();
 
+        if (player_1 != nullptr)
+        {
+            auto slot = player_1->GetComponent<components::SpellSlotComponent>();
+            if (slot != nullptr)
+            {
+                switch (slot->type_)
+                {
+                case SKULL_MINION:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/skull_black_bg.png");
+                    break;
+                }
+                case LIFE_STEAL:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/life_steal_black_bg.png");
+                    break;
+                }
+                case SHIELD:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/shield_black_bg.png");
+                    break;
+                }
+                default:
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/empty_black_bg.png");
+                    break;
+                }
+            }
+        }
+
+        if (player_2 != nullptr)
+        {
+            auto slot = player_2->GetComponent<components::SpellSlotComponent>();
+            if (slot != nullptr)
+            {
+                switch (slot->type_)
+                {
+                case SKULL_MINION:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/skull_black_bg.png");
+                    break;
+                }
+                case LIFE_STEAL:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/life_steal_black_bg.png");
+                    break;
+                }
+                case SHIELD:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/shield_black_bg.png");
+                    break;
+                }
+                default:
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/empty_black_bg.png");
+                    break;
+                }
+            }
+        }
+
         if (SceneManager::i_->IsScene("game"))
         {
             float p1p = 0.0;
@@ -1660,6 +1755,11 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
                 }
             }
+
+            HUDBarShader->Use();
+           
+            HUDBarShader->SetFloat("percentage", (time_stop_completion_percentage / cast_time));
+            spell_timer_border->PropagateUpdate();
 
             if (p1p < 0.25f)
             {
