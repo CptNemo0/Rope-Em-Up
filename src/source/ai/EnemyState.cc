@@ -21,6 +21,10 @@ ai::IdleState* ai::IdleState::Instance()
 
 void ai::IdleState::Execute(EnemyStateMachine* machine)
 {
+	if (machine == nullptr)
+	{
+		return;
+	}
 	if (machine->billboard_renderer_ != nullptr)	machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/dizzy.png");
 	if (machine->rest_timer_ < machine->vehicle_.rest_lenght)
 	{
@@ -58,6 +62,10 @@ ai::PatrolState* ai::PatrolState::Instance()
 
 void ai::PatrolState::Execute(EnemyStateMachine* machine)
 {
+	if (machine == nullptr)
+	{
+		return;
+	}
 	if (machine->billboard_renderer_ != nullptr)	machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/face_with_monocle.png");
 	if (machine->is_choked_)
 	{
@@ -103,6 +111,10 @@ ai::OnAlertState* ai::OnAlertState::Instance()
 
 void ai::OnAlertState::Execute(EnemyStateMachine* machine)
 {
+	if (machine == nullptr)
+	{
+		return;
+	}
 	if (machine->billboard_renderer_ != nullptr) machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/alert.png");
 	
 	if (machine->was_idle_)
@@ -148,6 +160,10 @@ ai::AttackState* ai::AttackState::Instance()
 
 void ai::AttackState::Execute(EnemyStateMachine* machine)
 {
+	if (machine == nullptr)
+	{
+		return;
+	}
 	if (machine->billboard_renderer_ != nullptr) machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/attack.png");
 
 	float tmp = 10.0f;
@@ -315,6 +331,10 @@ ai::PursuitState* ai::PursuitState::Instance()
 
 void ai::PursuitState::Execute(EnemyStateMachine* machine)
 {
+	if (machine == nullptr)
+	{
+		return;
+	}
 	if (machine->billboard_renderer_ != nullptr) machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/pursuit.png");
 	if (machine->is_choked_)
 	{
@@ -376,6 +396,10 @@ ai::ExtrapolationState* ai::ExtrapolationState::Instance()
 
 void ai::ExtrapolationState::Execute(EnemyStateMachine* machine)
 {
+	if (machine == nullptr)
+	{
+		return;
+	}
 	if (machine->is_choked_)
 	{
 		machine->current_state_ = IdleState::Instance();
@@ -422,6 +446,10 @@ ai::EvasionState* ai::EvasionState::Instance()
 
 void ai::EvasionState::Execute(EnemyStateMachine* machine)
 {
+	if (machine == nullptr)
+	{
+		return;
+	}
 	if (machine->is_choked_)
 	{
 		machine->current_state_ = IdleState::Instance();
