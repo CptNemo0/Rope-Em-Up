@@ -575,9 +575,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
     drop::SpellDropQueue::i_->shader = GBufferPassShader;
     
+    drop::SpellDropQueue::i_->queue_.push(SPELLS::SHIELD);
     for (int i = 0; i < 1000; i++)
     {
-        drop::SpellDropQueue::i_->queue_.push(SPELLS::LIFE_STEAL);
+        drop::SpellDropQueue::i_->queue_.push(SPELLS::SKULL_MINION);
     }
     
 #pragma endregion Models
@@ -611,7 +612,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
+    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
     player_1->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     
     auto emmiter_player_1 = player_1->GetComponent<components::ParticleEmitter>();

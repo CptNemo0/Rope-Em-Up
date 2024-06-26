@@ -103,8 +103,12 @@ void components::PlayerController::OnAction(Action action, input::State state)
         }
         case Action::INTERACT:
         {
-            cout << "INTERACT!!!" << endl;
-            drop::DropManager::i_->PickUpSpell(gameObject_.lock());
+            if (state.button)
+            {
+                drop::DropManager::i_->PickUpSpell(gameObject_.lock());
+                cout << gameObject_.lock()->GetComponent<components::SpellSlotComponent>()->type_ << endl;
+            }
+            
             break;
         }
     }
