@@ -33,12 +33,12 @@ public:
     }
 
     const float kLevelUpThreshold = 1000.0f;
-    const float kSpeedLevelUp = 300.0f;
-    const float kPullPowerLevelUp = 100.0f;
-    const float kDragLevelUp = 0.0025f;
-    const float kWeightLevelUp = -0.0025f;
+    const float kSpeedLevelUp = 100.0f;
+    const float kPullPowerLevelUp = 50.0f;
+    const float kDragLevelUp = 0.001f;
+    const float kWeightLevelUp = -0.001f;
     const float kHealthLevelUp = 10.0f;
-    const int kSegmentLevelUp = 3;
+    const int kSegmentLevelUp = 2;
 
     Rope* rope_;
     std::shared_ptr<GameObject> player_1_;
