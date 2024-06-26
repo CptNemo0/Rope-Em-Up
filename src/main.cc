@@ -1240,11 +1240,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         rope_level_text->GetComponent<components::TextRenderer>()->text_ = std::to_string(PlayerStatsManager::i_->rope_level_);
     };
 
-    for (int i = 0; i < 20; i++)
-    {
-        PlayerStatsManager::i_->AddExp(1000.0f);
-    }
-
     altar_menu->UpdateSelection();
     altar_menu->Disable();
     game_scene->menus_["altar"] = altar_menu;

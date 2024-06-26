@@ -4,6 +4,12 @@ components::MeshRenderer::MeshRenderer(s_ptr<Model> model, s_ptr<Shader> shader)
 {
 	assert(model);
 
+	if (!model)
+	{
+		std::cerr << "Model is null" << std::endl;
+		return;
+	}
+
 	this->model_ = model;
 	this->shader_ = shader;
 	this->color_ = glm::vec3(1.0f, 1.0f, 1.0f);

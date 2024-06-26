@@ -84,10 +84,10 @@ void generation::RoomLayoutGenerator::GenerateRoomsBetweenPoints(const glm::ivec
 generation::RoomLayoutGenerator::RoomLayoutGenerator()
 {
     std::vector<bool> data = {true};
-    // for (int i = 0; i < 3; i++)
-    // {
-    //     data.push_back(false);
-    // }
+    for (int i = 0; i < 3; i++)
+    {
+        data.push_back(false);
+    }
     altar_room_shuffler.SetData(data);
 }
 
@@ -364,7 +364,7 @@ void generation::GenerateRoom(Room& room, RoomGenerationSettings* rgs, RoomModel
             room.width = rgs->width;
             room.height = rgs->height;
 
-            bool is_altar = rlg->altar_room_shuffler.Pop();
+            bool is_altar = rlg->built_rooms_ > 3 && rlg->altar_room_shuffler.Pop();
             room.is_altar = is_altar;
 
             if (room.is_altar)

@@ -109,11 +109,15 @@ void PlayerStatsManager::LevelUp()
 			e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
 			e1->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			e1->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+			e1->start_size_ = {1.5f, 1.5f};
+			e1->start_position_ = {0.0f, 1.0f, 0.0f};
 
 			e2->texture_ = tex;
 			e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
 			e2->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			e2->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+			e2->start_size_ = {1.5f, 1.5f};
+			e2->start_position_ = {0.0f, 1.0f, 0.0f};
 
 			e1->Burst(1);
 			e2->Burst(1);
@@ -143,14 +147,18 @@ void PlayerStatsManager::AddExp(float exp)
 			e1->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
 			e1->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			e1->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+			e1->start_size_ = {0.5f, 0.5f};
+			e1->start_position_ = {0.0f, 1.0f, 0.0f};
 
 			e2->texture_ = tex;
 			e2->start_acceleration_ = glm::vec3(0.0f, 50.0f, 0.0f);
 			e2->start_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			e2->end_color_ = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+			e2->start_size_ = {0.5f, 0.5f};
+			e2->start_position_ = {0.0f, 1.0f, 0.0f};
 
-			e1->Burst(10);
-			e2->Burst(10);
+			e1->Burst(1);
+			e2->Burst(1);
 		}
 	}
 }
