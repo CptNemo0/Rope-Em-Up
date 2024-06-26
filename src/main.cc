@@ -756,10 +756,21 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     man_HUD->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.35f);
     man_HUD->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
 
+    auto man_slot = GameObject::Create(game_HUD_root);
+    man_slot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/upgrade_icons/empty_black_bg.png"), HUDshader));
+    man_slot->transform_->set_scale({ 0.15f / Global::i_->active_camera_->get_aspect_ratio(), 0.15f, 0.0f });
+    man_slot->transform_->add_position({ 0.805, -0.2, 0.0 });
+
     auto woman_HUD = GameObject::Create(game_HUD_root);
     woman_HUD->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/woman_healtbar.png"), HUDshader));
     woman_HUD->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.35f);
     woman_HUD->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+
+    auto woman_slot = GameObject::Create(game_HUD_root);
+    woman_slot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/upgrade_icons/empty_black_bg.png"), HUDshader));
+    woman_slot->transform_->set_scale({ 0.15f / Global::i_->active_camera_->get_aspect_ratio(), 0.15f, 0.0f });
+    woman_slot->transform_->add_position({-0.8025f, -0.2, 0.0});
+
 
     auto minimap_object = GameObject::Create(game_HUD_root);
     minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minimap.png"), HUDshader));
@@ -1647,6 +1658,64 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         BillboardShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         BillboardRendererManager::i_->UpdateRenderers();
+
+        if (player_1 != nullptr)
+        {
+            auto slot = player_1->GetComponent<components::SpellSlotComponent>();
+            if (slot != nullptr)
+            {
+                switch (slot->type_)
+                {
+                case SKULL_MINION:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/skull_black_bg.png");
+                    break;
+                }
+                case LIFE_STEAL:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/life_steal_black_bg.png");
+                    break;
+                }
+                case SHIELD:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/shield_black_bg.png");
+                    break;
+                }
+                default:
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/empty_black_bg.png");
+                    break;
+                }
+            }
+        }
+
+        if (player_2 != nullptr)
+        {
+            auto slot = player_2->GetComponent<components::SpellSlotComponent>();
+            if (slot != nullptr)
+            {
+                switch (slot->type_)
+                {
+                case SKULL_MINION:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/skull_black_bg.png");
+                    break;
+                }
+                case LIFE_STEAL:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/life_steal_black_bg.png");
+                    break;
+                }
+                case SHIELD:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/shield_black_bg.png");
+                    break;
+                }
+                default:
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/empty_black_bg.png");
+                    break;
+                }
+            }
+        }
 
         if (SceneManager::i_->IsScene("game"))
         {
