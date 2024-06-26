@@ -371,7 +371,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
 {
     auto logo_texture = res::get_texture("res/textures/loading_screen.png");
-    auto text_texture = res::get_texture("res/textures/loading_text.png");
+    auto text_texture = res::get_texture("res/textures/game_is_loading.png");
     auto hud_shader = res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag");
 
     auto logo = GameObject::Create(loading_root);
@@ -379,7 +379,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     logo->AddComponent(make_shared<components::HUDRenderer>(logo_texture, hud_shader));
 
     auto text = GameObject::Create(loading_root);
-    text->transform_->scale({2.0f, 1.0f, 1.0f});
+    text->transform_->scale({ 6.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.6f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f });
     text->transform_->set_position({0.0f, -1.0f, 0.0f});
     text->AddComponent(make_shared<components::HUDRenderer>(text_texture, hud_shader));
 
@@ -569,16 +569,15 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     // Spell Drops
     auto place_holder_drop_model = res::get_model(kDebugMeshPath);
 
-    drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
-    drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
-    drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
-    drop::SpellDropQueue::i_->drop_meshes.push_back(place_holder_drop_model);
+    drop::SpellDropQueue::i_->drop_meshes.push_back(res::get_model("res/skull_upgrade/skull_upgrade.obj"));
+    drop::SpellDropQueue::i_->drop_meshes.push_back(res::get_model("res/ls_upgrade/ls_upgrade.obj"));
+    drop::SpellDropQueue::i_->drop_meshes.push_back(res::get_model("res/shield_upgrade/shield_upgrade.obj"));
+    
     drop::SpellDropQueue::i_->shader = GBufferPassShader;
     
-    drop::SpellDropQueue::i_->queue_.push(SPELLS::SHIELD);
     for (int i = 0; i < 1000; i++)
     {
-        drop::SpellDropQueue::i_->queue_.push(SPELLS::SKULL_MINION);
+        drop::SpellDropQueue::i_->queue_.push(SPELLS(random::RandInt(0, 3)));
     }
     
 #pragma endregion Models
@@ -612,7 +611,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
+    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
     player_1->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     
     auto emmiter_player_1 = player_1->GetComponent<components::ParticleEmitter>();
@@ -642,17 +641,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     emmiter_player_2->start_size_ = glm::vec2(1.0f, 1.0f);
     emmiter_player_2->end_size_ = glm::vec2(1.0f, 1.0f);
 
- 
-    /*auto test_plane = GameObject::Create(game_scene_root);
-    test_plane->transform_->set_scale(glm::vec3(1.0f));
-    test_plane->transform_->set_position(glm::vec3(-16.0f, 2.0f, -16.0));
-    test_plane->AddComponent(BillboardRendererManager::i_->CreateRenderer(res::get_model("res/models/enviroment/floor/floor.obj"), res::get_texture("res/textures/logo.png")));
-    
-    cout << test_plane->transform_->get_up().x << " " << test_plane->transform_->get_up().y << " " << test_plane->transform_->get_up().z << endl;
-    glm::vec3 dir = glm::normalize(Global::i_->active_camera_->get_position() - test_plane->transform_->get_position());
-    cout << dir.x << " " << dir.y << " " << dir.z << endl;
-    cout << Global::i_->active_camera_->get_position().x << " " << Global::i_->active_camera_->get_position().y << " " << Global::i_->active_camera_->get_position().z << endl;
-    std::vector<std::shared_ptr<GameObject>> players_vector {player_1, player_2};*/
     std::vector<std::shared_ptr<GameObject>> players_vector{ player_1, player_2 };
 #pragma region Animations
 
@@ -768,10 +756,21 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     man_HUD->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.35f);
     man_HUD->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
 
+    auto man_slot = GameObject::Create(game_HUD_root);
+    man_slot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/upgrade_icons/empty_black_bg.png"), HUDshader));
+    man_slot->transform_->set_scale({ 0.15f / Global::i_->active_camera_->get_aspect_ratio(), 0.15f, 0.0f });
+    man_slot->transform_->add_position({ 0.805, -0.2, 0.0 });
+
     auto woman_HUD = GameObject::Create(game_HUD_root);
     woman_HUD->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/woman_healtbar.png"), HUDshader));
     woman_HUD->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.35f);
     woman_HUD->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+
+    auto woman_slot = GameObject::Create(game_HUD_root);
+    woman_slot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/upgrade_icons/empty_black_bg.png"), HUDshader));
+    woman_slot->transform_->set_scale({ 0.15f / Global::i_->active_camera_->get_aspect_ratio(), 0.15f, 0.0f });
+    woman_slot->transform_->add_position({-0.8025f, -0.2, 0.0});
+
 
     auto minimap_object = GameObject::Create(game_HUD_root);
     minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minimap.png"), HUDshader));
@@ -785,10 +784,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     auto player_1_hp_bar_border = GameObject::Create();
     player_1_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    player_1_hp_bar_border->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.029f);
+    player_1_hp_bar_border->transform_->scale_in({1.0f, 1.0f, 0.0f}, 0.045f);
     player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
-    player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 10.0f);
-    player_1_hp_bar_border->transform_->add_position({0.05f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
+    player_1_hp_bar_border->transform_->scale_in({1.0f, 0.0f, 0.0f}, 6.5f);
+    player_1_hp_bar_border->transform_->add_position({0.055f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
 
     auto player_1_hp_bar = GameObject::Create(player_1_hp_bar_border);
     player_1_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -798,10 +797,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     auto player_2_hp_bar_border = GameObject::Create();
     player_2_hp_bar_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarBorderTexturePath), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-    player_2_hp_bar_border->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.029f);
+    player_2_hp_bar_border->transform_->scale_in({-1.0f, 1.0f, 0.0f}, 0.045f);
     player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
-    player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 10.0f);
-    player_2_hp_bar_border->transform_->add_position({-0.05f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
+    player_2_hp_bar_border->transform_->scale_in({-1.0f, 0.0f, 0.0f}, 6.5f);
+    player_2_hp_bar_border->transform_->add_position({-0.055f * 1.0f / Global::i_->active_camera_->get_aspect_ratio(), 0.071f, 0.0f});
 
     auto player_2_hp_bar = GameObject::Create(player_2_hp_bar_border);
     player_2_hp_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -923,11 +922,13 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto menu = make_shared<Menu>();
     input::InputManager::i_->AddObserver(0, menu);
 
-    auto logo = GameObject::Create(menu_HUD_root);
-    logo->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
-    logo->transform_->scale({0.333f, 0.333f, 1.0f});
-    logo->transform_->set_position({0.0f, 0.5f, 0.0f});
-    logo->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/logo.png"), HUDshader));
+    auto background = GameObject::Create(menu_HUD_root);
+    background->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/color.png"), HUDshader, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f)));
+
+    auto banner = GameObject::Create(menu_HUD_root);
+    banner->transform_->scale({1.5f / Global::i_->active_camera_->get_aspect_ratio(), 0.4f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f});
+    banner->transform_->set_position({0.0f, 0.5f, 0.0f});
+    banner->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/napis_menu.png"), HUDshader));
 
     auto new_game_button = GameObject::Create(menu_HUD_root);
     new_game_button->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
@@ -1116,17 +1117,18 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     input::InputManager::i_->AddObserver(0, altar_menu);
 
     auto altar_container = GameObject::Create(game_HUD_root);
-    auto altar_background_tex = res::get_texture("res/textures/color.png");
     altar_container->transform_->set_scale(glm::vec3(1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f));
-    altar_container->transform_->scale({0.7f, 0.7f, 1.0f});
+    altar_container->transform_->scale({0.6f, 0.6f, 1.0f});
 
     auto altar_text_container = GameObject::Create(game_HUD_text_root);
     altar_text_container->transform_->set_scale(glm::vec3(1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f));
-    altar_text_container->transform_->scale({0.7f, 0.7f, 1.0f});
+    altar_text_container->transform_->scale({0.6f, 0.6f, 1.0f});
 
+    auto altar_background_tex = res::get_texture("res/textures/ramka.png");
     auto altar_background = GameObject::Create(altar_container);
-    altar_background->AddComponent(make_shared<components::HUDRenderer>(altar_background_tex, HUDshader, glm::vec4(0.0, 0.0, 0.0, 0.6f)));
+    altar_background->AddComponent(make_shared<components::HUDRenderer>(altar_background_tex, HUDshader));
     altar_background->transform_->set_scale({1.4f, 1.0f, 1.0f});
+    altar_background->transform_->scale({1.2f, 1.2f, 1.0f});
     altar_menu->layout_[{-10, -10}] = make_shared<MenuItem>(altar_background, [](){});
 
     auto unspent_levels_text = GameObject::Create(altar_text_container);
@@ -1156,7 +1158,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto player_plus = GameObject::Create(altar_container);
     player_plus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/plus_button.png"), HUDshader));
     player_plus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
-    player_plus->transform_->add_position({0.0f, 0.0f, 0.0f});
+    player_plus->transform_->add_position({-0.1f, 0.0f, 0.0f});
     player_plus->transform_->scale({0.9f, 0.9f, 1.0f});
     altar_menu->layout_[{0, 0}] = make_shared<MenuItem>(player_plus, [&unspent_levels, &player_level_text]()
     {
@@ -1168,7 +1170,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto player_minus = GameObject::Create(altar_container);
     player_minus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minus_button.png"), HUDshader));
     player_minus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
-    player_minus->transform_->add_position({0.4f, 0.0f, 0.0f});
+    player_minus->transform_->add_position({0.3f, 0.0f, 0.0f});
     player_minus->transform_->scale({0.9f, 0.9f, 1.0f});
     altar_menu->layout_[{1, 0}] = make_shared<MenuItem>(player_minus, [&unspent_levels, &player_level_text]()
     {
@@ -1192,7 +1194,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto rope_plus = GameObject::Create(altar_container);
     rope_plus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/plus_button.png"), HUDshader));
     rope_plus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
-    rope_plus->transform_->add_position({0.0f, -0.4f, 0.0f});
+    rope_plus->transform_->add_position({-0.1f, -0.4f, 0.0f});
     rope_plus->transform_->scale({0.9f, 0.9f, 1.0f});
     altar_menu->layout_[{0, 1}] = make_shared<MenuItem>(rope_plus, [&unspent_levels, &rope_level_text]()
     {
@@ -1204,7 +1206,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto rope_minus = GameObject::Create(altar_container);
     rope_minus->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minus_button.png"), HUDshader));
     rope_minus->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.2f);
-    rope_minus->transform_->add_position({0.4f, -0.4f, 0.0f});
+    rope_minus->transform_->add_position({0.3f, -0.4f, 0.0f});
     rope_minus->transform_->scale({0.9f, 0.9f, 1.0f});
     altar_menu->layout_[{1, 1}] = make_shared<MenuItem>(rope_minus, [&unspent_levels, &rope_level_text]()
     {
@@ -1216,8 +1218,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto apply_button = GameObject::Create(altar_container);
     apply_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/button_apply.png"), HUDshader));
     apply_button->transform_->add_position({0.0f, -0.4f, 0.0f});
-    apply_button->transform_->scale({2.0f, 1.0f, 1.0f});
-    apply_button->transform_->scale({0.2f, 0.2f, 1.0f});
+    apply_button->transform_->scale({2.52f, 1.0f, 1.0f});
+    apply_button->transform_->scale({0.3f, 0.3f, 1.0f});
     altar_menu->layout_[{0, 2}] = make_shared<MenuItem>(apply_button, []()
     {
         PlayerStatsManager::i_->Apply();
@@ -1226,8 +1228,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto back_button = GameObject::Create(altar_container);
     back_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/button_back.png"), HUDshader));
     back_button->transform_->add_position({0.0f, -0.8f, 0.0f});
-    back_button->transform_->scale({2.0f, 1.0f, 1.0f});
-    back_button->transform_->scale({0.1f, 0.1f, 1.0f});
+    back_button->transform_->scale({2.52f, 1.0f, 1.0f});
+    back_button->transform_->scale({0.15f, 0.15f, 1.0f});
     altar_menu->layout_[{0, 3}] = make_shared<MenuItem>(back_button, []()
     {
         SceneManager::i_->current_scene_->SwitchMenu("");
@@ -1316,7 +1318,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             if ((current_room_pos != next_room_pos) && rlg.rooms.contains(next_room_pos))
             {
                 DifficultyManager::i_->UpdateHealth(player_1, player_2);
-                DifficultyManager::i_->UpdateSettings(&rg_settings);
+                if (rlg.built_rooms_ > 3)
+                {
+                    DifficultyManager::i_->UpdateSettings(&rg_settings);
+                }
                 //cout << "GOING THROUGH ROOM";
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
@@ -1653,6 +1658,64 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         BillboardShader->SetMatrix4("view_matrix", active_camera->GetViewMatrix());
 
         BillboardRendererManager::i_->UpdateRenderers();
+
+        if (player_1 != nullptr)
+        {
+            auto slot = player_1->GetComponent<components::SpellSlotComponent>();
+            if (slot != nullptr)
+            {
+                switch (slot->type_)
+                {
+                case SKULL_MINION:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/skull_black_bg.png");
+                    break;
+                }
+                case LIFE_STEAL:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/life_steal_black_bg.png");
+                    break;
+                }
+                case SHIELD:
+                {
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/shield_black_bg.png");
+                    break;
+                }
+                default:
+                    woman_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/empty_black_bg.png");
+                    break;
+                }
+            }
+        }
+
+        if (player_2 != nullptr)
+        {
+            auto slot = player_2->GetComponent<components::SpellSlotComponent>();
+            if (slot != nullptr)
+            {
+                switch (slot->type_)
+                {
+                case SKULL_MINION:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/skull_black_bg.png");
+                    break;
+                }
+                case LIFE_STEAL:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/life_steal_black_bg.png");
+                    break;
+                }
+                case SHIELD:
+                {
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/shield_black_bg.png");
+                    break;
+                }
+                default:
+                    man_slot->GetComponent<components::HUDRenderer>()->texture_ = res::get_texture("res/upgrade_icons/empty_black_bg.png");
+                    break;
+                }
+            }
+        }
 
         if (SceneManager::i_->IsScene("game"))
         {

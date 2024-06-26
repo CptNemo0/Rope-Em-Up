@@ -30,6 +30,24 @@ void TutorialManager::Init()
 	choke_tutorial->transform_->set_position(glm::vec3(-0.28f, -0.75f, 0.0f));
 	choke_tutorial->Disable();
 	tutorial_map[2] = choke_tutorial;
+
+	auto spell_tutorial = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_text_root_);
+	string spell_tutorial_info = "Press the square button to pick up spell balls dropped by enemies.";
+	spell_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), spell_tutorial_info, glm::vec3(1.0f)));
+	spell_tutorial->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
+	spell_tutorial->transform_->scale_in({ 1.0f, 0.0f, 0.0f }, 1.0f / aspect_ratio);
+	spell_tutorial->transform_->set_position(glm::vec3(-0.36f, -0.75f, 0.0f));
+	spell_tutorial->Disable();
+	tutorial_map[4] = spell_tutorial;
+
+	auto level_tutorial = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_text_root_);
+	string level_tutorial_info = "   Each slain tentacle grants you experience points.\nSpend them to upgrade your rope or character attributes.";              
+	level_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), level_tutorial_info, glm::vec3(1.0f)));
+	level_tutorial->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
+	level_tutorial->transform_->scale_in({ 1.0f, 0.0f, 0.0f }, 1.0f / aspect_ratio);
+	level_tutorial->transform_->set_position(glm::vec3(-0.44f, -0.75f, 0.0f));
+	level_tutorial->Disable();
+	tutorial_map[5] = level_tutorial;
 }
 
 void TutorialManager::Update()

@@ -106,7 +106,6 @@ void components::PlayerController::OnAction(Action action, input::State state)
             if (state.button)
             {
                 drop::DropManager::i_->PickUpSpell(gameObject_.lock());
-                cout << gameObject_.lock()->GetComponent<components::SpellSlotComponent>()->type_ << endl;
             }
             
             break;

@@ -23,6 +23,26 @@ void drop::SpellDrop::Consume(generation::Room& room)
 		auto ssc = std::make_shared<components::SpellSlotComponent>();
 		ssc->type_ = args_.type_;
 		drop->AddComponent(ssc);
+		drop->transform_->set_rotation({ -45.0f, -135.0f, 0.0f });
+		drop->transform_->set_scale({ 0.4, 0.4, 0.4 });
+		drop->transform_->add_position({ 0.0f, 0.6f, 0.0f });
+		/*switch (args_.type_)
+		{
+		case SKULL_MINION:
+		{
+			drop->transform_->set_rotation({ -45.0f, -135.0f, 0.0f });
+			drop->transform_->set_scale({ 0.4, 0.4, 0.4 });
+			drop->transform_->add_position({0.0f, 0.6f, 0.0f});
+			break;
+		}
+		case SHIELD:
+		{
+			
+			break;
+		}
+		default:
+			break;
+		}*/
 	}
 }
 

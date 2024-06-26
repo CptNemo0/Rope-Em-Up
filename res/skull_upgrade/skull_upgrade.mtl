@@ -1,0 +1,15 @@
+# File produced by Open Asset Import Library (http://www.assimp.sf.net)
+# (assimp v3.1.243586452)
+
+newmtl DefaultMaterial
+kd 0.6 0.6 0.6
+ka 0 0 0
+ks 0 0 0
+ke 0 0 0
+d 1
+illum 1
+map_Kd skull_upgrade/skull_upgrade_albedo.png
+map_Ns skull_upgrade/skull_upgrade_roughness.png
+map_Pm skull_upgrade/skull_upgrade_metallic.png
+map_Bump -bm 20.000000 skull_upgrade/skull_upgrade_normal.png
+map_Ke no_emission.png

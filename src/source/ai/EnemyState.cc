@@ -119,7 +119,10 @@ void ai::OnAlertState::Execute(EnemyStateMachine* machine)
 	
 	if (machine->was_idle_)
 	{
-		audio::AudioManager::i_->PlaySound(res::get_sound("res/sounds/alert.wav"));
+		Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
+		audio_shuffler_.SetData({ res::get_sound("res/sounds/alert1.wav"), res::get_sound("res/sounds/alert2.wav"), res::get_sound("res/sounds/alert3.wav") });
+
+		audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
 		machine->was_idle_ = false;
 	}
 	
@@ -228,7 +231,13 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 				
 			}
 
-			
+			machine->partcile_->rotate_ = false;
+
+			float previous_mass = machine->partcile_->mass_;
+			float new_mass = 100000.0f;
+
+			machine->partcile_->mass_ = new_mass;
+			machine->partcile_->inverse_mass_ = 1.0f / new_mass;
 
 			lb.y = 0.0f;
 			rb.y = 0.0f;
@@ -273,13 +282,17 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 				{
 
 					Timer::AddTimer(0.5f,
-						[hitbox] 
+						[hitbox]() 
 						{
 							if (hitbox != nullptr)
 							{
 								if (auto hc = hitbox->GetComponent<components::HitboxCollider>(); hc != nullptr)
 								{
 									HitboxManager::i_->Check(hc);
+									Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
+									audio_shuffler_.SetData({ res::get_sound("res/sounds/obslizgly1.wav"), res::get_sound("res/sounds/obslizgly2.wav"), res::get_sound("res/sounds/obslizgly3.wav") });
+
+									audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
 								}
 							}
 						});
@@ -287,7 +300,7 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 				
 
 			int id = Timer::AddTimer(1.1f,
-				[hitbox, machine]
+				[hitbox, machine, previous_mass]
 				{
 					if (hitbox != nullptr)
 					{
@@ -298,9 +311,15 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 							machine->partcile_->controllable_ = true;
 							assert(machine->current_state_ && PatrolState::Instance());
 							machine->current_state_ = PatrolState::Instance();
+
+							if (machine->partcile_ != nullptr)
+							{
+								machine->partcile_->rotate_ = true;
+								machine->partcile_->mass_ = previous_mass;
+								machine->partcile_->inverse_mass_ = 1.0f / previous_mass;
+							}
 						}	
 					}
-					
 				},
 				[hitbox, id](float delta_time)
 				{
