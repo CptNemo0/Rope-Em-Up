@@ -119,6 +119,14 @@ bool components::Animator::IsAttackAnimation(s_ptr<anim::Animation> animation)
 
 }
 
+bool components::Animator::IsAnimation(const string &animationName)
+{
+	if (m_Animations.contains(animationName))
+	{
+    	return m_CurrentAnimation == m_Animations[animationName];
+	}
+}
+
 void components::Animator::BlendTwoAnimations(const std::string& pLayeredAnimation, float blendFactor)
 {
 	if (m_Animations.find(pLayeredAnimation) != m_Animations.end())

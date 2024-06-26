@@ -45,6 +45,7 @@ namespace components
 		void RemoveAnimation(const std::string& name);
 
 		bool IsAttackAnimation(s_ptr<anim::Animation> animation);
+		bool IsAnimation(const string& animationName);
 
 		void BlendTwoAnimations(s_ptr<anim::Animation> pLayeredAnimation, float blendFactor);
 		void BlendTwoAnimations(const std::string& pLayeredAnimation, float blendFactor);

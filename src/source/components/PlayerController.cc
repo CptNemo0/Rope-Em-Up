@@ -2,9 +2,32 @@
 #include "../../headers/SpellCaster.h"
 #include "../../headers/SceneManager.h"
 #include "../../headers/drop/DropManager.h"
+
 components::PlayerController::PlayerController(int gamepadID)
 {
     this->gamepadID_ = gamepadID;
+    std::vector<s_ptr<audio::AudioBuffer>> data;
+    if (gamepadID == GLFW_JOYSTICK_1)
+    {
+        auto anim = res::get_animation("res/players/female/kobieta.fbx", 5, "res/players/female/kobieta.fbx");
+        walk_timer_delay_ = anim->GetDuration() / anim->GetTicksPerSecond() * 0.5f;
+        data.push_back(res::get_sound("res/sounds/walk3.wav"));
+        data.push_back(res::get_sound("res/sounds/walk4.wav"));
+    }
+    if (gamepadID == GLFW_JOYSTICK_2)
+    {
+        auto anim = res::get_animation("res/players/male/facet.fbx", 5, "res/players/male/facet.fbx");
+        walk_timer_delay_ = anim->GetDuration() / anim->GetTicksPerSecond() * 0.25f;
+        data.push_back(res::get_sound("res/sounds/walk1.wav"));
+        data.push_back(res::get_sound("res/sounds/walk2.wav"));
+    }
+    walk_sounds_.SetData(data);
+
+    auto grass_data = std::vector<s_ptr<audio::AudioBuffer>>();
+    grass_data.push_back(res::get_sound("res/sounds/grass1.wav"));
+    grass_data.push_back(res::get_sound("res/sounds/grass2.wav"));
+    grass_data.push_back(res::get_sound("res/sounds/grass3.wav"));
+    grass_walk_sounds.SetData(grass_data);
 }
 
 void components::PlayerController::Start()
@@ -32,13 +55,49 @@ void components::PlayerController::Update()
     else
     {
         move_generator_->magnitude_ = speed_;
-        if (glm::length(direction_) > 0.0f)
+        if (glm::length(direction_) > 0.0f && !is_pulling_)
         {
             gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Run", 1);
         }
         else
         {
             gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Idle", 1);
+        }
+    }
+
+    // Walking sounds
+    if (gameObject_.lock()->GetComponent<components::Animator>()->IsAnimation("Run"))
+    {
+        if (!walking_timer_lock_)
+        {
+            if (SkullMinionManager::i_->room_->is_altar)
+            {
+                audio::AudioManager::i_->PlaySound(grass_walk_sounds.Pop(), 0.5f);
+            }
+            else
+            {
+                audio::AudioManager::i_->PlaySound(walk_sounds_.Pop(), 0.2f);
+            }
+            walk_timer_ = Timer::AddTimer(walk_timer_delay_, [this]()
+            {
+                if (SkullMinionManager::i_->room_->is_altar)
+                {
+                    audio::AudioManager::i_->PlaySound(grass_walk_sounds.Pop(), 0.5f);
+                }
+                else
+                {
+                    audio::AudioManager::i_->PlaySound(walk_sounds_.Pop(), 0.2f);
+                }
+            }, nullptr, true); 
+            walking_timer_lock_ = true;
+        }
+    }
+    else
+    {
+        if (walking_timer_lock_)
+        {
+            Timer::RemoveTimer(walk_timer_);
+            walking_timer_lock_ = false;
         }
     }
 

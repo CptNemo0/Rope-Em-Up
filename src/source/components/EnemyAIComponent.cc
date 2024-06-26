@@ -30,10 +30,45 @@ void components::EnemyAIComponent::CheckChoke()
 
 void components::EnemyAIComponent::Start()
 {
+	std::vector<s_ptr<audio::AudioBuffer>> data;
+	data.push_back(res::get_sound("res/sounds/slide1.wav"));
+	data.push_back(res::get_sound("res/sounds/slide2.wav"));
+	data.push_back(res::get_sound("res/sounds/slide3.wav"));
+	slide_sounds_.SetData(data);
 }
 
 void components::EnemyAIComponent::Update()
 {
+	auto player_pos = PlayerStatsManager::i_->player_1_->transform_->get_global_position();
+	auto player_pos2 = PlayerStatsManager::i_->player_2_->transform_->get_global_position();
+	auto avg_pos = (player_pos + player_pos2) / 2.0f;
+
+	auto pos = gameObject_.lock()->transform_->get_global_position();
+	auto distance = glm::distance(avg_pos, pos);
+	volume_ = glm::abs(0.3333f - glm::clamp(distance, 0.0f, 15.0f) / 45.0f);
+
+	if (!(state_machine_->is_attacking || state_machine_->is_choked_) && !is_passive_)
+	{
+		if (!slide_timer_lock_)
+		{
+			slide_timer_lock_ = true;
+			slide_timer_ = Timer::AddTimer(0.4f, [this]()
+			{
+				if (this != nullptr)
+				{
+					audio::AudioManager::i_->PlaySound(slide_sounds_.Pop(), volume_);
+				}
+			}, nullptr, true);
+		}
+	}
+	else
+	{
+		if (slide_timer_lock_)
+		{
+			Timer::RemoveTimer(slide_timer_);
+			slide_timer_lock_ = false;
+		}
+	}
 }
 
 void components::EnemyAIComponent::Destroy()
