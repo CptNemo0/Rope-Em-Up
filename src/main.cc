@@ -611,7 +611,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
+    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
     player_1->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     
     auto emmiter_player_1 = player_1->GetComponent<components::ParticleEmitter>();
@@ -771,7 +771,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     woman_slot->transform_->set_scale({ 0.15f / Global::i_->active_camera_->get_aspect_ratio(), 0.15f, 0.0f });
     woman_slot->transform_->add_position({-0.8025f, -0.2, 0.0});
 
-
     auto minimap_object = GameObject::Create(game_HUD_root);
     minimap_object->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/minimap.png"), HUDshader));
     minimap_object->transform_->scale_in({-1.0f, -1.0f, 0.0f}, 0.4f);
@@ -808,6 +807,19 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_2_hp_bar->transform_->set_rotation({ 0.0f, 0.0, 180.0f });
     player_2_hp_bar->transform_->set_position({ 0.0f, 0.0f, 0.0 });
     
+    auto spell_timer_border = GameObject::Create();
+    spell_timer_border->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/bar.png"), HUDshader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    spell_timer_border->transform_->set_scale({ 0.65f / Global::i_->active_camera_->get_aspect_ratio(), 0.10f, 1.0f });
+    spell_timer_border->transform_->set_position({ 0.0f, -0.2f, 0.0 });
+
+    auto spell_bar = GameObject::Create(spell_timer_border);
+    spell_bar->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(kHealthBarTexturePath), HUDBarShader, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    spell_bar->transform_->set_scale({ 0.81, 0.515f, 1.0f });
+    spell_bar->transform_->set_position({ 0.0f, 0.25f, 0.0 });
+
+    spell_timer_border->Disable();
+    spell_bar->Disable();
+    
     auto game_HUD_text_root = GameObject::Create();
 
     auto maturasc_font = res::get_font(kFontPath);
@@ -817,6 +829,13 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     HUDText_object->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
     HUDText_object->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
     HUDText_object->transform_->set_position(glm::vec3(-1.0f, 0.94f, 0.0f));
+
+    auto spell_timer_text = GameObject::Create(game_HUD_text_root);
+    spell_timer_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "X to SPELL!!!", glm::vec3(1.0f)));
+    spell_timer_text->transform_->set_scale(glm::vec3(0.002f, 0.002f, 0.001f));
+    spell_timer_text->transform_->add_position({-0.33f, 0.2f, 0.0f });
+
+    spell_timer_text->Disable();
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -1382,11 +1401,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         
         // glfwGetKey(window, GLFW_KEY_SPACE
         // HealthManager::i_->something_died_
-        HUDBarShader->Use();
-        HUDBarShader->SetFloat("percentage", std::cosf(glfwGetTime() ) * 0.5f + 0.5f);
-
+       
         static float cast_time = 2.0f;
         static float slowdown_smooth_factor = 0.055f;
+        static float time_stop_completion_percentage = 0.0f;
         if (HealthManager::i_->something_died_ && HealthManager::i_->what_ == MONSTER)
         {
             auto ss1 = player_1->GetComponent<components::SpellSlotComponent>()->type_;
@@ -1396,19 +1414,25 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
             {
                 postprocessor.slowed_time = true;
                 SpellCaster::i_->active_ = true;
+                time_stop_completion_percentage = 0.0f;
+                spell_timer_border->Enable();
+                spell_timer_text->Enable();
                 unsigned int spell_timer_id = Timer::AddTimer(cast_time,
-                    [&fixed_update_rate, &postprocessor]()
+                    [&fixed_update_rate, &postprocessor, &spell_timer_border, &spell_timer_text]()
                     {
                         fixed_update_rate = pbd::kMsPerUpdate;
                         postprocessor.slowed_time = false;
+                        spell_timer_border->Disable();
+                        spell_timer_text->Disable();
                     },
 
-                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor](float delta_time)
+                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor, &HUDBarShader](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
-
+                        time_stop_completion_percentage += delta_time;
                         if (!SpellCaster::i_->active_)
                         {
+                            
                             fixed_update_rate = pbd::kMsPerUpdate;
                             postprocessor.slowed_time = false;
                             SpellCaster::i_->Cast();
@@ -1729,6 +1753,11 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
                 }
             }
+
+            HUDBarShader->Use();
+           
+            HUDBarShader->SetFloat("percentage", (time_stop_completion_percentage / cast_time));
+            spell_timer_border->PropagateUpdate();
 
             if (p1p < 0.25f)
             {
