@@ -1,5 +1,7 @@
 #include "./headers/components/Animator.h"
 
+#include "../../headers/animation/AnimatorManager.h"
+
 components::Animator::Animator(s_ptr<anim::Animation> animation)
 	: m_CurrentAnimation(animation), m_CurrentTime(0.0f), m_BlendingTime(0.0f), m_BlendFactor(0.0f)
 {
@@ -75,7 +77,10 @@ void components::Animator::PlayAnimation(const std::string& animationName, int p
 
 		Timer::AddTimer(prio_time, [this]()
 		{
-			priority_ = 0;
+			if (this)
+			{
+				priority_ = 0;
+			}
 		});
 	}
 }
@@ -233,6 +238,15 @@ void components::Animator::CalculateBlendedBoneTransform(
 
 	for (size_t i = 0; i < node->children.size(); ++i)
 		CalculateBlendedBoneTransform(pAnimationBase, &node->children[i], pAnimationLayer, &nodeLayered->children[i], currentTimeBase, currentTimeLayered, globalTransformation, blendFactor);
+}
+
+void components::Animator::Destroy()
+{
+	m_Animations.clear();
+	m_FinalBoneMatrices.clear();
+	m_CurrentAnimation = nullptr;
+	m_BlendingAnimation = nullptr;
+	anim::AnimatorManager::i_->RemoveAnimatorComponent(shared_from_this());
 }
 
 components::Animator::Animator(json &j)
