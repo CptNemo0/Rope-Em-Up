@@ -78,7 +78,15 @@ void HealthManager::DeathUpdate()
 				}
 
 				ManageDeath(h->gameObject_.lock());
-				h->gameObject_.lock()->Destroy();
+				if (h->type_ != PLAYER)
+				{
+					h->gameObject_.lock()->Destroy();
+				}
+				else if (h->type_ = PLAYER)
+				{
+					auto anim = h->gameObject_.lock()->transform_->children_[0]->game_object_->GetComponent<components::Animator>();
+					anim->PlayAnimation("Death", 4, 2.0f);
+				}
 			}
 		}
 		i++;

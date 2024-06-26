@@ -907,36 +907,54 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 enemy_mesh->transform_->set_scale(glm::vec3(0.01f));
 
 
-                enemy_mesh->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
-                /*auto enemy_attack_1 = res::get_animation("res/enemy/enemy_test.fbx", 0, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_attack_2 = res::get_animation("res/enemy/enemy_test.fbx", 1, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_attack_3 = res::get_animation("res/enemy/enemy_test.fbx", 2, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_attack_4 = res::get_animation("res/enemy/enemy_test.fbx", 3, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_attack_5 = res::get_animation("res/enemy/enemy_test.fbx", 4, rm->enemies[room.enemies_idx[i]]->path_);
+            enemy_mesh->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
+            /*enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", anim::AnimatorManager::i_->enemy_attack_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", anim::AnimatorManager::i_->enemy_attack_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", anim::AnimatorManager::i_->enemy_attack_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", anim::AnimatorManager::i_->enemy_attack_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", anim::AnimatorManager::i_->enemy_attack_5);
 
-                auto enemy_death_1 = res::get_animation("res/enemy/enemy_test.fbx", 5, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_death_2 = res::get_animation("res/enemy/enemy_test.fbx", 6, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_death_3 = res::get_animation("res/enemy/enemy_test.fbx", 7, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_death_4 = res::get_animation("res/enemy/enemy_test.fbx", 8, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_death_5 = res::get_animation("res/enemy/enemy_test.fbx", 9, rm->enemies[room.enemies_idx[i]]->path_);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", anim::AnimatorManager::i_->enemy_idle_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", anim::AnimatorManager::i_->enemy_idle_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", anim::AnimatorManager::i_->enemy_idle_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", anim::AnimatorManager::i_->enemy_idle_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", anim::AnimatorManager::i_->enemy_idle_5);
 
-                auto enemy_idle_1 = res::get_animation("res/enemy/enemy_test.fbx", 10, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_idle_2 = res::get_animation("res/enemy/enemy_test.fbx", 11, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_idle_3 = res::get_animation("res/enemy/enemy_test.fbx", 12, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_idle_4 = res::get_animation("res/enemy/enemy_test.fbx", 13, rm->enemies[room.enemies_idx[i]]->path_);
-                auto enemy_idle_5 = res::get_animation("res/enemy/enemy_test.fbx", 14, rm->enemies[room.enemies_idx[i]]->path_);*/
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", anim::AnimatorManager::i_->enemy_death_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", anim::AnimatorManager::i_->enemy_death_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", anim::AnimatorManager::i_->enemy_death_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", anim::AnimatorManager::i_->enemy_death_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", anim::AnimatorManager::i_->enemy_death_5);*/
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", anim::AnimatorManager::i_->enemy_attack_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", anim::AnimatorManager::i_->enemy_attack_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", anim::AnimatorManager::i_->enemy_attack_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", anim::AnimatorManager::i_->enemy_attack_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", anim::AnimatorManager::i_->enemy_attack_5);
+            auto enemy_attack_1 = res::get_animation("res/enemy/enemy_test.fbx", 0, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_attack_2 = res::get_animation("res/enemy/enemy_test.fbx", 1, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_attack_3 = res::get_animation("res/enemy/enemy_test.fbx", 2, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_attack_4 = res::get_animation("res/enemy/enemy_test.fbx", 3, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_attack_5 = res::get_animation("res/enemy/enemy_test.fbx", 4, rm->enemies[room.enemies_idx[i]]->path_);
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", anim::AnimatorManager::i_->enemy_idle_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", anim::AnimatorManager::i_->enemy_idle_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", anim::AnimatorManager::i_->enemy_idle_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", anim::AnimatorManager::i_->enemy_idle_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", anim::AnimatorManager::i_->enemy_idle_5);
+            auto enemy_death_1 = res::get_animation("res/enemy/enemy_test.fbx", 5, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_death_2 = res::get_animation("res/enemy/enemy_test.fbx", 6, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_death_3 = res::get_animation("res/enemy/enemy_test.fbx", 7, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_death_4 = res::get_animation("res/enemy/enemy_test.fbx", 8, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_death_5 = res::get_animation("res/enemy/enemy_test.fbx", 9, rm->enemies[room.enemies_idx[i]]->path_);
+
+            auto enemy_idle_1 = res::get_animation("res/enemy/enemy_test.fbx", 10, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_idle_2 = res::get_animation("res/enemy/enemy_test.fbx", 11, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_idle_3 = res::get_animation("res/enemy/enemy_test.fbx", 12, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_idle_4 = res::get_animation("res/enemy/enemy_test.fbx", 13, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_idle_5 = res::get_animation("res/enemy/enemy_test.fbx", 14, rm->enemies[room.enemies_idx[i]]->path_);
+
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", enemy_attack_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", enemy_attack_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", enemy_attack_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", enemy_attack_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", enemy_attack_5);
+
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", enemy_idle_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", enemy_idle_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", enemy_idle_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", enemy_idle_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", enemy_idle_5);
 
                 enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", anim::AnimatorManager::i_->enemy_death_1);
                 enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", anim::AnimatorManager::i_->enemy_death_2);
@@ -1185,23 +1203,59 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
 
                 enemy_mesh->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", anim::AnimatorManager::i_->enemy_attack_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", anim::AnimatorManager::i_->enemy_attack_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", anim::AnimatorManager::i_->enemy_attack_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", anim::AnimatorManager::i_->enemy_attack_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", anim::AnimatorManager::i_->enemy_attack_5);
+                /*auto enemy_attack_1 = res::get_animation("res/enemy/enemy_test.fbx", 0, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_attack_2 = res::get_animation("res/enemy/enemy_test.fbx", 1, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_attack_3 = res::get_animation("res/enemy/enemy_test.fbx", 2, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_attack_4 = res::get_animation("res/enemy/enemy_test.fbx", 3, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_attack_5 = res::get_animation("res/enemy/enemy_test.fbx", 4, rm->enemies[room.enemies_idx[i]]->path_);
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", anim::AnimatorManager::i_->enemy_idle_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", anim::AnimatorManager::i_->enemy_idle_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", anim::AnimatorManager::i_->enemy_idle_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", anim::AnimatorManager::i_->enemy_idle_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", anim::AnimatorManager::i_->enemy_idle_5);
+               auto enemy_death_1 = res::get_animation("res/enemy/enemy_test.fbx", 5, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_death_2 = res::get_animation("res/enemy/enemy_test.fbx", 6, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_death_3 = res::get_animation("res/enemy/enemy_test.fbx", 7, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_death_4 = res::get_animation("res/enemy/enemy_test.fbx", 8, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_death_5 = res::get_animation("res/enemy/enemy_test.fbx", 9, rm->enemies[room.enemies_idx[i]]->path_);
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", anim::AnimatorManager::i_->enemy_death_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", anim::AnimatorManager::i_->enemy_death_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", anim::AnimatorManager::i_->enemy_death_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", anim::AnimatorManager::i_->enemy_death_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", anim::AnimatorManager::i_->enemy_death_5);
+               auto enemy_idle_1 = res::get_animation("res/enemy/enemy_test.fbx", 10, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_idle_2 = res::get_animation("res/enemy/enemy_test.fbx", 11, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_idle_3 = res::get_animation("res/enemy/enemy_test.fbx", 12, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_idle_4 = res::get_animation("res/enemy/enemy_test.fbx", 13, rm->enemies[room.enemies_idx[i]]->path_);
+               auto enemy_idle_5 = res::get_animation("res/enemy/enemy_test.fbx", 14, rm->enemies[room.enemies_idx[i]]->path_);*/
+
+                auto enemy_attack_1 = res::get_animation("res/enemy/enemy_test.fbx", 0, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_attack_2 = res::get_animation("res/enemy/enemy_test.fbx", 1, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_attack_3 = res::get_animation("res/enemy/enemy_test.fbx", 2, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_attack_4 = res::get_animation("res/enemy/enemy_test.fbx", 3, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_attack_5 = res::get_animation("res/enemy/enemy_test.fbx", 4, rm->enemies[room.enemies_idx[i]]->path_);
+
+                auto enemy_death_1 = res::get_animation("res/enemy/enemy_test.fbx", 5, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_death_2 = res::get_animation("res/enemy/enemy_test.fbx", 6, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_death_3 = res::get_animation("res/enemy/enemy_test.fbx", 7, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_death_4 = res::get_animation("res/enemy/enemy_test.fbx", 8, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_death_5 = res::get_animation("res/enemy/enemy_test.fbx", 9, rm->enemies[room.enemies_idx[i]]->path_);
+
+                auto enemy_idle_1 = res::get_animation("res/enemy/enemy_test.fbx", 10, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_idle_2 = res::get_animation("res/enemy/enemy_test.fbx", 11, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_idle_3 = res::get_animation("res/enemy/enemy_test.fbx", 12, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_idle_4 = res::get_animation("res/enemy/enemy_test.fbx", 13, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_idle_5 = res::get_animation("res/enemy/enemy_test.fbx", 14, rm->enemies[room.enemies_idx[i]]->path_);
+
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", enemy_attack_1);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", enemy_attack_2);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", enemy_attack_3);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", enemy_attack_4);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", enemy_attack_5);
+
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", enemy_idle_1);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", enemy_idle_2);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", enemy_idle_3);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", enemy_idle_4);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", enemy_idle_5);
+
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", enemy_death_1);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", enemy_death_2);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", enemy_death_3);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", enemy_death_4);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", enemy_death_5);
 
                 auto enemy_state_display = GameObject::Create(enemy);
                 auto br = BillboardRendererManager::i_->CreateRenderer(res::get_texture("res/textures/quit.png"));
@@ -1480,23 +1534,59 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
 
                 enemy_mesh->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", anim::AnimatorManager::i_->enemy_attack_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", anim::AnimatorManager::i_->enemy_attack_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", anim::AnimatorManager::i_->enemy_attack_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", anim::AnimatorManager::i_->enemy_attack_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", anim::AnimatorManager::i_->enemy_attack_5);
+                /*auto enemy_attack_1 = res::get_animation("res/enemy/enemy_test.fbx", 0, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_attack_2 = res::get_animation("res/enemy/enemy_test.fbx", 1, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_attack_3 = res::get_animation("res/enemy/enemy_test.fbx", 2, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_attack_4 = res::get_animation("res/enemy/enemy_test.fbx", 3, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_attack_5 = res::get_animation("res/enemy/enemy_test.fbx", 4, rm->enemies[room.enemies_idx[i]]->path_);
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", anim::AnimatorManager::i_->enemy_idle_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", anim::AnimatorManager::i_->enemy_idle_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", anim::AnimatorManager::i_->enemy_idle_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", anim::AnimatorManager::i_->enemy_idle_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", anim::AnimatorManager::i_->enemy_idle_5);
+              auto enemy_death_1 = res::get_animation("res/enemy/enemy_test.fbx", 5, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_death_2 = res::get_animation("res/enemy/enemy_test.fbx", 6, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_death_3 = res::get_animation("res/enemy/enemy_test.fbx", 7, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_death_4 = res::get_animation("res/enemy/enemy_test.fbx", 8, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_death_5 = res::get_animation("res/enemy/enemy_test.fbx", 9, rm->enemies[room.enemies_idx[i]]->path_);
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", anim::AnimatorManager::i_->enemy_death_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", anim::AnimatorManager::i_->enemy_death_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", anim::AnimatorManager::i_->enemy_death_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", anim::AnimatorManager::i_->enemy_death_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", anim::AnimatorManager::i_->enemy_death_5);
+              auto enemy_idle_1 = res::get_animation("res/enemy/enemy_test.fbx", 10, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_idle_2 = res::get_animation("res/enemy/enemy_test.fbx", 11, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_idle_3 = res::get_animation("res/enemy/enemy_test.fbx", 12, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_idle_4 = res::get_animation("res/enemy/enemy_test.fbx", 13, rm->enemies[room.enemies_idx[i]]->path_);
+              auto enemy_idle_5 = res::get_animation("res/enemy/enemy_test.fbx", 14, rm->enemies[room.enemies_idx[i]]->path_);*/
+
+                auto enemy_attack_1 = res::get_animation("res/enemy/enemy_test.fbx", 0, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_attack_2 = res::get_animation("res/enemy/enemy_test.fbx", 1, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_attack_3 = res::get_animation("res/enemy/enemy_test.fbx", 2, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_attack_4 = res::get_animation("res/enemy/enemy_test.fbx", 3, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_attack_5 = res::get_animation("res/enemy/enemy_test.fbx", 4, rm->enemies[room.enemies_idx[i]]->path_);
+
+                auto enemy_death_1 = res::get_animation("res/enemy/enemy_test.fbx", 5, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_death_2 = res::get_animation("res/enemy/enemy_test.fbx", 6, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_death_3 = res::get_animation("res/enemy/enemy_test.fbx", 7, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_death_4 = res::get_animation("res/enemy/enemy_test.fbx", 8, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_death_5 = res::get_animation("res/enemy/enemy_test.fbx", 9, rm->enemies[room.enemies_idx[i]]->path_);
+
+                auto enemy_idle_1 = res::get_animation("res/enemy/enemy_test.fbx", 10, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_idle_2 = res::get_animation("res/enemy/enemy_test.fbx", 11, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_idle_3 = res::get_animation("res/enemy/enemy_test.fbx", 12, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_idle_4 = res::get_animation("res/enemy/enemy_test.fbx", 13, rm->enemies[room.enemies_idx[i]]->path_);
+                auto enemy_idle_5 = res::get_animation("res/enemy/enemy_test.fbx", 14, rm->enemies[room.enemies_idx[i]]->path_);
+
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", enemy_attack_1);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", enemy_attack_2);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", enemy_attack_3);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", enemy_attack_4);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", enemy_attack_5);
+
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", enemy_idle_1);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", enemy_idle_2);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", enemy_idle_3);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", enemy_idle_4);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", enemy_idle_5);
+
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", enemy_death_1);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", enemy_death_2);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", enemy_death_3);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", enemy_death_4);
+                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", enemy_death_5);
 
                 auto enemy_state_display = GameObject::Create(enemy);
                 auto br = BillboardRendererManager::i_->CreateRenderer(res::get_texture("res/textures/quit.png"));
@@ -1806,23 +1896,59 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
 
                 enemy_mesh->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", anim::AnimatorManager::i_->enemy_attack_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", anim::AnimatorManager::i_->enemy_attack_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", anim::AnimatorManager::i_->enemy_attack_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", anim::AnimatorManager::i_->enemy_attack_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", anim::AnimatorManager::i_->enemy_attack_5);
+            /*enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", anim::AnimatorManager::i_->enemy_attack_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", anim::AnimatorManager::i_->enemy_attack_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", anim::AnimatorManager::i_->enemy_attack_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", anim::AnimatorManager::i_->enemy_attack_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", anim::AnimatorManager::i_->enemy_attack_5);
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", anim::AnimatorManager::i_->enemy_idle_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", anim::AnimatorManager::i_->enemy_idle_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", anim::AnimatorManager::i_->enemy_idle_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", anim::AnimatorManager::i_->enemy_idle_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", anim::AnimatorManager::i_->enemy_idle_5);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", anim::AnimatorManager::i_->enemy_idle_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", anim::AnimatorManager::i_->enemy_idle_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", anim::AnimatorManager::i_->enemy_idle_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", anim::AnimatorManager::i_->enemy_idle_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", anim::AnimatorManager::i_->enemy_idle_5);
 
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", anim::AnimatorManager::i_->enemy_death_1);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", anim::AnimatorManager::i_->enemy_death_2);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", anim::AnimatorManager::i_->enemy_death_3);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", anim::AnimatorManager::i_->enemy_death_4);
-                enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", anim::AnimatorManager::i_->enemy_death_5);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", anim::AnimatorManager::i_->enemy_death_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", anim::AnimatorManager::i_->enemy_death_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", anim::AnimatorManager::i_->enemy_death_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", anim::AnimatorManager::i_->enemy_death_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", anim::AnimatorManager::i_->enemy_death_5);*/
+
+            auto enemy_attack_1 = res::get_animation("res/enemy/enemy_test.fbx", 0, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_attack_2 = res::get_animation("res/enemy/enemy_test.fbx", 1, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_attack_3 = res::get_animation("res/enemy/enemy_test.fbx", 2, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_attack_4 = res::get_animation("res/enemy/enemy_test.fbx", 3, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_attack_5 = res::get_animation("res/enemy/enemy_test.fbx", 4, rm->enemies[room.enemies_idx[i]]->path_);
+
+            auto enemy_death_1 = res::get_animation("res/enemy/enemy_test.fbx", 5, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_death_2 = res::get_animation("res/enemy/enemy_test.fbx", 6, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_death_3 = res::get_animation("res/enemy/enemy_test.fbx", 7, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_death_4 = res::get_animation("res/enemy/enemy_test.fbx", 8, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_death_5 = res::get_animation("res/enemy/enemy_test.fbx", 9, rm->enemies[room.enemies_idx[i]]->path_);
+
+            auto enemy_idle_1 = res::get_animation("res/enemy/enemy_test.fbx", 10, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_idle_2 = res::get_animation("res/enemy/enemy_test.fbx", 11, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_idle_3 = res::get_animation("res/enemy/enemy_test.fbx", 12, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_idle_4 = res::get_animation("res/enemy/enemy_test.fbx", 13, rm->enemies[room.enemies_idx[i]]->path_);
+            auto enemy_idle_5 = res::get_animation("res/enemy/enemy_test.fbx", 14, rm->enemies[room.enemies_idx[i]]->path_);
+
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_1", enemy_attack_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_2", enemy_attack_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_3", enemy_attack_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_4", enemy_attack_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Attack_5", enemy_attack_5);
+
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_1", enemy_idle_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_2", enemy_idle_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_3", enemy_idle_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_4", enemy_idle_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Idle_5", enemy_idle_5);
+
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_1", enemy_death_1);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_2", enemy_death_2);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_3", enemy_death_3);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_4", enemy_death_4);
+            enemy_mesh->GetComponent<components::Animator>()->AddAnimation("Death_5", enemy_death_5);
 
                 auto enemy_state_display = GameObject::Create(enemy);
                 auto br = BillboardRendererManager::i_->CreateRenderer(res::get_texture("res/textures/quit.png"));
