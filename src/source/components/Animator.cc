@@ -25,7 +25,7 @@ void components::Animator::UpdateAnimation(float dt)
 {
 	if (m_CurrentAnimation && IsAttackAnimation(m_CurrentAnimation))
 	{
-		dt *= 2; // Speed up the delta time for attack animations
+		dt *= 4; // Speed up the delta time for attack animations
 	}
 
 	m_CurrentTime += dt;
