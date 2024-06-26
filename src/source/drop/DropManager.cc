@@ -112,6 +112,8 @@ void drop::DropManager::PickUpSpell(std::shared_ptr<GameObject> player)
 	}
 	else
 	{
-
+		player_ssc->DropSpell();
+		player_ssc->type_ = drop_ssc->type_;
+		closest->Destroy();
 	}
 }
