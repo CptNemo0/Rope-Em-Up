@@ -1,5 +1,5 @@
 #include "../../headers/components/SpellSlotComponent.h"
-
+#include "../../headers/drop/DropManager.h"
 
 components::SpellSlotComponent::SpellSlotComponent(SSC_INIT init)
 {

@@ -7,9 +7,12 @@
 #include "../GameObject.h"
 #include "../generation/Room.h"
 #include "../components/HealthComponent.h"
-
+#include "../components/SpellSlotComponent.h"
 namespace drop
 {
+    const float kPickUpRange = 1.5f;
+    const float kPickUpRange2 = kPickUpRange * kPickUpRange;
+
 	class DropManager
 	{
     public:
@@ -37,6 +40,8 @@ namespace drop
             }
         }
 
+        generation::Room* room_;
+
 		std::stack<ExpDrop> exp_stack_;
 		std::stack<HpDrop> hp_stack_;
 		std::stack<SpellDrop> spell_stack_;
@@ -48,6 +53,8 @@ namespace drop
 		void DropExp();
 		void DropHp(std::vector<std::shared_ptr<GameObject>>& to_be_healed);
 		void DropSpells(generation::Room& room);
+
+        void PickUpSpell(std::shared_ptr<GameObject> player);
 	};
 }
 

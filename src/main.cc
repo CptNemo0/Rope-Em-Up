@@ -597,6 +597,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     generation::Room* room = &rlg.rooms[glm::ivec2(0, 0)];
     SkullMinionManager::i_->room_ = room;
+    drop::DropManager::i_->room_ = room;
     generation::GenerateRoom(*room, &rg_settings, &models);
     generation::BuildRoom(*room, &models, GBufferPassShader, &rlg, trail_texture, ParticleShader);
     pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
@@ -629,7 +630,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_2->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_2->transform_));
     player_2->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_2));
     player_2->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_2->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
+    player_2->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
     
     player_2->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     auto emmiter_player_2 = player_2->GetComponent<components::ParticleEmitter>();
@@ -1243,8 +1244,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         static float slowdown_smooth_factor = 0.055f;
         if (HealthManager::i_->something_died_ && HealthManager::i_->what_ == MONSTER)
         {
-            //cout << HealthManager::i_->what_ << " " << HealthManager::i_->where_.x << " " << HealthManager::i_->where_.z << endl;
-
             auto ss1 = player_1->GetComponent<components::SpellSlotComponent>()->type_;
             auto ss2 = player_2->GetComponent<components::SpellSlotComponent>()->type_;
 
@@ -1280,6 +1279,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         drop::DropManager::i_->DropHp(players_vector);
         drop::DropManager::i_->DropSpells(*room);
         drop::DropManager::i_->DropExp();
+
+        //cout << drop::DropManager::i_->room_->drops->transform_->children_.size() << endl;
 
 #pragma endregion
 

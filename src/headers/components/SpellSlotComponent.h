@@ -7,7 +7,7 @@
 
 #include "../res/Resources.h"
 #include "Component.h"
-#include "../drop/DropManager.h"
+
 #include "../drop/Drop.h"
 #include "../drop/DropArgs.h"
 #include "../drop/SpellDropQueue.h"

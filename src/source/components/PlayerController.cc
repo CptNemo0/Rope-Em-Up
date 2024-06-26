@@ -1,7 +1,7 @@
 #include "../../headers/components/PlayerController.h"
 #include "../../headers/SpellCaster.h"
 #include "../../headers/SceneManager.h"
-
+#include "../../headers/drop/DropManager.h"
 components::PlayerController::PlayerController(int gamepadID)
 {
     this->gamepadID_ = gamepadID;
@@ -89,7 +89,6 @@ void components::PlayerController::OnAction(Action action, input::State state)
         {
             if (state.button)
             {
-                cout << "AAAAAAAAAAAA" << endl;
                 SpellCaster::i_->QueueUpSpell(gameObject_.lock()->GetComponent<components::SpellSlotComponent>());
                 break;
             }
@@ -105,6 +104,7 @@ void components::PlayerController::OnAction(Action action, input::State state)
         case Action::INTERACT:
         {
             cout << "INTERACT!!!" << endl;
+            drop::DropManager::i_->PickUpSpell(gameObject_.lock());
             break;
         }
     }

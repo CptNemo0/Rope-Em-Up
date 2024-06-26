@@ -50,3 +50,68 @@ void drop::DropManager::DropSpells(generation::Room& room)
 		spell_stack_.pop();
 	}
 }
+
+void drop::DropManager::PickUpSpell(std::shared_ptr<GameObject> player)
+{
+	if (player == nullptr)
+	{
+		return;
+	}
+
+	if (room_ == nullptr)
+	{
+		cout << "room_" << endl;
+		return;
+	}
+
+	if (room_->drops == nullptr)
+	{
+		cout << "room_->drops is null" << endl;
+		return;
+	}
+
+	if (room_->drops->transform_ == nullptr)
+	{
+		cout << "room_->drops->transform_ is null" << endl;
+		return;
+	}
+
+	if (!room_->drops->transform_->children_.size())
+	{
+		return;
+	}
+
+	std::shared_ptr<GameObject> closest;
+	float min_distance = FLT_MAX;
+
+	for (auto& transform : room_->drops->transform_->children_)
+	{
+		float distance = glm::distance2(player->transform_->get_global_position(), transform->get_global_position());
+		if (distance < kPickUpRange2)
+		{
+			if (distance < min_distance)
+			{
+				min_distance = distance;
+				closest = transform->game_object_;
+			}
+		}
+	}
+
+	if (closest == nullptr)
+	{
+		return;
+	}
+
+	auto drop_ssc = closest->GetComponent<components::SpellSlotComponent>();
+	auto player_ssc = player->GetComponent<components::SpellSlotComponent>();
+
+	if (player_ssc->type_ == NOT_A_SPELL)
+	{
+		player_ssc->type_ = drop_ssc->type_;
+		closest->Destroy();
+	}
+	else
+	{
+
+	}
+}

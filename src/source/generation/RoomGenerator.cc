@@ -1675,7 +1675,7 @@ void generation::ChangeRooms(Room*& room, RoomLayoutGenerator& rlg, RoomGenerati
     rlg.rooms_traversed_++;
 
     SkullMinionManager::i_->room_ = &rlg.rooms[next_room_pos];
-
+    drop::DropManager::i_->room_ = &rlg.rooms[next_room_pos];
     if (room->is_built)
     {
         room->room_object->Enable();
