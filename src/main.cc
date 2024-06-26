@@ -611,7 +611,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     player_1->AddComponent(pbd::PBDManager::i_->CreateParticle(2.0f, 0.9f, player_1->transform_));
     player_1->AddComponent(make_shared<components::PlayerController>(GLFW_JOYSTICK_1));
     player_1->AddComponent(HealthManager::i_->CreateHealthComponent(100.0f, PLAYER));
-    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::GET_SPELL_FROM_QUEUE));
+    player_1->AddComponent(make_shared<components::SpellSlotComponent>(components::SSC_INIT::NO_SPELL));
     player_1->AddComponent(make_shared<components::ParticleEmitter>(1000, trail_texture, ParticleShader, true));
     
     auto emmiter_player_1 = player_1->GetComponent<components::ParticleEmitter>();
@@ -1426,7 +1426,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
                         spell_timer_text->Disable();
                     },
 
-                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor, &HUDBarShader](float delta_time)
+                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor, &HUDBarShader, &spell_timer_border, &spell_timer_text](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
                         time_stop_completion_percentage += delta_time;
@@ -1437,6 +1437,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
                             postprocessor.slowed_time = false;
                             SpellCaster::i_->Cast();
                             Timer::RemoveTimer(id);
+                            spell_timer_border->Disable();
+                            spell_timer_text->Disable();
                         }
 
                     },
