@@ -117,11 +117,14 @@ void ai::OnAlertState::Execute(EnemyStateMachine* machine)
 	}
 	if (machine->billboard_renderer_ != nullptr) machine->billboard_renderer_->texture_ = res::get_texture("res/emoji/alert.png");
 	
-	Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
-	audio_shuffler_.SetData({ res::get_sound("res/sounds/alert1.wav"), res::get_sound("res/sounds/alert2.wav"), res::get_sound("res/sounds/alert3.wav") });
+	if (machine->was_idle_)
+	{
+		Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
+		audio_shuffler_.SetData({ res::get_sound("res/sounds/alert1.wav"), res::get_sound("res/sounds/alert2.wav"), res::get_sound("res/sounds/alert3.wav") });
 
-	audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
-	machine->was_idle_ = false;
+		audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
+		machine->was_idle_ = false;
+	}
 	
 	if (machine->is_choked_)
 	{
