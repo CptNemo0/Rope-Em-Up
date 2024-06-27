@@ -52,28 +52,31 @@ void Menu::OnAction(Action action, input::State state)
         case Action::MENU_MOVE:
         {
             static float scale = glm::sqrt(2) * 0.5f;
-            glm::ivec2 move_dir = {glm::round(state.axis.x * scale), glm::round(state.axis.y * scale)};
+            glm::ivec2 move_dir = {glm::round(state.axis.x), glm::round(state.axis.y)};
             move_dir *= -1;
 
             if (move_dir != glm::ivec2(0))
             {
-                move_lock_ = true;
-                glm::ivec2 next_pos = current_pos_;
-                while (true)
+                if (!move_lock_)
                 {
-                    if (layout_.contains(next_pos + move_dir))
+                    move_lock_ = true;
+                    glm::ivec2 next_pos = current_pos_;
+                    while (true)
                     {
-                        next_pos += move_dir;
-                        if (!layout_[next_pos]->enabled_)
-                            continue;
-                        else
+                        if (layout_.contains(next_pos + move_dir))
                         {
-                            current_pos_ = next_pos;
-                            break;
+                            next_pos += move_dir;
+                            if (!layout_[next_pos]->enabled_)
+                                continue;
+                            else
+                            {
+                                current_pos_ = next_pos;
+                                break;
+                            }
                         }
+                        else
+                            break;
                     }
-                    else
-                        break;
                 }
             }
             else
