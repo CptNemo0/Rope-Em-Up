@@ -147,6 +147,14 @@ void HitboxManager::Check(std::shared_ptr<components::HitboxCollider> hitbox)
 								anim->PlayAnimation("Damage", 2, 1.0f);
 							}
 						}
+						if (auto pc = collider->gameObject_.lock()->GetComponent<components::PlayerController>(); pc != nullptr)
+						{
+							auto sound = pc->damage_sounds_.Pop();
+							Timer::AddTimer(0.1f, [sound]()
+							{
+								audio::AudioManager::i_->PlaySound(sound, 1.0f);
+							});
+						}
 					}
 				}
 			}

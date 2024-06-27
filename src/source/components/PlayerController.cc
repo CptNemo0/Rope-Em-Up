@@ -7,12 +7,16 @@ components::PlayerController::PlayerController(int gamepadID)
 {
     this->gamepadID_ = gamepadID;
     std::vector<s_ptr<audio::AudioBuffer>> data;
+    std::vector<s_ptr<audio::AudioBuffer>> damage_data;
     if (gamepadID == GLFW_JOYSTICK_1)
     {
         auto anim = res::get_animation("res/players/female/kobieta.fbx", 5, "res/players/female/kobieta.fbx");
         walk_timer_delay_ = anim->GetDuration() / anim->GetTicksPerSecond() * 0.5f;
         data.push_back(res::get_sound("res/sounds/walk3.wav"));
         data.push_back(res::get_sound("res/sounds/walk4.wav"));
+        damage_data.push_back(res::get_sound("res/sounds/woman1.wav"));
+        damage_data.push_back(res::get_sound("res/sounds/woman2.wav"));
+        damage_data.push_back(res::get_sound("res/sounds/woman3.wav"));
     }
     if (gamepadID == GLFW_JOYSTICK_2)
     {
@@ -20,8 +24,12 @@ components::PlayerController::PlayerController(int gamepadID)
         walk_timer_delay_ = anim->GetDuration() / anim->GetTicksPerSecond() * 0.25f;
         data.push_back(res::get_sound("res/sounds/walk1.wav"));
         data.push_back(res::get_sound("res/sounds/walk2.wav"));
+        damage_data.push_back(res::get_sound("res/sounds/man1.wav"));
+        damage_data.push_back(res::get_sound("res/sounds/man2.wav"));
+        damage_data.push_back(res::get_sound("res/sounds/man3.wav"));
     }
     walk_sounds_.SetData(data);
+    damage_sounds_.SetData(damage_data);
 
     auto grass_data = std::vector<s_ptr<audio::AudioBuffer>>();
     grass_data.push_back(res::get_sound("res/sounds/grass1.wav"));
@@ -55,7 +63,7 @@ void components::PlayerController::Update()
     else
     {
         move_generator_->magnitude_ = speed_;
-        if (glm::length(direction_) > 0.0f && !is_pulling_)
+        if (glm::length(direction_) > 0.0f)
         {
             gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Run", 1);
         }

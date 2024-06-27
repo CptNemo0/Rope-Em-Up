@@ -10,12 +10,13 @@ TutorialManager::TutorialManager(GLFWvidmode* mode)
 void TutorialManager::Init()
 {
 	float aspect_ratio = Global::i_->active_camera_->get_aspect_ratio();
+	glm::vec3 color = {1.0f, 0.95f, 0.9f};
 
 	int width = mode_->width;
 	int height = mode_->height;
 	auto movement_tutorial = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_text_root_);
 	string movement_tutorial_info = "Use the left stick to move your characters.";
-	movement_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), movement_tutorial_info, glm::vec3(1.0f)));
+	movement_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), movement_tutorial_info, color));
 	movement_tutorial->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
 	movement_tutorial->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / aspect_ratio);
 	movement_tutorial->transform_->set_position(glm::vec3(-0.32f, -0.75f, 0.0f));
@@ -24,7 +25,7 @@ void TutorialManager::Init()
 
 	auto choke_tutorial = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_text_root_);
 	string choke_tutorial_info = "   Wrap your enemies with the rope,\nthen pull both triggers to choke them.";
-	choke_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), choke_tutorial_info, glm::vec3(1.0f)));
+	choke_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), choke_tutorial_info, color));
 	choke_tutorial->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
 	choke_tutorial->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / aspect_ratio);
 	choke_tutorial->transform_->set_position(glm::vec3(-0.28f, -0.75f, 0.0f));
@@ -33,16 +34,16 @@ void TutorialManager::Init()
 
 	auto spell_tutorial = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_text_root_);
 	string spell_tutorial_info = "Press the square button to pick up spell balls dropped by enemies.";
-	spell_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), spell_tutorial_info, glm::vec3(1.0f)));
+	spell_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), spell_tutorial_info, color));
 	spell_tutorial->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
 	spell_tutorial->transform_->scale_in({ 1.0f, 0.0f, 0.0f }, 1.0f / aspect_ratio);
-	spell_tutorial->transform_->set_position(glm::vec3(-0.36f, -0.75f, 0.0f));
+	spell_tutorial->transform_->set_position(glm::vec3(-0.51f, -0.75f, 0.0f));
 	spell_tutorial->Disable();
 	tutorial_map[4] = spell_tutorial;
 
 	auto level_tutorial = GameObject::Create(SceneManager::i_->scenes_["game"]->HUD_text_root_);
 	string level_tutorial_info = "   Each slain tentacle grants you experience points.\nSpend them to upgrade your rope or character attributes.";              
-	level_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), level_tutorial_info, glm::vec3(1.0f)));
+	level_tutorial->AddComponent(std::make_shared<components::TextRenderer>(res::get_shader("res/shaders/HUDText.vert", "res/shaders/HUDText.frag"), res::get_font("res/fonts/CourierPrime-Regular.ttf"), level_tutorial_info, color));
 	level_tutorial->transform_->set_scale(glm::vec3(0.001f, 0.001f, 1.0f));
 	level_tutorial->transform_->scale_in({ 1.0f, 0.0f, 0.0f }, 1.0f / aspect_ratio);
 	level_tutorial->transform_->set_position(glm::vec3(-0.44f, -0.75f, 0.0f));

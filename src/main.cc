@@ -1267,6 +1267,22 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     altar_menu->Disable();
     game_scene->menus_["altar"] = altar_menu;
 
+    auto game_over_HUD_root = GameObject::Create();
+
+    auto game_over_background = GameObject::Create(game_over_HUD_root);
+    game_over_background->AddComponent(make_shared<components::HUDRenderer>(pause_menu_background_tex, HUDshader, glm::vec4(0.5f, 0.3f, 0.3f, 1.0f)));
+
+    auto game_over_text = GameObject::Create(game_over_HUD_root);
+    game_over_text->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/gameover.png"), HUDshader));
+    game_over_text->transform_->set_scale({1.0f, Global::i_->active_camera_->get_aspect_ratio(), 1.0f});
+    game_over_text->transform_->scale({5.0f, 1.0f, 1.0f});
+    game_over_text->transform_->scale({0.2f, 0.2f, 1.0f});
+
+    auto game_over_scene = make_shared<Scene>();
+    game_over_scene->HUD_root_ = game_over_HUD_root;
+    game_over_scene->camera_ = menuCamera;
+    SceneManager::i_->AddScene("game_over", game_over_scene);
+
     SceneManager::i_->SwitchScene("main_menu");
 
     TutorialManager::i_->Init();

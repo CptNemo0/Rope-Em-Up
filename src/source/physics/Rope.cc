@@ -192,7 +192,7 @@ void Rope::ChokeCheck(generation::Room *room)
 		if (choked.contains(HEALTH_TYPE::MONSTER))
 		{
 			cout << "CHOKE'EM MOTHAFUCKA!!!!\n";
-			audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
+			audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop(), 0.6f);
 
 			///dealing dmg to enemy animation to implement
 		}

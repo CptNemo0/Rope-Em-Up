@@ -3,6 +3,7 @@
 #include "../headers/components/ExpDropComponent.h"
 #include "../headers/components/HpDropComponent.h"
 #include "../headers/components/SpellSlotComponent.h"
+#include "../headers/SceneManager.h"
 
 HealthManager* HealthManager::i_ = nullptr;
 
@@ -77,15 +78,25 @@ void HealthManager::DeathUpdate()
 					audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
 				}
 
-				ManageDeath(h->gameObject_.lock());
-				if (h->type_ != PLAYER)
+				if (what_ != PLAYER)
 				{
+					ManageDeath(h->gameObject_.lock());
 					h->gameObject_.lock()->Destroy();
 				}
-				else if (h->type_ = PLAYER)
+				else if (what_ == PLAYER)
 				{
-					auto anim = h->gameObject_.lock()->transform_->children_[0]->game_object_->GetComponent<components::Animator>();
-					anim->PlayAnimation("Death", 4, 2.0f);
+					auto anim = h->gameObject_.lock()->GetComponent<components::Animator>();
+					anim->SetAnimation("Death", 4);
+					PlayerStatsManager::i_->player_1_->GetComponent<components::PlayerController>()->active_ = false;
+					PlayerStatsManager::i_->player_2_->GetComponent<components::PlayerController>()->active_ = false;
+					Timer::AddTimer(1.8f, []()
+					{
+						SceneManager::i_->SwitchScene("game_over");
+					});
+					Timer::AddTimer(7.0f, []()
+					{
+						SceneManager::i_->SwitchScene("main_menu");
+					});
 				}
 			}
 		}

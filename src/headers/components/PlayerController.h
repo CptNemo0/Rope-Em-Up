@@ -37,6 +37,7 @@ public:
     bool walking_timer_lock_ = false;
     Shuffler<s_ptr<audio::AudioBuffer>> walk_sounds_;
     Shuffler<s_ptr<audio::AudioBuffer>> grass_walk_sounds;
+    Shuffler<s_ptr<audio::AudioBuffer>> damage_sounds_;
 
     void Start() override;
     void Update() override;
