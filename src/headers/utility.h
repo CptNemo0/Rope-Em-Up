@@ -8,9 +8,6 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-#include "imgui_impl/imgui_impl_glfw.h"
-#include "imgui_impl/imgui_impl_opengl3.h"
-
 #include "Camera.h"
 
 namespace utility
@@ -47,8 +44,8 @@ namespace utility
         mode = (GLFWvidmode*)glfwGetVideoMode(monitor);
 
         // SET CUSTOM RESOLUTION
-        mode->width = 1600;
-        mode->height = 900;
+        // mode->width = 1600;
+        // mode->height = 900;
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -58,7 +55,7 @@ namespace utility
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), nullptr, nullptr);
+        window = glfwCreateWindow(mode->width, mode->height, window_name.c_str(), monitor, nullptr);
             
         if (window == nullptr)
         {
@@ -89,23 +86,6 @@ namespace utility
 
     void InitImGUI(GLFWwindow*& window)
     {
-        bool return_value = false;
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        //ImGui::StyleColorsLight();
-
-        // Setup Platform/Renderer backends
-        return_value = ImGui_ImplGlfw_InitForOpenGL(window, true);
-#ifdef __EMSCRIPTEN__
-        ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
-#endif
-        return_value *= ImGui_ImplOpenGL3_Init("#version 330");
     }
 
     void DebugCameraMovement(GLFWwindow* window, s_ptr <llr::Camera> camera, float delta_time)

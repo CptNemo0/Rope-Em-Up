@@ -29,7 +29,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 ${glad_SOURCE_DIR}
 ${stb_image_SOURCE_DIR}
 ${STB_EASY_FONT_SOURCE_DIR}
-${imgui_SOURCE_DIR})
+)
 
 target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES}
 	glad
@@ -40,7 +40,6 @@ target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES}
 	stb_truetype
 	assimp
 	glfw
-	imgui
 	spdlog
 	glm::glm
 	OpenAL::OpenAL
