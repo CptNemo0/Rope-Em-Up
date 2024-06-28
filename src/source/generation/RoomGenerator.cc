@@ -1750,9 +1750,9 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 emitter2->start_color_ = {1.0f, 1.0f, 1.0f, 0.2f};
                 altar_emitter2->AddComponent(emitter2);
 
-                auto renderer = GameObject::Create();
-                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer({0.0f, 0.0f, 0.0f}, {-32.0f, 0.0f, -32.0f}, 400.0f));
-                room.floors->transform_->AddChild(renderer->transform_);
+                // auto renderer = GameObject::Create();
+                // renderer->AddComponent(GrassRendererManager::i_->CreateRenderer({0.0f, 0.0f, 0.0f}, {-32.0f, 0.0f, -32.0f}, 200.0f));
+                // room.floors->transform_->AddChild(renderer->transform_);
             }
 
             //generate gates

@@ -936,6 +936,8 @@ loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_r
     new_game_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/new_game.png"), HUDshader));
     menu->layout_[{0, 0}] = make_shared<MenuItem>(new_game_button, []()
     {
+        
+
         SceneManager::i_->SwitchScene("game");
     });
 
@@ -1417,7 +1419,7 @@ loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_r
                         spell_timer_text->Disable();
                     },
 
-                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor, &HUDBarShader, &spell_timer_border, &spell_timer_text](float delta_time)
+                    [&fixed_update_rate, spell_timer_id, &window, &postprocessor, &HUDBarShader, &spell_timer_border, &spell_timer_text](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
                         time_stop_completion_percentage += delta_time;
@@ -1427,7 +1429,7 @@ loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_r
                             fixed_update_rate = pbd::kMsPerUpdate;
                             postprocessor.slowed_time = false;
                             SpellCaster::i_->Cast();
-                            Timer::RemoveTimer(id);
+                            Timer::RemoveTimer(spell_timer_id);
                             spell_timer_border->Disable();
                             spell_timer_text->Disable();
                         }
