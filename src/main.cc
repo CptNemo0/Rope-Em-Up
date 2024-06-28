@@ -1299,9 +1299,7 @@ loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_r
         float delta_time = current_time - previous_time;
 
         lag += delta_time;
-        #ifdef _DEBUG
-            delta_time = glm::clamp(delta_time, 0.0f, (1.0f / 30.0f));
-        #endif
+        delta_time = glm::clamp(delta_time, 0.0f, (1.0f / 10.0f));
 
         previous_time = current_time;
     

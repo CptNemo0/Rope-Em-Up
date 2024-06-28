@@ -38,25 +38,10 @@ namespace components
 			if (this->type_ == MONSTER)
 			{
 				auto animator = gameObject_.lock()->transform_->children_[0]->game_object_->GetComponent<components::Animator>();
-				if (health_ == 1)
+				auto anim_name = "Death_" + std::to_string((int)health_);
+				if (animator != nullptr && animator->m_Animations.contains(anim_name))
 				{
-					animator->PlayAnimation("Death_1", 2, 0.9f);
-				}
-				else if (health_ == 2)
-				{
-					animator->PlayAnimation("Death_2", 2, 0.9f);
-				}
-				else if (health_ == 3)
-				{
-					animator->PlayAnimation("Death_3", 2, 0.9f);
-				}
-				else if (health_ == 4)
-				{
-					animator->PlayAnimation("Death_4", 2, 0.9f);
-				}
-				else if (health_ == 5)
-				{
-					animator->PlayAnimation("Death_5", 2, 0.9f);
+					animator->PlayAnimation(anim_name, 3);
 				}
 			}
 

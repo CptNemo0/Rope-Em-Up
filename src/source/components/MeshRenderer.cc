@@ -1,5 +1,7 @@
 #include "../../headers/components/MeshRenderer.h"
 
+#include "../../headers/components/Animator.h"
+
 components::MeshRenderer::MeshRenderer(s_ptr<Model> model, s_ptr<Shader> shader)
 {
 	assert(model);
@@ -24,6 +26,13 @@ void components::MeshRenderer::Update()
 {
     shader_->SetMatrix4("model_matrix", transform_->get_model_matrix());
 	shader_->SetVec3("in_color", color_);
+
+	auto anim = gameObject_.lock()->GetComponent<components::Animator>();
+	if (anim)
+	{
+		model_->UpdateBoneTransforms(anim->GetFinalBoneMatrices());
+	}
+
 	if (model_->m_BoneCounter > 0)
 	{
 		shader_->SetBool("useBones", true);

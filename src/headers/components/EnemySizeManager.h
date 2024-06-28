@@ -24,9 +24,7 @@ namespace components
 		~EnemySizeManager() = default;
 
 		std::shared_ptr<HealthComponent> health_component_;
-		std::shared_ptr<GameObject> model_;
 		std::shared_ptr<components::Animator> animator;
-		int last_health_;
 
 		// Inherited via Component
 		void Start() override;

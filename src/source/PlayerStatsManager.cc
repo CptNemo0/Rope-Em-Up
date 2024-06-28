@@ -91,12 +91,12 @@ void PlayerStatsManager::LevelUp()
 		auto anim2 = player_2_->GetComponent<components::Animator>();
 		if (anim1 != nullptr)
 		{
-			anim1->PlayAnimation("Upgrade", 4, 1.0f);
+			anim1->PlayAnimation("Upgrade", 3);
 		}
 
 		if (anim2 != nullptr)
 		{
-			anim2->PlayAnimation("Upgrade", 4, 1.0f);
+			anim2->PlayAnimation("Upgrade", 3);
 		}
 
 		auto tex = res::get_texture("res/particles/levelup.png");
