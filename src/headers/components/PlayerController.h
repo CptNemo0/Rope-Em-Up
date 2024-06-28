@@ -39,6 +39,8 @@ public:
     Shuffler<s_ptr<audio::AudioBuffer>> grass_walk_sounds;
     Shuffler<s_ptr<audio::AudioBuffer>> damage_sounds_;
 
+    void ForceStop();
+
     void Start() override;
     void Update() override;
     void Destroy() override;

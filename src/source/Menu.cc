@@ -91,41 +91,43 @@ void Menu::OnAction(Action action, input::State state)
             if (state.button && !layout_[current_pos_]->lock_)
             {
                 auto size = layout_[current_pos_]->object_->transform_->get_scale();
-                auto object = layout_[current_pos_]->object_;
+                auto menu_item = layout_[current_pos_];
                 layout_[current_pos_]->lock_ = true;
+                move_lock_ = true;
 
                 Timer::AddTimer(0.05f,
-                [size, object, this]()
+                [size, menu_item, this]()
                 {
-                    object->transform_->set_scale(0.9f * size);
+                    menu_item->object_->transform_->set_scale(0.9f * size);
                     float progress = layout_[current_pos_]->progress_ = 0.0f;
                     Timer::AddTimer(0.1f,
-                    [size, object, this]()
+                    [size, menu_item, this]()
                     {
-                        object->transform_->set_scale(size);
-                        layout_[current_pos_]->lock_ = false;
-                        layout_[current_pos_]->progress_ = 0.0f;
-                        if (layout_[current_pos_]->OnPress)
+                        menu_item->object_->transform_->set_scale(size);
+                        menu_item->lock_ = false;
+                        menu_item->progress_ = 0.0f;
+                        if (menu_item->OnPress)
                         {
-                            layout_[current_pos_]->OnPress();
+                            menu_item->OnPress();
                         }
+                        move_lock_ = false;
                     },
-                    [size, object, this](float delta_time)
+                    [size, menu_item, this](float delta_time)
                     {
-                        float progress = layout_[current_pos_]->progress_ / 0.1f;
+                        float progress = menu_item->progress_ / 0.1f;
 
-                        object->transform_->set_scale(glm::mix(size * 0.9f, size, progress));
+                        menu_item->object_->transform_->set_scale(glm::mix(size * 0.9f, size, progress));
 
-                        layout_[current_pos_]->progress_ += delta_time;
+                        menu_item->progress_ += delta_time;
                     });
                 },
-                [size, object, this](float delta_time)
+                [size, menu_item, this](float delta_time)
                 {
-                    float progress = layout_[current_pos_]->progress_ / 0.05f;
+                    float progress = menu_item->progress_ / 0.05f;
 
-                    object->transform_->set_scale(glm::mix(size, size * 0.9f, progress));
+                    menu_item->object_->transform_->set_scale(glm::mix(size, size * 0.9f, progress));
 
-                    layout_[current_pos_]->progress_ += delta_time;
+                    menu_item->progress_ += delta_time;
                 });
             }
         }

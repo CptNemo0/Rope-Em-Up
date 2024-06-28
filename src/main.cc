@@ -361,22 +361,22 @@ auto loading_root = GameObject::Create();
 loading_root->transform_->set_scale({0.25f, 0.25f, 1.0f});
 loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
 
-auto loading_dot = GameObject::Create(loading_root);
-loading_dot->transform_->set_scale({0.1f, 0.1f, 1.0f});
-loading_dot->transform_->set_position({-1.0f, -3.0f, 0.0f});
-loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/loading_dot.png"), res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag")));
-
 {
     auto logo_texture = res::get_texture("res/textures/loading_screen.png");
+    auto logo_texture2 = res::get_texture("res/textures/loading_screen2.png");
     auto text_texture = res::get_texture("res/textures/game_is_loading.png");
     auto hud_shader = res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag");
 
     auto logo = GameObject::Create(loading_root);
-    logo->transform_->set_position({0.0f, 1.0f, 0.0f});
+    logo->transform_->set_position({-1.5f, 1.0f, 0.0f});
     logo->AddComponent(make_shared<components::HUDRenderer>(logo_texture, hud_shader));
 
+    auto logo2 = GameObject::Create(loading_root);
+    logo2->transform_->set_position({1.5f, 1.0f, 0.0f});
+    logo2->AddComponent(make_shared<components::HUDRenderer>(logo_texture2, hud_shader));
+
     auto text = GameObject::Create(loading_root);
-    text->transform_->scale({ 6.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.6f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f });
+    text->transform_->scale({ 5.0f, 1.0f, 1.0f });
     text->transform_->set_position({0.0f, -1.0f, 0.0f});
     text->AddComponent(make_shared<components::HUDRenderer>(text_texture, hud_shader));
 
@@ -389,18 +389,19 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    logo->PropagateUpdate();
-    text->PropagateUpdate();
+    loading_root->PropagateUpdate();
 
     glfwSwapBuffers(window);
 
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    logo->PropagateUpdate();
-    text->PropagateUpdate();
 
-    logo->Destroy();
-    text->Destroy();
+    loading_root->PropagateUpdate();
+
+    glfwSwapBuffers(window);
+    glfwSwapBuffers(window);
 }
+
 
 #pragma endregion Loading Screen
 
@@ -498,11 +499,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto lamp_model = res::get_model(kLampPath);
     auto lamp_c_model = res::get_model(kLampCPath);
 
-    loading_dot->PropagateUpdate();
-    glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
-
     auto bone_model = res::get_model(kBonePath);
     auto leafs_model = res::get_model(kLeafsPath);
     auto box_model = res::get_model(kBoxPath);
@@ -515,10 +511,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     auto grass_model = res::get_model(kGrassPath);
 
-    loading_dot->PropagateUpdate();
     glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     // Main modules
     auto mod1_model = res::get_model(kMod1Path);
@@ -528,11 +521,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto mod5_model = res::get_model(kMod5Path);
     auto mod6_model = res::get_model(kMod6Path);
     auto mod7_model = res::get_model(kMod7Path);
-
-    loading_dot->PropagateUpdate();
-    glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     auto barell_model = res::get_model(kBarellPath);
 
@@ -641,17 +629,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     std::vector<std::shared_ptr<GameObject>> players_vector{ player_1, player_2 };
 #pragma region Animations
 
+    glfwSwapBuffers(window);
+
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
     auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
 	auto F_anim_idle = res::get_animation(kFemalePlayerMeshPath, 2, F_player_model->path_);
     auto F_anim_pull = res::get_animation(kFemalePlayerMeshPath, 3, F_player_model->path_);
 	auto F_anim_upgrade = res::get_animation(kFemalePlayerMeshPath, 4, F_player_model->path_);
 	auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 5, F_player_model->path_);
-
-    loading_dot->PropagateUpdate();
-    glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     player_1->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
     player_1->GetComponent<components::Animator>()->AddAnimation("Damage", F_anim_gethit);
@@ -668,11 +653,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto M_anim_pull = res::get_animation(kMalePlayerMeshPath, 3, M_player_model->path_);
 	auto M_anim_upgrade = res::get_animation(kMalePlayerMeshPath, 4, M_player_model->path_);
 	auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 5, M_player_model->path_);
-
-    loading_dot->PropagateUpdate();
-    glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     player_2->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
     player_2->GetComponent<components::Animator>()->AddAnimation("Damage", M_anim_gethit);
@@ -828,9 +808,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     HUDText_object->transform_->set_position(glm::vec3(-1.0f, 0.94f, 0.0f));
 
     auto spell_timer_text = GameObject::Create(game_HUD_text_root);
-    spell_timer_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "X to SPELL!!!", glm::vec3(1.0f)));
-    spell_timer_text->transform_->set_scale(glm::vec3(0.002f, 0.002f, 0.001f));
-    spell_timer_text->transform_->add_position({-0.33f, 0.2f, 0.0f });
+    spell_timer_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "X to SPELL!", glm::vec3(1.0f, 0.5f, 0.5f)));
+    spell_timer_text->transform_->set_scale(glm::vec3(0.004f, 0.004f, 0.001f));
+    spell_timer_text->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+    spell_timer_text->transform_->add_position({-0.66f / Global::i_->active_camera_->get_aspect_ratio(), 0.2f, 0.0f });
 
     spell_timer_text->Disable();
 
@@ -1239,6 +1220,9 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     altar_menu->layout_[{0, 2}] = make_shared<MenuItem>(apply_button, []()
     {
         PlayerStatsManager::i_->Apply();
+        SceneManager::i_->current_scene_->SwitchMenu("");
+        PlayerStatsManager::i_->player_1_->GetComponent<components::PlayerController>()->active_ = true;
+        PlayerStatsManager::i_->player_2_->GetComponent<components::PlayerController>()->active_ = true;
     });
 
     auto back_button = GameObject::Create(altar_container);
@@ -1358,13 +1342,9 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
                 auto pc1 = player_1->GetComponent<components::PlayerController>();
-                pc1->active_ = false;
-                pc1->direction_ = glm::vec3(0.0f);
-                pc1->move_generator_->direction_ = glm::vec3(0.0f);
                 auto pc2 = player_2->GetComponent<components::PlayerController>();
-                pc2->active_ = false;
-                pc2->direction_ = glm::vec3(0.0f);
-                pc2->move_generator_->direction_ = glm::vec3(0.0f);
+                pc1->ForceStop();
+                pc2->ForceStop();
 
                 Timer::AddTimer(postprocessor.transition_vignette_time_, [&room, &rlg, &rg_settings, &models, &next_room_pos, &GBufferPassShader, &move_direction, &player_1, &player_2, &rope, &pc1, &pc2, &postprocessor, &trail_texture, &ParticleShader]()
                 {

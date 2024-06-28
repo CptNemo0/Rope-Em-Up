@@ -76,10 +76,10 @@ void components::Altar::OnAction(Action action, input::State state)
     {
         case Action::CAST_SPELL:
         {
-            if (!SceneManager::i_->current_scene_->menus_["altar"]->active_ && state.button)
+            if (!SceneManager::i_->current_scene_->menus_["altar"]->active_ && is_near_ && state.button)
             {
-                player_1->GetComponent<components::PlayerController>()->active_ = false;
-                player_2->GetComponent<components::PlayerController>()->active_ = false;
+                player_1->GetComponent<components::PlayerController>()->ForceStop();
+                player_2->GetComponent<components::PlayerController>()->ForceStop();
                 Timer::AddTimer(0.1f, []()
                 {
                     SceneManager::i_->current_scene_->SwitchMenu("altar");
