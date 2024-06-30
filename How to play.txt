@@ -4,8 +4,8 @@ Gamepads:
 
 Movement: Left stick
 Choke: Hold both triggers
-Cast: Square (left button)
-Interact / Pickup: Square (left button)
+Cast: X (bottom button)
+Pickup: Square (left button)
 
 If you are alone / don't have gamepads:
 
