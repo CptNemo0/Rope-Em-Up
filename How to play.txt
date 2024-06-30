@@ -1,0 +1,25 @@
+How to play?
+
+Gamepads:
+
+Movement: Left stick
+Choke: Hold both triggers
+Cast: Square (left button)
+Interact / Pickup: Square (left button)
+
+If you are alone / don't have gamepads:
+
+Player 1: 
+Movement: FGHT 
+Choke: Y
+Cast: R
+Interact / Pickup: E
+
+Player 2: 
+Movement: JKLI 
+Choke: U
+Cast: O
+
+When interacting with menus:
+Arrows + ENTER
+

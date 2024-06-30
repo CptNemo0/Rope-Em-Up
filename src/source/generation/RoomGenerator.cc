@@ -1751,7 +1751,7 @@ void generation::BuildRoom(Room& room, RoomModels* rm, s_ptr<Shader> shader, Roo
                 altar_emitter2->AddComponent(emitter2);
 
                 auto renderer = GameObject::Create();
-                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer({0.0f, 0.0f, 0.0f}, {-32.0f, 0.0f, -32.0f}, 200.0f));
+                renderer->AddComponent(GrassRendererManager::i_->CreateRenderer({0.0f, 0.0f, 0.0f}, {-32.0f, 0.0f, -32.0f}, 400.0f));
                 room.floors->transform_->AddChild(renderer->transform_);
             }
 
