@@ -38,25 +38,10 @@ namespace components
 			if (this->type_ == MONSTER)
 			{
 				auto animator = gameObject_.lock()->transform_->children_[0]->game_object_->GetComponent<components::Animator>();
-				if (health_ == 1)
+				auto anim_name = "Death_" + std::to_string((int)health_);
+				if (animator != nullptr && animator->m_Animations.contains(anim_name))
 				{
-					animator->PlayAnimation("Death_1", 2, 0.9f);
-				}
-				else if (health_ == 2)
-				{
-					animator->PlayAnimation("Death_2", 2, 0.9f);
-				}
-				else if (health_ == 3)
-				{
-					animator->PlayAnimation("Death_3", 2, 0.9f);
-				}
-				else if (health_ == 4)
-				{
-					animator->PlayAnimation("Death_4", 2, 0.9f);
-				}
-				else if (health_ == 5)
-				{
-					animator->PlayAnimation("Death_5", 2, 0.9f);
+					animator->PlayAnimation(anim_name, 3);
 				}
 			}
 
@@ -102,58 +87,43 @@ namespace components
 	{
 		damage_cooldown_ = true;
 
-		float delay = 1.0f;
-
-		Timer::AddTimer(delay,
-		[this, dmg]()
-		{
-			if(this != nullptr)
-			{
-				damage_cooldown_ = false;
-				
-			}
-		});
-
-		delay = 0.2f;
-		Timer::AddTimer(0.2f,
+		damage_cooldown_timer_id_ = Timer::AddTimer(1.0f,
 		[this]()
 		{
-			if(this != nullptr)
-			{
-				if (this->type_ == PLAYER)
-				{
-					if (this->gameObject_.lock() != nullptr)
-					{
-						std::shared_ptr<components::MeshRenderer> renderer = this->gameObject_.lock()->GetComponent<components::MeshRenderer>();
-						if (renderer != nullptr)
-						{
-							renderer->color_ = glm::vec3(1.0f);
-						}
-					}	
-				}
-			}
-			
-		},
-		[this, delay](float delta_time)
+			damage_cooldown_ = false;
+		});
+
+		flash_ = true;
+
+		flash_timer_id_ = Timer::AddTimer(0.2f,
+		[this]()
 		{
-			static float t = 0.0f;
-			float completion = t / delay;
 			if (this->type_ == PLAYER)
 			{
-				if (this != nullptr)
+				if (this->gameObject_.lock() != nullptr)
 				{
-					if (this->gameObject_.lock() != nullptr)
+					std::shared_ptr<components::MeshRenderer> renderer = this->gameObject_.lock()->GetComponent<components::MeshRenderer>();
+					if (renderer != nullptr)
 					{
-						std::shared_ptr<components::MeshRenderer> renderer = this->gameObject_.lock()->GetComponent<components::MeshRenderer>();
-						if (renderer != nullptr)
-						{
-							renderer->color_ = glm::vec3(1.0f, 0.0f, 0.0f);
-						}
+						renderer->color_ = glm::vec3(1.0f);
+					}
+				}	
+			}
+			flash_ = false;
+		},
+		[this](float delta_time)
+		{
+			if (this->type_ == PLAYER)
+			{
+				if (this->gameObject_.lock() != nullptr)
+				{
+					std::shared_ptr<components::MeshRenderer> renderer = this->gameObject_.lock()->GetComponent<components::MeshRenderer>();
+					if (renderer != nullptr)
+					{
+						renderer->color_ = glm::vec3(1.0f, 0.0f, 0.0f);
 					}
 				}
 			}
-
-			t += delta_time;
 		});
 
 	}
@@ -168,6 +138,14 @@ namespace components
 
 	void HealthComponent::Destroy()
 	{
+		if (damage_cooldown_)
+		{
+			Timer::RemoveTimer(damage_cooldown_timer_id_);
+		}
+		if (flash_)
+		{
+			Timer::RemoveTimer(flash_timer_id_);
+		}
 		ChokeList::i_->RemoveHealthComponent(shared_from_this());
 		HealthManager::i_->RemoveHealthComponent(shared_from_this());
 		std::cout << "Destroying HealthCompoent" << std::endl;

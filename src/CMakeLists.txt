@@ -13,6 +13,10 @@ file(GLOB_RECURSE HEADER_FILES
 file(GLOB_RECURSE ASSETS_FILES 
 	 ${CMAKE_SOURCE_DIR}/res/*.*)
 
+if (MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10000000")
+endif()
+
 set_source_files_properties(${ASSETS_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})						   
@@ -29,7 +33,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 ${glad_SOURCE_DIR}
 ${stb_image_SOURCE_DIR}
 ${STB_EASY_FONT_SOURCE_DIR}
-${imgui_SOURCE_DIR})
+)
 
 target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES}
 	glad
@@ -40,7 +44,6 @@ target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES}
 	stb_truetype
 	assimp
 	glfw
-	imgui
 	spdlog
 	glm::glm
 	OpenAL::OpenAL
@@ -55,6 +58,5 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX)
 endif()
-
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "RopeEmUp")

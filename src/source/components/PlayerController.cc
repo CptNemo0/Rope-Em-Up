@@ -38,6 +38,19 @@ components::PlayerController::PlayerController(int gamepadID)
     grass_walk_sounds.SetData(grass_data);
 }
 
+void components::PlayerController::ForceStop()
+{
+    active_ = false;
+    gameObject_.lock()->GetComponent<components::Animator>()->SetAnimation("Idle", 1);
+    if (walking_timer_lock_)
+    {
+        Timer::RemoveTimer(walk_timer_);
+        walking_timer_lock_ = false;
+    }
+    direction_ = glm::vec3(0.0f);
+    move_generator_->direction_ = glm::vec3(0.0f);
+}
+
 void components::PlayerController::Start()
 {
     input::InputManager::i_->AddObserver(gamepadID_, shared_from_this());

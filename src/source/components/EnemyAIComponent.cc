@@ -54,10 +54,7 @@ void components::EnemyAIComponent::Update()
 			slide_timer_lock_ = true;
 			slide_timer_ = Timer::AddTimer(0.4f, [this]()
 			{
-				if (this != nullptr)
-				{
-					audio::AudioManager::i_->PlaySound(slide_sounds_.Pop(), volume_);
-				}
+				audio::AudioManager::i_->PlaySound(slide_sounds_.Pop(), volume_);
 			}, nullptr, true);
 		}
 	}
@@ -73,6 +70,11 @@ void components::EnemyAIComponent::Update()
 
 void components::EnemyAIComponent::Destroy()
 {
+	if (slide_timer_lock_)
+	{
+		Timer::RemoveTimer(slide_timer_);
+		slide_timer_lock_ = false;
+	}
 	ai::EnemyAIManager::i_->RemoveEnemyAI(shared_from_this());
 	//state_machine_->~EnemyStateMachine();
 	cout << "Destroying EnemyAIComponent" << endl;

@@ -35,28 +35,7 @@ void components::Animator::UpdateAnimation(float dt)
 		m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt;
 		m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
 		CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
-		m_CurrentAnimation->model_->UpdateBoneTransforms(m_FinalBoneMatrices);
 	}
-
-	if (m_BlendingAnimation)
-	{
-		m_BlendingTime += dt;
-		m_BlendingTime = fmod(m_BlendingTime, m_BlendingAnimation->GetDuration());
-		BlendTwoAnimations(m_BlendingAnimation, m_BlendFactor * m_DeltaTime);
-		m_BlendFactor += dt;
-		if (m_BlendFactor > 1.0f)
-		{
-			m_CurrentAnimation = m_BlendingAnimation;
-			m_CurrentTime = m_BlendingTime;
-			m_BlendingAnimation = nullptr;
-			m_BlendFactor = 0.0f;
-		}
-	}
-	if (m_CurrentAnimation)
-	{
-		m_CurrentAnimation->model_->UpdateBoneTransforms(m_FinalBoneMatrices);
-	}
-
 }
 
 void components::Animator::PlayAnimation(s_ptr<anim::Animation> animation)
@@ -65,22 +44,31 @@ void components::Animator::PlayAnimation(s_ptr<anim::Animation> animation)
 	m_CurrentTime = 0.0f;
 }
 
-void components::Animator::PlayAnimation(const std::string& animationName, int priority, float prio_time)
+void components::Animator::PlayAnimation(const std::string& animationName, int priority)
 {
 	if (m_Animations.contains(animationName) && priority >= priority_)
 	{
+		if (animation_playing_)
+		{
+			Timer::RemoveTimer(anim_timer_id_);
+		}
+
 		m_CurrentAnimation = m_Animations[animationName];
 		m_CurrentTime = 0.0f;
-		/*m_BlendingAnimation = m_Animations[animationName];
-		m_BlendFactor = 0.0f;*/
 		priority_ = priority;
+		animation_playing_ = true;
 
-		Timer::AddTimer(prio_time, [this]()
+		float dur = m_CurrentAnimation->GetDuration() / m_CurrentAnimation->GetTicksPerSecond();
+		if (IsAttackAnimation(m_CurrentAnimation))
 		{
-			if (this)
-			{
-				priority_ = 0;
-			}
+			dur /= 4;
+		}
+		cerr << dur << '\n';
+
+		anim_timer_id_ = Timer::AddTimer(dur, [this]()
+		{
+			priority_ = 0;
+			animation_playing_ = false;
 		});
 	}
 }
@@ -254,6 +242,10 @@ void components::Animator::Destroy()
 	m_FinalBoneMatrices.clear();
 	m_CurrentAnimation = nullptr;
 	m_BlendingAnimation = nullptr;
+	if (animation_playing_)
+	{
+		Timer::RemoveTimer(anim_timer_id_);
+	}
 	anim::AnimatorManager::i_->RemoveAnimatorComponent(shared_from_this());
 }
 

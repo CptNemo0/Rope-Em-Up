@@ -50,8 +50,6 @@
 #include "headers/ai/EnemyState.h"
 #include "headers/ai/EnemyStateMachine.h"
 #include "headers/HealthManager.h"
-#include "imgui_impl/imgui_impl_glfw.h"
-#include "imgui_impl/imgui_impl_opengl3.h"
 #include "headers/LBuffer.h"
 #include "headers/GBuffer.h"
 #include "headers/SSAO.h"
@@ -265,7 +263,6 @@ int main()
     }
     cout << "GLAD Initialized.\n";
     glPatchParameteri(GL_PATCH_VERTICES, 4);
-    utility::InitImGUI(window);
 
     collisions::CollisionManager::Initialize();
 
@@ -364,22 +361,22 @@ auto loading_root = GameObject::Create();
 loading_root->transform_->set_scale({0.25f, 0.25f, 1.0f});
 loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f, 1.0f});
 
-auto loading_dot = GameObject::Create(loading_root);
-loading_dot->transform_->set_scale({0.1f, 0.1f, 1.0f});
-loading_dot->transform_->set_position({-1.0f, -3.0f, 0.0f});
-loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/loading_dot.png"), res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag")));
-
 {
     auto logo_texture = res::get_texture("res/textures/loading_screen.png");
+    auto logo_texture2 = res::get_texture("res/textures/loading_screen2.png");
     auto text_texture = res::get_texture("res/textures/game_is_loading.png");
     auto hud_shader = res::get_shader("res/shaders/HUD.vert", "res/shaders/HUD.frag");
 
     auto logo = GameObject::Create(loading_root);
-    logo->transform_->set_position({0.0f, 1.0f, 0.0f});
+    logo->transform_->set_position({-1.5f, 1.0f, 0.0f});
     logo->AddComponent(make_shared<components::HUDRenderer>(logo_texture, hud_shader));
 
+    auto logo2 = GameObject::Create(loading_root);
+    logo2->transform_->set_position({1.5f, 1.0f, 0.0f});
+    logo2->AddComponent(make_shared<components::HUDRenderer>(logo_texture2, hud_shader));
+
     auto text = GameObject::Create(loading_root);
-    text->transform_->scale({ 6.0f / Global::i_->active_camera_->get_aspect_ratio(), 1.6f / Global::i_->active_camera_->get_aspect_ratio(), 1.0f });
+    text->transform_->scale({ 5.0f, 1.0f, 1.0f });
     text->transform_->set_position({0.0f, -1.0f, 0.0f});
     text->AddComponent(make_shared<components::HUDRenderer>(text_texture, hud_shader));
 
@@ -392,18 +389,19 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    logo->PropagateUpdate();
-    text->PropagateUpdate();
+    loading_root->PropagateUpdate();
 
     glfwSwapBuffers(window);
 
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    logo->PropagateUpdate();
-    text->PropagateUpdate();
 
-    logo->Destroy();
-    text->Destroy();
+    loading_root->PropagateUpdate();
+
+    glfwSwapBuffers(window);
+    glfwSwapBuffers(window);
 }
+
 
 #pragma endregion Loading Screen
 
@@ -501,11 +499,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto lamp_model = res::get_model(kLampPath);
     auto lamp_c_model = res::get_model(kLampCPath);
 
-    loading_dot->PropagateUpdate();
-    glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
-
     auto bone_model = res::get_model(kBonePath);
     auto leafs_model = res::get_model(kLeafsPath);
     auto box_model = res::get_model(kBoxPath);
@@ -518,10 +511,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 
     auto grass_model = res::get_model(kGrassPath);
 
-    loading_dot->PropagateUpdate();
     glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     // Main modules
     auto mod1_model = res::get_model(kMod1Path);
@@ -531,11 +521,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto mod5_model = res::get_model(kMod5Path);
     auto mod6_model = res::get_model(kMod6Path);
     auto mod7_model = res::get_model(kMod7Path);
-
-    loading_dot->PropagateUpdate();
-    glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     auto barell_model = res::get_model(kBarellPath);
 
@@ -644,17 +629,14 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     std::vector<std::shared_ptr<GameObject>> players_vector{ player_1, player_2 };
 #pragma region Animations
 
+    glfwSwapBuffers(window);
+
     auto F_anim_gethit = res::get_animation(kFemalePlayerMeshPath, 0, F_player_model->path_);
     auto F_anim_getkilled = res::get_animation(kFemalePlayerMeshPath, 1, F_player_model->path_);
 	auto F_anim_idle = res::get_animation(kFemalePlayerMeshPath, 2, F_player_model->path_);
     auto F_anim_pull = res::get_animation(kFemalePlayerMeshPath, 3, F_player_model->path_);
 	auto F_anim_upgrade = res::get_animation(kFemalePlayerMeshPath, 4, F_player_model->path_);
 	auto F_anim_run = res::get_animation(kFemalePlayerMeshPath, 5, F_player_model->path_);
-
-    loading_dot->PropagateUpdate();
-    glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     player_1->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
     player_1->GetComponent<components::Animator>()->AddAnimation("Damage", F_anim_gethit);
@@ -671,11 +653,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     auto M_anim_pull = res::get_animation(kMalePlayerMeshPath, 3, M_player_model->path_);
 	auto M_anim_upgrade = res::get_animation(kMalePlayerMeshPath, 4, M_player_model->path_);
 	auto M_anim_run = res::get_animation(kMalePlayerMeshPath, 5, M_player_model->path_);
-
-    loading_dot->PropagateUpdate();
-    glfwSwapBuffers(window);
-    loading_dot->PropagateUpdate();
-    loading_dot->transform_->add_position({0.5f, 0.0f, 0.0f});
 
     player_2->AddComponent(anim::AnimatorManager::i_->CreateAnimatorComponent());
     player_2->GetComponent<components::Animator>()->AddAnimation("Damage", M_anim_gethit);
@@ -831,9 +808,10 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     HUDText_object->transform_->set_position(glm::vec3(-1.0f, 0.94f, 0.0f));
 
     auto spell_timer_text = GameObject::Create(game_HUD_text_root);
-    spell_timer_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "X to SPELL!!!", glm::vec3(1.0f)));
-    spell_timer_text->transform_->set_scale(glm::vec3(0.002f, 0.002f, 0.001f));
-    spell_timer_text->transform_->add_position({-0.33f, 0.2f, 0.0f });
+    spell_timer_text->AddComponent(make_shared<components::TextRenderer>(HUDTextShader, maturasc_font, "X to SPELL!", glm::vec3(1.0f, 0.5f, 0.5f)));
+    spell_timer_text->transform_->set_scale(glm::vec3(0.004f, 0.004f, 0.001f));
+    spell_timer_text->transform_->scale_in({1.0f, 0.0f, 0.0f}, 1.0f / Global::i_->active_camera_->get_aspect_ratio());
+    spell_timer_text->transform_->add_position({-0.66f / Global::i_->active_camera_->get_aspect_ratio(), 0.2f, 0.0f });
 
     spell_timer_text->Disable();
 
@@ -958,6 +936,8 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     new_game_button->AddComponent(make_shared<components::HUDRenderer>(res::get_texture("res/textures/new_game.png"), HUDshader));
     menu->layout_[{0, 0}] = make_shared<MenuItem>(new_game_button, []()
     {
+        
+
         SceneManager::i_->SwitchScene("game");
     });
 
@@ -1242,6 +1222,9 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     altar_menu->layout_[{0, 2}] = make_shared<MenuItem>(apply_button, []()
     {
         PlayerStatsManager::i_->Apply();
+        SceneManager::i_->current_scene_->SwitchMenu("");
+        PlayerStatsManager::i_->player_1_->GetComponent<components::PlayerController>()->active_ = true;
+        PlayerStatsManager::i_->player_2_->GetComponent<components::PlayerController>()->active_ = true;
     });
 
     auto back_button = GameObject::Create(altar_container);
@@ -1318,9 +1301,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
         float delta_time = current_time - previous_time;
 
         lag += delta_time;
-        #ifdef _DEBUG
-            delta_time = glm::clamp(delta_time, 0.0f, (1.0f / 30.0f));
-        #endif
+        delta_time = glm::clamp(delta_time, 0.0f, (1.0f / 10.0f));
 
         previous_time = current_time;
     
@@ -1361,13 +1342,9 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
                 // Temporarily stop players and player inputs
                 moving_through_room = true;
                 auto pc1 = player_1->GetComponent<components::PlayerController>();
-                pc1->active_ = false;
-                pc1->direction_ = glm::vec3(0.0f);
-                pc1->move_generator_->direction_ = glm::vec3(0.0f);
                 auto pc2 = player_2->GetComponent<components::PlayerController>();
-                pc2->active_ = false;
-                pc2->direction_ = glm::vec3(0.0f);
-                pc2->move_generator_->direction_ = glm::vec3(0.0f);
+                pc1->ForceStop();
+                pc2->ForceStop();
 
                 Timer::AddTimer(postprocessor.transition_vignette_time_, [&room, &rlg, &rg_settings, &models, &next_room_pos, &GBufferPassShader, &move_direction, &player_1, &player_2, &rope, &pc1, &pc2, &postprocessor, &trail_texture, &ParticleShader]()
                 {
@@ -1442,7 +1419,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
                         spell_timer_text->Disable();
                     },
 
-                    [&fixed_update_rate, &id = spell_timer_id, &window, &postprocessor, &HUDBarShader, &spell_timer_border, &spell_timer_text](float delta_time)
+                    [&fixed_update_rate, spell_timer_id, &window, &postprocessor, &HUDBarShader, &spell_timer_border, &spell_timer_text](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
                         time_stop_completion_percentage += delta_time;
@@ -1452,7 +1429,7 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
                             fixed_update_rate = pbd::kMsPerUpdate;
                             postprocessor.slowed_time = false;
                             SpellCaster::i_->Cast();
-                            Timer::RemoveTimer(id);
+                            Timer::RemoveTimer(spell_timer_id);
                             spell_timer_border->Disable();
                             spell_timer_text->Disable();
                         }
@@ -1858,250 +1835,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
 #pragma endregion
         
 #ifdef _DEBUG 
-
-#pragma region ImGUI
-        
-         ImGui_ImplOpenGL3_NewFrame();
-         ImGui_ImplGlfw_NewFrame();
-         ImGui::NewFrame();
-
-         ImGui::Begin("Texture");
-         ImGui::Image((void*)(intptr_t)pmt.id_, ImVec2(160 * 4, 90 * 4));
-         ImGui::End();
-
-         ImGui::Begin("Postprocessor");
-         ImGui::SliderFloat("Gamma", &postprocessor.gamma_, 0.1f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-         ImGui::SliderFloat("Brightness", &postprocessor.brightness_, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-         ImGui::SliderFloat("Contrast", &postprocessor.contrast_, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-         ImGui::SliderFloat("Vignete Contrast", &postprocessor.vignete_contrast_, 0.0f, 200.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-         ImGui::SliderFloat("Vignete Amount", &postprocessor.vignete_amount_, 0.0f, 0.5f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-         ImGui::SliderFloat("Noise Amount", &postprocessor.noise_amount_, 0.0f, 0.5f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-         ImGui::End();
-
-         ImGui::Begin("Camera");
-         //chose the camera
-         const char* items[] = { "Isometric", "Top Down", "Debugging" };
-         static int selectedItem = 0;
-         if (ImGui::Combo("Camera Type", &selectedItem, items, IM_ARRAYSIZE(items)))
-         {
-             switch (selectedItem)
-             {
-                 case 0:
-                     Global::i_->active_camera_ = isometricCameraComponent->camera_;
-                     break;
-                 case 1:
-                     Global::i_->active_camera_ = topDownCameraComponent->camera_;
-                     break;
-                 case 2:
-                     Global::i_->active_camera_ = DebugCameraComponent->camera_;
-                     break;
-             }
-         }
-         switch (selectedItem)
-         {
-         case 0:
-             ImGui::SliderFloat("Y", &isometricCameraComponent->height_, 1.0f, 20.0f, "%.0f");
-             ImGui::SliderFloat("X", &isometricCameraComponent->distanceX_, -10.0f, 10.0f, "%.0f");
-             ImGui::SliderFloat("Z", &isometricCameraComponent->distanceZ_, -10.0f, 10.0f, "%.0f");
-             break;
-         case 1:
-             ImGui::SliderFloat("Y", &topDownCameraComponent->height_, 1.0f, 100.0f, "%.2f");
-             break;
-         case 2:
-             break;
-         }
-         ImGui::End();
-
-         ImGui::Begin("Lights");
-         ImGui::LabelText("Point Light", "Point Light");
-         ImGui::ColorEdit3("Point L Color", (float*)&point_light_color);
-         ImGui::DragFloat("Point L Intensity", &point_light_intensity, 0.01f, 0.0f, 1000.0f);
-         ImGui::SliderFloat("Height", &lamp_h, 0.0f, 10.0f, "%0.2f");
-
-         ImGui::LabelText("Directional Light", "Directional Light");
-         ImGui::ColorEdit3("Dir L Color", (float*)&dir_light_color);
-         ImGui::DragFloat("Dir Light Intensity", &dir_light_intensity, 0.01f, 0.0f, 10.0f);
-         ImGui::DragFloat3(" Dir Light Direction", glm::value_ptr(dir_light_direction), 0.05f, -1.0f, 1.0f);
-
-         ImGui::LabelText("Spot Light", "Spot Light");
-         ImGui::ColorEdit3("Spot L Color", (float*)&spot_light_color);
-         ImGui::DragFloat("Spot L Intensity", &spot_light_intensity, 0.01f, 0.0f, 10.0f);
-         ImGui::DragFloat3("Spot L Position", glm::value_ptr(spot_light_position), 0.05f, -100.0f, 100.0f);
-         ImGui::DragFloat3("Spot L Direction", glm::value_ptr(spot_light_direction), 0.05f, -1.0f, 1.0f);
-         ImGui::DragFloat("Spot L Cut Off", &spot_light_cut_off, 0.01f, 0.0f, 50.0f);
-         ImGui::DragFloat("Spot L Outer Cut Off", &spot_light_outer_cut_off, 0.01f, 0.0f, 50.0f);
-
-        
-         if (ImGui::Checkbox("SSAO", &use_ssao))
-         {
-             LBufferPassShader->Use();
-             LBufferPassShader->SetBool("use_ssao", use_ssao);
-         }
-
-         ImGui::Checkbox("Bloom", &lbuffer.bloom_);
-         ImGui::End();
-
-         ImGui::Begin("Halt test");
-         static bool cb = false;
-         if (ImGui::Checkbox("Halted", &cb))
-         {
-             if (cb)
-             {
-                 SceneManager::i_->current_scene_->scene_root_->Halt();
-                 SceneManager::i_->current_scene_->HUD_root_->Halt();
-                 SceneManager::i_->current_scene_->HUD_text_root_->Halt();
-             }
-             else
-             {
-                 SceneManager::i_->current_scene_->scene_root_->Continue();
-                 SceneManager::i_->current_scene_->HUD_root_->Continue();
-                 SceneManager::i_->current_scene_->HUD_text_root_->Continue();
-             }
-         }
-         ImGui::End();
-
-         ImGui::Begin("Player Stats Manager");
-         ImGui::SliderFloat("Exp", &(PlayerStatsManager::i_->exp_), 0.0f, 1000.0f, "%0.0f");
-         ImGui::SameLine();
-         if (ImGui::Button("Add Exp"))
-         {
-             PlayerStatsManager::i_->AddExp(100.0f);
-         }
-         ImGui::SliderInt("Unspent Levels", &(PlayerStatsManager::i_->unspent_levels_), 0, 20);
-
-         ImGui::SliderFloat("Speed", &(PlayerStatsManager::i_->speed_), 0.0f, 2000.0f, "%0.0f");
-         ImGui::SameLine();
-         if (ImGui::Button("LevelUp Speed"))
-         {
-             PlayerStatsManager::i_->LevelUpSpeed();
-         }
-         ImGui::SameLine();
-         if (ImGui::Button("LevelDown Speed"))
-         {
-             PlayerStatsManager::i_->LevelDownSpeed();
-         }
-
-         ImGui::SliderFloat("Pull", &(PlayerStatsManager::i_->pull_power_), 0.0f, 3000.0f, "%0.0f");
-         ImGui::SameLine();
-         if (ImGui::Button("LevelUp Pull"))
-         {
-             PlayerStatsManager::i_->LevelUpPull();
-         }
-         ImGui::SameLine();
-         if (ImGui::Button("LevelDown Pull"))
-         {
-             PlayerStatsManager::i_->LevelDownPull();
-         }
-
-         ImGui::SliderFloat("Intertia", &(PlayerStatsManager::i_->rope_drag_), 0.0f, 1.0f, "%0.5f");
-         ImGui::SameLine();
-         if (ImGui::Button("LevelUp Intertia"))
-         {
-             PlayerStatsManager::i_->LevelUpDrag();
-         }
-         ImGui::SameLine();
-         if (ImGui::Button("LevelDown Intertia"))
-         {
-             PlayerStatsManager::i_->LevelDownDrag();
-         }
-
-         ImGui::SliderFloat("Rope weight", &(PlayerStatsManager::i_->rope_weight_), 0.0f, 1.0f, "%0.5f");
-         ImGui::SameLine();
-         if (ImGui::Button("LevelUp Weight"))
-         {
-             PlayerStatsManager::i_->LevelUpWeight();
-         }
-         ImGui::SameLine();
-         if (ImGui::Button("LevelDown Weight"))
-         {
-             PlayerStatsManager::i_->LevelDownWeight();
-         }
-
-         ImGui::SliderFloat("Max Health", &(PlayerStatsManager::i_->max_health_), 0.0f, 1000.0f, "%0.1f");
-         ImGui::SameLine();
-         if (ImGui::Button("LevelUp Health"))
-         {
-             PlayerStatsManager::i_->LevelUpHealth();
-         }
-         ImGui::SameLine();
-         if (ImGui::Button("LevelDown Health"))
-         {
-             PlayerStatsManager::i_->LevelDownHealth();
-         }
-
-         ImGui::SliderInt("Segment number", &(PlayerStatsManager::i_->segments_num_), 0, 100);
-         ImGui::SameLine();
-         if (ImGui::Button("LevelUp Segment number"))
-         {
-             PlayerStatsManager::i_->LevelUpSegments();
-         }
-         ImGui::SameLine();
-         if (ImGui::Button("LevelDown Segment number"))
-         {
-             PlayerStatsManager::i_->LevelDownSegments();
-         }
-
-         if (ImGui::Button("Apply Level"))
-         {
-             PlayerStatsManager::i_->Apply();
-         }
-         ImGui::End();
-
-         ImGui::Begin("Serialize");
-
-         static char filename_buf[32] = "save.json";
-         ImGui::InputText("File", filename_buf, 32);
-
-         if (ImGui::Button("Serialize"))
-         {
-             json j = rlg.Serialize();
-             j["rope"] = rope.Serialize();
-             j["player_1"] = player_1->Serialize();
-             j["player_2"] = player_2->Serialize();
-
-             j["current_room"] = { room->position.x, room->position.y };
-          
-             std::ofstream save_file;
-             save_file.open(filename_buf);
-             save_file << j.dump();
-             save_file.close();
-         }
-
-         if (ImGui::Button("Deserialize"))
-         {
-             std::ifstream save_file;
-             save_file.open(filename_buf);
-             json j = json::parse(save_file);
-             save_file.close();
-
-             rlg.Destroy();
-             rlg = generation::RoomLayoutGenerator(j, room_root);
-             glm::ivec2 current_room = { j["current_room"][0], j["current_room"][1] };
-             room = &rlg.rooms[current_room];
-             pbd::WallConstraint walls = pbd::WallConstraint(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-room->width * generation::kModuleSize, 0.0f, -room->height * generation::kModuleSize), 1.0f);
-             pbd::PBDManager::i_->set_walls(walls);
-             rg_settings.generated_rooms = rlg.built_rooms_;
-             minimap.Rebuild(rlg);
-
-             rope.Deserialize(j["rope"]);
-             player_1->Destroy();
-             player_2->Destroy();
-             *player_1 = *GameObject::Deserialize(j["player_1"]);
-             *player_2 = *GameObject::Deserialize(j["player_2"]);
-             game_scene_root->transform_->AddChild(player_1->transform_);
-             game_scene_root->transform_->AddChild(player_2->transform_);
-             rope.rope_constraints_.pop_back();
-             rope.rope_constraints_.pop_front();
-             rope.AssignPlayerBegin(player_1);
-             rope.AssignPlayerEnd(player_2);
-         }
-
-         ImGui::End();
-
-         ImGui::Render();
-         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
-        
-#pragma endregion 
 #endif
 
         glfwSwapBuffers(window);
@@ -2127,9 +1860,6 @@ loading_dot->AddComponent(make_shared<components::HUDRenderer>(res::get_texture(
     input::InputManager::Destroy();
     SceneManager::Destroy();
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
     glfwTerminate();
 
     return 0;

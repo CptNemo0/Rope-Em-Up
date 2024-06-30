@@ -26,6 +26,9 @@ namespace components
 
 		int priority_ = 0;
 
+		unsigned int anim_timer_id_ = -1;
+		bool animation_playing_ = false;
+
 	public:
 		std::map<std::string, s_ptr<anim::Animation>> m_Animations;
 
@@ -37,7 +40,7 @@ namespace components
 		void UpdateAnimation(float dt);
 
 		void PlayAnimation(s_ptr<anim::Animation> pAnimation);
-		void PlayAnimation(const std::string& animationName, int priority, float prio_time);
+		void PlayAnimation(const std::string& animationName, int priority);
 
 		void SetAnimation(const string& animationName, int priority);
 

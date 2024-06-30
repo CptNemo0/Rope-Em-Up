@@ -144,7 +144,7 @@ void HitboxManager::Check(std::shared_ptr<components::HitboxCollider> hitbox)
 
 							if (anim->m_Animations.contains("Damage"))
 							{
-								anim->PlayAnimation("Damage", 2, 1.0f);
+								anim->PlayAnimation("Damage", 4);
 							}
 						}
 						if (auto pc = collider->gameObject_.lock()->GetComponent<components::PlayerController>(); pc != nullptr)

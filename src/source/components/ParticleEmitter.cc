@@ -59,7 +59,10 @@ void components::ParticleEmitter::Destroy()
 {
     particles_.clear();
     particle_indeces_to_remove_.clear();
-    Timer::RemoveTimer(emission_timer_id_);
+    if (!burst_emitter_)
+    {
+        Timer::RemoveTimer(emission_timer_id_);
+    }
     ParticleEmitterManager::i_->RemoveEmitter(shared_from_this());
     glDeleteVertexArrays(1, &VAO_);
     glDeleteBuffers(1, &VBO_);

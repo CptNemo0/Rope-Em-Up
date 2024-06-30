@@ -46,9 +46,9 @@ input::InputManager::InputManager(GLFWwindow *window)
         {
             {Action::MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
             {Action::PULL_ROPE, ActionMappingType{.axisType = GamepadAxisType::TRIGGERS}},
-            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_CROSS}},
             {Action::MENU_MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
-            {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
+            {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_SQUARE}},
             {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_START}},
             {Action::INTERACT, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_SQUARE}}
         }},
@@ -56,9 +56,9 @@ input::InputManager::InputManager(GLFWwindow *window)
         {
             {Action::MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
             {Action::PULL_ROPE, ActionMappingType{.axisType = GamepadAxisType::TRIGGERS}},
-            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
+            {Action::CAST_SPELL, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_CROSS}},
             {Action::MENU_MOVE, ActionMappingType{.axisType = GamepadAxisType::LEFT}},
-            {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_X}},
+            {Action::MENU_CLICK, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_SQUARE}},
             {Action::PAUSE_GAME, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_START}},
             {Action::INTERACT, ActionMappingType{.buttonID = GLFW_GAMEPAD_BUTTON_SQUARE}}
         }}

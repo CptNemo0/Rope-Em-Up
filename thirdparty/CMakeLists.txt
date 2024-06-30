@@ -44,7 +44,6 @@ target_include_directories(stb_truetype PRIVATE ${STB_TRUETYPE_DIR})
 CPMAddPackage("gh:assimp/assimp@5.2.5")
 CPMAddPackage("gh:glfw/glfw#3.4")
 CPMAddPackage("gh:g-truc/glm#1.0.1")
-CPMAddPackage("gh:ocornut/imgui@1.90.4")
 CPMAddPackage("gh:gabime/spdlog@1.13.0")
 CPMAddPackage("gh:kcat/openal-soft#1.23.1")
 CPMAddPackage(
@@ -56,13 +55,6 @@ CPMAddPackage(
     GITHUB_REPOSITORY nlohmann/json
 	VERSION 3.11.3
 )
-
-set(imgui_SOURCE_DIR ${imgui_SOURCE_DIR} CACHE INTERNAL "")
-add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
-					     ${imgui_SOURCE_DIR}/imgui_demo.cpp
-					     ${imgui_SOURCE_DIR}/imgui_draw.cpp
-						 ${imgui_SOURCE_DIR}/imgui_tables.cpp
-					     ${imgui_SOURCE_DIR}/imgui_widgets.cpp)
 						 
 
 set_target_properties(assimp
@@ -70,7 +62,6 @@ set_target_properties(assimp
 		      common
 		      glad
 	              glm
-		      imgui
      		      OpenAL
 		      spdlog
 		      stb_easy_font

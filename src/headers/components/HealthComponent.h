@@ -33,7 +33,10 @@ namespace components
 		float health_;
 		float shield_ = 0.0f;
 
+		unsigned int damage_cooldown_timer_id_ = -1;
+		unsigned int flash_timer_id_ = -1;
 		bool damage_cooldown_ = false;
+		bool flash_ = false;
 		HEALTH_TYPE type_;
 
 		HealthComponent(float health, HEALTH_TYPE type) : health_(health), max_health_(health), type_(type) {}

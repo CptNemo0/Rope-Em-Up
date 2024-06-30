@@ -199,8 +199,8 @@ void Rope::ChokeCheck(generation::Room *room)
 
 		Timer::AddTimer(0.1f, [this]()
 		{
-			player_begin_->GetComponent<components::Animator>()->PlayAnimation("Pull", 3, 0.5f);
-			player_end_->GetComponent<components::Animator>()->PlayAnimation("Pull", 3, 0.5f);
+			player_begin_->GetComponent<components::Animator>()->PlayAnimation("Pull", 3);
+			player_end_->GetComponent<components::Animator>()->PlayAnimation("Pull", 3);
 		});
 
 		Timer::AddTimer(0.5f, [this]()
