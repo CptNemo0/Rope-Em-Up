@@ -1398,7 +1398,7 @@ loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_r
         static float cast_time = 2.0f;
         static float slowdown_smooth_factor = 0.055f;
         static float time_stop_completion_percentage = 0.0f;
-        if (HealthManager::i_->something_died_ && HealthManager::i_->what_ == MONSTER)
+        if (HealthManager::i_->something_died_ && HealthManager::i_->what_.contains(MONSTER))
         {
             auto ss1 = player_1->GetComponent<components::SpellSlotComponent>()->type_;
             auto ss2 = player_2->GetComponent<components::SpellSlotComponent>()->type_;
@@ -1417,21 +1417,22 @@ loading_root->transform_->scale({1.0f / Global::i_->active_camera_->get_aspect_r
                         postprocessor.slowed_time = false;
                         spell_timer_border->Disable();
                         spell_timer_text->Disable();
+                        SpellCaster::i_->active_ = false;
                     },
 
-                    [&fixed_update_rate, spell_timer_id, &window, &postprocessor, &HUDBarShader, &spell_timer_border, &spell_timer_text](float delta_time)
+                    [&fixed_update_rate, &spell_timer_id, &window, &postprocessor, &HUDBarShader, &spell_timer_border, &spell_timer_text](float delta_time)
                     {
                         fixed_update_rate = fixed_update_rate * (1.0f - slowdown_smooth_factor) + 0.0000000001f * slowdown_smooth_factor;
                         time_stop_completion_percentage += delta_time;
                         if (!SpellCaster::i_->active_)
                         {
-                            
                             fixed_update_rate = pbd::kMsPerUpdate;
                             postprocessor.slowed_time = false;
                             SpellCaster::i_->Cast();
                             Timer::RemoveTimer(spell_timer_id);
                             spell_timer_border->Disable();
                             spell_timer_text->Disable();
+                            SpellCaster::i_->active_ = false;
                         }
 
                     },

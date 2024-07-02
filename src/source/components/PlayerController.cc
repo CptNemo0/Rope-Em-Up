@@ -47,8 +47,7 @@ void components::PlayerController::ForceStop()
         Timer::RemoveTimer(walk_timer_);
         walking_timer_lock_ = false;
     }
-    direction_ = glm::vec3(0.0f);
-    move_generator_->direction_ = glm::vec3(0.0f);
+    move_generator_->magnitude_ = 0.0f;
 }
 
 void components::PlayerController::Start()
@@ -101,6 +100,12 @@ void components::PlayerController::Update()
             }
             walk_timer_ = Timer::AddTimer(walk_timer_delay_, [this]()
             {
+                if (!SceneManager::i_->IsScene("game"))
+                {
+                    Timer::RemoveTimer(walk_timer_);
+                    walking_timer_lock_ = false;
+                    return;
+                }
                 if (SkullMinionManager::i_->room_->is_altar)
                 {
                     audio::AudioManager::i_->PlaySound(grass_walk_sounds.Pop(), 0.5f);
@@ -133,7 +138,7 @@ void components::PlayerController::Destroy()
 
 void components::PlayerController::OnAction(Action action, input::State state)
 {
-    if (!active_)
+    if (!active_ && action != Action::MOVE)
     {
         return;
     }

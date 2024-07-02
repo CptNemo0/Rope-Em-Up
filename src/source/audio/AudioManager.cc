@@ -217,7 +217,15 @@ const ALuint audio::AudioManager::GetFreeSource()
 
 void audio::AudioManager::PlaySound(const s_ptr<audio::AudioBuffer> buffer, float volume)
 {
+    if (volume <= 0.001f)
+    {
+        return;
+    }
     auto source = GetFreeSource();
+    if (source == -1)
+    {
+        return;
+    }
     alSourcei(source, AL_BUFFER, buffer->buffer);
     alSourcef(source, AL_GAIN, volume);
 

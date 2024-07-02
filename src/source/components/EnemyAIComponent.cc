@@ -1,6 +1,8 @@
 #include "../../headers/components/EnemyAIComponent.h"
 #include "../../headers/ai/EnemyAIManager.h"
 
+#include "../../headers/SceneManager.h"
+
 void components::EnemyAIComponent::CheckChoke()
 {
 	if (collisions::ChokeCheck(gameObject_.lock(), gPRECISION, gPRECISION * collisions::kChokePrecision, collisions::kChokeDistance))
@@ -54,6 +56,12 @@ void components::EnemyAIComponent::Update()
 			slide_timer_lock_ = true;
 			slide_timer_ = Timer::AddTimer(0.4f, [this]()
 			{
+				if (!SceneManager::i_->IsScene("game"))
+				{
+					Timer::RemoveTimer(slide_timer_);
+					slide_timer_lock_ = false;
+					return;
+				}
 				audio::AudioManager::i_->PlaySound(slide_sounds_.Pop(), volume_);
 			}, nullptr, true);
 		}

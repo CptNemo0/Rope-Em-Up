@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <deque>
+#include <set>
 #include "nlohmann/json.hpp"
 
 #include "components/HealthComponent.h"
@@ -23,9 +24,10 @@ private:
 
 public:
     std::deque<std::shared_ptr<components::HealthComponent>> health_components_;
+    std::deque<std::shared_ptr<components::HealthComponent>> dead_;
     bool something_died_;
     glm::vec3 where_;
-    HEALTH_TYPE what_;
+    std::set<HEALTH_TYPE> what_;
     std::shared_ptr<Model> shield_model_;
     std::shared_ptr<Shader> shield_shader_;
 

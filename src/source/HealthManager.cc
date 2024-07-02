@@ -48,8 +48,8 @@ void HealthManager::DeathUpdate()
 {
 	something_died_ = false;
 	where_ = glm::vec3(0.0f);
-	what_ = OTHER;
-	int i = 0;
+	what_.clear();
+
 	for (auto& h : health_components_)
 	{
 		if (h == nullptr)
@@ -63,14 +63,10 @@ void HealthManager::DeathUpdate()
 			{
 				something_died_ = true;
 				where_ = h->gameObject_.lock()->transform_->get_position();
-				what_ = h->type_;
+				HEALTH_TYPE what = h->type_;
+				what_.insert(what);
 
-				if (what_ == OTHER)
-				{
-					what_ = OTHER;
-				}
-
-				if (what_ == BARELL)
+				if (what == BARELL)
 				{
 					Shuffler<s_ptr<audio::AudioBuffer>> audio_shuffler_;
 					audio_shuffler_.SetData({ res::get_sound("res/sounds/barrel1.wav"), res::get_sound("res/sounds/barrel2.wav"), res::get_sound("res/sounds/barrel3.wav") });
@@ -78,12 +74,12 @@ void HealthManager::DeathUpdate()
 					audio::AudioManager::i_->PlaySound(audio_shuffler_.Pop());
 				}
 
-				if (what_ != PLAYER)
+				if (what != PLAYER)
 				{
 					ManageDeath(h->gameObject_.lock());
-					h->gameObject_.lock()->Destroy();
+					dead_.push_back(h);
 				}
-				else if (what_ == PLAYER)
+				else if (what == PLAYER)
 				{
 					auto anim = h->gameObject_.lock()->GetComponent<components::Animator>();
 					anim->SetAnimation("Death", 4);
@@ -100,8 +96,13 @@ void HealthManager::DeathUpdate()
 				}
 			}
 		}
-		i++;
 	}
+
+	for (auto &dead : dead_)
+	{
+		dead->gameObject_.lock()->Destroy();
+	}
+	dead_.clear();
 }
 
 void HealthManager::ManageDeath(s_ptr<GameObject> go)
