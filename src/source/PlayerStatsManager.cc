@@ -85,6 +85,8 @@ void PlayerStatsManager::LevelUp()
 	unspent_levels_++;
 	exp_ = 0.0f;
 
+	kLevelUpThreshold += kLevelUpThresholdRaise;
+
 	if (player_1_ != nullptr && player_2_ != nullptr)
 	{
 		auto anim1 = player_1_->GetComponent<components::Animator>();
