@@ -289,12 +289,12 @@ void ai::AttackState::Execute(EnemyStateMachine* machine)
 						if (machine != nullptr)
 						{
 							machine->is_attacking = false;
-							machine->partcile_->controllable_ = true;
 							assert(machine->current_state_ && PatrolState::Instance());
 							machine->current_state_ = PatrolState::Instance();
 
 							if (machine->partcile_ != nullptr)
 							{
+								machine->partcile_->controllable_ = true;
 								machine->partcile_->rotate_ = true;
 								machine->partcile_->mass_ = previous_mass;
 								machine->partcile_->inverse_mass_ = 1.0f / previous_mass;
